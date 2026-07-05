@@ -35,20 +35,38 @@ Outlook system are unchanged throughout.
 
 All visual/design assets, `data-requirements.md`'s first research pass, and this
 documentation system (INTRODUCTION.md, DIRECTORY.md, SPEC.md, ISSUES.md, HANDOFF.md,
-AGENTS.md, README.md) are in place.
+AGENTS.md, README.md, and two new pillar docs — `CONVENTIONS.md` and
+`agent-build-plan.md`) are in place. The repo is live at `github.com/Jay-2212/CapexIQ`.
 
-**What's next:** The repo is live at `github.com/Jay-2212/CapexIQ` (pushed 2026-07-05).
-Per `ISSUES.md`, in order: (1) get a Node environment and verify the skeleton actually
-builds (`npm install && npm run build`) — currently unverified, ISS-1; (2) wire up
-Cloudflare Pages + DNS for the `capexiq` subdomain, pointing at that repo — ISS-2,
-a dashboard action; (3) populate `/equipment-data/*.json` from `data-requirements.md`
-§14's starter table — ISS-3; (4) implement the real formulas against SPEC.md §31; (5)
-build the wizard UI.
+**Build is now verified.** Node.js (v26.4.0) and npm (11.17.0) were installed via
+Homebrew (`brew install node`) and put on PATH automatically. `npm install` and
+`npm run build` both succeed — Next.js 15.5.20 compiles, type-checks, and produces a
+working static export in `out/` (ISS-1 resolved). `npm install` surfaces 7 dev-only
+audit warnings (esbuild/postcss transitive, not runtime-exploitable) — tracked as ISS-8,
+not urgent.
+
+**A full phased build plan now exists** in `agent-build-plan.md`: 9 phases from real
+equipment data through formulas, content, a deliberately separate "wizard state design"
+phase (write the transition table before any UI code — this is the direct fix for a
+past project's session-timer bug, where stop/resume/tab-switch behavior was never
+enumerated before being built), wizard UI, dashboard, exports, scenarios, and finally
+deploy/go-live QA. `CONVENTIONS.md` sets the rules every phase is held to: one concern
+per file, pure/tested `/formulas`, no duplicated calculation logic between dashboard and
+exports, and which phases are safe to parallelize across agents (formulas and content
+are; the wizard reducer is not).
+
+**What's next:** Per `agent-build-plan.md`, Phase 1 (real equipment data) and Phase 2
+(real formulas) can start immediately and in parallel — see that doc for the exact
+per-file breakdown. Separately, you're setting up Cloudflare Pages + DNS for
+`capexiq.jaybharti.me` yourself (ISS-2) — exact build settings were given directly in
+chat (build command `npm run build`, output directory `out`, Node version pinned via
+`NODE_VERSION` env var).
 
 **Anything blocking or half-finished:** Nothing blocking. See `ISSUES.md` for the full
-open list (code skeleton unverified, infra not wired, equipment data still placeholder,
-some benchmark gaps still genuinely unresearched). One cosmetic known quirk: the CFO
-persona's background-removed cutout retains her office chair — see `ISSUES.md` ISS-5.
+open list (infra not wired yet, equipment data still placeholder, some benchmark gaps
+still genuinely unresearched, dev-dependency audit warnings). One cosmetic known quirk:
+the CFO persona's background-removed cutout retains her office chair — see `ISSUES.md`
+ISS-5.
 
 ---
 
@@ -75,6 +93,32 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-05 — Build verified; phased build plan + code conventions written
+**What changed:** Installed Node.js/npm via Homebrew and verified the skeleton for
+real: `npm install` then `npm run build` both succeed (Next.js 15.5.20, static export
+to `out/`), resolving ISS-1. Added `.gitignore` entries for `next-env.d.ts` and
+`*.tsbuildinfo` (standard Next.js generated files) and committed `package-lock.json`
+for reproducibility. `npm install` surfaces 7 dev-only audit warnings (esbuild/postcss,
+transitive through vite/vitest and next) — logged as ISS-8, not urgent, not a build
+blocker. Wrote two new pillar docs: `agent-build-plan.md` (the "v0.6 — Agent Build
+Spec" artifact SPEC.md §38 already called for — 9 phases from equipment data through
+deploy/go-live QA, each with dependencies, parallelization notes, and a Definition of
+Done) and `CONVENTIONS.md` (file/dependency/typing/testing rules, and — directly
+addressing user-reported pain from a past project where a browser extension's session
+timer shipped with broken stop/resume/tab-switch behavior — a hard rule that any
+stateful UI flow gets its states and transitions written down and edge-case-tested
+*before* implementation, not after). `agent-build-plan.md` Phase 4 applies this rule
+concretely to this project's input wizard. Wired both new docs into `INTRODUCTION.md`'s
+reading order and `DIRECTORY.md`'s folder map and quick-lookup table.
+**Files touched:** `.gitignore`, `package-lock.json` (new), `ISSUES.md` (ISS-1 resolved,
+ISS-2 updated with real repo URL + Cloudflare build settings note, ISS-8 added),
+`agent-build-plan.md` (new), `CONVENTIONS.md` (new), `INTRODUCTION.md`, `DIRECTORY.md`,
+`HANDOFF.md` (this entry + Current State).
+**What's next:** Phase 1 (real equipment data) and Phase 2 (real formulas) per
+`agent-build-plan.md` — both can start now, in parallel. Cloudflare Pages + DNS setup
+(ISS-2) is being done directly by the project owner, not an agent, using build settings
+given in chat (build command `npm run build`, output dir `out`, `NODE_VERSION` pinned).
 
 ### 2026-07-05 — Code skeleton built; ISSUES.md created; corrected "two repos" mixup
 **What changed:** Built the skeletal Next.js + TypeScript structure per SPEC.md §32:

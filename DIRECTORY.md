@@ -16,6 +16,8 @@ Roi_Calculator/                  (becomes the "CapexIQ" GitHub repo)
 ├── HANDOFF.md                   <- current state + change log
 ├── DIRECTORY.md                 <- this file
 ├── ISSUES.md                    <- open problems/gaps/quirks tracker, check every session
+├── CONVENTIONS.md               <- how code gets written here — read before coding
+├── agent-build-plan.md          <- phased build plan, dependencies, Definition of Done
 ├── SPEC.md                      <- full product spec (moved from Documents root, indexed)
 ├── data-requirements.md          research brief + first-pass findings on real Indian
 │                                 healthcare-equipment data (SPEC.md §24), see below
@@ -74,6 +76,8 @@ Roi_Calculator/                  (becomes the "CapexIQ" GitHub repo)
 |---|---|---|
 | To understand the product | `SPEC.md` | Use its index at the top, don't read front-to-back |
 | Where things stand right now | `HANDOFF.md` | Current State block at the top |
+| Which phase to build next | `agent-build-plan.md` | Phases in order, each with dependencies + Definition of Done |
+| How code should be structured/tested | `CONVENTIONS.md` | Read before writing or editing any code |
 | Real Indian data on equipment cost/maintenance/financing/utilization | `data-requirements.md` | §12-14 have first-pass findings + a starter assumptions table; §15 lists what's still genuinely unknown |
 | A photo of MRI/CT/dialysis/etc. equipment | `equipment-images/` | 9 photos, see its `sources.txt` |
 | A photo of a hospital admin/CFO/COO/consultant | `people-personas/` | 4 photos; use `transparent/` if you need them cut out of a background |

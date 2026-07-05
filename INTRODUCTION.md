@@ -32,10 +32,15 @@ index at the top so you can jump to the section you need.
 3. **DIRECTORY.md** — the map of the codebase: what exists, where, and what it's for.
 4. **ISSUES.md** — open problems/gaps being tracked. Check before assuming something's
    fine; add to it the moment you spot something wrong, even if you don't fix it now.
-5. **SPEC.md** — the full product spec, only when you need the detail behind a decision.
+5. **CONVENTIONS.md** — how code gets written here (file/dependency/testing rules).
+   Read this before writing or editing any code — not optional, not just for style.
+6. **agent-build-plan.md** — the phase you're actually working on, its dependencies,
+   and its Definition of Done. Check which phase is next before starting new code.
+7. **SPEC.md** — the full product spec, only when you need the detail behind a decision.
 
 You don't need to read SPEC.md front-to-back. Use its index. You *do* need to read
-HANDOFF.md, DIRECTORY.md, and ISSUES.md every time — they're short by design.
+HANDOFF.md, DIRECTORY.md, ISSUES.md, and CONVENTIONS.md every time — they're short by
+design.
 
 ---
 
@@ -77,16 +82,15 @@ HANDOFF.md, DIRECTORY.md, and ISSUES.md every time — they're short by design.
 
 ## What's already done vs. what's next
 
-Visual/design assets (equipment photos, persona photos + transparent cutouts, icons,
-fonts, color system, dashboard mockup, logo, favicon, hero background, OG image, PWA
-manifest), `data-requirements.md` (research brief + first-pass findings on real Indian
-healthcare-equipment data), the rebrand to CapexIQ, and a skeletal Next.js code
-structure are complete — see DIRECTORY.md for the map.
+Visual/design assets, `data-requirements.md`, the rebrand to CapexIQ, a skeletal
+Next.js code structure (build-verified — `npm install && npm run build` both succeed),
+the GitHub repo, and this documentation system including `CONVENTIONS.md` and
+`agent-build-plan.md` are all in place — see DIRECTORY.md for the map.
 
-Not yet built: real equipment data filled into the JSON files (skeleton has placeholders
-only), content/copy files (methodology, disclaimer, glossary, tooltip copy), report
-templates, formula implementations, and UI components. Check HANDOFF.md's Current State
-block — it will say exactly what's next and why.
+Not yet built: everything in `agent-build-plan.md`'s phases — real equipment data,
+formula implementations, content/copy, the wizard UI, the dashboard, exports. Check
+`HANDOFF.md`'s Current State block and `agent-build-plan.md` for exactly which phase is
+next and why.
 
 ---
 

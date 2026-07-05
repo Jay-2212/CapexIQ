@@ -12,16 +12,6 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
-### ISS-1 — Skeleton not build-verified
-**Area:** code / tooling
-**Status:** open
-**What:** Node.js, npm, and wrangler are not installed in the environment this skeleton
-was built in, so the Next.js scaffold in `/app` etc. has never been through
-`npm install` or `npm run build`. It's structurally right per SPEC.md §32 but unverified.
-**Next action:** first agent/session with a working Node environment should run
-`npm install && npm run build` and fix whatever breaks before assuming the skeleton
-actually compiles.
-
 ### ISS-2 — Cloudflare Pages + DNS not yet wired up for capexiq.jaybharti.me
 **Area:** infra
 **Status:** open
@@ -44,6 +34,19 @@ needed — reconsider that config if the app later needs server-side API routes.
 `data-requirements.md` §14.
 **Next action:** populate from `data-requirements.md` §14's starter assumptions table,
 per SPEC.md §32.1.
+
+### ISS-8 — Dev-dependency audit warnings (moderate/high/critical, all dev-only)
+**Area:** code / tooling
+**Status:** open
+**What:** `npm install` reports 7 vulnerabilities: `esbuild<=0.24.2` (dev server can be
+sent arbitrary requests — GHSA-67mh-4wv8-2f99), pulled in transitively through
+`vite`/`vitest`; and `postcss<8.5.10` (XSS in CSS stringify — GHSA-qx2v-qp2m-jg93),
+pulled in transitively through `next`. Both are dev/build-tooling paths, not runtime
+code shipped to users, and neither is exploitable in a static-export production build.
+`npm audit fix --force` would resolve them but pulls in `vitest@4` and `next@9` — both
+breaking-change downgrades/upgrades not worth forcing onto an otherwise-fine skeleton.
+**Next action:** revisit next time `next`/`vitest` get a routine version bump anyway;
+don't force it just for this.
 
 ### ISS-4 — Genuinely unresearched benchmark gaps
 **Area:** data
@@ -76,6 +79,20 @@ is a placeholder only, safe to replace once real product screenshots exist.
 ---
 
 ## Resolved
+
+### ISS-1 — Skeleton not build-verified
+**Area:** code / tooling
+**Resolution:** Node.js (v26.4.0) and npm (11.17.0) installed via Homebrew
+(`brew install node`), which put both on PATH automatically. `npm install` and
+`npm run build` both succeed — Next.js 15.5.20 compiles, type-checks, and produces a
+static export in `out/` (confirms `next.config.ts`'s `output: "export"` works end to
+end). No test files exist yet under `/tests` (only READMEs), so `npm test` has nothing
+to run — that's expected, not a failure; add tests alongside real formula
+implementations, not before.
+**Note:** `npm install` reported 7 audit vulnerabilities (5 moderate, 1 high, 1
+critical), all in dev-only tooling (`esbuild`/`vite` transitively via `vitest`,
+`postcss` transitively via `next`) — see ISS-8 below, tracked separately since it's a
+dependency-hygiene item, not a build blocker.
 
 ### ISS-7 — "App repo not yet renamed to CapexIQ" (false alarm — one repo, not two)
 **Area:** code
