@@ -37,12 +37,13 @@ All visual/design assets, `data-requirements.md`'s first research pass, and this
 documentation system (INTRODUCTION.md, DIRECTORY.md, SPEC.md, ISSUES.md, HANDOFF.md,
 AGENTS.md, README.md) are in place.
 
-**What's next:** Per `ISSUES.md`, in order: (1) get a Node environment and verify the
-skeleton actually builds (`npm install && npm run build`) — currently unverified,
-ISS-1; (2) create the repo on GitHub and push everything, then wire up Cloudflare
-Pages + DNS for the `capexiq` subdomain — ISS-2, partly a dashboard action; (3) populate
-`/equipment-data/*.json` from `data-requirements.md` §14's starter table — ISS-3; (4)
-implement the real formulas against SPEC.md §31; (5) build the wizard UI.
+**What's next:** The repo is live at `github.com/Jay-2212/CapexIQ` (pushed 2026-07-05).
+Per `ISSUES.md`, in order: (1) get a Node environment and verify the skeleton actually
+builds (`npm install && npm run build`) — currently unverified, ISS-1; (2) wire up
+Cloudflare Pages + DNS for the `capexiq` subdomain, pointing at that repo — ISS-2,
+a dashboard action; (3) populate `/equipment-data/*.json` from `data-requirements.md`
+§14's starter table — ISS-3; (4) implement the real formulas against SPEC.md §31; (5)
+build the wizard UI.
 
 **Anything blocking or half-finished:** Nothing blocking. See `ISSUES.md` for the full
 open list (code skeleton unverified, infra not wired, equipment data still placeholder,
@@ -102,9 +103,11 @@ INTRODUCTION.md/DIRECTORY.md rename passes and SPEC.md's identity metadata, §1,
 entry + Current State), `DIRECTORY.md`, `INTRODUCTION.md`, `SPEC.md`,
 `data-requirements.md`, `equipment-images/sources.txt`, `design/colors.md`,
 `design/tokens.css` (header comment only).
-**What's next:** git init this folder, create the GitHub repo, push. Then, per
-`ISSUES.md`: verify the build with a real Node environment, wire up Cloudflare Pages +
-DNS, populate real equipment data, implement formulas, build the UI.
+**What's next:** Also done in this session (after the skeleton above): `git init`,
+initial commit, and `gh repo create Jay-2212/CapexIQ --public --push` — repo is now
+live at `github.com/Jay-2212/CapexIQ`. Remaining, per `ISSUES.md`: verify the build with
+a real Node environment, wire up Cloudflare Pages + DNS, populate real equipment data,
+implement formulas, build the UI.
 
 ### 2026-07-05 — CapexIQ rebrand: identity layer actioned
 **What changed:** Actioned `design/rebrand-brief.md` (product renamed Healthcare Capex

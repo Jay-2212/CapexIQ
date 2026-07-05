@@ -25,12 +25,16 @@ actually compiles.
 ### ISS-2 — Cloudflare Pages + DNS not yet wired up for capexiq.jaybharti.me
 **Area:** infra
 **Status:** open
-**What:** The repo exists on GitHub, but nothing connects it to Cloudflare Pages, and no
-DNS record for the `capexiq` subdomain exists yet. This is a dashboard action (Cloudflare
-account access), not something doable from this environment.
-**Next action:** in Cloudflare dashboard — create a Pages project connected to the
-CapexIQ GitHub repo, then add a CNAME/subdomain record for `capexiq.jaybharti.me`
-pointing at that Pages project, same pattern as the main `jaybharti.me` site.
+**What:** The repo now exists on GitHub (`github.com/Jay-2212/CapexIQ`, pushed
+2026-07-05), but nothing connects it to Cloudflare Pages, and no DNS record for the
+`capexiq` subdomain exists yet. This is a dashboard action (Cloudflare account access),
+not something doable from this environment.
+**Next action:** in Cloudflare dashboard — create a Pages project connected to
+`github.com/Jay-2212/CapexIQ`, then add a CNAME/subdomain record for
+`capexiq.jaybharti.me` pointing at that Pages project, same pattern as the main
+`jaybharti.me` site. Note `next.config.ts` is set to `output: "export"` (static export)
+specifically so this can be a plain Pages static deployment with no Workers/adapter
+needed — reconsider that config if the app later needs server-side API routes.
 
 ### ISS-3 — Equipment data files are placeholders, not real data
 **Area:** data
