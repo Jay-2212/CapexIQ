@@ -1,0 +1,73 @@
+<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, Inter, sans-serif">
+  <defs>
+    <pattern id="og-dot-grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1.1" fill="#D8D6D1" opacity="0.5"/>
+    </pattern>
+    <clipPath id="card-clip">
+      <rect x="0" y="0" width="380" height="360" rx="14"/>
+    </clipPath>
+  </defs>
+
+  <!-- background -->
+  <rect x="0" y="0" width="1200" height="630" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#og-dot-grid)"/>
+  <path d="M -20 560 C 260 540, 480 480, 700 420 S 1100 260, 1220 180"
+        fill="none" stroke="#0F7B4D" stroke-width="2" opacity="0.10"/>
+  <path d="M -20 600 C 300 590, 560 540, 800 480 S 1140 360, 1220 320"
+        fill="none" stroke="#3E5C76" stroke-width="2" opacity="0.09"/>
+  <rect x="0" y="0" width="720" height="630" fill="#FFFFFF" opacity="0.45"/>
+
+  <!-- logo lockup -->
+  <rect x="72" y="72" width="56" height="56" rx="13" fill="#1E2A3A"/>
+  <path d="M 82 108 L 89 108 L 93.5 96 L 98 114 L 102.5 108 L 110 108"
+        fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="110" y="96" width="7" height="12" rx="1.4" fill="#FFFFFF"/>
+  <rect x="120" y="88" width="7" height="20" rx="1.4" fill="#FFFFFF" opacity="0.92"/>
+
+  <text x="146" y="94" font-size="16" font-weight="700" fill="#1C1C1A" letter-spacing="0.5">CAPEXIQ</text>
+
+  <!-- headline: the tagline -->
+  <text x="72" y="220" font-size="46" font-weight="700" fill="#1C1C1A">Know if it pays for itself,</text>
+  <text x="72" y="278" font-size="46" font-weight="700" fill="#1C1C1A">before you buy it.</text>
+
+  <!-- subtext -->
+  <text x="72" y="330" font-size="18" fill="#5C5B57">ROI, payback, NPV, IRR, break-even usage, and cash-flow risk</text>
+  <text x="72" y="358" font-size="18" fill="#5C5B57">for hospital equipment investments &#8212; built for India.</text>
+
+  <text x="72" y="560" font-size="16" font-weight="600" fill="#1E2A3A">capexiq.jaybharti.me</text>
+
+  <!-- mini dashboard preview card -->
+  <g transform="translate(776, 150)">
+    <rect x="0" y="0" width="360" height="360" rx="16" fill="#FFFFFF" stroke="#E6E4E0" stroke-width="1.5"/>
+    <g clip-path="url(#card-clip)">
+      <text x="24" y="36" font-size="12" fill="#8A8883" font-weight="600">INVESTMENT OUTLOOK</text>
+
+      <rect x="24" y="52" width="88" height="30" rx="15" fill="#E9F6EF"/>
+      <text x="68" y="72" font-size="14" font-weight="700" fill="#0F7B4D" text-anchor="middle">Strong</text>
+
+      <text x="336" y="72" font-size="26" font-weight="700" fill="#1C1C1A" text-anchor="end" font-family="IBM Plex Mono, monospace">78</text>
+      <text x="336" y="88" font-size="10" fill="#8A8883" text-anchor="end">/ 100</text>
+
+      <line x1="24" y1="104" x2="336" y2="104" stroke="#E6E4E0"/>
+
+      <text x="24" y="132" font-size="11" fill="#8A8883">SIMPLE PAYBACK</text>
+      <text x="24" y="160" font-size="22" font-weight="700" fill="#1C1C1A" font-family="IBM Plex Mono, monospace">3.8 yrs</text>
+
+      <text x="190" y="132" font-size="11" fill="#8A8883">ROI</text>
+      <text x="190" y="160" font-size="22" font-weight="700" fill="#1C1C1A" font-family="IBM Plex Mono, monospace">24%</text>
+
+      <line x1="24" y1="182" x2="336" y2="182" stroke="#E6E4E0"/>
+
+      <text x="24" y="210" font-size="11" fill="#8A8883">NPV</text>
+      <text x="24" y="238" font-size="22" font-weight="700" fill="#1C1C1A" font-family="IBM Plex Mono, monospace">&#8377;1.4 Cr</text>
+
+      <text x="190" y="210" font-size="11" fill="#8A8883">BREAK-EVEN</text>
+      <text x="190" y="238" font-size="22" font-weight="700" fill="#1C1C1A" font-family="IBM Plex Mono, monospace">11/day</text>
+
+      <!-- tiny break-even chart -->
+      <line x1="24" y1="320" x2="336" y2="320" stroke="#D8D6D1"/>
+      <path d="M 24 316 L 336 260" stroke="#0F7B4D" stroke-width="2" fill="none"/>
+      <path d="M 24 296 L 336 296" stroke="#B7791F" stroke-width="1.6" stroke-dasharray="3 3"/>
+    </g>
+  </g>
+</svg>

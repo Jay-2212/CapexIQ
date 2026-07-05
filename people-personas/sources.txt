@@ -1,0 +1,25 @@
+Persona photos for landing page "who this is for" section (spec section 3)
+Sourced from Pexels — free to use, no attribution required, no watermark.
+
+01-hospital-administrator.jpg
+  "Asian man in corporate attire working at a desk in an office setting"
+  Photo by Kampus Production — https://www.pexels.com/photo/bearded-man-in-a-suit-working-on-documents-8463182/
+
+02-operations-head-coo.jpg
+  "Confident senior businessman in suit and tie, smiling in modern office"
+  Photo by Kampus Production — https://www.pexels.com/photo/portrait-of-an-elegant-man-in-an-office-8463183/
+
+03-cfo-finance-manager.jpg
+  "Portrait of a professional woman in an office setting, exuding confidence and poise"
+  Photo by Adolfo Mancilla Mojica — https://www.pexels.com/photo/confident-businesswoman-at-office-desk-33438842/
+
+04-healthcare-consultant.jpg
+  "Two female healthcare professionals discussing documents in a bright medical setting"
+  Photo by Gustavo Fring — https://www.pexels.com/photo/healthcare-professionals-looking-at-the-document-on-the-clipboard-7446988/
+
+License: Pexels License — free for commercial and personal use, no attribution required.
+https://www.pexels.com/license/
+
+Note: these are generic professional stock photos, not real testimonials. Fine for
+a "built for owners, administrators, ops heads, CFOs, and consultants" section, but
+swap for real customer photos once you have actual users/testimonials.

@@ -1,0 +1,29 @@
+{
+  "name": "CapexIQ",
+  "short_name": "CapexIQ",
+  "description": "Know if it pays for itself, before you buy it. ROI, payback, NPV, IRR, break-even analysis, and cash-flow risk for hospital equipment investments.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1E2A3A",
+  "icons": [
+    {
+      "src": "/favicon-exports/favicon-48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-exports/favicon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "apple touch icon"
+    },
+    {
+      "src": "/favicon-exports/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

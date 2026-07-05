@@ -1,0 +1,27 @@
+{
+  "_status": "placeholder - not real data, see equipment-data/README.txt and ISSUES.md ISS-3",
+  "equipmentType": "cath-lab",
+  "purchaseCost": {
+    "low": null,
+    "typical": null,
+    "high": null,
+    "unit": "INR",
+    "confidence": null,
+    "sourceId": null
+  },
+  "usefulLifeYears": null,
+  "salvageValuePercentage": null,
+  "installationAndAncillaryCostPercentage": null,
+  "warrantyYears": null,
+  "cmcYears": null,
+  "amcAnnualCostPercentage": null,
+  "typicalUtilization": {
+    "usagePerDay": null,
+    "workingDaysPerMonth": null,
+    "rampUpMonths": null
+  },
+  "financingNorms": {
+    "typicalLoanTenureYears": null,
+    "typicalInterestRateRange": null
+  }
+}

@@ -1,0 +1,28 @@
+<svg viewBox="0 0 1600 520" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- restrained dot-grid tile, evokes graph paper / financial ledger without being loud -->
+    <pattern id="dot-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1.2" fill="#D8D6D1" opacity="0.55"/>
+    </pattern>
+  </defs>
+
+  <!-- base -->
+  <rect x="0" y="0" width="1600" height="520" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="1600" height="520" fill="url(#dot-grid)"/>
+
+  <!-- faint ascending trend lines, suggestive of ROI/utilization curves, never competing with foreground text -->
+  <path d="M -20 440 C 300 420, 500 380, 760 330 S 1180 220, 1620 120"
+        fill="none" stroke="#0F7B4D" stroke-width="2" opacity="0.10"/>
+  <path d="M -20 480 C 340 470, 620 430, 900 390 S 1300 300, 1620 260"
+        fill="none" stroke="#3E5C76" stroke-width="2" opacity="0.10"/>
+  <path d="M -20 500 C 400 498, 700 480, 980 460 S 1360 420, 1620 400"
+        fill="none" stroke="#1E2A3A" stroke-width="1.6" opacity="0.08"/>
+
+  <!-- a few quiet data-point markers on the primary line -->
+  <circle cx="760" cy="330" r="3.5" fill="#0F7B4D" opacity="0.16"/>
+  <circle cx="1180" cy="220" r="3.5" fill="#0F7B4D" opacity="0.16"/>
+  <circle cx="1400" cy="160" r="3.5" fill="#0F7B4D" opacity="0.16"/>
+
+  <!-- soft vignette so pattern recedes toward the text area (top-left, where a hero headline typically sits) -->
+  <rect x="0" y="0" width="800" height="520" fill="#FFFFFF" opacity="0.55"/>
+</svg>

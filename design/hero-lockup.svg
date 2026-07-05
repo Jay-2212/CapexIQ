@@ -1,0 +1,12 @@
+<svg viewBox="0 0 480 100" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, Inter, sans-serif">
+  <rect x="0" y="0" width="64" height="64" rx="14" fill="#1E2A3A"/>
+  <path d="M 8 44 L 16 44 L 20 32 L 25 52 L 30 44 L 36 44"
+        fill="none" stroke="#FFFFFF" stroke-width="3.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="36" y="32" width="6.5" height="12" rx="1.25" fill="#FFFFFF"/>
+  <rect x="45.5" y="24" width="6.5" height="20" rx="1.25" fill="#FFFFFF"/>
+  <rect x="55" y="16" width="6.5" height="28" rx="1.25" fill="#FFFFFF" opacity="0.92"/>
+
+  <text x="80" y="42" font-size="31" font-weight="700" fill="#1C1C1A">CapexIQ</text>
+
+  <text x="2" y="88" font-size="16" font-weight="500" fill="#5C5B57">Know if it pays for itself, before you buy it.</text>
+</svg>

@@ -1,0 +1,49 @@
+CapexIQ (was "Healthcare Capex Decision Support Tool") — Equipment/Visual Assets
+Sourced from Pexels (free to use, no attribution required, no watermark)
+Downloaded: 2026-07-05
+
+01-mri-machine.jpg
+  "Doctor assists patient undergoing MRI scan in healthcare facility"
+  Photo by MART PRODUCTION — https://www.pexels.com/photo/photo-of-doctor-operating-mri-scanner-7088479/
+
+02-ct-scanner.jpg
+  "Close-up view of a modern CT scanner in a healthcare facility"
+  Photo by MART PRODUCTION — https://www.pexels.com/photo/photo-of-ct-scanner-7089024/
+
+03-cath-lab-cardiology-equipment.jpg
+  "High-resolution image of a modern defibrillator in a hospital environment"
+  (used to represent Cath Lab / cardiology equipment — no exact cath-lab-room photo found free of patients/graphic content)
+  Photo by Los Muertos Crew — https://www.pexels.com/photo/defibrillator-in-hospital-8460235/
+
+04-dialysis-unit.jpg
+  "A focused healthcare worker operates advanced medical machinery" (tagged: Dialysis Machine, Hemodialysis)
+  Photo by sirmudi_photography — https://www.pexels.com/photo/healthcare-professional-operating-medical-equipment-33764117/
+
+05-ultrasound-machine.jpg
+  "Digital ultrasound machine with monitor in a healthcare setting"
+  Photo by Pavel Danilyuk — https://www.pexels.com/photo/photo-of-an-ultrasound-machine-7108390/
+
+06-laboratory-analyzer.jpg
+  "High-tech laboratory equipment featuring Witeg machines"
+  Photo by Ludovic Delot — https://www.pexels.com/photo/a-laboratory-with-several-machines-and-equipment-18471457/
+
+07-operation-theatre-equipment.jpg
+  "Doctor in surgical attire performing operation in a well-equipped operating room"
+  Photo by Anna Shvets — https://www.pexels.com/photo/a-doctor-in-an-operating-room-4769120/
+
+08-hospital-corridor.jpg
+  "Dimly lit hospital corridor with Exit sign, featuring a wheelchair in the distance"
+  Photo by Sandy Torchon — https://www.pexels.com/photo/empty-long-corridor-of-modern-hospital-4094199/
+
+09-financial-dashboard-mock.jpg
+  "Financial chart displayed on monitor showcasing stock market trends and analysis"
+  (used as a placeholder for the "financial dashboard mock image" — not a literal ROI-tool screenshot)
+  Photo by AlphaTradeZone — https://www.pexels.com/photo/monitor-with-data-on-stock-exchange-on-screen-5831251/
+
+License: Pexels License — free for commercial and personal use, no attribution required.
+https://www.pexels.com/license/
+
+Note: 03 and 09 are close approximations, not exact matches, since Pexels has no free
+photos of an actual cardiac catheterization lab room or a literal hospital-capex ROI
+dashboard. Consider replacing these two with custom screenshots/mockups once the
+product UI exists.
