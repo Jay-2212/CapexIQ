@@ -23,5 +23,19 @@
   "financingNorms": {
     "typicalLoanTenureYears": null,
     "typicalInterestRateRange": null
+  },
+  "billedTariffPerUse": {
+    "low": null,
+    "typical": null,
+    "high": null,
+    "unit": "INR",
+    "confidence": null,
+    "sourceId": null
+  },
+  "launchDelayMonths": {
+    "value": null,
+    "unit": "months",
+    "confidence": null,
+    "sourceId": null
   }
 }

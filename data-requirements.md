@@ -1029,3 +1029,44 @@ UI warning:
 ```text
 Some benchmark data is directional and may not apply to your hospital. Replace these values with your vendor quotation, tariff sheet, payer contracts, and lender sanction terms before using the output for a real investment decision.
 ```
+
+---
+
+## 16. Next Research Pass — Priority Brief (added 2026-07-06)
+
+See `ISSUES.md` ISS-9. A build-time pass populated `content/inputs-metadata.json` and
+SPEC.md §18.2/§18.3 with several numbers that are **not** in this document — most
+seriously, a discount-rate/target-IRR "citation" to §12.3 that doesn't exist. Those
+were stripped back to `null`/`"Unavailable"` in `equipment-data/common-assumptions.json`
+and `equipment-data/*.json`. This section names the priority list for the next research
+pass so the same gaps don't get filled with invented numbers again.
+
+Follow this file's own methodology throughout (§3 source-quality rules, §4 output
+format, the confidence labels in §3.3) — every returned value still needs a source URL,
+confidence label, and the machine-readable row format from §4.2.
+
+Priority order (highest-value gaps first):
+
+```text
+1. Discount rate (cost of capital) benchmark for Indian private-hospital capex
+   — not previously researched at all; this is the single most-needed figure since the
+   NPV calculation has no honest default without it.
+2. Target IRR / hurdle rate benchmark for Indian private-hospital equity/capex decisions
+   — same status as #1.
+3. Usage-per-day / utilization by equipment type, hospital bed-size bucket, and city tier
+   — for MRI, CT, Cath Lab, Dialysis, Ultrasound (§2.3's bucket structure). Currently
+   the single biggest gap: the tool cannot show ANY usage default without this.
+4. Average billed tariff per use, by equipment type — CT has one real data point
+   (~₹4,500, S1); MRI, Cath Lab, Dialysis, Ultrasound do not have a usable general
+   default yet (existing sources are either single-example, patient-cost-only, or
+   explicitly caveated against use as a default — see §13's per-equipment notes).
+5. Launch delay / time-to-first-revenue by equipment type (civil work + installation +
+   licensing + commissioning + training, per §16 of SPEC.md) — not researched at all
+   yet; distinct from the AMC/CMC-cliff timing already covered in §13.
+6. Re-confirm cath lab and dialysis acquisition cost with more than one source each
+   (currently single-example, Low confidence: S13 for cath lab, S15 for dialysis).
+```
+
+This list is intentionally the same shape as §14's table — a completed pass should
+extend `equipment-data/*.json` and `equipment-data/common-assumptions.json` directly,
+row by row, not require reformatting.

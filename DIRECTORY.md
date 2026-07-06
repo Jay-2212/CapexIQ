@@ -35,10 +35,14 @@ Roi_Calculator/                  (becomes the "CapexIQ" GitHub repo)
 ├── formulas/                     13 calculation modules per SPEC.md §32 — signatures
 │                                 only, every function throws "not implemented"
 ├── equipment-data/                mri/ct/cath-lab/dialysis/ultrasound/custom.json —
-│   └── README.txt                schema-shaped placeholders, not real data (ISS-3)
+│   ├── common-assumptions.json    non-equipment-specific benchmarks (discount rate,
+│   │                               target IRR, financing) — see ISS-9, mostly still null
+│   └── README.txt                schema-shaped placeholders, not real data (ISS-3/ISS-9)
 ├── report-templates/              word/excel/methodology/disclaimer — placeholder .md
 │   └── README.txt
 ├── content/                       field-explanations/benchmark-notes/glossary/tooltip
+│   ├── inputs-metadata.json       <- UI/control schema only (control type, slider bounds,
+│   │                                 tooltip copy) — NO numeric defaults, see ISS-9
 │   └── README.txt                 copy — placeholder .md
 ├── exports/                       excel/word/zip generator stubs
 │   └── README.md
@@ -189,6 +193,11 @@ code structure exists per SPEC.md §32. Still missing:
   action, see ISSUES.md ISS-2.
 - A financial disclaimer — this tool gives investment guidance; needs one before launch
   (`report-templates/disclaimer.md` is a placeholder, not the real thing).
+- Real values for several benchmark fields that a prior pass filled with invented
+  numbers (including a fabricated citation to `data-requirements.md` §12.3 for discount
+  rate/target IRR, which doesn't exist there) — stripped back to `null`/unresourced on
+  2026-07-06, see ISSUES.md ISS-9. A deep-research prompt covering exactly these gaps is
+  ready to hand to a research agent.
 
 Check `HANDOFF.md`'s Current State block and `ISSUES.md` before assuming any of the
 above is still missing — they're the source of truth for what's actually done.

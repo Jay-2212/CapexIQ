@@ -1,0 +1,43 @@
+{
+  "_status": "partially populated - see ISSUES.md ISS-9 before treating any value here as final",
+  "_note": "Holds financial-model assumptions that are NOT equipment-specific (SPEC.md §11.1.F / §18) — same value would otherwise be repeated identically across every equipment-data/*.json file. Equipment-specific benchmarks (purchase cost, useful life, utilization, tariff, launch delay) stay in the per-equipment files, not here.",
+  "discountRate": {
+    "value": null,
+    "unit": "% p.a.",
+    "confidence": "Unavailable",
+    "sourceId": null,
+    "note": "No source for this exists in data-requirements.md. A prior draft cited data-requirements.md §12.3 for a 12.0% default — that citation was false (§12.3 has no discount-rate row). Needs real research: WACC/cost-of-capital benchmark for Indian private healthcare capex. See ISSUES.md ISS-9."
+  },
+  "targetIrr": {
+    "value": null,
+    "unit": "% p.a.",
+    "confidence": "Unavailable",
+    "sourceId": null,
+    "note": "Same fabricated-citation problem as discountRate (was wrongly attributed to §12.3 at 15.0%). Needs real research: typical hurdle-rate/target-equity-return benchmark for Indian private healthcare capex. See ISSUES.md ISS-9."
+  },
+  "loanInterestRate": {
+    "low": 8,
+    "typical": 11.5,
+    "high": 15,
+    "unit": "% p.a.",
+    "confidence": "Low-Medium",
+    "sourceId": "S11,S12",
+    "note": "S11 (Bajaj) gives up to 14% p.a.; S12 (Tata Capital) gives a broad 8-15% market range. data-requirements.md recommends this as sensitivity_range, not a clean single default — 11.5 is a derived midpoint of the cited ranges, not a quoted figure. UI must show it as an editable range with this confidence, not as a silent single default, and must prefer the user's actual lender quote per data-requirements.md §7.3."
+  },
+  "loanTenureMonths": {
+    "low": 12,
+    "typical": 60,
+    "high": 120,
+    "unit": "months",
+    "confidence": "Medium",
+    "sourceId": "S10,S11",
+    "note": "S10 (HDFC) gives 12-84 months; S11 (Bajaj) gives 3-120 months. 60 is a derived midpoint within both ranges, not a directly quoted figure."
+  },
+  "workingDaysPerMonth": {
+    "value": 25,
+    "unit": "days",
+    "confidence": "N/A - modeling convention, not a researched benchmark",
+    "sourceId": null,
+    "note": "Generic calendar assumption (25 working days assumes Sunday closure), classified as a 'safe default' under data-requirements.md §7.1, not a sourced benchmark. Always editable; do not present as researched."
+  }
+}
