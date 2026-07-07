@@ -98,15 +98,31 @@ there so a future pass doesn't miss them. `ISSUES.md` ISS-3 rewritten to reflect
 reality (was stale, describing all equipment files as unpopulated placeholders when only
 `custom.json` still is).
 
+**Third research pass (2026-07-07, same day):** Jay commissioned a targeted third
+research pass (ChatGPT Deep Research, prompted with a detailed brief covering source
+hierarchy/citation format matching this doc's own conventions) against exactly the
+remaining Phase-1 gaps. Result, written up in `data-requirements.md` §18: `warrantyYears`,
+`salvageValuePercentage` (5% flat, all equipment, Schedule II), and
+`installationAndAncillaryCostPercentage` filled for all five equipment types;
+`cmcYears`/`amcAnnualCostPercentage` filled plus a new `cmcAnnualCostPercentage` field
+added (AMC and CMC turned out to be genuinely distinct contracts, not one concept); and
+**Cath Lab's `billedTariffPerUse`, empty through two prior passes, is now filled**
+(₹11,920-₹15,000, High confidence — CGHS + PM-JAY converge, independently re-verified
+this session via a live fetch of a second site). Two things flagged rather than silently
+resolved: the AMC figures are an identical generic proxy across all 5 equipment types,
+not equipment-specific research; and MRI's CMC cost has a real contradiction between a
+generic tender-ceiling range and one real hospital's much lower observed cost (new
+ISS-12, needs Jay's call). See `ISSUES.md` ISS-3 (now resolved) and ISS-12/ISS-13 (new,
+open) for the full picture. Phase 1 (equipment data) is now close to complete —
+`purchaseCost` for MRI/CT/Ultrasound and DSO/payer-mix/specialist-fee benchmarks (ISS-4)
+remain the main genuinely-open data gaps, correctly left as user-entered inputs.
+
 **What's next:** Phase 4 (design/UX) is **deliberately paused** — Jay is taking
 typography/spacing/chart-color/tooltip-mechanics/product-feel decisions on directly,
 not delegating them, and asked this not be touched until he picks it back up. Don't
 start `design/ux-product-spec.md` or any wizard/dashboard UI work without him. Until
-then: Phase 1's remaining equipment-data gaps
-(`salvageValuePercentage`/`installationAndAncillaryCostPercentage`/`warrantyYears`/
-`cmcYears`/`amcAnnualCostPercentage` — see ISSUES.md ISS-3, `usefulLifeYears` is now
-filled) and Phase 2's score/EAC/discounted-payback formulas (against
-`financial-model-spec.md`) are both fair game and don't touch design.
+then: Phase 2's score/EAC/discounted-payback formulas (against `financial-model-spec.md`)
+and resolving ISS-12 (MRI CMC contradiction) are both fair game and don't touch design.
 
 **Cloudflare Pages + DNS (ISS-2) is done:** Jay confirmed 2026-07-07 he wired this up
 directly in the Cloudflare dashboard — `capexiq.jaybharti.me` is live. Resolved, see
@@ -144,6 +160,61 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-07 — Third research pass: filled warranty/salvage/installation%/AMC/CMC, resolved Cath Lab tariff
+**What changed:** Following the false-claim cleanup earlier the same day, Jay commissioned
+a third, narrowly-scoped research pass (ChatGPT Deep Research) using a prompt built
+directly from this project's own source-quality/citation/confidence-level conventions
+(see `data-requirements.md` §3/§4/§9), targeted at exactly the six gaps §15 flagged as
+having zero coverage. Delivered as a 10-page PDF ("Healthcare Capex Benchmarking (third
+pass).pdf"), reviewed, cross-checked, and propagated into the docs, then deleted per
+Jay's instruction once fully extracted.
+**Findings (full detail in `data-requirements.md` §18):**
+1. **Warranty period** — filled for all 5 equipment types. Real tender-to-tender
+   variation for CT/Cath Lab/Dialysis (not a data-quality issue); MRI backed by two
+   independent government tenders (High confidence); Ultrasound rests on a single tender
+   (Medium, not High, per this doc's own confidence rules).
+2. **Salvage/residual value** — 5% of original cost, all equipment (Companies Act
+   Schedule II). Citation corrected: the pass cited an Income Tax depreciation-rates page,
+   which looks like a citation mismatch for a Schedule II claim; recorded as S8 (Schedule
+   II itself, already used for `usefulLifeYears`) instead. Three independent-verification
+   attempts (India Code's Schedule II file, MCA's PDF, a CA-focused secondary source) were
+   inconclusive/blocked (PDF extraction issues, HTTP 403, HTTP 404) — the 5% figure is
+   well-established in Indian corporate practice but wasn't independently re-confirmed
+   against primary text this session. Confidence recorded as Medium-High, not High.
+3. **Installation/ancillary cost %** — filled for all 5 (10-30% MRI, 10% CT, 20-30% Cath
+   Lab, 5-10% Dialysis, 0-5% Ultrasound). Mostly tender-mandated bid-allocation floors or
+   inferences, not measured actual spend — Medium/Low confidence throughout, not High.
+4. **AMC/CMC** — the pass correctly identified these as distinct contract types (AMC:
+   labour-only; CMC: parts-included) and a new `cmcAnnualCostPercentage` field was added
+   to the schema alongside the existing `amcAnnualCostPercentage`/`cmcYears`. AMC figures
+   (2-2.5%) are an **identical generic proxy across all 5 equipment types** (one SCTIMST
+   tender clause), not equipment-specific — flagged clearly, not presented as 5 separate
+   findings. CMC is mostly generic too, except Cath Lab (a real West Bengal tender's
+   year-wise schedule, 6-6.7%, Medium-High) and MRI, which has an unresolved contradiction
+   between the generic 3-10% tender ceiling and one real AIIMS life-cycle-costing study's
+   observed ~0.25%/year — a ~25-30x gap. Both values recorded in `mri.json`, not silently
+   picked; logged as new **ISS-12** for Jay's decision.
+5. **Cath Lab tariff — the big one, previously completely empty through two prior
+   passes:** ₹11,920-₹15,000 per diagnostic catheterization. CGHS (Oct 2025 rate list,
+   procedure code CI017) and PM-JAY's Health Benefit Package converge closely.
+   **Independently re-verified this session** — fetched `cghshospitals.com` directly (a
+   different site than the pass's own citation) and got the identical figures. High
+   confidence.
+6. **Dialysis/Ultrasound launch delay** — filled, both Low confidence (informal/adjacent
+   sources, not dedicated timeline studies).
+7. **CT utilization** — a new source was found (IPHS district-hospital workload norms)
+   but it's a *combined* X-ray+CT+ultrasound figure, not CT-specific — weaker than the
+   existing PET/CT-derived proxy already in `ct.json`. No change made; recorded as
+   corroborating context only, standalone CT utilization remains a genuine open gap.
+**Also:** new **ISS-13** logged (workingDaysPerMonth/financingNorms per-equipment fields
+may be dead schema, duplicating `common-assumptions.json` — neither research pass touched
+this, worth a look next time Phase 1 is revisited).
+**Files touched:** `data-requirements.md` (§15 updated, new §18), `ISSUES.md` (ISS-3
+resolved, ISS-12/ISS-13 opened), `equipment-data/mri.json`, `equipment-data/ct.json`,
+`equipment-data/cath-lab.json`, `equipment-data/dialysis.json`,
+`equipment-data/ultrasound.json`, `HANDOFF.md`. Source PDF deleted after extraction per
+Jay's instruction.
 
 ### 2026-07-07 — Fixed a false UX-resolved claim; resolved ISS-2; propagated usefulLifeYears; paused Phase 4
 **What changed:** Jay asked to pause all Phase 4 (design/UX) work for now — he'll take

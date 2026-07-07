@@ -1,5 +1,5 @@
 {
-  "_status": "partially populated (2026-07-07 second research pass) - see data-requirements.md \u00a717 and ISSUES.md ISS-9",
+  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md \u00a717/\u00a718 and ISSUES.md ISS-9/ISS-3",
   "equipmentType": "ultrasound",
   "purchaseCost": {
     "low": null,
@@ -16,11 +16,54 @@
     "sourceId": "S8",
     "note": "Companies Act Schedule II explicitly names 'ultrasound machines' at 13 years, the diagnostic-scan category. See data-requirements.md §12.4/§14."
   },
-  "salvageValuePercentage": null,
-  "installationAndAncillaryCostPercentage": null,
-  "warrantyYears": null,
-  "cmcYears": null,
-  "amcAnnualCostPercentage": null,
+  "salvageValuePercentage": {
+    "value": 5,
+    "unit": "percent",
+    "confidence": "Medium-High",
+    "sourceId": "S8",
+    "note": "Companies Act Schedule II caps residual value at 5% of original cost unless separately justified. See data-requirements.md §18.2 for the citation-correction caveat (same as MRI)."
+  },
+  "installationAndAncillaryCostPercentage": {
+    "low": 0,
+    "typical": 2.5,
+    "high": 5,
+    "unit": "percent of equipment cost",
+    "confidence": "Low",
+    "sourceId": "S50",
+    "note": "No tender or study gives a stated percentage. A buying-guide site notes ultrasound site prep is light (power outlets, network, storage) vs. heavy imaging-equipment civil work -- this range is an inference from that description, not a measured figure. See data-requirements.md §18.3."
+  },
+  "warrantyYears": {
+    "value": 5,
+    "unit": "years",
+    "confidence": "Medium",
+    "sourceId": "S47",
+    "note": "AIIMS Patna tender: 5-year comprehensive warranty + 5yr CMC. Single tender, no corroborating source found -- kept at Medium confidence (not High) despite being the only figure available, per this doc's own confidence rules (High requires multiple sources to agree). See data-requirements.md §18.1."
+  },
+  "cmcYears": {
+    "value": 5,
+    "unit": "years",
+    "confidence": "Medium",
+    "sourceId": "S47",
+    "note": "Follows the 5-year warranty in the AIIMS Patna tender. See data-requirements.md §18.4."
+  },
+  "amcAnnualCostPercentage": {
+    "low": 2,
+    "typical": 2.25,
+    "high": 2.5,
+    "unit": "percent of equipment cost per year",
+    "confidence": "Low",
+    "sourceId": "S52",
+    "note": "Labour-only AMC. Generic tender clause (SCTIMST) applied identically across all 5 equipment types -- not Ultrasound-specific. See data-requirements.md §18.4."
+  },
+  "cmcAnnualCostPercentage": {
+    "low": 3,
+    "typical": 4,
+    "high": 5,
+    "unit": "percent of equipment cost per year",
+    "confidence": "Low",
+    "sourceId": "S52",
+    "note": "Generic proxy (SCTIMST's tighter 3-5% CAMC cap, applied here rather than the broader 3-10% GeM range used for MRI/CT/Dialysis) -- not Ultrasound-specific research. See data-requirements.md §18.4."
+  },
   "typicalUtilization": {
     "usagePerDay": null,
     "workingDaysPerMonth": null,
@@ -44,10 +87,12 @@
     "note": "Ultrasound whole-abdomen CGHS reimbursement ceiling -- a government-scheme floor, NOT a private cash tariff. Pelvis (~425/500) and small-parts (~655/770) studies price lower -- this field anchors to whole-abdomen as the baseline."
   },
   "launchDelayMonths": {
-    "value": null,
+    "low": 0,
+    "typical": 0.25,
+    "high": 0.5,
     "unit": "months",
-    "confidence": "Unavailable",
-    "sourceId": null,
-    "note": "No formal timeline study found. Informal claim only: portable units need minimal site work and are 'usually usable immediately' -- not a quantified figure."
+    "confidence": "Low",
+    "sourceId": "S50",
+    "note": "Still an informal claim after a third pass, not a real timeline study: a buying-guide site says ultrasound units are usable almost immediately given minimal site needs. Converted here to ~0-2 weeks (0-0.5 month). See data-requirements.md §18.6."
   }
 }

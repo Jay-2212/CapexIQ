@@ -1,5 +1,5 @@
 {
-  "_status": "partially populated (2026-07-07 second research pass) - see data-requirements.md \u00a717 and ISSUES.md ISS-9",
+  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md \u00a717/\u00a718 and ISSUES.md ISS-9/ISS-3",
   "equipmentType": "dialysis",
   "purchaseCost": {
     "low": 10,
@@ -17,11 +17,62 @@
     "sourceId": "S8",
     "note": "Companies Act Schedule II's only other category besides the named diagnostic-scan class (Cat-scan/ultrasound, 13yr) is 'other medical/surgical equipment' at 15 years. Dialysis machines aren't individually named by S8, but as therapeutic (not imaging-diagnostic) equipment they fall in this second category by elimination -- a direct inference from S8's own two-way split, not a separate research claim. See data-requirements.md §12.4/§14."
   },
-  "salvageValuePercentage": null,
-  "installationAndAncillaryCostPercentage": null,
-  "warrantyYears": null,
-  "cmcYears": null,
-  "amcAnnualCostPercentage": null,
+  "salvageValuePercentage": {
+    "value": 5,
+    "unit": "percent",
+    "confidence": "Medium-High",
+    "sourceId": "S8",
+    "note": "Companies Act Schedule II caps residual value at 5% of original cost unless separately justified. See data-requirements.md §18.2 for the citation-correction caveat (same as MRI)."
+  },
+  "installationAndAncillaryCostPercentage": {
+    "low": 5,
+    "typical": 7.5,
+    "high": 10,
+    "unit": "percent of equipment cost",
+    "confidence": "Low",
+    "sourceId": null,
+    "note": "GeM spec requires turnkey RO-plant installation but states no cost percentage. This range is the research pass's own inference from uncited 'anecdotal project reports' -- weaker evidence than the tender-mandated MRI/CT floors. See data-requirements.md §18.3."
+  },
+  "warrantyYears": {
+    "low": 2,
+    "typical": 3,
+    "high": 3,
+    "unit": "years",
+    "confidence": "Medium",
+    "sourceId": "S44,S45",
+    "note": "Machine only, excludes the RO water-treatment system. MEA/Nepal tender: 2yr warranty (parts+consumables). NHM Odisha pre-bid clarification: 3yr comprehensive warranty. The RO plant itself carries a separate 5-year warranty in a different GeM spec (see _roSystemWarrantyYears below) -- a different equipment item bundled in the same tender, not a contradiction. See data-requirements.md §18.1/§18.8.",
+    "_roSystemWarrantyYears": {
+      "value": 5,
+      "confidence": "Medium",
+      "sourceId": "S46",
+      "note": "Warranty on the reverse-osmosis water-treatment system supplied with dialysis units, not the dialysis machine itself."
+    }
+  },
+  "cmcYears": {
+    "value": 5,
+    "unit": "years",
+    "confidence": "Medium",
+    "sourceId": "S46",
+    "note": "5-year CMC for the RO plant following the warranty period. See data-requirements.md §18.4."
+  },
+  "amcAnnualCostPercentage": {
+    "low": 2,
+    "typical": 2.25,
+    "high": 2.5,
+    "unit": "percent of equipment cost per year",
+    "confidence": "Low",
+    "sourceId": "S52",
+    "note": "Labour-only AMC. Generic tender clause (SCTIMST) applied identically across all 5 equipment types -- not Dialysis-specific. See data-requirements.md §18.4."
+  },
+  "cmcAnnualCostPercentage": {
+    "low": 3,
+    "typical": 6.5,
+    "high": 10,
+    "unit": "percent of equipment cost per year",
+    "confidence": "Low",
+    "sourceId": "S51,S52",
+    "note": "Generic tender-ceiling range (GeM + SCTIMST caps), no cost percentages were found specific to dialysis/RO-plant CMC. See data-requirements.md §18.4."
+  },
   "typicalUtilization": {
     "usagePerDay": 3,
     "workingDaysPerMonth": null,
@@ -46,10 +97,12 @@
     "note": "Hemodialysis (seronegative) CGHS reimbursement ceiling -- a government-scheme floor, NOT a private cash tariff, from a different-vintage CGHS document (nominally 2014, updated 2024-02-05) than the imaging tariffs elsewhere in this file. Seropositive sessions price higher (~1650/1898), sustained low-efficiency lower (~1250/1438). A private-provider source (S19, from the original pass) gives ~1500-4000/session patient-cost content but explicitly cautions against use as a default -- not used here."
   },
   "launchDelayMonths": {
-    "value": null,
+    "low": 0.5,
+    "typical": 0.75,
+    "high": 1,
     "unit": "months",
-    "confidence": "Unavailable",
-    "sourceId": null,
-    "note": "Confirmed unavailable across two research passes -- no credible source reports purchase-to-first-revenue duration for dialysis machines. Installation is mainly plumbing/water-treatment/staff training, but no duration figure was found."
+    "confidence": "Low",
+    "sourceId": "S56",
+    "note": "Still weakly sourced after a third pass -- not dialysis-specific. A general (non-dialysis) RO-plant installation FAQ states small/medium RO systems commission 'within days to a few weeks'; converted here to ~2-4 weeks (0.5-1 month) since RO water-treatment is the main bottleneck for a dialysis centre. Prefer a vendor-specific estimate. See data-requirements.md §18.6."
   }
 }

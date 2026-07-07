@@ -70,28 +70,35 @@ independent, well-bounded, already-specified tasks (e.g. implementing a single p
 formula file against an exact SPEC.md formula) may still be delegated to a second agent
 (Codex) when explicitly scoped by the primary agent first.
 
-### ISS-3 — Equipment data files: several fields have zero research coverage in either pass
-**Area:** data
+### ISS-12 — MRI CMC cost: generic tender-ceiling range contradicts one real observed-cost study
+**Area:** data / product
 **Status:** open
-**What:** `mri.json`/`ct.json`/`cath-lab.json`/`dialysis.json`/`ultrasound.json` are
-partially populated (purchase cost, utilization, tariff, launch delay — from the
-2026-07-06/07 research passes; see `data-requirements.md` §17). `usefulLifeYears` was
-filled in 2026-07-07 (see the Resolved section below). Still `null` with **no research
-attempted in either pass, and not even named in `data-requirements.md` §15's gap list**:
-`salvageValuePercentage`, `installationAndAncillaryCostPercentage`, `warrantyYears`,
-`cmcYears`, `amcAnnualCostPercentage`. `data-requirements.md` §15 has been updated to
-list these explicitly so a future research pass doesn't miss them. `custom.json` remains
-a pure placeholder by design (user fills in their own equipment's specs), not a gap.
-**Also flagged, not yet resolved:** each equipment file has `typicalUtilization.workingDaysPerMonth`
-and `financingNorms.typicalLoanTenureYears`/`typicalInterestRateRange` fields that are
+**What:** The third research pass (2026-07-07, see `data-requirements.md` §18.4) found
+two genuinely conflicting figures for MRI's post-warranty comprehensive-maintenance
+(CMC) cost: a generic tender-ceiling range of 3-10% of equipment value/year (what
+vendors are contractually allowed to bid, used as a fallback proxy across MRI/CT/
+Dialysis/Ultrasound in the absence of equipment-specific data), versus a peer-reviewed
+life-cycle-costing study of one real AIIMS 1.5T MRI that found *actual* realized CMC
+cost was only ~0.23-0.28%/year — roughly 25-30x lower. Both are recorded in
+`equipment-data/mri.json`'s `cmcAnnualCostPercentage` field (primary value + an
+`_observedActualAlternative` sub-object), not silently resolved one way.
+**Next action:** Jay's call needed before either number becomes a UI default — is the
+tender ceiling more representative of what a new private hospital should budget, or is
+AIIMS's real (possibly negotiated-government-rate) experience closer to reality? Worth
+a small targeted follow-up search for a second independent-hospital life-cycle-cost
+study before deciding, rather than picking blind.
+
+### ISS-13 — Equipment-data schema: workingDaysPerMonth/financingNorms per-equipment fields may be dead
+**Area:** data / schema
+**Status:** open
+**What:** Each equipment file has `typicalUtilization.workingDaysPerMonth` and
+`financingNorms.typicalLoanTenureYears`/`typicalInterestRateRange` fields that are
 `null` in every equipment file — these duplicate values that already live at the shared
 level in `common-assumptions.json` (`workingDaysPerMonth`, `loanInterestRate`,
 `loanTenureMonths`) and don't appear to need an equipment-specific override per
-`data-requirements.md`. Worth confirming whether these per-equipment fields are dead
-schema (safe to remove) or intentional future overrides, next time Phase 1 is touched.
-**Next action:** a third research pass (or Jay's own domain knowledge) for the five
-zero-coverage fields above; otherwise these should be explicit user-entered inputs like
-the other `data-requirements.md` §15 items, not silent defaults.
+`data-requirements.md`. Neither the second nor third research pass touched these.
+**Next action:** confirm whether these per-equipment fields are dead schema (safe to
+remove) or intentional future overrides, next time Phase 1 is touched.
 
 ### ISS-8 — Dev-dependency audit warnings (moderate/high/critical, all dev-only)
 **Area:** code / tooling
@@ -144,22 +151,40 @@ is a placeholder only, safe to replace once real product screenshots exist.
 dashboard — `capexiq.jaybharti.me` is live. No agent action was needed or taken; this
 was always a dashboard-only task outside this environment's reach.
 
-### ISS-3 (partial) — usefulLifeYears now filled from real research
+### ISS-3 — Equipment data files: zero-coverage fields now filled by a third research pass
 **Area:** data
-**What was flagged:** `usefulLifeYears` was `null` in every equipment file despite
-`data-requirements.md` §12.4/§14 already having a real, High-confidence sourced answer
-(Companies Act Schedule II, source S8).
-**Resolution (2026-07-07):** filled `usefulLifeYears` in `mri.json`/`ct.json`/
-`ultrasound.json` (13 years — S8's own wording names "Cat-scan and ultrasound machines"
-as the diagnostic-scan category) and `cath-lab.json`/`dialysis.json` (15 years — S8's
-"other medical/surgical equipment" category; not individually named by S8, but the only
-other category S8 defines, so this mapping is a reasonable direct inference from the
-source's own two-category split, not a separate research claim). Confidence High,
-sourceId S8 in all five files. `custom.json` untouched (no equipment type to map).
-**Still open:** the other five null fields on the same equipment files
-(`salvageValuePercentage`, `installationAndAncillaryCostPercentage`, `warrantyYears`,
-`cmcYears`, `amcAnnualCostPercentage`) — see the ISS-3 entry above, still open, now also
-listed in `data-requirements.md` §15.
+**What was flagged:** `usefulLifeYears`, `salvageValuePercentage`,
+`installationAndAncillaryCostPercentage`, `warrantyYears`, `cmcYears`, and
+`amcAnnualCostPercentage` were `null` in every equipment file, several with zero research
+attempted across two prior passes and not even named in `data-requirements.md` §15's gap
+list.
+**Resolution (2026-07-07, in two steps):**
+1. `usefulLifeYears` filled first from data already sitting unused in this doc (Companies
+   Act Schedule II, S8): 13yr for MRI/CT/Ultrasound (named directly), 15yr for Cath
+   Lab/Dialysis (by elimination — S8's only other category).
+2. A third, narrowly-scoped research pass (ChatGPT Deep Research, prompted specifically
+   against the remaining gaps) filled `salvageValuePercentage` (5% flat, all equipment,
+   Schedule II again — see the citation caveat below), `installationAndAncillaryCostPercentage`,
+   `warrantyYears`, `cmcYears`, and `amcAnnualCostPercentage` for all five equipment types,
+   plus a new `cmcAnnualCostPercentage` field (added because AMC and CMC turned out to be
+   genuinely distinct, differently-priced contracts, not one concept). **Also resolved in
+   the same pass: Cath Lab's `billedTariffPerUse`, previously completely empty through two
+   prior passes** — ₹11,920-₹15,000 per diagnostic catheterization, High confidence
+   (CGHS + PM-JAY converge, independently re-verified this session against a second site).
+   Dialysis and Ultrasound `launchDelayMonths` also filled (Low confidence, still weakly
+   sourced). See `data-requirements.md` §18 for full findings, per-field confidence
+   levels, and the complete new source register (S37-S57).
+**Caveats carried forward, not silently swept under this resolution:**
+- The AMC figures (2-2.5%, labour-only) are **identical across all 5 equipment types**
+  because they all trace to one generic tender clause, not equipment-specific research —
+  flagged in every file's notes, Low confidence.
+- The Schedule II salvage-value citation was corrected from the pass's own (likely
+  mismatched) Income Tax Department source to S8 — the well-known 5% figure itself wasn't
+  independently re-verified against primary statutory text this session (3 verification
+  attempts were inconclusive/blocked). Medium-High, not High.
+- MRI's CMC cost has a real, unresolved contradiction — see new ISS-12.
+- `custom.json` untouched throughout (no equipment type to map), remains a pure
+  placeholder by design.
 
 ### ISS-1 — Skeleton not build-verified
 **Area:** code / tooling
