@@ -198,6 +198,11 @@ code structure exists per SPEC.md §32. Still missing:
   rate/target IRR, which doesn't exist there) — stripped back to `null`/unresourced on
   2026-07-06, see ISSUES.md ISS-9. A deep-research prompt covering exactly these gaps is
   ready to hand to a research agent.
+- Two artifacts `agent-build-plan.md` Phase 4/Phase 2 now require and don't yet exist:
+  `design/ux-product-spec.md` (typography/spacing/chart-color/tooltip-mechanics/
+  validation decisions) and `financial-model-spec.md` (Investment Outlook scoring
+  methodology). Also `content/inputs-metadata.json` — the per-field validation
+  contract — doesn't exist yet either.
 
 Check `HANDOFF.md`'s Current State block and `ISSUES.md` before assuming any of the
 above is still missing — they're the source of truth for what's actually done.

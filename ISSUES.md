@@ -70,6 +70,19 @@ independent, well-bounded, already-specified tasks (e.g. implementing a single p
 formula file against an exact SPEC.md formula) may still be delegated to a second agent
 (Codex) when explicitly scoped by the primary agent first.
 
+### ISS-10 — Investment Outlook score, EAC, and discounted payback have no formula
+**Area:** data / product
+**Status:** open
+**What:** SPEC.md §21/§11.2 name the Investment Outlook 0–100 score and its
+Strong/Moderate/Caution/Weak bands, EAC (Equivalent Annual Cost), and discounted payback
+as required outputs, but §31 (the formula list) has no corresponding entry for any of
+the three. Found during the 2026-07-07 gap-analysis pass on `agent-build-plan.md`.
+**Next action:** write `financial-model-spec.md` (SPEC.md §38's named-but-never-written
+v0.5 artifact) defining the score's inputs, normalization, weighting, and band
+thresholds before `formulas/` implements it — see `agent-build-plan.md` Phase 2. This is
+a designed methodology, not a benchmark needing a source citation, but it still needs
+Jay's review before it's coded, not an ad hoc invention inside `roi.ts`.
+
 ### ISS-2 — Cloudflare Pages + DNS not yet wired up for capexiq.jaybharti.me
 **Area:** infra
 **Status:** open
@@ -151,6 +164,19 @@ implementations, not before.
 critical), all in dev-only tooling (`esbuild`/`vite` transitively via `vitest`,
 `postcss` transitively via `next`) — see ISS-8 below, tracked separately since it's a
 dependency-hygiene item, not a build blocker.
+
+### ISS-11 — "Doctor's cut" — unclear if distinct from the professional/reporting fee field
+**Area:** data / product
+**What was flagged:** Jay flagged "doctor cuts" as something Advanced Mode should
+surface. SPEC.md §10.2 already has a Basic Mode field for "professional/reporting fee
+per use" (the performing/reporting doctor's own fee). It was unconfirmed whether
+"doctor's cut" meant that same field, or a separate referral/commission cost (common in
+Indian private healthcare, where a referring doctor gets a cut distinct from the
+performing doctor's fee) for referral scans from other hospitals.
+**Resolution (2026-07-07):** confirmed with Jay — "doctor's cut" is the existing
+professional/reporting fee field, no new field needed. The separate referral/commission
+scenario exists but is negligible relative to the scale of this CAPEX ROI tool and is
+deliberately out of scope; don't add a field for it.
 
 ### ISS-7 — "App repo not yet renamed to CapexIQ" (false alarm — one repo, not two)
 **Area:** code

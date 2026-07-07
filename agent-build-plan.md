@@ -11,6 +11,18 @@ Read `CONVENTIONS.md` before starting any phase — it defines the Definition of
 every phase below is held to, and the dependency-direction / testing rules that make
 each phase actually verifiable rather than just "looks right."
 
+**2026-07-07 update:** this doc was significantly deepened via a dedicated gap-analysis
+pass, before any UI/dashboard code exists, per the project's own "plan before build"
+discipline. The pass found that SPEC.md exhaustively lists *fields* but leaves several
+*mechanisms* explicitly unresolved (some literally flagged "TBD" in §36.3) — how Advanced
+Mode is surfaced, whether charts/dashboards update live as inputs change, tooltip
+direction/default-value content, chart color logic, input validation bounds,
+typography/spacing, and whether the Excel export contains live formulas. All of those are
+now resolved below (new Phase 4) or turned into a concrete task with a named owner-doc,
+rather than left to be improvised inside a component later. Phases 4 onward are
+renumbered from the prior version of this doc as a result — if you're citing an old phase
+number from a stale note, re-check it against this file.
+
 ---
 
 ## How to use this doc
@@ -26,30 +38,31 @@ phase is fully checked, update `HANDOFF.md` and move to the next.
 
 **Goal:** Replace the null placeholders in `/equipment-data/*.json` and
 `/equipment-data/common-assumptions.json` with real values, sourced from
-`data-requirements.md` §14's starter assumptions table plus whatever the next research
-pass returns (see ISSUES.md ISS-9 — a prior pass invented several of these numbers
-instead of researching them, and they were stripped back to `null` on 2026-07-06).
+`data-requirements.md` §14's starter assumptions table plus whatever the research
+passes have returned (see ISSUES.md ISS-9 — a prior pass invented several of these
+numbers instead of researching them, and they were stripped back to `null` on
+2026-07-06, then partly refilled by two subsequent Deep Research passes).
 **Depends on:** nothing to start the already-sourced fields — can begin immediately.
-The genuinely-gap fields (usage/day, billed tariff, launch delay, discount rate, target
-IRR — see ISS-9) depend on the next deep-research pass landing in
-`data-requirements.md` before they can be filled without inventing numbers again.
+The genuinely-still-unavailable fields (target IRR/hurdle rate, Cath Lab tariff,
+Dialysis/Ultrasound launch delay, standalone-CT utilization — see ISS-9) stay
+user-entered inputs rather than blocking this phase.
 **Parallelizable:** yes, freely — pure data, no shared state, can even split by
 equipment type across sessions.
 **Do:**
 - [ ] For each of `mri.json` / `ct.json` / `cath-lab.json` / `dialysis.json` /
       `ultrasound.json` / `custom.json` / `common-assumptions.json`, fill every field
-      from §14 (and the next research pass once it lands), keeping the `confidence` /
-      `sourceId` columns intact.
+      from §14 and the research passes, keeping the `confidence` / `sourceId` columns
+      intact.
 - [ ] Where no research value exists, leave the field `null` **and** note why in the
       file's own `_status` field — don't invent a number (SPEC.md §24/§36,
       `INTRODUCTION.md` rule 5, ISSUES.md ISS-9).
+- [ ] Add a small schema-validation test (or script) so a malformed/missing field fails
+      loudly instead of silently reaching the UI later.
 - [ ] Reconciliation check: before marking this phase done, confirm
       `content/inputs-metadata.json` still contains zero numeric defaults (it should
       only have `controlType`/`unit`/slider bounds/tooltip copy, per its `_note` field)
       — if a future edit reintroduces a hardcoded default there, that's the same bug
       class as ISS-9 recurring.
-- [ ] Add a small schema-validation test (or script) so a malformed/missing field fails
-      loudly instead of silently reaching the UI later.
 **Definition of Done:** every field is either populated (with confidence/sourceId) or
 explicitly and visibly marked unresearched; nothing is silently null, and no numeric
 default has leaked back into `inputs-metadata.json`.
@@ -81,8 +94,36 @@ independent. Suggested split:
       rate, 100% realization, etc. — whatever's the meaningful boundary for that
       formula).
 - [ ] No `any`, no reimplementing a formula that already exists elsewhere.
+
+**Gap found in the 2026-07-07 pass — read before starting Group C:** SPEC.md §21/§11.2
+name several outputs — the Investment Outlook 0–100 score and its Strong/Moderate/
+Caution/Weak bands, EAC (Equivalent Annual Cost), discounted payback — that have **no
+corresponding formula in §31**. Don't invent a scoring formula/weights inline inside
+`roi.ts` or a new `score.ts` to fill the gap. Unlike an equipment-cost benchmark, a
+composite score's weighting is a designed methodology rather than a sourced fact, so it
+doesn't need a `data-requirements.md`-style citation — but it does need to be written
+down and reviewed with Jay before code, the same reason `wizard-state.md` gets written
+before wizard code (Phase 5).
+- [ ] Before implementing the score/EAC/discounted-payback formulas, write
+      `financial-model-spec.md` (the v0.5 artifact SPEC.md §38 already named but never
+      produced). It must define: which metrics feed the Investment Outlook score, how
+      each is normalized onto a comparable scale, the weighting, and the exact numeric
+      thresholds for the Strong/Moderate/Caution/Weak bands. Tie those same thresholds
+      into Phase 4-C's chart conditional-coloring rules so the score and the charts
+      never tell contradictory stories about the same numbers.
+- [ ] Until `financial-model-spec.md` exists, implement every other §31 formula
+      normally, but leave the score function as a clearly-labeled
+      `throw new Error("blocked on financial-model-spec.md — see agent-build-plan.md
+      Phase 2")` stub — distinct from the generic "not implemented" stub, so it's obvious
+      this one is blocked on a decision, not just unstarted.
+- [ ] DSCR is never mentioned anywhere in SPEC.md, despite Advanced Mode's financing
+      section (§11.C) covering loan terms in detail — lenders commonly require it. Flag
+      as an open question in SPEC.md §36.2 rather than silently adding or silently
+      omitting it.
+
 **Definition of Done:** every function in `/formulas` has real logic and a passing test
-file; `npm test` is green.
+file (except the score/EAC/discounted-payback trio, which may stay blocked pending
+`financial-model-spec.md`); `npm test` is green.
 
 ---
 
@@ -93,7 +134,8 @@ file; `npm test` is green.
 `content/field-explanations.md`, `content/benchmark-notes.md`, `content/glossary.md`,
 `content/tooltip-copy.md`.
 **Depends on:** Phase 2 for `formula-appendix.md` (needs the real formulas to document
-accurately) and `methodology.md`; the rest can start immediately.
+accurately) and `methodology.md`; Phase 4-E (tooltip content structure) for
+`tooltip-copy.md` specifically; the rest can start immediately.
 **Parallelizable:** yes, fully — no file overlap with any code phase, safe to run
 alongside Phase 1 and Phase 2.
 **Do:**
@@ -103,42 +145,230 @@ alongside Phase 1 and Phase 2.
 - [ ] `glossary.md` — every term used in `formula-appendix.md` and the tooltip copy
       needs an entry; no orphaned jargon.
 - [ ] `tooltip-copy.md` — keyed by field name, matching whatever fields Phase 5's
-      wizard-state.md ends up defining (coordinate, or do this after Phase 4).
+      wizard-state.md ends up defining. Each entry follows Phase 4-E's 7-slot
+      structure exactly (definition, direction, default/typical value + confidence,
+      source note, how-to-estimate, why-it-matters) — this is stricter than SPEC.md
+      §23.4's original 6 slots; "direction" (higher-is-better / lower-is-better /
+      context-dependent) is a new required slot this pass added because SPEC.md never
+      specified it and the product needs it (a user glancing at "DSO: 45 days" has no
+      way to know if that's good or bad without it).
+- [ ] Advanced Mode preview banner copy — the exact sentence(s) shown above the
+      collapsed Advanced panel (Phase 4-F), listing what it unlocks. Base it on SPEC.md
+      §10.4's existing soft-note string ("This first-pass view is based on billed
+      revenue. Open Advanced Financial Assumptions to model payer deductions,
+      collection delays, loan EMI timing, and working capital requirement.") but extend
+      it to name all six §11 field groups by label (payer mix & realization,
+      utilization ramp-up, financing/EMI, launch delay & pre-opening cost,
+      maintenance/lifecycle cost, discount rate/depreciation/tax assumptions) so nothing
+      Advanced unlocks is invisible to a Basic-only user.
+- [ ] The "professional/reporting fee" tooltip must explicitly state what it does and
+      doesn't cover (the doctor's own fee for performing/reporting the procedure). See
+      the open question logged in `ISSUES.md` about whether a separate
+      referral/commission "doctor's cut" field is needed — don't write copy that
+      silently assumes either answer before that's resolved.
 **Definition of Done:** no file in `/content` or `/report-templates` still says
 "placeholder, not yet written."
 
 ---
 
-## Phase 4 — Interactive state design (do not skip; do not start Phase 5/6 without this)
+## Phase 4 — Design system, interaction & validation contract
 
-**Goal:** Write `app/forms/wizard-state.md` — *before* writing any form or dashboard
-component — covering **two coupled state machines** that both drive the same
-sliders/charts/tooltips UX (the thing actually asked for: sliders that auto-update
-charts in real time, plus click-to-open tooltips):
+**Goal:** Resolve every design mechanism SPEC.md leaves open — several literally
+flagged "TBD" in §36.3 — plus the input-validation rules SPEC.md never addresses at
+all, by writing them into one prose spec (`design/ux-product-spec.md`, the v0.4 artifact
+SPEC.md §38 already named but never produced) and one machine-readable per-field
+contract (`content/inputs-metadata.json`), before any wizard or dashboard component is
+built. This phase exists for the same reason Phase 5 (wizard-state) exists: an
+undocumented interaction rule becomes an inconsistent implementation you debug into
+consistency later, instead of a decision you get right once.
+**Depends on:** Phase 3's tooltip-copy structure decision (already folded in above,
+since it's needed to shape the per-field contract) — otherwise independent of Phase 1/2.
+**Parallelizable:** no — like `wizard-state.md`, this needs to be one coherent pass so
+token names, thresholds, and mechanism choices stay internally consistent. Splitting it
+across sessions risks the same kind of drift `ISSUES.md` ISS-7/ISS-9 already logged once
+for this project.
 
-- **Part A — the 7-step wizard flow** (SPEC.md §7): step navigation, validation,
-  persistence.
-- **Part B — live-recalculation state**: every slider (in the wizard *and* in Phase 6's
-  dashboard Advanced settings pane) triggers a formula re-run and a chart/gauge
-  re-render. An earlier version of this plan split Part B's concerns into Phase 6 as a
-  freeform bullet list, which silently exempted it from the rule below — consolidated
-  here instead so one design covers both.
+**Must resolve, explicitly, in `design/ux-product-spec.md`:**
 
-This is the phase that exists specifically to prevent the extension-timer bug class
-(see `CONVENTIONS.md` §1) — Part B matters just as much as Part A here, since
-click-drag-recompute is exactly the kind of stateful flow that rule is about.
-**Depends on:** SPEC.md §7/§10/§11 (wizard) and §21/§25.5 (dashboard live-editing) —
-already written. Also depends on `content/inputs-metadata.json` (post ISS-9 cleanup)
-being the settled UI/control schema, since it defines which fields are sliders vs.
-input boxes — do not start this phase while that file is still in flux.
+**A. Typography scale.** SPEC.md §36.3.1 flags this open; §25.4 only suggests font
+families. Define a concrete type scale (e.g. 12/14/16/20/24/32px, or a ratio-based
+scale), a line-height per size, and which of the four downloaded weights (400/500/600/
+700) maps to which UI role (body copy / field labels / headings / metric figures).
+Confirm IBM Plex Mono + tabular numerals for *every* numeric/financial value across the
+whole product (wizard inputs, dashboard metrics, chart axis labels, export previews) —
+not just "financial outputs" in the abstract.
+
+**B. Spacing scale.** SPEC.md only says "calm spacing" (§25.2) with no system. Define a
+base-unit spacing scale (e.g. 4px base: 4/8/12/16/24/32/48/64) and where each step
+applies (field-to-field gap, card padding, section gap, wizard-step gap). Add these as
+new custom properties in `design/tokens.css` — it currently has zero spacing tokens,
+only color/shadow/radius/font-family.
+
+**C. Chart color system — fixed vs. conditional.** `design/colors.md` and
+`tokens.css` already define a fixed 5-color chart series (`--chart-1`…`--chart-5`:
+billed revenue / realized revenue / cash received / cost-EMI / benchmark) and a
+green/amber/red status triad. What's missing: which chart elements use *conditional*
+color (changes based on the computed value — e.g. a cumulative cash-flow line turning
+red once it dips below zero, a break-even marker turning amber inside a defined risk
+band) versus which stay a *fixed* series color regardless of value (billed vs. realized
+vs. cash always keep their assigned color so a user can track a series across charts).
+Tie every conditional threshold to the same Strong/Moderate/Caution/Weak bands Phase
+2's `financial-model-spec.md` defines, so the score and the charts are never in tension
+over the same numbers.
+
+**D. Chart label, contrast & legibility rules.** SPEC.md has zero coverage here.
+Define: a minimum WCAG AA contrast ratio (4.5:1 for text) for data labels against both
+`--bg-secondary` and any colored fill behind them; a rule that value labels/callouts
+never sit directly on top of a line or bar (offset the label with a leader line, or use
+an adjacent legend — never text-on-line, which is illegible at small sizes); and — per
+`DIRECTORY.md`'s existing colorblindness note about the Investment Outlook gauge —
+extend "never rely on color alone" explicitly to every chart, not just the gauge: every
+conditional-color chart element pairs with a shape/icon or text label too.
+
+**E. Tooltip UI mechanics.** SPEC.md §23.4 defines tooltip *content* (6 slots) but not
+the interaction. Define: hover-to-open on a mouse/trackpad pointer, tap-to-open /
+tap-outside-to-dismiss on touch (hover alone doesn't exist on mobile — this needs to be
+explicit or it'll get missed), a max tooltip width so long source notes don't stretch
+off-screen, and the exact, required content order — 7 slots, one more than SPEC.md's
+original 6:
+1. Plain-language definition ("What does this mean?")
+2. **Direction** — "Higher is better" / "Lower is better" / "Context-dependent — see
+   note below" (new: SPEC.md never specifies this; it's necessary for a user to
+   interpret any number without external context)
+3. Default/typical value **with its confidence label**, pulled live from
+   `data-requirements.md` — never hand-restated in `tooltip-copy.md`, to avoid the
+   exact "false citation" failure class `ISSUES.md` ISS-9 already caught once
+4. Source note
+5. How to estimate this if unknown
+6. Why this assumption matters
+
+**F. Basic → Advanced surfacing mechanism.** SPEC.md §36.3.6 explicitly leaves this
+open ("drawer, accordion, or separate tab?"). **Decision:** Advanced Mode is an inline,
+collapsible panel directly below the Basic Mode fields on the same screen — not a
+separate wizard step, not a modal, not a tab. Collapsed by default. A persistent
+preview banner sits above the collapse toggle, always visible even when collapsed,
+naming the six field groups it unlocks (Phase 3's banner copy). Toggling it open/closed
+must never discard already-entered Advanced values — this was already decided in
+`wizard-state.md` (Phase 5); this doc and that one must agree, and whichever is written
+second should cross-reference the first rather than re-decide it.
+
+**G. Live/dynamic recalculation contract.** SPEC.md never mentions live updates,
+sliders, or real-time recalculation anywhere. **Decision:** every numeric input —
+typed or slider-dragged — recalculates the visible dashboard/chart preview
+immediately, with no debounce on typed fields (formulas are pure and cheap per
+`CONVENTIONS.md` §3) but a short debounce (~100–150ms) specifically on continuous
+slider drag, so a fast drag doesn't fire dozens of recalculations a second. While a
+field is in an invalid state (per the validation contract below), the *last valid*
+computed result stays visible with a visual "stale" indicator (e.g. reduced opacity) —
+the chart must never blank out or render off a partial/invalid input.
+
+**H. Excel export formula strategy.** SPEC.md §29.5 asserts a philosophy ("transparent
+enough that a finance person can inspect and challenge it") without stating the
+technical requirement. **Resolved 2026-07-07: live, embedded Excel formulas**, not
+static computed values. Every input lives on a clearly separated Assumptions sheet;
+every downstream sheet (revenue, cash flow, NPV/IRR, break-even) references those cells
+with real formulas (e.g. `=Assumptions!B4*Assumptions!B7`), not pasted-in numbers — so a
+CFO can click any cell and trace it back to an assumption. This raises Phase 8's
+implementation bar: the export generator needs a library that can write real formula
+strings into cells (e.g. `exceljs`), not a plain data-dump library — deciding this now
+avoids discovering the constraint mid-Phase-8 after a simpler library's already wired
+up.
+
+**Also produce, in this same phase — the per-field validation contract,
+`content/inputs-metadata.json`:**
+
+One entry per wizard field (Basic + Advanced), each with:
+- `type`: `currency` | `percentage` | `integer-count` | `decimal` | `select` | `text`
+- `min` / `max` — explicit numeric bounds (e.g. usage/day ≥ 0 and ≤ a sane physical
+  ceiling like 200; a payer-mix percentage group summing to 100; interest/discount
+  rates 0–100%)
+- `decimalPlaces` — currency fields: 0 or 2 (matching how ₹ amounts are actually
+  entered); percentages: 1
+- `allowNegative` — `false` for every cost/revenue/count field in this product. Stated
+  explicitly because an unvalidated numeric `<input>` accepts a leading `-` by default
+  — this has to be turned off deliberately, not assumed.
+- `maxLength` — a character cap on free-text fields (equipment name/model, scenario
+  name — e.g. 80 chars), so a pasted paragraph can't blow out the wizard layout or an
+  exported report table.
+- `required` — matches SPEC.md §10/§11's Basic/Advanced grouping.
+- `errorMessage` — a specific sentence per rule ("Usage per day can't be negative." /
+  "Enter a value between 0% and 100%.") — never a generic "invalid input."
+
+This file is the single source of truth consumed by three places that must never
+independently diverge: the wizard's validation logic, the tooltip's default/typical
+value display, and the Excel export's Assumptions-sheet number formatting (currency vs.
+percentage cell format). This is `CONVENTIONS.md` §3's dependency-direction rule
+(formulas have exactly one implementation, called everywhere) extended from formulas to
+input metadata — the concrete fix for "the wizard, the tooltip, and the export
+disagreeing about what a field's bounds are."
+
+Worked example (this **shape** is the Phase 4 deliverable — the full file, one entry
+per field, is populated as part of this phase, not left as a 1-entry stub):
+
+```json
+{
+  "usagePerDay": {
+    "label": "Expected usage per day",
+    "type": "decimal",
+    "min": 0,
+    "max": 200,
+    "decimalPlaces": 1,
+    "allowNegative": false,
+    "required": true,
+    "step": "basic",
+    "errorMessage": "Enter a number between 0 and 200 scans/procedures per day.",
+    "tooltip": {
+      "definition": "How many times per day you expect this equipment to be used.",
+      "direction": "Higher is better — usage drives revenue.",
+      "default": { "value": null, "confidenceLabel": "See data-requirements.md §14" },
+      "sourceNote": "Pulled live from data-requirements.md — never hardcode a number here.",
+      "howToEstimate": "Start from your current similar-equipment usage, or ask 2-3 vendors for a realistic range.",
+      "whyItMatters": "This is the single input break-even usage is measured against."
+    }
+  }
+}
+```
+
+**Definition of Done:**
+- [ ] `design/ux-product-spec.md` exists and gives a concrete answer (not "TBD") to
+      A–H above.
+- [ ] `design/tokens.css` has spacing and type-scale tokens added alongside the
+      existing color/shadow/radius/font-family tokens.
+- [ ] `content/inputs-metadata.json`'s schema is defined and populated for every Basic
+      and Advanced field, matching the worked example's shape.
+- [ ] Every SPEC.md §36.3 bullet this phase resolves has a one-line "Resolved — see
+      agent-build-plan.md Phase 4-X" annotation added directly in SPEC.md, so the two
+      docs can't silently disagree the way ISS-7/ISS-9 already happened once (items 1,
+      6, and the §29.5 export-philosophy line were annotated in the 2026-07-07 pass;
+      items 2-5, 7-8 remain genuinely open and unrelated to this phase).
+
+---
+
+## Phase 5 — Wizard state design (do not skip; do not start Phase 6 without this)
+
+**Goal:** Write `app/forms/wizard-state.md` — the explicit transition table for the
+7-step wizard (SPEC.md §7) — *before* writing any form component. This is the phase that
+exists specifically to prevent the extension-timer bug class (see `CONVENTIONS.md` §1).
+**Depends on:** SPEC.md §7/§10/§11 (already written); Phase 4's validation contract
+(`content/inputs-metadata.json`) and live-recalculation contract (Phase 4-G) — the
+transition table needs both to enumerate invalid-state transitions correctly, not just
+happy-path steps. Doesn't depend on Phase 1-3.
 **Parallelizable:** no — this is a single coherent design; one session should own it
-start to finish so both tables stay internally consistent with each other (they share
-state, per the bullet below on write-back).
-**Must enumerate, explicitly, in the doc — Part A (wizard):**
-- [ ] Every step, every field in that step, its validation rule, and its control type (sliders vs. static input boxes) referencing [inputs-metadata.json](file:///Users/jay/Documents/Roi_Calculator/content/inputs-metadata.json).
+start to finish so the table stays internally consistent.
+**Must enumerate, explicitly, in the doc:**
+- [ ] Every step, every field in that step, and its validation rule (pulled from
+      `content/inputs-metadata.json`, not re-invented here).
 - [ ] What Basic → Advanced → Basic toggling does to already-entered Advanced-only
       values (decision: they persist in memory even while hidden, never silently
-      dropped).
+      dropped) — this must match Phase 4-F exactly; whichever doc is written second
+      should cross-reference the first rather than re-decide it.
+- [ ] What the dashboard/chart preview does while a field is in an invalid state (per
+      Phase 4-G: the last valid computed result stays visible with a "stale" visual
+      indicator; the chart never blanks or renders off a partial/invalid input) and the
+      transition back to a valid, fresh state once the field is corrected.
+- [ ] Slider-specific transitions: drag-start, drag-in-progress (debounced per Phase
+      4-G), drag-end, and keyboard-arrow-key increments (sliders must be operable
+      without a mouse — this is an accessibility requirement, not optional polish).
 - [ ] What happens on browser back/forward through wizard steps.
 - [ ] What happens on refresh mid-wizard (is there draft persistence? If yes to
       `localStorage`, define the schema and a version field so a future format change
@@ -148,128 +378,161 @@ state, per the bullet below on write-back).
       exact class of bug that shipped before).
 - [ ] Whether step submission is idempotent (double-click "Next" doesn't double-submit
       or skip a step).
-**Must enumerate, explicitly, in the doc — Part B (sliders → live recalculation → charts):**
-- [ ] Recompute trigger: fire on every slider `input` event (recomputes while dragging)
-      or only on release/`change`? If drag-live, specify a debounce/throttle interval —
-      state explicitly why, since this is a real perf-vs-snappiness tradeoff, not a
-      default to leave implicit.
-- [ ] Which fields recompute inline during the wizard (live preview of a step's impact)
-      vs. which only exist on the Phase 6 results dashboard's Advanced settings pane
-      (Discount Rate, Target Hurdle IRR, Financing Interest Rate) — list both sets.
-- [ ] Whether editing a value in the dashboard's Advanced settings pane writes back into
-      the same wizard-state store the user came from (so reopening the wizard shows the
-      edited value) or is separate dashboard-only state — decide one, explicitly, and
-      say why (recommendation: same store, consistent with the Basic/Advanced
-      never-silently-drop rule above).
-- [ ] Determinism: rapid, out-of-order slider moves cannot produce a stale or
-      inconsistent chart — name the mechanism that prevents it (e.g. always recompute
-      from the latest full state snapshot, never from a captured closure).
-- [ ] Tooltip popover state: exactly one popover open at a time; opening a new one
-      closes the previous; outside-click/Escape/re-clicking the same trigger closes it.
-      Name the single source of truth (e.g. `openTooltipId: string | null`) so Phase 5
-      and Phase 6 don't each invent separate tooltip-visibility state.
-**Definition of Done:** the doc exists, both Part A and Part B are covered with a
-concrete answer for every bullet above (not "TBD"), and has been read back by whoever
-will implement Phase 5 and Phase 6.
+**Definition of Done:** the doc exists, covers every bullet above with a concrete
+answer (not "TBD"), and has been read back by whoever will implement Phase 6.
 
 ---
 
-## Phase 5 — Wizard UI implementation
+## Phase 6 — Wizard UI implementation
 
 **Goal:** Build `app/forms/`, `app/advanced/`, and the step-navigation shell in
-`app/components/`, implementing exactly what Phase 4 Part A specifies, and using the central input registry in [inputs-metadata.json](file:///Users/jay/Documents/Roi_Calculator/content/inputs-metadata.json).
-**Depends on:** Phase 4 (both parts must exist first — Part B's slider/recompute
-mechanism is shared code the wizard's live preview also uses), Phase 2 (forms need real
-formulas to validate against/preview live results).
+`app/components/`, implementing exactly what Phase 5's `wizard-state.md` specifies.
+**Depends on:** Phase 5 (the doc must exist first), Phase 4 (`content/inputs-metadata.json`
+and `design/ux-product-spec.md`), Phase 2 (forms need real formulas to preview live
+results against, per Phase 4-G's live-recalculation contract).
 **Parallelizable:** no — single reducer, single source of truth for wizard state; two
 agents editing it at once is exactly the coordination failure `CONVENTIONS.md` §7 warns
 about.
 **Do:**
 - [ ] One `useReducer` (or equivalent single state container) for all wizard state — no
       parallel `useState` calls for the same data scattered across step components.
-- [ ] Render input elements dynamically using the metadata in `inputs-metadata.json` (rendering range sliders for operational values and input boxes for precise figures). Pull the actual default *value* for each field from `equipment-data/<type>.json` or `equipment-data/common-assumptions.json` per that field's `defaultSource` — never hardcode a number in the component.
-- [ ] Implement custom-styled range sliders using the design variables specified in SPEC.md §25.5.A, wired to the recompute trigger/debounce mechanism Phase 4 Part B specifies.
-- [ ] Implement click-to-open tooltip callouts (using CSS Popover API or relative dialog absolute rendering) containing the professional definition, default value (or an explicit "no benchmark available" note where `equipment-data` has `confidence: "Unavailable"`), and higher/lower impact, based on `inputs-metadata.json` tooltip schemas and the single `openTooltipId`-style state Phase 4 Part B defines. Hover behavior is disallowed.
-- [ ] A test file that runs every transition in `wizard-state.md`'s table (Part A and
-      Part B), with test names matching the plain-language scenario (e.g. `"back button
-      after a validation error does not clear other steps"`, `"dragging the usage-per-day
-      slider updates the break-even chart without a stale value"`).
-- [ ] Every edge case bullet from Phase 4 has a corresponding passing test — this is the
+- [ ] Every field's control type, numeric bounds, and error copy come from
+      `content/inputs-metadata.json` (Phase 4) — no ad hoc validation logic duplicated
+      inside a component; if a field needs a rule that file doesn't have, add it there
+      first, don't hardcode it in the component.
+- [ ] The Basic → Advanced panel implements Phase 4-F exactly: collapsed by default,
+      preview banner always visible above the toggle, entered Advanced values persist
+      across collapse/expand.
+- [ ] Slider components pair a draggable slider with a synced numeric text input
+      (either can drive the value, they stay in sync) — a slider alone isn't precise
+      enough for financial figures a CFO will scrutinize; it's an input aid, not a
+      replacement for a typed number.
+- [ ] A test file that runs every transition in `wizard-state.md`'s table, with test
+      names matching the plain-language scenario (e.g. `"back button after a validation
+      error does not clear other steps"`).
+- [ ] Every edge case bullet from Phase 5 has a corresponding passing test — this is the
       concrete, checkable fix for "stop button didn't stop, resume didn't work."
-**Definition of Done:** every Phase-4-enumerated edge case (both parts) has a named, passing test.
+**Definition of Done:** every Phase-5-enumerated edge case has a named, passing test.
 
 ---
 
-## Phase 6 — Results dashboard and charts
+## Phase 7 — Results dashboard and charts
 
 **Goal:** Build `app/results/` and `app/charts/` — Investment Outlook score, metric
 cards, break-even chart, cumulative cash-flow chart, risk callouts, narrative summary
-(SPEC.md §21, §27, §30) — plus the Advanced settings pane, implementing exactly what
-Phase 4 Part B specifies (this phase no longer invents its own live-recalculation
-behavior; Phase 4 is where that got decided).
-**Depends on:** Phase 2 (formulas), Phase 4 Part B (live-recalculation state design),
-and Phase 5 (wizard output to render).
-**Parallelizable:** yes, alongside Phase 7 — disjoint files, both just consume
+(SPEC.md §21, §27, §30) — plus an Advanced settings pane, implementing exactly what
+Phase 4-G's live-recalculation contract specifies (this phase does not invent its own
+live-recalculation behavior; Phase 4 is where that got decided).
+**Depends on:** Phase 2 (formulas), Phase 6 (wizard output to render), Phase 4-C/D
+(chart color and label/contrast rules), Phase 4-G (live-recalculation contract).
+**Parallelizable:** yes, alongside Phase 8 — disjoint files, both just consume
 `/formulas` output.
 **Do:**
 - [ ] Pure presentational components driven by formula output — no calculation logic
       inline here (per `CONVENTIONS.md` §3).
+- [ ] Charts subscribe to the same single computed-results object the dashboard already
+      derives (e.g. via `useMemo`) from formula output — never a second, independently
+      recalculated copy of the same numbers inside a chart component. This is the
+      concrete mechanism that makes Phase 4-G's live-recalculation contract hold: the
+      metric cards and the chart can never show numbers that briefly disagree.
+- [ ] Apply Phase 4-C's conditional-color thresholds (tied to `financial-model-spec.md`'s
+      Strong/Moderate/Caution/Weak bands) and Phase 4-D's label placement/contrast/
+      legibility rules during this phase's build, not bolted on afterward.
+- [ ] Chart-level hover tooltips (a data point's exact value on hover) are a distinct,
+      simpler UI element from field-help tooltips (Phase 4-E's 7-slot structure) — don't
+      conflate the two. A chart tooltip needs only value + series label + period.
 - [ ] Include an **Advanced settings pane** (accordion or drawer) allowing users to edit
       Discount Rate, Target Hurdle IRR, and Financing Interest Rate — using the same
-      slider/recompute-trigger mechanism and write-back decision Phase 4 Part B defines,
-      not a separately invented one.
+      slider/recompute-trigger mechanism Phase 4-G defines, not a separately invented
+      one.
 - [ ] Since Discount Rate and Target Hurdle IRR currently have no sourced default
       (`equipment-data/common-assumptions.json`, confidence `Unavailable` — see ISSUES.md
       ISS-9), the pane must visibly prompt the user to set these rather than silently
       showing a blank or a number that looks authoritative.
 - [ ] Visual QA pass across at least 3 equipment types spanning strong/moderate/risky
       outcomes — dashboards are easy to get "technically correct but visually broken"
-      for edge values (very large/very small numbers, 0% and 100% cases).
+      for edge values (very large/very small numbers, 0% and 100% cases). Include a
+      contrast check per Phase 4-D as part of this pass, not deferred to Phase 10.
 **Definition of Done:** dashboard renders correctly (numbers and layout both) for the
-full range of Investment Outlook outcomes, and every edge case from Phase 4 Part B that
-applies to the dashboard (recompute determinism, tooltip state) has a named passing
-test — not just "dynamic parameter edits trigger real-time recalculations" asserted
-informally.
+full range of Investment Outlook outcomes, not just one happy-path example; every chart
+data label passes Phase 4-D's contrast rule.
 
 ---
 
-## Phase 7 — Exports (Excel / Word / ZIP)
+## Phase 8 — Exports (Excel / Word / ZIP)
 
 **Goal:** Implement `exports/excel-generator.ts`, `exports/word-generator.ts`,
 `exports/zip-generator.ts` per SPEC.md §29, using `report-templates/` content and the
 `/formulas` engine — never a second copy of any formula.
-**Depends on:** Phase 2 (formulas), Phase 3 (report-templates content).
-**Parallelizable:** yes, alongside Phase 6.
-**Definition of Done:** an exported Excel/Word file reflects the exact same numbers
+**Depends on:** Phase 2 (formulas), Phase 3 (report-templates content), Phase 4-H (the
+live-formula decision).
+**Parallelizable:** yes, alongside Phase 7.
+**Do:**
+- [ ] Write `report-templates/excel-sheet-structure.md` for real before writing
+      `excel-generator.ts` — it's currently a placeholder that just points back to
+      SPEC.md §29. Define it tab-by-tab: which cells are user-editable inputs
+      (Assumptions sheet) vs. which are live formulas (every other sheet), matching
+      Phase 4-H's decision. Same "doc before code" pattern as Phase 5's
+      `wizard-state.md`.
+- [ ] Choose and wire up a formula-capable export library (e.g. `exceljs`) — per Phase
+      4-H, a plain data-dump library isn't sufficient once formulas must be live and
+      embedded.
+**Definition of Done:** an exported Excel file, opened in Excel/Sheets, shows real
+formulas (not pasted values) in every downstream cell, each one traceable back to the
+Assumptions sheet — verify this by actually opening the file and clicking cells, not by
+checking the numbers match. The Word/ZIP export must reflect the exact same numbers
 shown on the dashboard for the same inputs — verify this explicitly, side by side, not
 just "it exports without an error."
 
 ---
 
-## Phase 8 — Scenario comparison / sensitivity
+## Phase 9 — Scenario comparison / sensitivity
 
 **Goal:** Real implementation of `formulas/sensitivity.ts` plus whatever UI SPEC.md §28
 calls for to compare scenarios side by side.
-**Depends on:** Phase 2, Phase 5.
+**Depends on:** Phase 2, Phase 6, Phase 4-G (live-recalculation contract).
+
+SPEC.md §28 only describes *discrete* named-scenario comparison (a table); it never
+describes a *continuous*, slider-driven sensitivity view, even though "Sensitivity
+chart" is named as an output in §11.2/§27. These are two different features — build
+both, don't conflate them:
+- [ ] Discrete scenario comparison (SPEC.md §28, already spec'd): a table comparing
+      named scenarios (Conservative/Base/Optimistic, or user-named — "MRI Option A" vs.
+      "MRI Option B").
+- [ ] Continuous sensitivity view (implied but never UX-spec'd): pick the 1-2 highest-
+      leverage drivers (usage/day, realization %) and let the user drag a slider to see
+      NPV/IRR/payback update live in a small comparison strip next to the main chart —
+      reuses Phase 4-G's live-recalculation contract and `formulas/sensitivity.ts`'s
+      existing `runScenario` stub.
+
 **Definition of Done:** running the same scenario twice with identical inputs produces
 identical output (determinism check) — sensitivity/scenario code is the most likely
 place for an accidental hidden-state bug to hide.
 
 ---
 
-## Phase 9 — Deploy and go-live QA
+## Phase 10 — Deploy and go-live QA
 
 **Goal:** Once Cloudflare Pages + DNS is wired up (see the Cloudflare setup steps given
 separately — this is infra, not code, so it's not a numbered code phase, but it gates
 this one), do a final manual pass **on the actual deployed site**, not just localhost.
 **Do:**
-- [ ] Re-run every edge case from Phase 4's `wizard-state.md` manually in a real
+- [ ] Re-run every edge case from Phase 5's `wizard-state.md` manually in a real
       browser against the live `capexiq.jaybharti.me` URL — unit tests don't catch
       everything real tab-switching/refresh/mobile-viewport behavior can.
+- [ ] Exercise every `content/inputs-metadata.json` validation rule manually on the
+      live site — paste a very long string into a text field, type a negative number
+      into a cost field, type letters into a numeric field, drag a slider to its
+      min/max. Confirm the specific error copy shows and nothing crashes the chart
+      (per Phase 4-G's "last valid result stays visible" rule).
+- [ ] Run a contrast check (browser devtools or a WCAG checker) on chart data labels
+      against both light-mode card backgrounds and any colored fills, per Phase 4-D.
 - [ ] Confirm the OG image renders correctly when the URL is shared (paste the link
       into a chat app or use a link-preview debugger).
 - [ ] Confirm favicon shows correctly across at least two browsers.
-- [ ] Mobile viewport pass — the wizard is the highest-risk surface for this.
+- [ ] Mobile viewport pass — the wizard is the highest-risk surface for this, and
+      specifically confirm tooltips work via tap (per Phase 4-E) and sliders are usable
+      by touch drag.
 **Definition of Done:** the edge-case list has been exercised on the real deployed URL,
 not just asserted by unit tests.
 
@@ -277,9 +540,16 @@ not just asserted by unit tests.
 
 ## Not yet in this plan (flagged, not forgotten)
 
-SPEC.md §38 also names two artifacts this build plan doesn't replace:
-`ux-product-spec.md` (v0.4 — detailed screens/IA/field labels beyond what SPEC.md §10-11
-already gives) and `financial-model-spec.md` (v0.5 — a fuller formula/test-case spec
-than SPEC.md §31 alone). Neither has blocked any phase above since SPEC.md already has
-enough detail to start, but write one if a phase's SPEC.md section turns out to be too
-thin to implement against directly.
+SPEC.md §38 names two artifacts this build plan didn't originally replace:
+`ux-product-spec.md` (v0.4) and `financial-model-spec.md` (v0.5). The 2026-07-07 gap
+analysis found both are now load-bearing, not optional — Phase 4 depends on
+`ux-product-spec.md` directly, and Phase 2's scoring/EAC/discounted-payback formulas are
+explicitly blocked on `financial-model-spec.md`. Neither is "write if a phase turns out
+too thin" anymore; both are required deliverables of the phases that name them above.
+
+Still genuinely open, not resolved by this pass: the "doctor's cut" question logged in
+`ISSUES.md` (is it distinct from the existing professional/reporting fee field, and if
+so, does a new field need adding to §11 before Phase 3/4 finalize copy and validation
+metadata for it) — and SPEC.md §36.1/§36.2/§36.3's remaining unresolved product/data/
+design questions that this pass didn't touch (tone, homepage visuals, warning-display
+style, and the data-sourcing questions in §36.2).
