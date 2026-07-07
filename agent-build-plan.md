@@ -95,35 +95,31 @@ independent. Suggested split:
       formula).
 - [ ] No `any`, no reimplementing a formula that already exists elsewhere.
 
-**Gap found in the 2026-07-07 pass — read before starting Group C:** SPEC.md §21/§11.2
-name several outputs — the Investment Outlook 0–100 score and its Strong/Moderate/
-Caution/Weak bands, EAC (Equivalent Annual Cost), discounted payback — that have **no
-corresponding formula in §31**. Don't invent a scoring formula/weights inline inside
-`roi.ts` or a new `score.ts` to fill the gap. Unlike an equipment-cost benchmark, a
-composite score's weighting is a designed methodology rather than a sourced fact, so it
-doesn't need a `data-requirements.md`-style citation — but it does need to be written
-down and reviewed with Jay before code, the same reason `wizard-state.md` gets written
-before wizard code (Phase 5).
-- [ ] Before implementing the score/EAC/discounted-payback formulas, write
-      `financial-model-spec.md` (the v0.5 artifact SPEC.md §38 already named but never
-      produced). It must define: which metrics feed the Investment Outlook score, how
-      each is normalized onto a comparable scale, the weighting, and the exact numeric
-      thresholds for the Strong/Moderate/Caution/Weak bands. Tie those same thresholds
-      into Phase 4-C's chart conditional-coloring rules so the score and the charts
-      never tell contradictory stories about the same numbers.
-- [ ] Until `financial-model-spec.md` exists, implement every other §31 formula
-      normally, but leave the score function as a clearly-labeled
-      `throw new Error("blocked on financial-model-spec.md — see agent-build-plan.md
-      Phase 2")` stub — distinct from the generic "not implemented" stub, so it's obvious
-      this one is blocked on a decision, not just unstarted.
-- [ ] DSCR is never mentioned anywhere in SPEC.md, despite Advanced Mode's financing
-      section (§11.C) covering loan terms in detail — lenders commonly require it. Flag
-      as an open question in SPEC.md §36.2 rather than silently adding or silently
-      omitting it.
+**Gap found in the 2026-07-07 pass, resolved same day:** SPEC.md §21/§11.2 name several
+outputs — the Investment Outlook 0–100 score and its Strong/Moderate/Caution/Weak
+bands, EAC (Equivalent Annual Cost), discounted payback — that had **no corresponding
+formula in §31**. `financial-model-spec.md` now exists (reviewed and approved by Jay,
+resolves `ISSUES.md` ISS-10) and defines all three:
+- [ ] Implement the Investment Outlook score exactly per `financial-model-spec.md` §1 —
+      four weighted sub-scores (Return Strength 35%, Speed to Payback 25%, Financing
+      Resilience/DSCR 20%, Operational Margin of Safety 20%), each with its own
+      normalization formula and edge cases already defined there. Don't re-derive or
+      adjust the weighting inline — if it needs to change, that's an edit to
+      `financial-model-spec.md` first, not a silent divergence in `roi.ts`.
+- [ ] Implement EAC and discounted payback per `financial-model-spec.md` §2 (standard
+      finance formulas, not a designed methodology — no further review needed).
+- [ ] Tie the score bands (§1.4: Strong 75–100 / Moderate 55–74 / Caution 35–54 / Weak
+      0–34) into Phase 4-C's chart conditional-coloring thresholds exactly, so the score
+      and the charts never tell contradictory stories about the same numbers.
+- [ ] DSCR (`financial-model-spec.md` §1.2.3) is the answer to the open question below —
+      add a one-line "Resolved — see financial-model-spec.md §1.2.3" annotation to
+      SPEC.md §36.2 rather than leaving it silently open: DSCR is never mentioned
+      anywhere in SPEC.md despite Advanced Mode's financing section (§11.C) covering
+      loan terms in detail, and lenders commonly require it.
 
 **Definition of Done:** every function in `/formulas` has real logic and a passing test
-file (except the score/EAC/discounted-payback trio, which may stay blocked pending
-`financial-model-spec.md`); `npm test` is green.
+file, including the score/EAC/discounted-payback trio (against
+`financial-model-spec.md`'s worked examples); `npm test` is green.
 
 ---
 
@@ -504,10 +500,27 @@ both, don't conflate them:
       NPV/IRR/payback update live in a small comparison strip next to the main chart —
       reuses Phase 4-G's live-recalculation contract and `formulas/sensitivity.ts`'s
       existing `runScenario` stub.
+- [ ] **Automatic actionable insights** (added 2026-07-07, approved by Jay — see
+      `financial-model-spec.md` §4): a passive, threshold-gated price-increase
+      suggestion, distinct from the two user-driven features above — the user never
+      requests this, it either appears or it doesn't. Implement exactly per
+      `financial-model-spec.md` §4: a grid of test tariff increases (2/5/8/10/15% of
+      current `billedTariffPerUse`) × test start years (Year 1/2/3, capped at
+      `floor(usefulLifeYears / 2)`), re-running the payback formula for each
+      combination; a materiality gate (only surface if payback improves by ≥6 months);
+      a "cheapest win" selection rule (smallest qualifying price increase, earliest
+      qualifying start year); and a null case (show nothing if no combination clears the
+      gate — this is the expected, common result, not an empty state to fill in). Reuses
+      `formulas/sensitivity.ts`'s `runScenario`, does not need a new formula file.
+      Because the underlying formulas are pure and cheap, this runs silently as part of
+      the same live-recalculation pass Phase 4-G already does — no separate loading
+      state, no user-visible "extra calculation."
 
 **Definition of Done:** running the same scenario twice with identical inputs produces
 identical output (determinism check) — sensitivity/scenario code is the most likely
-place for an accidental hidden-state bug to hide.
+place for an accidental hidden-state bug to hide. The automatic-insight grid search must
+pass the same determinism check (same inputs → same insight, or the same `null`, every
+time).
 
 ---
 
@@ -541,15 +554,15 @@ not just asserted by unit tests.
 ## Not yet in this plan (flagged, not forgotten)
 
 SPEC.md §38 names two artifacts this build plan didn't originally replace:
-`ux-product-spec.md` (v0.4) and `financial-model-spec.md` (v0.5). The 2026-07-07 gap
-analysis found both are now load-bearing, not optional — Phase 4 depends on
-`ux-product-spec.md` directly, and Phase 2's scoring/EAC/discounted-payback formulas are
-explicitly blocked on `financial-model-spec.md`. Neither is "write if a phase turns out
-too thin" anymore; both are required deliverables of the phases that name them above.
+`ux-product-spec.md` (v0.4) and `financial-model-spec.md` (v0.5, **written and approved
+by Jay on 2026-07-07** — no longer missing, see Phase 2/Phase 9 above). `ux-product-spec.md`
+(v0.4) is still not written — Phase 4 depends on it directly and it remains a required
+deliverable, not optional.
 
-Still genuinely open, not resolved by this pass: the "doctor's cut" question logged in
-`ISSUES.md` (is it distinct from the existing professional/reporting fee field, and if
-so, does a new field need adding to §11 before Phase 3/4 finalize copy and validation
-metadata for it) — and SPEC.md §36.1/§36.2/§36.3's remaining unresolved product/data/
-design questions that this pass didn't touch (tone, homepage visuals, warning-display
-style, and the data-sourcing questions in §36.2).
+Resolved since the 2026-07-07 gap-analysis pass: the "doctor's cut" question
+(`ISSUES.md` ISS-11) — confirmed with Jay it's the existing professional/reporting fee
+field, no new field needed, no Phase 3/4 copy or validation-metadata work required for
+it. Still genuinely open: SPEC.md §36.1/§36.2/§36.3's remaining unresolved
+product/data/design questions this pass didn't touch (tone, homepage visuals,
+warning-display style, and the data-sourcing questions in §36.2 other than DSCR, which
+Phase 2 above now resolves).

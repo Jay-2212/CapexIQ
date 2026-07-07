@@ -18,6 +18,8 @@ Roi_Calculator/                  (becomes the "CapexIQ" GitHub repo)
 ├── ISSUES.md                    <- open problems/gaps/quirks tracker, check every session
 ├── CONVENTIONS.md               <- how code gets written here — read before coding
 ├── agent-build-plan.md          <- phased build plan, dependencies, Definition of Done
+├── financial-model-spec.md      <- Investment Outlook score, EAC, discounted payback,
+│                                 automatic actionable-insight engine (SPEC.md §38 v0.5)
 ├── SPEC.md                      <- full product spec (moved from Documents root, indexed)
 ├── data-requirements.md          research brief + first-pass findings on real Indian
 │                                 healthcare-equipment data (SPEC.md §24), see below
@@ -198,11 +200,11 @@ code structure exists per SPEC.md §32. Still missing:
   rate/target IRR, which doesn't exist there) — stripped back to `null`/unresourced on
   2026-07-06, see ISSUES.md ISS-9. A deep-research prompt covering exactly these gaps is
   ready to hand to a research agent.
-- Two artifacts `agent-build-plan.md` Phase 4/Phase 2 now require and don't yet exist:
+- One artifact `agent-build-plan.md` Phase 4 requires and doesn't yet exist:
   `design/ux-product-spec.md` (typography/spacing/chart-color/tooltip-mechanics/
-  validation decisions) and `financial-model-spec.md` (Investment Outlook scoring
-  methodology). Also `content/inputs-metadata.json` — the per-field validation
-  contract — doesn't exist yet either.
+  validation decisions). `financial-model-spec.md` (Investment Outlook scoring
+  methodology, EAC, discounted payback, and the automatic actionable-insight engine)
+  and `content/inputs-metadata.json` (per-field validation contract) both now exist.
 
 Check `HANDOFF.md`'s Current State block and `ISSUES.md` before assuming any of the
 above is still missing — they're the source of truth for what's actually done.

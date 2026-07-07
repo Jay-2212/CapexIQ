@@ -70,19 +70,6 @@ independent, well-bounded, already-specified tasks (e.g. implementing a single p
 formula file against an exact SPEC.md formula) may still be delegated to a second agent
 (Codex) when explicitly scoped by the primary agent first.
 
-### ISS-10 — Investment Outlook score, EAC, and discounted payback have no formula
-**Area:** data / product
-**Status:** open
-**What:** SPEC.md §21/§11.2 name the Investment Outlook 0–100 score and its
-Strong/Moderate/Caution/Weak bands, EAC (Equivalent Annual Cost), and discounted payback
-as required outputs, but §31 (the formula list) has no corresponding entry for any of
-the three. Found during the 2026-07-07 gap-analysis pass on `agent-build-plan.md`.
-**Next action:** write `financial-model-spec.md` (SPEC.md §38's named-but-never-written
-v0.5 artifact) defining the score's inputs, normalization, weighting, and band
-thresholds before `formulas/` implements it — see `agent-build-plan.md` Phase 2. This is
-a designed methodology, not a benchmark needing a source citation, but it still needs
-Jay's review before it's coded, not an ad hoc invention inside `roi.ts`.
-
 ### ISS-2 — Cloudflare Pages + DNS not yet wired up for capexiq.jaybharti.me
 **Area:** infra
 **Status:** open
@@ -177,6 +164,25 @@ performing doctor's fee) for referral scans from other hospitals.
 professional/reporting fee field, no new field needed. The separate referral/commission
 scenario exists but is negligible relative to the scale of this CAPEX ROI tool and is
 deliberately out of scope; don't add a field for it.
+
+### ISS-10 — Investment Outlook score, EAC, and discounted payback have no formula
+**Area:** data / product
+**What was flagged:** SPEC.md §21/§11.2 name the Investment Outlook 0–100 score and its
+Strong/Moderate/Caution/Weak bands, EAC (Equivalent Annual Cost), and discounted payback
+as required outputs, but §31 (the formula list) had no corresponding entry for any of
+the three. Found during the 2026-07-07 gap-analysis pass on `agent-build-plan.md`.
+**Resolution (2026-07-07):** wrote `financial-model-spec.md` (SPEC.md §38's
+named-but-never-written v0.5 artifact) — Jay reviewed and approved the methodology
+directly. It defines: a 4-component weighted Investment Outlook score (Return Strength
+35%, Speed to Payback 25%, Financing Resilience/DSCR 20%, Operational Margin of Safety
+20%), each with a concrete normalization formula and edge cases; standard EAC and
+discounted-payback formulas; confirmation that discount rate (12.5% typical, already
+researched) and target IRR (confirmed unresearchable, use discountRate+300-500bps
+heuristic) need no further work; and a new automatic actionable-insight feature (a
+threshold-gated price-increase suggestion, only surfaced when it improves payback by
+≥6 months with a price increase ≤15%, silent otherwise) that Jay specifically requested
+during this same discussion. `agent-build-plan.md` Phase 2 and Phase 9 updated to
+reference it.
 
 ### ISS-7 — "App repo not yet renamed to CapexIQ" (false alarm — one repo, not two)
 **Area:** code

@@ -63,32 +63,35 @@ contract") — phases 4 onward renumbered from the prior 9-phase version (old 4�
 Two decisions made explicitly (asked directly rather than guessed): (1) Excel exports
 use **live, embedded formulas**, not static values; (2) Advanced Mode is an **inline
 collapsible panel below Basic Mode fields with a persistent preview banner**, not a
-drawer/modal/tab. Two new artifacts are required before the phases that need them,
-neither written yet: `design/ux-product-spec.md` (Phase 4) and `financial-model-spec.md`
-(Phase 2 — blocks the Investment Outlook score/EAC/discounted-payback formulas, since
-SPEC.md §31 has no scoring formula at all).
+drawer/modal/tab. `design/ux-product-spec.md` (Phase 4) is still not written.
 
 **Codex's Phase 2 Group A formulas are merged:** `depreciation.ts`/`emi.ts`/
 `revenue.ts`/`breakEven.ts`/`npv.ts`/`irr.ts` plus their tests, reviewed and merged.
 
-**ISS-10 (Investment Outlook scoring methodology) is still open** — needs
-`financial-model-spec.md` defining the score's inputs/normalization/weighting/bands,
-with Jay's review before it's coded, not an invented methodology. **ISS-11 (doctor's
-cut) is resolved:** confirmed with Jay it's the existing professional/reporting fee
-field, no new field needed; the separate referral-commission scenario is real but
-negligible at this tool's scale and is out of scope.
+**`financial-model-spec.md` is written and approved (resolves ISS-10):** defines the
+Investment Outlook score as 4 weighted sub-scores (Return Strength 35%, Speed to
+Payback 25%, Financing Resilience/DSCR 20%, Operational Margin of Safety 20%), each
+with a concrete normalization formula; standard EAC and discounted-payback formulas;
+confirms the discount rate (12.5% typical) and target IRR heuristic need no further
+work; and a new **automatic actionable-insight** feature Jay specifically asked for — a
+background price-increase suggestion, gated to only surface when it improves payback by
+≥6 months via a ≤15% price increase, silent otherwise. `agent-build-plan.md` Phase 2 and
+Phase 9 updated to implement against it. **ISS-11 (doctor's cut) is resolved:**
+confirmed with Jay it's the existing professional/reporting fee field, no new field
+needed; the separate referral-commission scenario is real but negligible at this tool's
+scale and is out of scope.
 
 **What's next:** Phase 1 (equipment data) needs the remaining placeholder fields
 (purchaseCost/usefulLifeYears/salvage/installation/warranty/cmc/amc) filled from
-`data-requirements.md` §14's starter table. Phase 4 (design/validation contract) should
-happen before Phase 5/6 (wizard state + UI). Phase 2's scoring/EAC/discounted-payback
-trio is blocked on `financial-model-spec.md` (ISS-10). Cloudflare Pages + DNS setup
-(ISS-2) is being done directly by the project owner, not an agent.
+`data-requirements.md` §14's starter table. Phase 4 (design/validation contract,
+`ux-product-spec.md`) should happen before Phase 5/6 (wizard state + UI). Phase 2's
+score/EAC/discounted-payback formulas and Phase 9's automatic-insight feature can now
+both be implemented directly against `financial-model-spec.md`. Cloudflare Pages + DNS
+setup (ISS-2) is being done directly by the project owner, not an agent.
 
-**Anything blocking or half-finished:** Nothing blocking Phase 1/2/3 work. Phase 2's
-scoring/EAC/discounted-payback formulas are blocked on `financial-model-spec.md`
-(ISS-10). One cosmetic known quirk: the CFO persona's background-removed cutout retains
-her office chair — see `ISSUES.md` ISS-5.
+**Anything blocking or half-finished:** Nothing blocking. One cosmetic known quirk: the
+CFO persona's background-removed cutout retains her office chair — see `ISSUES.md`
+ISS-5.
 
 ---
 
@@ -115,6 +118,43 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-07 — Wrote financial-model-spec.md; resolved ISS-10; added automatic actionable-insight design
+**What changed:** Discussed and wrote `financial-model-spec.md` (SPEC.md §38's
+named-but-never-produced v0.5 artifact) directly with Jay, resolving `ISSUES.md` ISS-10.
+Defines: (1) the Investment Outlook 0–100 score as four independently-normalized
+sub-scores — Return Strength 35% (IRR spread over discount rate, with an NPV-ratio
+fallback when IRR is undefined), Speed to Payback 25% (discounted payback ÷ useful
+life), Financing Resilience 20% (a DSCR-style ratio — answers SPEC.md §36.2's
+long-open "should DSCR be part of the model" question, now annotated resolved),
+Operational Margin of Safety 20% (usage cushion above break-even) — plus Strong
+75–100/Moderate 55–74/Caution 35–54/Weak 0–34 bands, and a mechanical (not
+hand-authored) explainability rule: whichever sub-score is lowest drives the §21.4 risk
+callout; (2) standard EAC and discounted-payback formulas; (3) confirmation that
+discount rate (12.5% typical, already researched into `common-assumptions.json`) and
+target IRR (confirmed unresearchable, `discountRate + 300–500bps` heuristic) need no
+further work — no external API dependency. Also designed, at Jay's request, a new
+**automatic actionable-insight** feature: a background grid search over realistic
+tariff increases (2/5/8/10/15% of current price) × realistic start years (Year 1/2/3,
+capped at half the equipment's useful life), surfaced as a single "cheapest win"
+suggestion only when it improves payback by **≥6 months** via a price increase **≤15%**
+— silent otherwise, so it never nags with trivial suggestions. Confirmed this requires
+no separate loading state: the underlying formulas are pure and cheap (26 existing
+formula tests run in under a millisecond combined), so ~15 extra scenario evaluations
+run silently inside the same live-recalculation pass Phase 4-G already does.
+`agent-build-plan.md` Phase 2 updated to implement the score/EAC/payback trio against
+this doc; Phase 9 gets a new "automatic actionable insights" sub-section. SPEC.md
+§36.1 item 10 and §36.2 item 14 (new) annotated "Resolved," matching this project's
+cross-reference discipline so SPEC.md and the build plan can't silently drift apart the
+way ISS-7/ISS-9 already did once.
+**Files touched:** `financial-model-spec.md` (new), `ISSUES.md` (ISS-10 resolved),
+`agent-build-plan.md` (Phase 2, Phase 9, "Not yet in this plan" section),
+`SPEC.md` (§36.1 item 10, §36.2 items 7/14 annotated), `DIRECTORY.md` (folder map +
+"What's NOT here yet"), `HANDOFF.md` (this entry + Current State).
+**What's next:** Phase 2's score/EAC/discounted-payback formulas and Phase 9's
+automatic-insight feature can now be implemented directly against
+`financial-model-spec.md` — no remaining design blocker. `ux-product-spec.md` (Phase 4)
+is the one artifact SPEC.md §38 still names that doesn't exist yet.
 
 ### 2026-07-07 — Merged all three open PRs; resolved ISS-11
 **What changed:** Merged the three outstanding draft PRs into `main`: #2 (Codex's Phase
