@@ -1040,23 +1040,23 @@ State-specific regulatory costs and timelines
 Referring-doctor commission/"cut" — unconfirmed whether this is a cost distinct from
   the professional/reporting fee field already in SPEC.md §10.2; if distinct, typical
   commission % by equipment type is unresearched (see ISSUES.md ISS-11)
-Warranty period by equipment category — zero research coverage across both passes,
-  not attempted in either (added 2026-07-07; equipment-data/<type>.json#warrantyYears
-  is null for all equipment)
-Salvage value assumption by equipment category — zero research coverage across both
-  passes (added 2026-07-07; equipment-data/<type>.json#salvageValuePercentage is null
-  for all equipment)
-Installation/ancillary cost as a percentage of equipment cost — zero research coverage
-  across both passes (added 2026-07-07;
-  equipment-data/<type>.json#installationAndAncillaryCostPercentage is null for all
-  equipment)
-AMC/CMC annual cost and CMC coverage duration by equipment category — one adjacent data
-  point exists (§14's annual_cmc_percent_equipment_value, 5-15%, Medium confidence,
-  source S1, "shared CT/MRI CMC cue") but it doesn't cleanly map to either
-  equipment-data/<type>.json#cmcYears (a duration) or #amcAnnualCostPercentage (an
-  annual %) as currently schemed, and doesn't cover Cath Lab/Dialysis/Ultrasound at all
-  — needs either a schema clarification or targeted research, not a silent guess (added
-  2026-07-07)
+Warranty period by equipment category — RESOLVED 2026-07-07 by a third research pass,
+  see §18.1. Genuine tender-to-tender variation for CT/Cath Lab/Dialysis (not a data
+  problem); Ultrasound and MRI's figures rest on fewer independent tenders.
+Salvage value assumption by equipment category — RESOLVED 2026-07-07, see §18.2 (5% of
+  original cost, all categories, Companies Act Schedule II). Citation corrected from the
+  research pass's own mismatched source; full independent verification of the exact
+  statutory clause was not completed this session — flagged, not blocking.
+Installation/ancillary cost as a percentage of equipment cost — RESOLVED 2026-07-07, see
+  §18.3. MRI/CT figures are tender-mandated bid-allocation minimums, not measured actual
+  spend; Cath Lab/Dialysis/Ultrasound figures are inferences, not stated percentages —
+  all below High confidence.
+AMC/CMC annual cost and CMC coverage duration by equipment category — RESOLVED 2026-07-07
+  for 4 of 5 equipment types via a generic proxy (not equipment-specific — same number
+  applied across MRI/CT/Dialysis/Ultrasound), see §18.4. Cath Lab has a genuinely
+  equipment-specific figure. MRI has an unresolved contradiction between the generic
+  tender-ceiling range and one real hospital's much lower observed cost — needs a human
+  call, see §18.4 and equipment-data/mri.json.
 ```
 
 UI warning:
@@ -1207,10 +1207,12 @@ intervening period.
 **Recommended use:** `benchmark_tooltip`, confidence **Medium**, with each equipment's
 `equipment-data/<type>.json#billedTariffPerUse` anchored to one representative baseline
 procedure (plain/whole-organ study) since a single field can't hold every procedure
-variant — see the per-file notes for which variant was chosen and why. **Cath Lab still
-has zero tariff data from any pass** — data-requirements.md's original finding that
+variant — see the per-file notes for which variant was chosen and why. **Cath Lab had
+zero tariff data through this point** — resolved by a third research pass, see §18.5
+(diagnostic catheterization, ₹11,920-₹15,000, High confidence). The original finding that
 cath lab needs procedure-mix modeling rather than one blended average (§13.3) still
-stands, more strongly now that no tariff was found at all.
+stands — the resolved figure covers diagnostic catheterization only, not the full
+procedure mix (PCI/interventional pricing remains unresearched).
 
 ### 17.5 Launch delay / time-to-first-revenue
 
@@ -1263,3 +1265,219 @@ confidence **Medium**.
 | CT Scan | installation_timeline | ct_aerb_approval_weeks | range | 3 | | 6 | weeks | warning_only | Low | S33,S34 | Qualitative source language, approximated |
 | Cath Lab | installation_timeline | cath_lab_total_project_months | range | 4 | | 8 | months | benchmark_tooltip | Low-Medium | S27 | Construction + delivery + install + commissioning |
 | Dialysis unit | acquisition_cost | hemodialysis_machine_cost_tender | range | 10 | 11.5 | 11.5 | lakh INR | benchmark_tooltip | Medium | S36 | Bulk govt tender, may include pro-rata RO/site cost |
+
+---
+
+## 18. Third Research Pass Findings (2026-07-07)
+
+A third, narrowly-scoped research pass (ChatGPT Deep Research) targeted exactly the six
+gaps §15 flagged as having zero coverage after two passes: warranty period, salvage/
+residual value, installation/ancillary cost %, AMC/CMC annual cost + duration, Cath Lab
+tariff, and Dialysis/Ultrasound launch delay, plus one stretch goal (a stronger CT
+utilization source). Source: primarily Indian government e-procurement (GeM) tenders and
+hospital-specific tender documents (AIIMS Rishikesh/Patna, NEIGRIHMS, J&K Medical
+Supplies Corp, West Bengal Medical Services Corp), plus CGHS/PM-JAY official rate lists.
+Two claims were independently spot-checked this session via a second, different source
+(not just re-reading the pass's own citation) — see §18.9.
+
+### 18.1 Warranty period
+
+| Equipment | Finding | Confidence | Source |
+|---|---|---|---|
+| MRI | Two independent government tenders (Shirdi Saibaba Sansthan Trust 3T MRI; NEIGRIHMS 1.5T MRI) both specify 5-year comprehensive warranty. | **High** — two independent official tenders converge | S37, S38 |
+| CT Scan | Karnataka KKRDB tender specifies 3-year warranty; NEIGRIHMS 128-slice CT tender specifies 5-year warranty (+5yr CMC). Genuine variation across tenders, not a data-quality problem. | Medium | S39, S40 |
+| Cath Lab | AIIMS Rishikesh and J&K MSCL tenders both specify 5-year warranty + 5-year CMC; West Bengal's tender specifies only 2-year warranty + 8-year CMC. Real variation — West Bengal's structure trades a shorter warranty for a longer/detailed CMC schedule. | Medium | S41, S42, S43 |
+| Dialysis | MEA/Nepal tender: 2-year warranty on the dialysis machine itself (parts+consumables). NHM Odisha pre-bid clarification: 3-year comprehensive warranty. A separate GeM spec gives 5-year warranty **on the RO water-treatment system specifically**, not the dialysis machine — these are two different equipment items bundled in one tender, not a contradiction. | Medium | S44, S45, S46 |
+| Ultrasound | AIIMS Patna tender: 5-year comprehensive warranty + 5-year CMC. Single source — no corroborating tender found, so this is Medium confidence (single-tender), not High, despite being the only figure found. | Medium | S47 |
+
+### 18.2 Salvage / residual value
+
+Schedule II of the Companies Act 2013 caps residual value at 5% of original cost unless a
+higher value is separately justified and disclosed — this is a general corporate-accounting
+default, not medical-equipment-specific, and no source was found suggesting medical
+equipment gets a different treatment. **Recommended: 5% for all five equipment
+categories.**
+
+**Citation caveat (important):** the research pass cited an Income Tax Department
+depreciation-rates page (S48) for this claim, which covers Income Tax Act depreciation
+blocks — a different regime from the Companies Act Schedule II residual-value rule being
+described. This looks like a citation mismatch, not a wrong number — the 5% figure itself
+is well-established and widely cited in Indian corporate accounting practice. This session
+attempted to independently verify the exact Schedule II clause against three sources
+(India Code's own Schedule II file, MCA's Schedule II PDF, and a secondary CA-focused
+summary); the first was inconclusive due to PDF text-extraction issues, the second
+returned HTTP 403, and the third 404'd. **Full independent verification was not
+completed.** Source is recorded as **S8** (Companies Act Schedule II, India Code — the
+same document already used in this file for useful-life figures, and the correct legal
+source for a residual-value provision within the same schedule) rather than S48, since S8
+is the document that actually contains this rule if the widely-cited figure is accurate.
+**Confidence: Medium-High** — reflects "well-established and highly likely correct" but
+not "independently confirmed against primary text this session."
+
+### 18.3 Installation / ancillary cost as % of equipment cost
+
+| Equipment | Finding | Confidence | Source |
+|---|---|---|---|
+| MRI & CT | NEIGRIHMS tenders (both 1.5T MRI and 128-slice CT) require **at least 10%** of product cost allocated to installation/commissioning/testing (ICT); a Dr. Bhubaneswar Borooah Cancer Institute MRI tender sets the ICT minimum at **30%**. Range: 10-30%. | Medium — these are tender-mandated *minimum bid allocations*, not measured actual average spend; a bid-structuring floor, not empirical cost data | S38, S40, S49 |
+| Cath Lab | No tender states a fixed percentage; J&K tender requires turnkey installation + lab/waiting-area renovation within 180 days, evaluated as part of the bid but not broken out as a %. 20-30% is the pass's own inference from the scope of turnkey work described, not a stated figure. | Medium (pass's own caveat: "indirect evidence") | S42 |
+| Dialysis | GeM spec requires turnkey RO-plant installation; no cost % stated. 5-10% is an inference from unnamed "anecdotal project reports," not a citable source. | Low | — (uncited in pass) |
+| Ultrasound | A buying-guide site notes ultrasound site prep is light (power, storage, network) vs. heavy civil work for imaging equipment. 0-5% is a reasonable inference, not a measured figure. | Low | S50 |
+
+### 18.4 AMC / CMC annual cost and coverage duration
+
+**Important finding — read before using these numbers as defaults:** AMC and CMC are
+genuinely different things in Indian medical-equipment service contracts and this pass
+correctly separated them: **AMC** (Annual Maintenance Contract) is typically labour-only,
+consumer/hospital supplies parts; **CMC** (Comprehensive Maintenance Contract) includes
+parts and is priced higher. Two new fields are needed in the equipment-data schema to
+hold both — see §18.10.
+
+**AMC (labour-only) — identical 2-2.5% figure applied to all 5 equipment types.** This is
+**not 5 independent findings** — it's a single generic tender clause (SCTIMST's 2.5%
+labour-only AMC cap, S52) used as a fallback proxy everywhere the pass couldn't find
+equipment-specific AMC data, which was everywhere. Treat as **Low confidence,
+sensitivity_range only**, identical across MRI/CT/Cath Lab/Dialysis/Ultrasound — do not
+present this as if it were researched per equipment.
+
+**CMC (comprehensive) — mostly generic, with two real exceptions:**
+- **Cath Lab is genuinely equipment-specific and stronger:** West Bengal's tender gives
+  actual year-wise CMC rates, 6% in year 1 rising 0.1pp/year to 6.7% in year 8 — a real,
+  detailed, single-source schedule. Medium-High confidence. (S43)
+- **MRI has a direct contradiction that needs a call, not a silent pick:** a peer-reviewed
+  life-cycle-costing study of one AIIMS 1.5T MRI (S53) found *actual* post-warranty CMC
+  cost was only ~0.23-0.28% of equipment value per year (₹9.7 lakh total over 5 years on a
+  ~₹7.5 crore machine) — **roughly 25-30x lower** than the generic 3-10% tender-ceiling
+  range the pass otherwise applies to MRI. These measure different things: the tender
+  range is a contractual **ceiling** vendors are allowed to bid up to; the AIIMS figure is
+  **one hospital's actual realized cost**, which could be unusually low (a negotiated
+  AIIMS/government rate, a data or units error in the source paper, or the true norm with
+  tender ceilings being rarely reached in practice). **This file is not silently picking
+  one — both are recorded in equipment-data/mri.json with the discrepancy flagged. Jay:
+  this is worth a look before either number becomes a UI default** — probably resolvable
+  by checking whether the tender-ceiling range or a real-cost survey is more
+  representative of what a *new* private hospital should actually budget.
+- **CT, Dialysis, Ultrasound:** all fall back to the same generic ranges — CT/Dialysis use
+  the general GeM 3-10% CMC range (S51); Ultrasound uses SCTIMST's tighter 3-5% CAMC cap
+  (S52) since that's what the pass happened to apply there. Low-Medium confidence, not
+  equipment-specific.
+
+**CMC duration:** MRI/CT/Dialysis/Ultrasound cluster around 5 years (matches their 5-year
+warranty + 5-year CMC tender pattern). Cath Lab ranges 5-8 years across tenders (West
+Bengal's 8yr vs. AIIMS/J&K's 5yr).
+
+### 18.5 Cath Lab diagnostic-catheterization tariff — previously zero data, now resolved
+
+CGHS's October 2025 rate list (Procedure Code CI017) and PM-JAY's Health Benefit Package
+master list both give cardiac-catheterization package rates, and they closely agree:
+
+| Source | Tier 1/Metro | Tier 2 | Tier 3/District |
+|---|---|---|---|
+| CGHS (NABH), Oct 2025 | ₹14,900 | ₹13,410 | ₹11,920 |
+| PM-JAY HBP | ₹15,000 | ₹14,200 | ₹12,500 |
+
+**Independently verified this session** (not just re-reading the pass's citation): fetched
+`cghshospitals.com`'s cardiac-catheterization rate page directly — a different site than
+the pass's own csir.res.in PDF citation — and it returned the identical ₹14,900/₹13,410/
+₹11,920 figures with the same effective date (2025-10-13) and procedure code (CI017).
+**Confidence: High** — two independent official schemes agree closely, and one was
+independently re-fetched from a second site. **Recommended value: ₹11,920-₹15,000 per
+procedure**, `benchmark_tooltip`. This resolves the "Cath Lab has zero tariff data" gap
+noted in §17.4 and ISS-9/ISS-3.
+
+### 18.6 Launch delay — Dialysis and Ultrasound
+
+Neither figure is equipment-specific or strongly sourced — both are informal/adjacent
+inferences, kept for completeness but clearly labeled Low confidence:
+
+- **Dialysis:** a general (non-dialysis-specific) RO-plant installation FAQ states small/
+  medium RO systems commission "within days to a few weeks." Pass's inference: 2-4 weeks
+  (~0.5-1 month). Confidence Low. (S56)
+- **Ultrasound:** a buying-guide site claims ultrasound units are "usable almost
+  immediately" given minimal site needs. Pass's inference: 0-2 weeks (~0-0.5 month).
+  Confidence Low, informal claim only, no timeline study. (S50)
+
+### 18.7 CT utilization — new source found, does not strengthen existing confidence
+
+IPHS (Indian Public Health Standards) district-hospital guidelines describe a
+radiologist's *combined* workload as 20-30 imaging examinations/day across X-ray, CT, and
+ultrasound together (S57) — not CT alone. This happens to produce a similar 15-30
+scans/day range to the existing `equipment-data/ct.json` entry, but it's **not a stronger
+source** than what's already cited there (a dedicated, if imperfect, AIIMS PET/CT
+throughput study, S26) — it's a more blended, multi-modality proxy. **No change made to
+`ct.json`'s existing values or confidence level**; this is recorded here as a corroborating
+data point only. Standalone CT utilization remains a genuine open gap.
+
+### 18.8 New machine-readable rows
+
+| equipment_type | data_area | metric_name | value_type | value_low | value_mid | value_high | unit | recommended_use | confidence | source_id | notes |
+|---|---|---|---|---:|---:|---:|---|---|---|---|---|
+| MRI | maintenance | warranty_years | single | | 5 | | years | default_assumption | High | S37,S38 | Two independent tenders converge |
+| CT Scan | maintenance | warranty_years | range | 3 | 4 | 5 | years | benchmark_tooltip | Medium | S39,S40 | Genuine tender-to-tender variation |
+| Cath Lab | maintenance | warranty_years | range | 2 | 4 | 5 | years | benchmark_tooltip | Medium | S41,S42,S43 | Genuine tender-to-tender variation |
+| Dialysis unit | maintenance | warranty_years_machine | range | 2 | 3 | 3 | years | benchmark_tooltip | Medium | S44,S45 | Machine only, excludes RO plant |
+| Dialysis unit | maintenance | warranty_years_ro_plant | single | | 5 | | years | benchmark_tooltip | Medium | S46 | RO water-treatment system, not the dialysis machine itself |
+| Ultrasound | maintenance | warranty_years | single | | 5 | | years | benchmark_tooltip | Medium | S47 | Single tender, no corroboration |
+| Common | accounting | residual_value_percent | single | | 5 | | percent | default_assumption | Medium-High | S8 | Companies Act Schedule II general rule; citation corrected from pass's own (mismatched) S48, not independently re-verified against primary text this session |
+| MRI | installation | installation_cost_percent | range | 10 | 20 | 30 | percent of equipment cost | sensitivity_range | Medium | S38,S40,S49 | Tender-mandated minimum bid allocation, not measured actual spend |
+| CT Scan | installation | installation_cost_percent | single | | 10 | | percent of equipment cost | sensitivity_range | Medium | S40 | Tender-mandated minimum |
+| Cath Lab | installation | installation_cost_percent | range | 20 | 25 | 30 | percent of equipment cost | sensitivity_range | Medium | S42 | Inferred from turnkey scope, not a stated %; pass's own caveat |
+| Dialysis unit | installation | installation_cost_percent | range | 5 | 7.5 | 10 | percent of equipment cost | sensitivity_range | Low | — | Uncited "anecdotal project reports" in the pass |
+| Ultrasound | installation | installation_cost_percent | range | 0 | 2.5 | 5 | percent of equipment cost | sensitivity_range | Low | S50 | Inference from light site-prep description |
+| MRI | maintenance | amc_cost_percent_labour_only | range | 2 | 2.25 | 2.5 | percent of equipment cost/yr | sensitivity_range | Low | S52 | Generic proxy, identical across all 5 equipment types, not equipment-specific |
+| CT Scan | maintenance | amc_cost_percent_labour_only | range | 2 | 2.25 | 2.5 | percent of equipment cost/yr | sensitivity_range | Low | S52 | Generic proxy — see MRI row note |
+| Cath Lab | maintenance | amc_cost_percent_labour_only | range | 2 | 2.25 | 2.5 | percent of equipment cost/yr | sensitivity_range | Low | S52 | Generic proxy — see MRI row note |
+| Dialysis unit | maintenance | amc_cost_percent_labour_only | range | 2 | 2.25 | 2.5 | percent of equipment cost/yr | sensitivity_range | Low | S52 | Generic proxy — see MRI row note |
+| Ultrasound | maintenance | amc_cost_percent_labour_only | range | 2 | 2.25 | 2.5 | percent of equipment cost/yr | sensitivity_range | Low | S52 | Generic proxy — see MRI row note |
+| MRI | maintenance | cmc_cost_percent_tender_ceiling | range | 3 | 6.5 | 10 | percent of equipment cost/yr | sensitivity_range | Low-Medium | S51,S52 | Generic tender-ceiling range — CONTRADICTS a real single-hospital observed cost of 0.23-0.28%/yr, see §18.4 and S53; do not use as sole default |
+| MRI | maintenance | cmc_cost_percent_observed_actual | single | | 0.25 | | percent of equipment cost/yr | warning_only | Medium | S53 | One AIIMS hospital's real life-cycle-costing study; may be unusually low/negotiated, see §18.4 |
+| CT Scan | maintenance | cmc_cost_percent | range | 3 | 6.5 | 10 | percent of equipment cost/yr | sensitivity_range | Low-Medium | S51,S52 | Generic proxy, not equipment-specific |
+| Cath Lab | maintenance | cmc_cost_percent | range | 6 | 6.35 | 6.7 | percent of equipment+turnkey cost/yr | benchmark_tooltip | Medium-High | S43 | Real year-wise tender schedule — the strongest CMC figure of the five |
+| Dialysis unit | maintenance | cmc_cost_percent | range | 3 | 6.5 | 10 | percent of equipment cost/yr | sensitivity_range | Low | S51,S52 | Generic proxy, not equipment-specific |
+| Ultrasound | maintenance | cmc_cost_percent | range | 3 | 4 | 5 | percent of equipment cost/yr | sensitivity_range | Low | S52 | Generic proxy (tighter SCTIMST CAMC range) |
+| MRI | maintenance | cmc_duration_years | single | | 5 | | years | benchmark_tooltip | Medium | S38 | Follows 5yr warranty |
+| CT Scan | maintenance | cmc_duration_years | single | | 5 | | years | benchmark_tooltip | Medium | S40 | Follows 5yr-warranty tender |
+| Cath Lab | maintenance | cmc_duration_years | range | 5 | 6.5 | 8 | years | benchmark_tooltip | Medium | S42,S43 | Genuine tender-to-tender variation |
+| Dialysis unit | maintenance | cmc_duration_years | single | | 5 | | years | benchmark_tooltip | Medium | S46 | RO plant CMC |
+| Ultrasound | maintenance | cmc_duration_years | single | | 5 | | years | benchmark_tooltip | Medium | S47 | Single tender |
+| Cath Lab | tariff | diagnostic_catheterization | range | 11920 | 13410 | 15000 | INR | benchmark_tooltip | High | S39cghs,S54,S55 | Two official schemes converge; independently re-verified this session against a second site |
+| Dialysis unit | installation_timeline | ro_plant_commissioning | range | 0.5 | 0.75 | 1 | months | warning_only | Low | S56 | Not dialysis-specific; general RO-plant FAQ |
+| Ultrasound | installation_timeline | usable_after_delivery | range | 0 | 0.25 | 0.5 | months | warning_only | Low | S50 | Informal claim, no timeline study |
+
+### 18.9 Source register additions (S37-S57)
+
+| ID | Source | Type | URL | Covers | Confidence |
+|---|---|---|---|---|---|
+| S37 | Shri Saibaba Sansthan Trust, Shirdi — 3T MRI tender | Government trust tender | https://www.sai.org.in/sites/default/files/Tender%20A%20-MRI.pdf | MRI 5yr warranty | Medium |
+| S38 | NEIGRIHMS GeM tender — 1.5T MRI with workstations | Government hospital tender | https://neigrihms.gov.in/tender/TenderStore/2023/September/GeM-Bidding-4945299-SITC%20of%20MRI%20system(1.5T)%20with%20Additional%20Workstations%20on%20buy%20back%20basis.pdf | MRI 5yr warranty+CMC; 10% ICT minimum | Medium |
+| S39 | Karnataka KKRDB medical equipment quotation | State government tender | https://dme.karnataka.gov.in/storage/pdf-files/KKRDB%20QUOTATION%20FOR%20MEDICAL%20EQUIPMENTS.pdf | CT 3yr warranty | Medium |
+| S40 | NEIGRIHMS GeM tender — 128-slice CT with turnkey works | Government hospital tender | https://neigrihms.gov.in/tender/TenderStore/2024/March/GeM-Bidding-4343183-CT%20SCANNER%20UNIT%20with%20Detailed%20Turnkey%20Works.pdf | CT 5yr warranty+CMC; 10% ICT minimum | Medium |
+| S41 | AIIMS Rishikesh — new cath lab tender | Government hospital tender | https://aiimsrishikesh.edu.in/tenders/212%20new%20cath%20lab%20tender.pdf | Cath Lab 5yr warranty+CMC | Medium |
+| S42 | J&K Medical Supplies Corp — cath lab NIT 2026 | State government tender | https://www.jkmsclbusiness.com/pdf/sbd689.pdf | Cath Lab 5yr warranty+CMC, turnkey installation, 180-day timeline, 20-30% installation inference | Medium |
+| S43 | West Bengal Medical Services Corp — cath lab tender notice | State government tender | https://www.wbmsc.gov.in/notice/wbmsc-notice-5303.pdf | Cath Lab 2yr warranty, 8yr CMC at 6-6.7%/yr, 180-day installation | Medium |
+| S44 | MEA tender — 200 dialysis machines + 60 RO systems, Nepal embassy | Government tender | https://www.mea.gov.in/Portal/Tender/5056_1/1_Etenderdocument-1.pdf | Dialysis machine 2yr warranty | Medium |
+| S45 | NHM Odisha — dialysis tender pre-bid clarification | State health mission document | https://nhmodisha.gov.in/wp-content/uploads/2023/06/Pre-bid-Clarification-Amendments-Dialysis-Tender-SDH-for-web.pdf | Dialysis machine 3yr warranty | Medium |
+| S46 | GeM specification document — hemodialysis machine with RO system | Government e-marketplace spec | https://mkp.gem.gov.in/catalog_data/catalog_support_document/buyer_documents/6488347/54/78/703/CatalogAttrs/SpecificationDocument/2022/11/14/hemodialysis-machine-along-with-reverse-osmosiswat_2022-11-14-11-33-01_95732bf4fceef0e609c1636ddac608a5.pdf | RO plant 5yr warranty+CMC, turnkey installation | Medium |
+| S47 | AIIMS Patna — portable colour-Doppler ultrasound tender | Government hospital tender | https://aiimspatna.edu.in/advertisement/6t176_ultraound_obs.pdf | Ultrasound 5yr warranty+CMC | Medium |
+| S48 | Income Tax Dept — depreciation rates page | Government tax page | https://www.incometaxindia.gov.in/w/depreciation-rates | Cited by the pass for the 5% residual-value claim; likely a citation mismatch (Income Tax Act depreciation ≠ Companies Act Schedule II residual value) — see §18.2. Not used as the recorded source; S8 used instead. | Low (citation questioned) |
+| S49 | Dr. Bhubaneswar Borooah Cancer Institute — MRI tender | Government hospital tender | https://bbci.in/Content/uploads/tender/nit_mri-machine.pdf | 30% ICT minimum for MRI | Medium |
+| S50 | MedEquipGuide — Ultrasound System Buying Guide | Industry/vendor guide site | https://www.medequipguide.org/equipment/radiology-imaging/ultrasound | Ultrasound light site-prep, near-immediate usability | Low |
+| S51 | GeM bidding document (general medical equipment) | Government e-marketplace tender | https://asmchardoi.org/wp-content/uploads/2021/09/GeM-Bidding-2634772.pdf | General CMC 3-10%/yr range | Medium |
+| S52 | SCTIMST tender B_2022-23_2701 | Government institute tender | https://tenders.sctimst.ac.in/resources/B_2022-23_2701.pdf | CAMC 3-5%, labour-only AMC 2.5% caps | Medium |
+| S53 | "Life cycle costing of MRI machine at a tertiary care teaching hospital", PMC | Peer-reviewed article | https://pmc.ncbi.nlm.nih.gov/articles/PMC7546299/ | Real observed MRI CMC cost ~0.23-0.28%/yr — contradicts S51/S52's generic ceiling for MRI, see §18.4 | Medium |
+| S54 | cghshospitals.com — Cardiac Catheterization (CATH) rate page | Rate-lookup site (CGHS-derived) | https://cghshospitals.com/rates/cardiac-catheterization-cath-1202 | Cath Lab tariff — independently re-fetched this session, matches S29 exactly | Medium-High |
+| S55 | PM-JAY Health Benefit Package master list (HBP 2022) | Official government scheme document | https://ayushmanup.in/assets/doc/HBP-2022.pdf | Cath Lab (Right/Left Heart Catheterization) package rates | Medium-High |
+| S56 | Advance Engineers — RO plant installation & commissioning FAQ | Vendor/industry FAQ page | https://advancees.com/services/ro-plant-start-up-installation-commissioning/ | Generic (non-dialysis-specific) RO commissioning timeline | Low |
+| S57 | NHSRC — Indian Public Health Standards, Vol.1 (SDH/DH) | Government health-standards document | https://nhsrcindia.org/sites/default/files/Volume%201_SDH-DH_0.pdf | Combined imaging-modality workload norm, not CT-specific | Medium |
+
+Note: S29 and S30 (CGHS rate lists) were already in this file's source register from the
+second pass — this pass cited the same two documents again for cardiology/dialysis
+sections of those same rate lists, so no new number was assigned; see §18.5's table.
+
+### 18.10 Schema note for `equipment-data/*.json`
+
+The existing schema has one field for comprehensive-maintenance duration (`cmcYears`)
+and one for annual maintenance cost (`amcAnnualCostPercentage`), but no field for CMC's
+own annual cost — AMC and CMC are priced differently (labour-only vs. parts-included) and
+this pass found real, distinct numbers for both. Added a new field,
+`cmcAnnualCostPercentage`, alongside the existing `amcAnnualCostPercentage`, in all five
+equipment files.

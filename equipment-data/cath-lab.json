@@ -1,5 +1,5 @@
 {
-  "_status": "partially populated (2026-07-07 second research pass) - see data-requirements.md \u00a717 and ISSUES.md ISS-9",
+  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md \u00a717/\u00a718 and ISSUES.md ISS-9/ISS-3",
   "equipmentType": "cath-lab",
   "purchaseCost": {
     "low": null,
@@ -17,11 +17,58 @@
     "sourceId": "S8",
     "note": "Companies Act Schedule II's only other category besides the named diagnostic-scan class (Cat-scan/ultrasound, 13yr) is 'other medical/surgical equipment' at 15 years. Cath lab isn't individually named by S8, but as interventional (not imaging-diagnostic) equipment it falls in this second category by elimination -- a direct inference from S8's own two-way split, not a separate research claim. See data-requirements.md §12.4/§14."
   },
-  "salvageValuePercentage": null,
-  "installationAndAncillaryCostPercentage": null,
-  "warrantyYears": null,
-  "cmcYears": null,
-  "amcAnnualCostPercentage": null,
+  "salvageValuePercentage": {
+    "value": 5,
+    "unit": "percent",
+    "confidence": "Medium-High",
+    "sourceId": "S8",
+    "note": "Companies Act Schedule II caps residual value at 5% of original cost unless separately justified. See data-requirements.md §18.2 for the citation-correction caveat (same as MRI)."
+  },
+  "installationAndAncillaryCostPercentage": {
+    "low": 20,
+    "typical": 25,
+    "high": 30,
+    "unit": "percent of equipment cost",
+    "confidence": "Medium",
+    "sourceId": "S42",
+    "note": "No tender states a fixed percentage. J&K MSCL tender requires turnkey installation plus lab/waiting-area renovation within 180 days; 20-30% is the research pass's own inference from the scope of turnkey work described, not a stated figure -- weaker evidence than a directly quoted percentage. See data-requirements.md §18.3."
+  },
+  "warrantyYears": {
+    "low": 2,
+    "typical": 4,
+    "high": 5,
+    "unit": "years",
+    "confidence": "Medium",
+    "sourceId": "S41,S42,S43",
+    "note": "AIIMS Rishikesh and J&K MSCL tenders both specify 5-year warranty + 5yr CMC; West Bengal's tender specifies only 2-year warranty + 8yr CMC (trading a shorter warranty for a longer CMC schedule). Genuine tender-to-tender variation. See data-requirements.md §18.1."
+  },
+  "cmcYears": {
+    "low": 5,
+    "typical": 6.5,
+    "high": 8,
+    "unit": "years",
+    "confidence": "Medium",
+    "sourceId": "S42,S43",
+    "note": "AIIMS/J&K tenders: 5yr CMC following 5yr warranty. West Bengal tender: 8yr CMC following 2yr warranty. 6.5 is a straight bracket midpoint, not a weighted 'most likely' figure. See data-requirements.md §18.4/§18.8."
+  },
+  "amcAnnualCostPercentage": {
+    "low": 2,
+    "typical": 2.25,
+    "high": 2.5,
+    "unit": "percent of equipment cost per year",
+    "confidence": "Low",
+    "sourceId": "S52",
+    "note": "Labour-only AMC. Generic tender clause (SCTIMST) applied identically across all 5 equipment types in the absence of Cath-Lab-specific AMC data. See data-requirements.md §18.4."
+  },
+  "cmcAnnualCostPercentage": {
+    "low": 6,
+    "typical": 6.35,
+    "high": 6.7,
+    "unit": "percent of equipment + turnkey cost per year",
+    "confidence": "Medium-High",
+    "sourceId": "S43",
+    "note": "The strongest CMC figure of all five equipment types -- a real, detailed, year-wise CMC rate schedule from the West Bengal cath-lab tender: 6% in year 1, rising 0.1 percentage points/year to 6.7% in year 8. Unlike MRI/CT/Dialysis/Ultrasound, this is genuinely Cath-Lab-specific, not a generic proxy. See data-requirements.md §18.4."
+  },
   "typicalUtilization": {
     "usagePerDay": null,
     "workingDaysPerMonth": null,
@@ -39,12 +86,13 @@
     "typicalInterestRateRange": null
   },
   "billedTariffPerUse": {
-    "low": null,
-    "typical": null,
-    "high": null,
+    "low": 11920,
+    "typical": 13410,
+    "high": 15000,
     "unit": "INR",
-    "confidence": null,
-    "sourceId": null
+    "confidence": "High",
+    "sourceId": "S54,S55",
+    "note": "Diagnostic cardiac catheterization only (does NOT cover PCI/angioplasty or other interventional procedures -- see the existing usagePerDay note on procedure-mix modeling below). CGHS Oct 2025 rate list (Tier 3/District Rs11,920 to Tier 1/Metro Rs14,900, NABH) and PM-JAY Health Benefit Package (Tier 3 Rs12,500 to Tier 1 Rs15,000) closely agree -- two independent official government schemes. Independently re-verified this session by fetching cghshospitals.com directly (a different site than the original citation), which returned the identical Rs14,900/Rs13,410/Rs11,920 figures. This resolves what was previously a completely empty field -- Cath Lab had zero tariff data through two prior research passes. See data-requirements.md §18.5."
   },
   "launchDelayMonths": {
     "low": 4,
