@@ -10,7 +10,13 @@
     "sourceId": "S13",
     "note": "Single Indian government-hospital project estimate (2022), configuration (single-plane vs biplane) unspecified. International USD pricing provides supplementary context only, NOT converted to INR per this project's rule against silent currency conversion: new single-plane $1-2M, new biplane $2-4M (S27); refurbished $200k-1.2M depending on configuration (S27,S35). Indian landed cost would add import duty/GST/logistics not reflected in these USD figures."
   },
-  "usefulLifeYears": null,
+  "usefulLifeYears": {
+    "value": 15,
+    "unit": "years",
+    "confidence": "High",
+    "sourceId": "S8",
+    "note": "Companies Act Schedule II's only other category besides the named diagnostic-scan class (Cat-scan/ultrasound, 13yr) is 'other medical/surgical equipment' at 15 years. Cath lab isn't individually named by S8, but as interventional (not imaging-diagnostic) equipment it falls in this second category by elimination -- a direct inference from S8's own two-way split, not a separate research claim. See data-requirements.md §12.4/§14."
+  },
   "salvageValuePercentage": null,
   "installationAndAncillaryCostPercentage": null,
   "warrantyYears": null,

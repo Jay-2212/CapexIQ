@@ -2200,7 +2200,10 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 
 ### 36.3 Design questions
 
-1. What exact typography should be used? — **Resolved 2026-07-07**, see `agent-build-plan.md` Phase 4-A (`design/ux-product-spec.md` defines the type scale).
+1. What exact typography should be used? — **Open.** `agent-build-plan.md` Phase 4-A
+   names what has to be decided (a concrete type scale, line-heights, and a
+   weight-to-role mapping) but does not itself decide it — `design/ux-product-spec.md`
+   does not exist yet. Deliberately deferred; Jay is taking this up directly (2026-07-07).
 2. Should the UI feel more like a government/consulting report or modern healthcare SaaS?
 3. Should the result score be circular, card-based, or text-based?
 4. How much color is acceptable before it starts feeling generic?

@@ -9,7 +9,13 @@
     "confidence": null,
     "sourceId": null
   },
-  "usefulLifeYears": null,
+  "usefulLifeYears": {
+    "value": 13,
+    "unit": "years",
+    "confidence": "High",
+    "sourceId": "S8",
+    "note": "Companies Act Schedule II names 'Cat-scan and ultrasound machines' as the diagnostic-scan category (13 years) -- MRI is grouped here as the same class of diagnostic imaging equipment. See data-requirements.md §12.4/§14."
+  },
   "salvageValuePercentage": null,
   "installationAndAncillaryCostPercentage": null,
   "warrantyYears": null,

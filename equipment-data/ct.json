@@ -9,7 +9,13 @@
     "confidence": null,
     "sourceId": null
   },
-  "usefulLifeYears": null,
+  "usefulLifeYears": {
+    "value": 13,
+    "unit": "years",
+    "confidence": "High",
+    "sourceId": "S8",
+    "note": "Companies Act Schedule II explicitly names 'Cat-scan' machines at 13 years, the diagnostic-scan category. See data-requirements.md §12.4/§14."
+  },
   "salvageValuePercentage": null,
   "installationAndAncillaryCostPercentage": null,
   "warrantyYears": null,

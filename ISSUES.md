@@ -70,28 +70,28 @@ independent, well-bounded, already-specified tasks (e.g. implementing a single p
 formula file against an exact SPEC.md formula) may still be delegated to a second agent
 (Codex) when explicitly scoped by the primary agent first.
 
-### ISS-2 — Cloudflare Pages + DNS not yet wired up for capexiq.jaybharti.me
-**Area:** infra
-**Status:** open
-**What:** The repo now exists on GitHub (`github.com/Jay-2212/CapexIQ`, pushed
-2026-07-05), but nothing connects it to Cloudflare Pages, and no DNS record for the
-`capexiq` subdomain exists yet. This is a dashboard action (Cloudflare account access),
-not something doable from this environment.
-**Next action:** in Cloudflare dashboard — create a Pages project connected to
-`github.com/Jay-2212/CapexIQ`, then add a CNAME/subdomain record for
-`capexiq.jaybharti.me` pointing at that Pages project, same pattern as the main
-`jaybharti.me` site. Note `next.config.ts` is set to `output: "export"` (static export)
-specifically so this can be a plain Pages static deployment with no Workers/adapter
-needed — reconsider that config if the app later needs server-side API routes.
-
-### ISS-3 — Equipment data files are placeholders, not real data
+### ISS-3 — Equipment data files: several fields have zero research coverage in either pass
 **Area:** data
 **Status:** open
-**What:** `/equipment-data/*.json` exist as schema-shaped placeholders (see
-`equipment-data/README.txt`), not filled in with the real assumptions from
-`data-requirements.md` §14.
-**Next action:** populate from `data-requirements.md` §14's starter assumptions table,
-per SPEC.md §32.1.
+**What:** `mri.json`/`ct.json`/`cath-lab.json`/`dialysis.json`/`ultrasound.json` are
+partially populated (purchase cost, utilization, tariff, launch delay — from the
+2026-07-06/07 research passes; see `data-requirements.md` §17). `usefulLifeYears` was
+filled in 2026-07-07 (see the Resolved section below). Still `null` with **no research
+attempted in either pass, and not even named in `data-requirements.md` §15's gap list**:
+`salvageValuePercentage`, `installationAndAncillaryCostPercentage`, `warrantyYears`,
+`cmcYears`, `amcAnnualCostPercentage`. `data-requirements.md` §15 has been updated to
+list these explicitly so a future research pass doesn't miss them. `custom.json` remains
+a pure placeholder by design (user fills in their own equipment's specs), not a gap.
+**Also flagged, not yet resolved:** each equipment file has `typicalUtilization.workingDaysPerMonth`
+and `financingNorms.typicalLoanTenureYears`/`typicalInterestRateRange` fields that are
+`null` in every equipment file — these duplicate values that already live at the shared
+level in `common-assumptions.json` (`workingDaysPerMonth`, `loanInterestRate`,
+`loanTenureMonths`) and don't appear to need an equipment-specific override per
+`data-requirements.md`. Worth confirming whether these per-equipment fields are dead
+schema (safe to remove) or intentional future overrides, next time Phase 1 is touched.
+**Next action:** a third research pass (or Jay's own domain knowledge) for the five
+zero-coverage fields above; otherwise these should be explicit user-entered inputs like
+the other `data-requirements.md` §15 items, not silent defaults.
 
 ### ISS-8 — Dev-dependency audit warnings (moderate/high/critical, all dev-only)
 **Area:** code / tooling
@@ -137,6 +137,29 @@ is a placeholder only, safe to replace once real product screenshots exist.
 ---
 
 ## Resolved
+
+### ISS-2 — Cloudflare Pages + DNS not yet wired up for capexiq.jaybharti.me
+**Area:** infra
+**Resolution (2026-07-07):** Jay confirmed he's done this directly in the Cloudflare
+dashboard — `capexiq.jaybharti.me` is live. No agent action was needed or taken; this
+was always a dashboard-only task outside this environment's reach.
+
+### ISS-3 (partial) — usefulLifeYears now filled from real research
+**Area:** data
+**What was flagged:** `usefulLifeYears` was `null` in every equipment file despite
+`data-requirements.md` §12.4/§14 already having a real, High-confidence sourced answer
+(Companies Act Schedule II, source S8).
+**Resolution (2026-07-07):** filled `usefulLifeYears` in `mri.json`/`ct.json`/
+`ultrasound.json` (13 years — S8's own wording names "Cat-scan and ultrasound machines"
+as the diagnostic-scan category) and `cath-lab.json`/`dialysis.json` (15 years — S8's
+"other medical/surgical equipment" category; not individually named by S8, but the only
+other category S8 defines, so this mapping is a reasonable direct inference from the
+source's own two-category split, not a separate research claim). Confidence High,
+sourceId S8 in all five files. `custom.json` untouched (no equipment type to map).
+**Still open:** the other five null fields on the same equipment files
+(`salvageValuePercentage`, `installationAndAncillaryCostPercentage`, `warrantyYears`,
+`cmcYears`, `amcAnnualCostPercentage`) — see the ISS-3 entry above, still open, now also
+listed in `data-requirements.md` §15.
 
 ### ISS-1 — Skeleton not build-verified
 **Area:** code / tooling
