@@ -15,75 +15,80 @@ of *how* we got here.
 
 **Where things stand:** Product is **CapexIQ**, tagline "Know if it pays for itself,
 before you buy it.", living at `capexiq.jaybharti.me` (confirmed resolving, HTTP 200).
-Repo is live at `github.com/Jay-2212/CapexIQ` (main, last pushed 2026-07-05 — today's
-session's changes are not yet pushed). Build is verified: `npm install`/`npm run build`
-succeed (Next.js 15.5.20, static export to `out/`). Core docs: `CONVENTIONS.md` (code
-rules), `agent-build-plan.md` (9 phases, dependencies, Definition of Done), `ISSUES.md`
-(open/accepted/resolved tracker — check before assuming anything is fine).
+Repo is live at `github.com/Jay-2212/CapexIQ` (main). Build is verified: `npm install`/
+`npm run build` succeed (Next.js 15.5.20, static export to `out/`). Core docs:
+`CONVENTIONS.md` (code rules), `agent-build-plan.md` (now 10 phases after the gap-analysis
+pass below, dependencies, Definition of Done), `ISSUES.md` (open/accepted/resolved
+tracker — check before assuming anything is fine).
+
+**All three PRs open as of this morning are now merged into main:** Codex's Phase 2
+Group A formulas (`depreciation.ts`/`emi.ts`/`revenue.ts`/`breakEven.ts`/`npv.ts`/
+`irr.ts` + tests), the benchmark-cleanup + 2nd research-pass integration, and the
+build-plan gap-analysis pass (new Phase 4, two UX decisions resolved). See the two
+Change Log entries below for what each contained; this paragraph is just the
+now-current combined state.
 
 UI/UX decisions for the input layer are settled: operational variables (usage/day,
 billed tariff, working days, launch delay) render as sliders; structural/capital
 variables (purchase cost, useful life, financing terms) render as precise input boxes;
 tooltips are click-to-open popovers (hover rejected, poor touch support), each showing
 professional definition, default value (or an explicit "no benchmark available" note),
-and higher/lower-value impact. This is codified in `content/inputs-metadata.json`.
+and higher/lower-value impact. This is codified in `content/inputs-metadata.json`
+(control schema only — zero numeric defaults live there, see ISS-9).
 
-**Correction this session (2026-07-06, see ISSUES.md ISS-9):** a prior pass populated
-`inputs-metadata.json` with per-field numeric defaults, several invented rather than
-sourced — most seriously, SPEC.md falsely claimed a 12% discount rate / 15% target IRR
-were "sourced from `data-requirements.md` §12.3," which has no such row. Cleaned up:
-`inputs-metadata.json` now holds only UI/control schema (control type, slider bounds,
-tooltip copy), zero numbers. All equipment-specific benchmarks live only in
-`equipment-data/<type>.json` (now also has `billedTariffPerUse` and `launchDelayMonths`
-fields, both null pending research). Non-equipment-specific figures (discount rate,
-target IRR, loan interest rate/tenure, working days/month) moved to new
-`equipment-data/common-assumptions.json`, each carrying honest confidence/sourceId —
-the fabricated ones are now `null`/`"Unavailable"`, not fake-precise numbers. SPEC.md
-§18.2/§18.3/§23.4 corrected to stop asserting the false citation. `agent-build-plan.md`
-Phase 1 now includes a reconciliation check for this. A deep-research prompt covering
-exactly the now-null gaps (usage/day, tariff, discount rate, hurdle rate, launch delay)
-is ready to hand to a research agent — see ISS-9 for the full list.
+**Benchmark cleanup + two research passes (2026-07-06/07, ISS-9):** a prior pass had
+populated `inputs-metadata.json` with invented numbers — most seriously a false claim
+that a 12% discount rate / 15% target IRR were "sourced from `data-requirements.md`
+§12.3," which has no such row. Cleaned up by moving all numeric benchmarks out of
+`inputs-metadata.json` and into `equipment-data/<type>.json` / the new
+`equipment-data/common-assumptions.json`, each with honest confidence/sourceId. A
+follow-up Deep Research pass then filled most of the resulting gaps with real, cited
+data: discount rate (11.1-14.1% proxy, typical 12.5%), MRI/Dialysis utilization, CGHS
+reimbursement-ceiling tariffs for CT/MRI/Ultrasound/Dialysis, MRI/CT/Cath-Lab
+launch-delay ranges, and a real per-machine dialysis acquisition cost. **Still
+genuinely unavailable after two passes** (deliberately `null`, not oversight): target
+IRR/hurdle rate, Cath Lab tariff, Dialysis/Ultrasound launch delay, standalone-CT
+utilization. See ISS-9 for the full list; not blocking, these stay user-entered inputs.
 
-**Also streamlined this session:** `agent-build-plan.md` Phase 4 was split awkwardly
-from Phase 6 — the wizard got a proper stateful-flow transition table (per
-`CONVENTIONS.md` §1) but the dashboard's live slider-driven recalculation (edit
-Discount Rate/IRR/interest rate → instant chart/gauge update) did not, despite being
-the same class of stateful UI bug the rule exists to catch. Phase 4 is now "Interactive
-state design" with two parts — Part A (wizard flow) and Part B (slider →
-recompute → chart re-render, shared by both the wizard's live preview and the
-dashboard's Advanced settings pane) — and Phase 6 implements Part B rather than
-inventing its own behavior.
+**Build-plan gap-analysis pass (2026-07-07):** `agent-build-plan.md` went through a
+dedicated gap-analysis pass, per the project's "plan before build" discipline, before
+any UI/dashboard component was written. Finding: SPEC.md lists *fields* exhaustively but
+left several *mechanisms* unresolved — how Advanced Mode is surfaced, whether the
+dashboard/charts update live as inputs change, tooltip content structure, chart color
+logic, input validation bounds, typography/spacing tokens, and the Excel-formula
+question. All now either resolved with a concrete decision or turned into a named,
+sequenced task, via a new **Phase 4** ("Design system, interaction & validation
+contract") — phases 4 onward renumbered from the prior 9-phase version (old 4→5, 5→6,
+6→7, 7→8, 8→9, 9→10); re-check any old phase-number citation against the current file.
+Two decisions made explicitly (asked directly rather than guessed): (1) Excel exports
+use **live, embedded formulas**, not static values; (2) Advanced Mode is an **inline
+collapsible panel below Basic Mode fields with a persistent preview banner**, not a
+drawer/modal/tab. Two new artifacts are required before the phases that need them,
+neither written yet: `design/ux-product-spec.md` (Phase 4) and `financial-model-spec.md`
+(Phase 2 — blocks the Investment Outlook score/EAC/discounted-payback formulas, since
+SPEC.md §31 has no scoring formula at all).
 
-**Second research pass landed (2026-07-07):** a Deep Research pass (delivered as a PDF,
-now deleted per the single-source-of-truth rule — its content is fully captured in
-`data-requirements.md` §17) filled most of ISS-9's gaps with real, cited data: discount
-rate (11.1-14.1% proxy from listed Indian hospital-chain WACC, typical 12.5%), MRI
-utilization (23 scans/day, real Indian study) and Dialysis utilization (3
-sessions/machine/day, official design-capacity norm), CGHS reimbursement-ceiling
-tariffs for CT/MRI/Ultrasound/Dialysis (a floor, not a private cash price — flagged
-everywhere), MRI/CT/Cath-Lab launch-delay ranges, and a real per-machine dialysis
-acquisition cost (₹11.5 lakh, 2022 government tender). Propagated into
-`equipment-data/*.json` and `common-assumptions.json` with confidence/sourceId intact.
-**Still genuinely unavailable after two passes** (deliberately `null`, not oversight):
-target IRR/hurdle rate, Cath Lab tariff, Dialysis/Ultrasound launch delay,
-standalone-CT utilization (only a PET/CT proxy exists). `content/inputs-metadata.json`
-tooltip copy updated to match — it still holds zero numbers itself, per its design.
+**Codex's Phase 2 Group A formulas are merged:** `depreciation.ts`/`emi.ts`/
+`revenue.ts`/`breakEven.ts`/`npv.ts`/`irr.ts` plus their tests, reviewed and merged.
 
-Separately, Codex has been implementing Phase 2 Group A formulas
-(`depreciation.ts`/`emi.ts`/`revenue.ts`/`breakEven.ts`/`npv.ts`/`irr.ts` + tests) in
-the main working copy — not yet reviewed/committed by this session, flagged so it isn't
-lost or duplicated.
+**ISS-10 (Investment Outlook scoring methodology) is still open** — needs
+`financial-model-spec.md` defining the score's inputs/normalization/weighting/bands,
+with Jay's review before it's coded, not an invented methodology. **ISS-11 (doctor's
+cut) is resolved:** confirmed with Jay it's the existing professional/reporting fee
+field, no new field needed; the separate referral-commission scenario is real but
+negligible at this tool's scale and is out of scope.
 
-**What's next:** Phase 1 (equipment data) is now meaningfully further along — the
-remaining placeholder fields (purchaseCost/usefulLifeYears/etc. for MRI/CT/ultrasound,
-salvage/installation/warranty/cmc/amc across all equipment) still need the original
-§14 starter-table pass applied; that's a smaller, well-scoped remainder now. Phase 2's
-Group A formulas are in progress via Codex (see above, needs review). Once both land,
-Phase 3 (content/copy) and Phase 4 (interactive state design) can proceed.
+**What's next:** Phase 1 (equipment data) needs the remaining placeholder fields
+(purchaseCost/usefulLifeYears/salvage/installation/warranty/cmc/amc) filled from
+`data-requirements.md` §14's starter table. Phase 4 (design/validation contract) should
+happen before Phase 5/6 (wizard state + UI). Phase 2's scoring/EAC/discounted-payback
+trio is blocked on `financial-model-spec.md` (ISS-10). Cloudflare Pages + DNS setup
+(ISS-2) is being done directly by the project owner, not an agent.
 
-**Anything blocking or half-finished:** Nothing blocking. This session's doc changes
-are on the open PR (see below); Codex's formula work in the main checkout is
-uncommitted and not yet folded in.
+**Anything blocking or half-finished:** Nothing blocking Phase 1/2/3 work. Phase 2's
+scoring/EAC/discounted-payback formulas are blocked on `financial-model-spec.md`
+(ISS-10). One cosmetic known quirk: the CFO persona's background-removed cutout retains
+her office chair — see `ISSUES.md` ISS-5.
 
 ---
 
@@ -110,6 +115,26 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-07 — Merged all three open PRs; resolved ISS-11
+**What changed:** Merged the three outstanding draft PRs into `main`: #2 (Codex's Phase
+2 Group A formulas — code-only, no conflicts), #1 (benchmark cleanup + 2nd research-pass
+integration), and #3 (the build-plan gap-analysis pass), in that order. #1 and #3 had
+both branched from the same pre-#1 `main` and both edited `DIRECTORY.md`, `HANDOFF.md`,
+`ISSUES.md`, and `agent-build-plan.md`, so #3 was rebased onto post-#1 `main` and its
+conflicts resolved by hand (both sides' content kept; nothing dropped) before merging.
+Also resolved ISS-11, which #3 had left open: confirmed directly with Jay that "doctor's
+cut" is the existing professional/reporting fee field, not a separate cost — the
+referral/commission scenario for scans referred in from other hospitals is real in
+Indian private healthcare but negligible at this tool's CAPEX scale, so no new field is
+being added for it. ISS-10 (Investment Outlook scoring methodology) remains open,
+pending Jay's input on the actual weighting/methodology for `financial-model-spec.md`.
+**Files touched:** `HANDOFF.md` (this entry + Current State, conflict resolution),
+`ISSUES.md` (ISS-11 resolved), `DIRECTORY.md`, `agent-build-plan.md` (conflict
+resolution only, no content changes beyond merging both PRs' additions).
+**What's next:** ISS-10 needs Jay's decision on the Investment Outlook scoring
+methodology before `financial-model-spec.md` can be written and Phase 2's
+score/EAC/discounted-payback formulas can be implemented.
 
 ### 2026-07-07 — Deep Research pass (2nd) integrated into data-requirements.md; equipment-data populated; PDF removed
 **What changed:** Read the Deep Research agent's 9-page PDF ("CapexIQ Benchmark
@@ -183,6 +208,53 @@ of this.
 **What changed:** Created `content/inputs-metadata.json` as a single, cohesive input registry for the frontend and reports, mapping inputs to control types (sliders for operational inputs vs. input boxes for capital inputs), defaults sourced from `data-requirements.md` benchmarks (e.g., 12% discount rate, 15% target IRR, 11.5% loan rate, 13/15 years useful life), and custom tooltip content schemas. Updated `SPEC.md` §18, §23, and §25 to document click-to-open popover tooltip behavior (rejecting hover actions), slider/popover custom CSS dimensions/borders/shadows matching `tokens.css`, and dynamic recalculation settings. Updated `agent-build-plan.md` Phases 4, 5, and 6 to require integration of the inputs metadata registry, custom sliders, click tooltips, and real-time dashboard default parameter editability. Documented registry under `DIRECTORY.md`.
 **Files touched:** `content/inputs-metadata.json` (new), `SPEC.md`, `agent-build-plan.md`, `DIRECTORY.md`, `HANDOFF.md` (this entry + Current State).
 **What's next:** Phase 1 (real equipment data) and Phase 2 (real formulas) of the build plan.
+
+### 2026-07-07 — agent-build-plan.md gap-analysis pass; Phase 4 added; no code changed
+**What changed:** Per the project's "plan before build" discipline (deepen the phased
+plan before implementation ramps up, to catch gaps at design time rather than debug them
+after), ran a dedicated gap-analysis pass across SPEC.md, `agent-build-plan.md`,
+`design/colors.md`/`tokens.css`, and every `content/`/`report-templates/` file, prompted
+by a detailed list of build-time risk areas (dynamic slider-driven charts, tooltip
+content structure, Basic/Advanced mode surfacing, chart color behavior, Excel formula
+strategy, typography/spacing, input validation strictness, chart label contrast). Found
+SPEC.md specifies fields exhaustively but leaves multiple *mechanisms* unresolved — item
+1 and item 6 of its own §36.3 "Design questions" list were literally still open, and
+input validation, typography/spacing tokens, chart accessibility, and the Excel
+live-formula question had zero coverage anywhere in the repo (confirmed via full-text
+search, not skimming). Inserted a new **Phase 4 — "Design system, interaction &
+validation contract"** into `agent-build-plan.md` between Content (was/is Phase 3) and
+Wizard state design (now Phase 5, was Phase 4) resolving all of the above with concrete
+decisions or a named follow-up artifact; renumbered every phase from 4 onward (old 4→5,
+5→6, 6→7, 7→8, 8→9, 9→10) and threaded cross-references (Phase 4-A through 4-H) through
+Phases 2, 3, 5-9 wherever they now depend on a Phase 4 decision. Resolved two decisions
+explicitly this session (asked the user directly rather than guessing, since both are
+hard-to-reverse effort/positioning tradeoffs): Excel exports will contain live, embedded
+formulas (not static values); Advanced Mode is an inline collapsible panel below Basic
+Mode with a persistent "what's inside" preview banner (not a drawer/modal/tab). A third
+question (whether "doctor's cut" is the same as the existing professional/reporting fee
+field or a distinct referral-commission cost) didn't come back with a captured answer,
+so it was logged as `ISSUES.md` ISS-11 and left unresolved rather than assumed either
+way. Also logged `ISSUES.md` ISS-10: the Investment Outlook 0–100 score, EAC, and
+discounted payback are named as required outputs (SPEC.md §21/§11.2) but have **no
+formula anywhere in §31** — this blocks part of Phase 2 until `financial-model-spec.md`
+(SPEC.md §38's named-but-never-written v0.5 artifact) defines the scoring methodology;
+deliberately did not invent weights to fill this gap, since unlike a benchmark it needs
+Jay's review, not a citation. Annotated SPEC.md §36.3 items 1/6 and the §29.5
+export-philosophy line as "Resolved," each pointing back to the relevant
+`agent-build-plan.md` Phase 4 sub-section, so the two docs can't silently disagree the
+way ISS-7/ISS-9 already happened once for this project. Added a spacing-tokens/
+per-field-validation-contract dependency line to `CONVENTIONS.md` §3's dependency
+diagram, and a `data-requirements.md` §15 entry for the doctor's-cut research gap.
+**Files touched:** `agent-build-plan.md` (rewritten, Phase 4 added, phases 4-9
+renumbered to 4-10), `SPEC.md` (§36.3 items 1/6 and §29.5 annotated), `CONVENTIONS.md`
+(§3 dependency diagram), `ISSUES.md` (ISS-10, ISS-11 added), `data-requirements.md`
+(§15), `DIRECTORY.md` ("What's NOT here yet"), `HANDOFF.md` (this entry + Current
+State). No `/app`, `/formulas`, `/equipment-data`, `/content`, or `/exports` files
+touched — this was a planning-only pass.
+**What's next:** Phase 1 and Phase 2 (minus the score/EAC/discounted-payback trio) can
+start now, in parallel. Phase 4 should happen before Phase 5/6. ISS-10 and ISS-11 need
+resolving before their respective downstream phases can fully close. (ISS-11 was
+resolved the same day, see the entry above this one.)
 
 ### 2026-07-05 — Build verified; phased build plan + code conventions written
 **What changed:** Installed Node.js/npm via Homebrew and verified the skeleton for

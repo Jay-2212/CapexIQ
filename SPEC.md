@@ -1792,6 +1792,11 @@ The website should not just calculate. It should help create an actual proposal.
 
 The exported model should be transparent enough that a finance person can inspect and challenge it.
 
+**Resolved 2026-07-07:** this means live, embedded Excel formulas (cells reference an
+Assumptions sheet, e.g. `=Assumptions!B4*...`), not static computed values — "inspect and
+challenge" requires being able to click into a cell and trace it. See
+`agent-build-plan.md` Phase 4-H and Phase 8.
+
 ---
 
 ## 30. Narrative Summary
@@ -2186,14 +2191,15 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 
 ### 36.3 Design questions
 
-1. What exact typography should be used?
+1. What exact typography should be used? — **Resolved 2026-07-07**, see `agent-build-plan.md` Phase 4-A (`design/ux-product-spec.md` defines the type scale).
 2. Should the UI feel more like a government/consulting report or modern healthcare SaaS?
 3. Should the result score be circular, card-based, or text-based?
 4. How much color is acceptable before it starts feeling generic?
 5. Should the homepage include equipment visuals or remain mostly typographic?
-6. Should the advanced mode be a drawer, accordion, or separate tab?
+6. Should the advanced mode be a drawer, accordion, or separate tab? — **Resolved 2026-07-07**: inline collapsible panel below Basic Mode fields, with a preview banner listing what it unlocks. See `agent-build-plan.md` Phase 4-F.
 7. Should charts appear immediately or after clicking “View financial dashboard”?
 8. How should warnings be displayed without making the tool feel negative or scary?
+9. Excel export formula strategy — **Resolved 2026-07-07**: live, embedded Excel formulas (not static pasted values), so a finance person can click into and trace any cell. See `agent-build-plan.md` Phase 4-H.
 
 ---
 

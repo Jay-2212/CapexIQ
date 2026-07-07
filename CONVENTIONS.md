@@ -59,6 +59,7 @@ and write one first. It's cheaper than debugging it after the fact.
 ```text
 app/ (UI)  --->  formulas/  --->  (nothing; formulas depend on nothing in this repo)
 app/ (UI)  --->  equipment-data/ (read-only data)
+app/ (UI)  --->  content/inputs-metadata.json (read-only field contract — see below)
 exports/   --->  formulas/  (same engine as the dashboard, never reimplemented)
 content/   --->  (nothing; it's copy, not logic)
 ```
@@ -73,6 +74,11 @@ content/   --->  (nothing; it's copy, not logic)
 - `/equipment-data` and `/content` are data, not code. Nothing in there should contain
   logic; if you find yourself writing a conditional inside a `.json` consumer that only
   exists to work around a data-shape problem, fix the schema instead.
+- `content/inputs-metadata.json` (per `agent-build-plan.md` Phase 4) is the single
+  source of truth for every wizard field's type, numeric bounds, and validation error
+  copy. It's consumed read-only by the wizard's validation logic, the tooltip display,
+  and the Excel export's cell formatting — never let any of those three redefine a
+  bound independently; if a bound needs to change, change it there and only there.
 
 ---
 

@@ -1037,6 +1037,9 @@ Ultrasound private scan mix and sonologist payout
 Dialysis consumable cost per session by procurement channel
 Loan interest rate, margin, moratorium, collateral, and fees for a specific borrower
 State-specific regulatory costs and timelines
+Referring-doctor commission/"cut" — unconfirmed whether this is a cost distinct from
+  the professional/reporting fee field already in SPEC.md §10.2; if distinct, typical
+  commission % by equipment type is unresearched (see ISSUES.md ISS-11)
 ```
 
 UI warning:
