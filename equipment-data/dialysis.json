@@ -10,7 +10,13 @@
     "sourceId": "S36",
     "note": "2022 government tender (Indian Embassy, Nepal): 200 hemodialysis machines + 60 RO systems, total INR 23.49 crore, implying INR 11.5 lakh/machine. Caveats: (1) bulk-procurement price (200 units) -- a private hospital buying 1-2 units may pay more; (2) the total bundles RO/water-treatment systems across the machines, so this per-machine figure likely includes some pro-rata site/RO cost, not a bare machine-only price."
   },
-  "usefulLifeYears": null,
+  "usefulLifeYears": {
+    "value": 15,
+    "unit": "years",
+    "confidence": "High",
+    "sourceId": "S8",
+    "note": "Companies Act Schedule II's only other category besides the named diagnostic-scan class (Cat-scan/ultrasound, 13yr) is 'other medical/surgical equipment' at 15 years. Dialysis machines aren't individually named by S8, but as therapeutic (not imaging-diagnostic) equipment they fall in this second category by elimination -- a direct inference from S8's own two-way split, not a separate research claim. See data-requirements.md §12.4/§14."
+  },
   "salvageValuePercentage": null,
   "installationAndAncillaryCostPercentage": null,
   "warrantyYears": null,

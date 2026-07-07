@@ -81,13 +81,39 @@ confirmed with Jay it's the existing professional/reporting fee field, no new fi
 needed; the separate referral-commission scenario is real but negligible at this tool's
 scale and is out of scope.
 
-**What's next:** Phase 1 (equipment data) needs the remaining placeholder fields
-(purchaseCost/usefulLifeYears/salvage/installation/warranty/cmc/amc) filled from
-`data-requirements.md` §14's starter table. Phase 4 (design/validation contract,
-`ux-product-spec.md`) should happen before Phase 5/6 (wizard state + UI). Phase 2's
-score/EAC/discounted-payback formulas and Phase 9's automatic-insight feature can now
-both be implemented directly against `financial-model-spec.md`. Cloudflare Pages + DNS
-setup (ISS-2) is being done directly by the project owner, not an agent.
+**False-claim cleanup + data cross-check (2026-07-07, same day):** SPEC.md §36.3 item 1
+falsely claimed typography was "Resolved... `design/ux-product-spec.md` defines the type
+scale" — that file doesn't exist and no typography decision has actually been made;
+corrected to **Open**. (Items 6/9 in the same section were checked too and are fine —
+they cite `agent-build-plan.md`, which does exist and does contain those decisions.)
+Separately, cross-checked `data-requirements.md` against every `equipment-data/*.json`
+file: found `usefulLifeYears` was `null` everywhere despite a real High-confidence
+sourced answer already sitting in `data-requirements.md` §12.4/§14 (Companies Act
+Schedule II, source S8) — filled it in (13yr for MRI/CT/Ultrasound, 15yr for Cath
+Lab/Dialysis, see ISSUES.md for the category-mapping reasoning). Also found
+`salvageValuePercentage`/`installationAndAncillaryCostPercentage`/`warrantyYears`/
+`cmcYears`/`amcAnnualCostPercentage` have **zero research coverage in either research
+pass** and weren't even listed in `data-requirements.md` §15's gap list — added them
+there so a future pass doesn't miss them. `ISSUES.md` ISS-3 rewritten to reflect current
+reality (was stale, describing all equipment files as unpopulated placeholders when only
+`custom.json` still is).
+
+**What's next:** Phase 4 (design/UX) is **deliberately paused** — Jay is taking
+typography/spacing/chart-color/tooltip-mechanics/product-feel decisions on directly,
+not delegating them, and asked this not be touched until he picks it back up. Don't
+start `design/ux-product-spec.md` or any wizard/dashboard UI work without him. Until
+then: Phase 1's remaining equipment-data gaps
+(`salvageValuePercentage`/`installationAndAncillaryCostPercentage`/`warrantyYears`/
+`cmcYears`/`amcAnnualCostPercentage` — see ISSUES.md ISS-3, `usefulLifeYears` is now
+filled) and Phase 2's score/EAC/discounted-payback formulas (against
+`financial-model-spec.md`) are both fair game and don't touch design.
+
+**Cloudflare Pages + DNS (ISS-2) is done:** Jay confirmed 2026-07-07 he wired this up
+directly in the Cloudflare dashboard — `capexiq.jaybharti.me` is live. Resolved, see
+`ISSUES.md`. Note the live site currently only serves the 21-line skeleton
+`app/page.tsx` — Jay may want a placeholder/"coming soon" page there; not done yet,
+pending his call (this is a UI change, so it's paused along with the rest of Phase 4
+per the above).
 
 **Anything blocking or half-finished:** Nothing blocking. One cosmetic known quirk: the
 CFO persona's background-removed cutout retains her office chair — see `ISSUES.md`
@@ -118,6 +144,35 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-07 — Fixed a false UX-resolved claim; resolved ISS-2; propagated usefulLifeYears; paused Phase 4
+**What changed:** Jay asked to pause all Phase 4 (design/UX) work for now — he'll take
+typography/spacing/chart-color/product-feel decisions on directly when he has time — and
+to instead scrub any place the docs falsely claim UX work is done, fix `ISSUES.md` ISS-2
+(Cloudflare/DNS, which Jay has now done himself — site confirmed live), and cross-check
+`data-requirements.md` against the equipment-data files since it was recently updated
+with real research.
+1. **False claim fixed:** SPEC.md §36.3 item 1 said typography was "Resolved... see
+   `design/ux-product-spec.md`" — that file was never written, so nothing was actually
+   resolved. Corrected to **Open**, with a note on what's actually pending. Checked the
+   rest of §36 and `DIRECTORY.md`/`agent-build-plan.md` for the same failure mode —
+   everywhere else correctly says the file doesn't exist yet.
+2. **ISS-2 resolved:** Cloudflare Pages + DNS confirmed done by Jay directly;
+   `capexiq.jaybharti.me` is live. Moved to Resolved in `ISSUES.md`.
+3. **Data cross-check:** read every `equipment-data/*.json` file against
+   `data-requirements.md` §12.4/§14/§17. Found `usefulLifeYears` was `null` in all five
+   real equipment files despite a real, High-confidence answer already sourced (Companies
+   Act Schedule II, S8) — filled in (13yr MRI/CT/Ultrasound — S8 names these directly;
+   15yr Cath Lab/Dialysis — S8's only other category, by elimination, noted as an
+   inference not a separate citation). Found five fields
+   (`salvageValuePercentage`/`installationAndAncillaryCostPercentage`/`warrantyYears`/
+   `cmcYears`/`amcAnnualCostPercentage`) with zero research coverage in either pass that
+   weren't even in `data-requirements.md` §15's gap list — added them there. Confirmed
+   `billedTariffPerUse.typical: null` is correct as-is (low/high are NABH/non-NABH rate
+   tiers, not a range to average) — not a gap. `ISSUES.md` ISS-3 rewritten (was stale).
+**Files touched:** `SPEC.md`, `ISSUES.md`, `data-requirements.md`,
+`equipment-data/mri.json`, `equipment-data/ct.json`, `equipment-data/ultrasound.json`,
+`equipment-data/cath-lab.json`, `equipment-data/dialysis.json`, `HANDOFF.md`.
 
 ### 2026-07-07 — Wrote financial-model-spec.md; resolved ISS-10; added automatic actionable-insight design
 **What changed:** Discussed and wrote `financial-model-spec.md` (SPEC.md §38's

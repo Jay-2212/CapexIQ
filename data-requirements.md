@@ -1040,6 +1040,23 @@ State-specific regulatory costs and timelines
 Referring-doctor commission/"cut" — unconfirmed whether this is a cost distinct from
   the professional/reporting fee field already in SPEC.md §10.2; if distinct, typical
   commission % by equipment type is unresearched (see ISSUES.md ISS-11)
+Warranty period by equipment category — zero research coverage across both passes,
+  not attempted in either (added 2026-07-07; equipment-data/<type>.json#warrantyYears
+  is null for all equipment)
+Salvage value assumption by equipment category — zero research coverage across both
+  passes (added 2026-07-07; equipment-data/<type>.json#salvageValuePercentage is null
+  for all equipment)
+Installation/ancillary cost as a percentage of equipment cost — zero research coverage
+  across both passes (added 2026-07-07;
+  equipment-data/<type>.json#installationAndAncillaryCostPercentage is null for all
+  equipment)
+AMC/CMC annual cost and CMC coverage duration by equipment category — one adjacent data
+  point exists (§14's annual_cmc_percent_equipment_value, 5-15%, Medium confidence,
+  source S1, "shared CT/MRI CMC cue") but it doesn't cleanly map to either
+  equipment-data/<type>.json#cmcYears (a duration) or #amcAnnualCostPercentage (an
+  annual %) as currently schemed, and doesn't cover Cath Lab/Dialysis/Ultrasound at all
+  — needs either a schema clarification or targeted research, not a silent guess (added
+  2026-07-07)
 ```
 
 UI warning:
