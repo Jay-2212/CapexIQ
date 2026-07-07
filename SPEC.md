@@ -2169,6 +2169,9 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 8. Should the tool support multi-equipment packages later?
 9. Should there be a methodology page explaining formulas?
 10. Should the score be shown immediately or only after advanced metrics are calculated?
+    — **Resolved 2026-07-07**: immediately, live, no "Calculate" button or loading
+    screen — see `agent-build-plan.md` Phase 4-G (live-recalculation contract);
+    formulas are pure and cheap enough that there's nothing to wait on.
 11. Should Basic Mode show only billed revenue or also a simplified realized-revenue assumption?
 12. Should the working capital gap be shown in v1 dashboard or only in Advanced Mode?
 13. Should professional/reporting fee be mandatory for specific equipment types?
@@ -2181,13 +2184,19 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 4. What data exists for MRI/CT/dialysis pricing across Indian cities?
 5. What are realistic AMC/CMC ranges?
 6. How should useful life be assigned to each equipment category?
-7. What default discount rate should be used?
+7. What default discount rate should be used? — **Resolved 2026-07-07**: 12.5% typical
+   (range 11.1–14.1%), sourced from listed Indian hospital-chain WACC. See
+   `data-requirements.md` §17.1 and `equipment-data/common-assumptions.json`.
 8. Should payer mix include PM-JAY as a default advanced option?
 9. Can loan/lease assumptions be grounded in current Indian healthcare equipment financing norms?
 10. What sources can support space and civil-work assumptions?
 11. What reliable sources exist for DSO/collection delay norms in Indian healthcare?
 12. Can professional/reporting fee benchmarks be sourced reliably, or should they remain user-entered only?
 13. What data exists on warranty periods and CMC/AMC costs by equipment category?
+14. Should DSCR (debt service coverage ratio) be part of the model, despite Advanced
+    Mode's financing section (§11.C) never mentioning it? — **Resolved 2026-07-07**:
+    yes — it's the "Financing Resilience" component of the Investment Outlook score.
+    See `financial-model-spec.md` §1.2.3 for the exact formula and normalization.
 
 ### 36.3 Design questions
 
