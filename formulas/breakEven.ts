@@ -4,7 +4,7 @@ export function contributionPerUse(
   realizedRevenuePerUse: number,
   variableCostPerUse: number
 ): number {
-  throw new Error("not implemented");
+  return realizedRevenuePerUse - variableCostPerUse;
 }
 
 export function breakEvenUsagePerDay(
@@ -12,5 +12,11 @@ export function breakEvenUsagePerDay(
   contributionPerUseValue: number,
   workingDaysPerMonth: number
 ): number {
-  throw new Error("not implemented");
+  if (contributionPerUseValue <= 0) {
+    throw new Error(
+      "Break-even usage is undefined when contribution per use is zero or negative."
+    );
+  }
+
+  return fixedMonthlyCost / contributionPerUseValue / workingDaysPerMonth;
 }

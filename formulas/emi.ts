@@ -5,5 +5,15 @@ export function monthlyEmi(
   annualInterestRate: number,
   tenureMonths: number
 ): number {
-  throw new Error("not implemented");
+  if (annualInterestRate === 0) {
+    return principal / tenureMonths;
+  }
+
+  const monthlyInterestRate = annualInterestRate / 12 / 100;
+  const compoundFactor = (1 + monthlyInterestRate) ** tenureMonths;
+
+  return (
+    (principal * monthlyInterestRate * compoundFactor) /
+    (compoundFactor - 1)
+  );
 }
