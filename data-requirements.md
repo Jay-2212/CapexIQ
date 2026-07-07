@@ -829,6 +829,21 @@ Keep actual vendor quote, utilization, payer mix, realization, DSO, professional
 | S19 | DCDC Kidney Care dialysis cost article, 2025 | Private provider article | https://dcdc.co.in/2025/01/27/understanding-the-cost-of-dialysis-in-india-what-are-your-options/ | Private dialysis patient-cost context | Low |
 | S20 | HospitalStore ultrasound price page, 2026 | Marketplace/retailer page | https://www.hospitalstore.com/ultrasound-machine-price/ | Ultrasound equipment price context | Low |
 | S21 | Birla Fertility 3D ultrasound with color Doppler cost page | Private provider tariff page | https://birlafertility.com/cost/3d-ultrasound-color-doppler/ | One ultrasound tariff example | Low |
+| S22 | ValueInvesting.io WACC pages for HCG.NS, 524520.BO (KMC), APOLLOHOSP.NS, FORTIS.NS, NH.NS, MAXHEALTH.NS | Financial-modeling site (market-implied beta/CAPM) | https://valueinvesting.io/HCG.NS/valuation/wacc (and the equivalent per-ticker URL for each) | Discount-rate (WACC) benchmark for listed Indian hospital chains | Medium |
+| S23 | Nuvama/Edelweiss 2021 DCF research report on Max Healthcare | Broker/analyst research report | https://www.nuvamawealth.com/ewwebimages/WebFiles/Research/f35292e7-d63f-4e40-be14-3a2c31722812.pdf | One analyst's stated WACC assumption (11.1%) for a hospital DCF | Medium |
+| S24 | NIMS (Nizam's Institute of Medical Sciences) MRI utilization study, IJSR, June 2018 | Peer-reviewed-adjacent published study | https://www.worldwidejournals.com/international-journal-of-scientific-research-(IJSR)/recent_issues_pdf/2018/June/June_2018_1528207277__280.pdf | MRI scans/day at one Indian tertiary teaching hospital | Medium |
+| S25 | "Efficient Health Care: Decreasing MRI Scan Time", PMC | Peer-reviewed article | https://pmc.ncbi.nlm.nih.gov/articles/PMC11140514/ | Global (non-India) MRI daily-throughput context | Medium |
+| S26 | "Unit Cost Analysis of PET-CT at an Apex Public Sector Health Care Institute in India" (AIIMS), PMC | Peer-reviewed article | https://pmc.ncbi.nlm.nih.gov/articles/PMC5317060/ | PET/CT scans/day at AIIMS Delhi (proxy only, not standalone CT) | Medium |
+| S27 | Elesonic "Complete Cath Lab Equipment Guide 2026" | Vendor blog | https://www.elesonicgroup.com/blog/complete-cath-lab-equipment-guide | Cath lab utilization, new/refurbished acquisition cost (USD), installation timeline | Low-Medium |
+| S28 | MoHFW/NITI standard guidelines for maintenance hemodialysis | Government planning guideline | https://www.nitiforstates.gov.in/public-assets/Policy/policy_files/GNC509Q000060.pdf | Design-capacity sessions/machine/day for hemodialysis | High |
+| S29 | CGHS rates, Oct 2025 rate list | Government reimbursement rate list | https://www.csir.res.in/sites/default/files/2025-10/cghs_rates.pdf | CT/MRI/ultrasound reimbursement-ceiling tariffs (non-NABH/NABH) | Medium |
+| S30 | CGHS package rate list (dialysis), nominally 2014, updated 2024-02-05 | Government reimbursement rate list | https://www.cgspublicationindia.com/PDFOM/RN,%20CGHS_05-02-2024.pdf | Hemodialysis session reimbursement-ceiling tariffs | Medium |
+| S31 | "Unit cost of CT scan and MRI at a large tertiary care teaching hospital in North India", 2013 | Peer-reviewed cost study | https://content.scirp.org/pdf/health_2013121817092361.pdf | Historical (2013) actual private-hospital CT/MRI charges — 13 years stale | Low |
+| S32 | SashaHealthCare blog, "Where to Buy an MRI Machine in India" | Vendor/supplier blog | https://sashahealthcare.com/where-to-buy-an-mri-machine-in-india/ | MRI installation timeline; confirms MRI doesn't need AERB licensing | Low |
+| S33 | DirectMed Imaging, "CT Scanner Installation Process Guide" | Vendor/industry guide | https://directmedimaging.com/ct-scanner-installation-process/ | CT delivery-to-first-scan timeline (site-ready assumption) | Low |
+| S34 | PSR Compliance, "AERB Certification" guide | Compliance-consultancy guide | https://www.psrcompliance.com/aerb-certification | Qualitative AERB approval duration for imaging equipment | Low |
+| S35 | Block Imaging, "2026 Digital Cath Lab Price Guide" | Vendor/reseller price guide | https://www.blockimaging.com/bid/96958/digital-cath-lab-equipment-cost-price-guide | Refurbished GE/Philips cath lab pricing (USD) | Low |
+| S36 | MEA tender: "Procurement and Supply of 200 Kidney Dialysis Machine with 60 RO System", Indian Embassy Nepal, 2022-23 | Government tender document | https://www.mea.gov.in/Portal/Tender/5056_1/1_Etenderdocument-1.pdf | Per-machine dialysis equipment cost from an official bulk procurement | Medium |
 
 ### 12.3 Cross-cutting assumptions
 
@@ -1029,3 +1044,202 @@ UI warning:
 ```text
 Some benchmark data is directional and may not apply to your hospital. Replace these values with your vendor quotation, tariff sheet, payer contracts, and lender sanction terms before using the output for a real investment decision.
 ```
+
+---
+
+## 16. Next Research Pass — Priority Brief (added 2026-07-06; resolved 2026-07-07, see §17)
+
+See `ISSUES.md` ISS-9. A build-time pass populated `content/inputs-metadata.json` and
+SPEC.md §18.2/§18.3 with several numbers that are **not** in this document — most
+seriously, a discount-rate/target-IRR "citation" to §12.3 that doesn't exist. Those
+were stripped back to `null`/`"Unavailable"` in `equipment-data/common-assumptions.json`
+and `equipment-data/*.json`. This section named the priority list handed to a research
+agent; §17 records what came back on 2026-07-07.
+
+Priority order as originally briefed, with resolution status:
+
+```text
+1. Discount rate (cost of capital) benchmark for Indian private-hospital capex
+   — RESOLVED (Medium confidence, proxy-based). See §17.1.
+2. Target IRR / hurdle rate benchmark for Indian private-hospital equity/capex decisions
+   — STILL UNAVAILABLE. Confirmed by a second pass, not just missed by the first. See §17.2.
+3. Usage-per-day / utilization by equipment type, hospital bed-size bucket, and city tier
+   — PARTIALLY RESOLVED. Real single-study data for MRI and an official design-capacity
+   figure for Dialysis; weak/proxy-only for CT; vendor-guidance-only for Cath Lab;
+   still unavailable for Ultrasound. See §17.3.
+4. Average billed tariff per use, by equipment type — PARTIALLY RESOLVED. CGHS
+   reimbursement-ceiling tariffs now exist for CT/MRI/Ultrasound/Dialysis (Medium
+   confidence, but these are government-scheme ceilings, not private cash tariffs —
+   see the caveat in §17.4). Still no tariff data at all for Cath Lab. See §17.4.
+5. Launch delay / time-to-first-revenue by equipment type — PARTIALLY RESOLVED for MRI,
+   CT, and Cath Lab (Low-Medium confidence, vendor/consultant sources). Still
+   unavailable for Dialysis; Ultrasound has only an informal "near-immediate" claim
+   with no formal timeline source. See §17.5.
+6. Re-confirm cath lab and dialysis acquisition cost with more than one source each —
+   RESOLVED for Dialysis (a real government tender gives a Medium-confidence per-machine
+   figure). Cath Lab still has only one Indian data point (S13, Low confidence), though
+   international USD pricing now provides supplementary (not INR-converted) context.
+   See §17.6.
+```
+
+This list is intentionally the same shape as §14's table — a completed pass should
+extend `equipment-data/*.json` and `equipment-data/common-assumptions.json` directly,
+row by row, not require reformatting.
+
+---
+
+## 17. Second Research Pass Findings (2026-07-07)
+
+Full findings below; source IDs S22-S36 are registered in §12.2. This section follows
+the same confidence-labeling discipline as §12-13 — nothing here should be read as more
+certain than its stated confidence level.
+
+### 17.1 Discount rate (cost of capital)
+
+No official benchmark exists for Indian private-hospital cost of capital specifically,
+but company-level WACC for six listed Indian hospital chains (calculated by a
+financial-modeling site from market-implied beta, risk-free rate, and cost of debt)
+gives: HCG 12.2%, KMC Speciality 12.1%, Apollo 12.4%, Fortis 14.1%, Narayana
+Hrudayalaya 12.4%, Max Healthcare 13.5% (all S22). A separate 2021 Edelweiss/Nuvama DCF
+report used 11.1% for Max Healthcare (risk-free 10%, market risk premium 4%, cost of
+equity 12.5%, cost of debt 8%) (S23).
+
+**Range: 11.1%-14.1%, clustering 12-13%.** Note: the source PDF's own machine-readable
+table separately states a "range summary" of 11.1-12.8%, which is inconsistent with its
+own individual data points (Fortis 14.1%, Max 13.5% both exceed 12.8%) — treating this
+as a transcription error in the research output and using the actual individual values
+above as ground truth.
+
+**Recommended use:** `sensitivity_range`, confidence **Medium** — this is public-company
+WACC used as a proxy for a project-level equipment discount rate, not a
+hospital-capex-project-specific figure, and the Edelweiss number is one analyst's DCF
+assumption, not the hospital's own stated cost of capital. Set
+`equipment-data/common-assumptions.json#discountRate` to low=11.1, typical=12.5 (rounded
+midpoint of the 12-13% cluster), high=14.1, sourceId="S22,S23".
+
+### 17.2 Target IRR / hurdle rate
+
+No credible public or academic source reports a target IRR or hurdle rate used by
+Indian hospitals or healthcare investors for equipment-capex approval. Industry/PE
+commentary discusses financing trends but never discloses numerical hurdle rates.
+**Confirmed unavailable** — this would require access to hospital finance-committee
+policy, PE fund disclosures, or lender credit memoranda, none of which are public.
+`recommended_use`: `user_input_required`, confidence **Unavailable**. Suggested UI
+guidance (a methodology, not a benchmark): a common capital-budgeting heuristic is
+target IRR = discount rate + a risk premium (commonly 300-500 bps for equipment-level
+projects) — offer this as a starting-point suggestion the user can override, clearly
+labeled as a suggested approach rather than a researched number.
+
+### 17.3 Usage-per-day (utilization)
+
+| Equipment | Finding | Confidence | Source |
+|---|---|---|---|
+| MRI | NIMS (tertiary teaching hospital) study: 14h/day operation, mean **23 scans/day**, ~31min average scan time, 48.54% use coefficient. | Medium (single Indian study, busy referral hospital — may run higher than a typical smaller private setup) | S24 |
+| MRI | Global context: most MRI scanners worldwide perform 20-40 scans/day (long scan times are the constraint). | Medium (global, not India-specific) | S25 |
+| CT Scan | AIIMS Delhi PET/CT cost analysis: ~30 PET/CT scans/day across two scanners = ~15/scanner. | Low-Medium (PET/CT ≠ standard CT throughput; proxy only) | S26 |
+| CT Scan | No Indian standalone-CT utilization study found. An unsourced "engineering guide" estimate suggests 20-30/day globally. | Low | — |
+| Cath Lab | Vendor guidance: 4-6 diagnostic catheterizations/day, or 2-4 PCI/interventional procedures/day; high-volume centres do 1,000-2,000 procedures/year. | Low (vendor guidance, not empirical; blends two different procedure types — consistent with §13.3's existing caution against a single blended cath lab average) | S27 |
+| Dialysis unit | MoHFW/NITI planning guideline: three 4-hour shifts/machine/day = **3 sessions/machine/day** design capacity. | Medium (official planning norm, but a design-capacity figure — real-world utilization "may be lower in smaller facilities" per the same source) | S28 |
+| Ultrasound | No published Indian data. Unsourced international inference (15-30min/exam → 16-32 scans/day) explicitly lacks an authoritative India source. | Unavailable | — |
+
+### 17.4 Average billed tariff per use
+
+CGHS's October 2025 rate list (S29) gives reimbursement ceilings (non-NABH / NABH) for
+imaging and dialysis. **Important caveat, repeated from §12.3's general framing:**
+these are government-scheme reimbursement ceilings, not private cash tariffs — private
+hospitals typically charge more, and this data should be used as a directional
+tariff *floor*, not a "typical" private billed-revenue default.
+
+```text
+CT head/brain (plain):        ₹880 / ₹1,035
+CT head with contrast:        ₹1,870 / ₹2,200
+CT chest or HRCT chest:       ₹1,700 / ₹2,000
+CT whole abdomen w/ contrast: ₹4,399 / ₹5,175
+MRI head/brain (plain):       ₹2,338 / ₹2,750
+MRI head with contrast:       ₹4,250 / ₹5,000
+MRI knee (example, other body part): ₹2,380 / ₹2,800
+Ultrasound whole abdomen:     ₹680 / ₹800
+Ultrasound pelvis:            ₹425 / ₹500
+Ultrasound small parts:       ₹655 / ₹770
+```
+
+Dialysis tariffs come from a separate, older CGHS package-rate document (S30, nominally
+2014, "updated" 2024-02-05 — a different vintage than S29's Oct-2025 imaging rates,
+worth noting as a freshness mismatch between the two CGHS documents):
+
+```text
+Hemodialysis (seronegative):           ₹1,400 / ₹1,610 per session
+Hemodialysis (seropositive):           ₹1,650 / ₹1,898 per session
+Sustained low-efficiency hemodialysis: ₹1,250 / ₹1,438 per session
+```
+
+**Note on internal inconsistency:** the research output's own machine-readable table
+gives different (lower) NABH-side values for several of these rows than its own prose
+text states (e.g., CT head/brain plain: prose says ₹1,035, that pass's table says
+957.5). The prose figures above are used as ground truth since they're stated as direct
+quotes with clear citations; the table appears to have a transcription error.
+
+A single stale (2013) private-hospital data point exists for context only (S31,
+**13 years old, do not use as a current default**): CT head ₹900, CT chest/abdomen
+₹1,200, MRI ₹2,500 — all below current CGHS rates, consistent with inflation over the
+intervening period.
+
+**Recommended use:** `benchmark_tooltip`, confidence **Medium**, with each equipment's
+`equipment-data/<type>.json#billedTariffPerUse` anchored to one representative baseline
+procedure (plain/whole-organ study) since a single field can't hold every procedure
+variant — see the per-file notes for which variant was chosen and why. **Cath Lab still
+has zero tariff data from any pass** — data-requirements.md's original finding that
+cath lab needs procedure-mix modeling rather than one blended average (§13.3) still
+stands, more strongly now that no tariff was found at all.
+
+### 17.5 Launch delay / time-to-first-revenue
+
+| Equipment | Finding | Confidence | Source |
+|---|---|---|---|
+| MRI | Installation (civil work, RF shielding, magnet commissioning): 6-10 weeks. No AERB licensing needed (non-ionizing). | Low-Medium (single vendor/supplier blog) | S32 |
+| CT Scan | Delivery-to-first-scan once site is ready: 3-5 days. Separately, AERB radiation approval: qualitatively "a few weeks to a couple of months" (no exact source figure — approximated here as 3-6 weeks). These are largely sequential, not additive with civil work time, which isn't covered by either source. | Low (vague qualitative source language for the AERB component; no official SLA found) | S33, S34 |
+| Cath Lab | Elesonic vendor guide: 3-6 months room construction + 2-4 weeks equipment delivery + 2-4 weeks installation/calibration + 1-2 weeks commissioning/training = **4-8 months total** project timeline. | Low-Medium (vendor guide, but a detailed, plausible breakdown) | S27 |
+| Dialysis unit | No credible source found for purchase-to-first-revenue duration. Installation is mainly plumbing/water-treatment/staff training. | Unavailable | — |
+| Ultrasound | Portable units need minimal site work and are "usually usable immediately" — informal claim only, no formal timeline study found. | Unavailable (as a number); informal qualitative claim only | — |
+
+### 17.6 Cath lab and dialysis acquisition cost — strengthened
+
+**Cath Lab:** international (non-India, USD, not converted per this file's own rule
+against silent currency conversion) pricing: new single-plane $1-2M, new biplane
+$2-4M; refurbished single-plane $250k-600k, refurbished biplane $400k-1.2M (S27);
+refurbished GE/Philips $200k-600k (S35). These are supplementary global context only —
+Indian landed cost includes import duty, GST, and logistics not reflected in these
+figures, and configuration (single-plane vs. biplane) for the existing Indian data
+point (S13, ₹9 crore) is unspecified. The single Indian data point remains the primary
+INR anchor; confidence stays **Low**.
+
+**Dialysis unit:** a 2022 government tender (Indian Embassy, Nepal) for 200
+hemodialysis machines plus 60 RO systems gives a total cost of ₹23.49 crore, implying
+**₹11.5 lakh per machine** (S36). This is a real, dated, officially-documented
+per-machine estimate — meaningfully stronger than the prior single procurement-estimate
+data point. Caveats: (1) it's a bulk-procurement price (200 units) — a private hospital
+buying one or two units may pay more; (2) the total bundles 60 RO/water-treatment
+systems across 200 machines, so the per-machine figure likely includes some pro-rata
+site/RO cost, not a bare machine-only price. `recommended_use`: `benchmark_tooltip`,
+confidence **Medium**.
+
+### 17.7 New machine-readable rows (extends §14's table)
+
+| equipment_type | data_area | metric_name | value_type | value_low | value_mid | value_high | unit | recommended_use | confidence | source_id | notes |
+|---|---|---|---|---:|---:|---:|---|---|---|---|---|
+| Common | financial_model | discount_rate_wacc_proxy | range | 11.1 | 12.5 | 14.1 | percent p.a. | sensitivity_range | Medium | S22,S23 | Listed-hospital-chain WACC as proxy; not equipment-project-specific |
+| Common | financial_model | target_irr_hurdle_rate | unavailable | | | | percent p.a. | user_input_required | Unavailable | — | Confirmed unresearchable in 2 passes; suggest discount rate + 300-500bps as a heuristic, not a benchmark |
+| MRI | utilization | scans_per_day_nims_study | single | | 23 | | scans/day | benchmark_tooltip | Medium | S24 | Tertiary teaching hospital, 14h/day operation |
+| MRI | utilization | scans_per_day_global_range | range | 20 | | 40 | scans/day | sensitivity_range | Medium | S25 | Global, not India-specific |
+| CT Scan | utilization | pet_ct_scans_per_day_aiims | single | | 15 | | scans/day/scanner | warning_only | Low-Medium | S26 | PET/CT proxy, not standard CT |
+| Cath Lab | utilization | diagnostic_procedures_per_day | range | 4 | | 6 | procedures/day | benchmark_tooltip | Low | S27 | Vendor guidance |
+| Cath Lab | utilization | interventional_pci_per_day | range | 2 | | 4 | procedures/day | benchmark_tooltip | Low | S27 | Vendor guidance |
+| Dialysis unit | utilization | sessions_per_machine_per_day | single | | 3 | | sessions/day | default_assumption | Medium | S28 | Design-capacity norm, not necessarily real-world |
+| CT Scan | tariff | ct_head_brain_plain | range | 880 | | 1035 | INR | benchmark_tooltip | Medium | S29 | CGHS reimbursement ceiling, not private cash tariff |
+| MRI | tariff | mri_head_brain_plain | range | 2338 | | 2750 | INR | benchmark_tooltip | Medium | S29 | CGHS reimbursement ceiling, not private cash tariff |
+| Ultrasound | tariff | ultrasound_whole_abdomen | range | 680 | | 800 | INR | benchmark_tooltip | Medium | S29 | CGHS reimbursement ceiling, not private cash tariff |
+| Dialysis unit | tariff | hemodialysis_seronegative | range | 1400 | | 1610 | INR/session | benchmark_tooltip | Medium | S30 | CGHS reimbursement ceiling, different vintage than S29 |
+| MRI | installation_timeline | mri_installation_weeks | range | 6 | | 10 | weeks | benchmark_tooltip | Low-Medium | S32 | No AERB needed for MRI |
+| CT Scan | installation_timeline | ct_aerb_approval_weeks | range | 3 | | 6 | weeks | warning_only | Low | S33,S34 | Qualitative source language, approximated |
+| Cath Lab | installation_timeline | cath_lab_total_project_months | range | 4 | | 8 | months | benchmark_tooltip | Low-Medium | S27 | Construction + delivery + install + commissioning |
+| Dialysis unit | acquisition_cost | hemodialysis_machine_cost_tender | range | 10 | 11.5 | 11.5 | lakh INR | benchmark_tooltip | Medium | S36 | Bulk govt tender, may include pro-rata RO/site cost |

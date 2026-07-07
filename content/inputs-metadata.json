@@ -1,0 +1,136 @@
+{
+  "_status": "UI/control schema only, as of 2026-07-06 — see ISSUES.md ISS-9",
+  "_note": "This registry defines HOW each field is rendered (control type, slider bounds, tooltip copy) — it does NOT hold benchmark numbers. Actual default values live in equipment-data/<type>.json (equipment-specific) or equipment-data/common-assumptions.json (shared across equipment), each with its own confidence/sourceId. A prior version of this file duplicated numeric defaults inline, several of them invented (no traceable source in data-requirements.md) — removed 2026-07-06, see ISSUES.md ISS-9. Slider min/max/step below are UI interaction bounds only, not benchmark claims.",
+  "purchaseCost": {
+    "displayName": "Equipment Purchase Cost (Capex)",
+    "controlType": "input",
+    "unit": "INR (Crore)",
+    "defaultSource": "equipment-data/<type>.json#purchaseCost",
+    "tooltip": {
+      "definition": "The total upfront capital expenditure required to acquire the equipment, including basic machine costs and initial vendor pricing.",
+      "defaultExplanation": "See the selected equipment's data file for the sourced range and confidence level; prefer an actual vendor quotation over any benchmark.",
+      "higherImpact": "Increases initial financing or cash requirements, extends the payback period, and lowers the project's NPV/IRR.",
+      "lowerImpact": "Reduces upfront capital burden, shortens the payback period, and improves NPV/IRR."
+    }
+  },
+  "usefulLifeYears": {
+    "displayName": "Useful Life (Years)",
+    "controlType": "input",
+    "unit": "Years",
+    "defaultSource": "equipment-data/<type>.json#usefulLifeYears",
+    "tooltip": {
+      "definition": "The expected operational lifespan of the equipment before it is decommissioned or replaced.",
+      "defaultExplanation": "Companies Act Schedule II (source S8, High confidence) sets 13 years for diagnostic scan equipment and 15 years for other medical/surgical equipment — see equipment-data/<type>.json for the value applied.",
+      "higherImpact": "Spreads depreciation over more years (improving annual book profits) and adds years of operational cash flow to NPV.",
+      "lowerImpact": "Accelerates annual depreciation and reduces the number of cash-flow years, lowering NPV."
+    }
+  },
+  "usagePerDay": {
+    "displayName": "Usage per Day",
+    "controlType": "slider",
+    "unit": "scans/sessions/procedures",
+    "min": 0,
+    "max": 50,
+    "step": 1,
+    "defaultSource": "equipment-data/<type>.json#typicalUtilization.usagePerDay",
+    "tooltip": {
+      "definition": "The average number of patient procedures or scan sessions performed on the machine per working day.",
+      "defaultExplanation": "Confidence varies a lot by equipment (see equipment-data/<type>.json and data-requirements.md §17.3): MRI has a real Indian study (23/day) and Dialysis has an official design-capacity norm (3 sessions/machine/day), but CT is proxy-only, Cath Lab is vendor-guidance-only, and Ultrasound has no Indian data at all. Always prefer your own hospital's estimate over any of these.",
+      "higherImpact": "Linearly increases billed and realized revenue, boosting operating surplus, NPV, and IRR.",
+      "lowerImpact": "Reduces revenue; if usage falls below the break-even threshold, the investment becomes financially non-viable."
+    }
+  },
+  "billedTariffPerUse": {
+    "displayName": "Average Billed Tariff per Use",
+    "controlType": "slider",
+    "unit": "INR",
+    "min": 500,
+    "max": 25000,
+    "step": 100,
+    "defaultSource": "equipment-data/<type>.json#billedTariffPerUse",
+    "tooltip": {
+      "definition": "The average gross price billed per procedure before adjusting for insurance deductions, scheme discounts, or collection delays.",
+      "defaultExplanation": "CT/MRI/Ultrasound/Dialysis have Medium-confidence CGHS reimbursement-ceiling figures (data-requirements.md §17.4) — treat these as a directional floor, not a private cash tariff, since private hospitals typically charge more. Cath Lab still has no tariff data from any research pass and requires user entry.",
+      "higherImpact": "Boosts operating margins and average realized revenue per scan, reducing the daily usage count needed to break even.",
+      "lowerImpact": "Shrinks margins and raises the daily break-even threshold."
+    }
+  },
+  "workingDaysPerMonth": {
+    "displayName": "Working Days per Month",
+    "controlType": "slider",
+    "unit": "Days",
+    "min": 20,
+    "max": 31,
+    "step": 1,
+    "defaultSource": "equipment-data/common-assumptions.json#workingDaysPerMonth",
+    "tooltip": {
+      "definition": "The number of days per month the service is operational for commercial patients.",
+      "defaultExplanation": "Defaults to 25 days, assuming Sunday closures or emergency-only/non-billing operations on Sundays — a modeling convention, not a researched benchmark (see common-assumptions.json).",
+      "higherImpact": "Increases annual procedure capacity and monthly revenue.",
+      "lowerImpact": "Reduces monthly procedural volume and revenue potential."
+    }
+  },
+  "discountRate": {
+    "displayName": "Discount Rate",
+    "controlType": "input",
+    "unit": "% p.a.",
+    "defaultSource": "equipment-data/common-assumptions.json#discountRate",
+    "tooltip": {
+      "definition": "The interest rate used to discount future cash flows back to their present value, representing the hospital's Cost of Capital.",
+      "defaultExplanation": "Medium confidence, 11.1-14.1% range (typical 12.5%) — a proxy from listed Indian hospital chains' WACC, not an equipment-project-specific figure (data-requirements.md §17.1, see common-assumptions.json). Confirm against your own hospital's actual cost of capital where known.",
+      "higherImpact": "Heavily discounts cash flows received in later years, reducing the calculated NPV.",
+      "lowerImpact": "Preserves the value of future cash flows, resulting in a higher calculated NPV."
+    }
+  },
+  "targetIrr": {
+    "displayName": "Target IRR (Hurdle Rate)",
+    "controlType": "input",
+    "unit": "% p.a.",
+    "defaultSource": "equipment-data/common-assumptions.json#targetIrr",
+    "tooltip": {
+      "definition": "The minimum acceptable Internal Rate of Return required by hospital management to approve the investment.",
+      "defaultExplanation": "Unavailable — confirmed unresearchable across two research passes (data-requirements.md §17.2); no Indian hospital/investor hurdle-rate benchmark is publicly disclosed anywhere. Suggested starting point: discount rate + 300-500bps, clearly as a heuristic, not a benchmark. Must be entered/confirmed by the user.",
+      "higherImpact": "Sets a stricter hurdle, making it more difficult for a project to score a 'Strong' Investment Outlook.",
+      "lowerImpact": "Relaxes the hurdle, allowing moderate-return projects to be marked viable."
+    }
+  },
+  "loanInterestRate": {
+    "displayName": "Financing Interest Rate",
+    "controlType": "input",
+    "unit": "% p.a.",
+    "defaultSource": "equipment-data/common-assumptions.json#loanInterestRate",
+    "tooltip": {
+      "definition": "The nominal annual interest rate charged by the financial institution on the borrowed capital.",
+      "defaultExplanation": "Low-Medium confidence market range of 8-15% p.a. (sources S11/S12); 11.5% is a derived midpoint, not a quoted rate. Prefer the user's actual lender quote — see common-assumptions.json.",
+      "higherImpact": "Increases monthly EMI payments and total interest costs, lowering net monthly cash flows.",
+      "lowerImpact": "Lowers debt service costs and enhances cash flow after debt payment."
+    }
+  },
+  "loanTenureMonths": {
+    "displayName": "Financing Tenure (Months)",
+    "controlType": "input",
+    "unit": "Months",
+    "defaultSource": "equipment-data/common-assumptions.json#loanTenureMonths",
+    "tooltip": {
+      "definition": "The duration of the loan payback term in months.",
+      "defaultExplanation": "Medium confidence, derived midpoint (60 months) of two cited lender ranges (S10: 12-84mo, S11: 3-120mo) — see common-assumptions.json.",
+      "higherImpact": "Reduces monthly EMI obligations but increases total cumulative interest paid over the life of the loan.",
+      "lowerImpact": "Increases monthly cash drain due to higher EMIs, but reduces total interest expense."
+    }
+  },
+  "launchDelayMonths": {
+    "displayName": "Moratorium / Launch Delay",
+    "controlType": "slider",
+    "unit": "Months",
+    "min": 0,
+    "max": 12,
+    "step": 1,
+    "defaultSource": "equipment-data/<type>.json#launchDelayMonths",
+    "tooltip": {
+      "definition": "The setup time required for site preparation, civil/shielding work, licensing/regulatory approval, and installation before first revenue-generating use.",
+      "defaultExplanation": "MRI, CT, and Cath Lab now have Low-to-Medium-confidence vendor/consultant-sourced ranges (data-requirements.md §17.5); Dialysis and Ultrasound remain unavailable. See equipment-data/<type>.json for the value applied per equipment.",
+      "higherImpact": "Extends the pre-revenue period, increasing pre-operative interest and the initial working capital gap.",
+      "lowerImpact": "Achieves faster commercial operations, reducing pre-opening cash losses."
+    }
+  }
+}

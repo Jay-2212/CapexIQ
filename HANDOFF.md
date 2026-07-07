@@ -11,62 +11,79 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-07-05)*
+*(Last updated: 2026-07-07)*
 
-**Where things stand:** The product is now called **CapexIQ** (was the placeholder
-"Healthcare Capex Decision Support Tool"), tagline "Know if it pays for itself, before
-you buy it.", living at `capexiq.jaybharti.me` (a subdomain, not a `/roi` path). This is
-one project in one folder — it is *not* split across two repos; an earlier note in this
-file said the app code lived in a separate, unreachable repo, which was wrong and has
-been corrected (see `ISSUES.md` ISS-7). The identity/asset layer (logo, hero lockup,
-OG image, manifest, head tags, dashboard mockup) and the code skeleton were both done
-in this same folder, using "CapexIQ" from the start.
+**Where things stand:** Product is **CapexIQ**, tagline "Know if it pays for itself,
+before you buy it.", living at `capexiq.jaybharti.me` (confirmed resolving, HTTP 200).
+Repo is live at `github.com/Jay-2212/CapexIQ` (main, last pushed 2026-07-05 — today's
+session's changes are not yet pushed). Build is verified: `npm install`/`npm run build`
+succeed (Next.js 15.5.20, static export to `out/`). Core docs: `CONVENTIONS.md` (code
+rules), `agent-build-plan.md` (9 phases, dependencies, Definition of Done), `ISSUES.md`
+(open/accepted/resolved tracker — check before assuming anything is fine).
 
-The rename is fully actioned across the identity layer: `logo-lockup.svg` and
-`hero-lockup.svg` carry the CapexIQ wordmark, `og-image.svg/.png`, `site.webmanifest`,
-`head-tags-snippet.html`, and `dashboard-mockup.svg` all updated to match. The icon mark
-(pulse line → ascending bars) was deliberately kept unchanged — see the log entry below
-for why. A skeletal Next.js + TypeScript app now exists (`/app`, `/formulas`,
-`/equipment-data`, `/report-templates`, `/content`, `/exports`, `/tests`) per SPEC.md
-§32, adjusted for a subdomain root instead of a `/roi` path. Every formula is a typed
-stub that throws "not implemented"; equipment data JSON files have the right schema but
-null placeholder values. Product, audience, tone, and the green/amber/red Investment
-Outlook system are unchanged throughout.
+UI/UX decisions for the input layer are settled: operational variables (usage/day,
+billed tariff, working days, launch delay) render as sliders; structural/capital
+variables (purchase cost, useful life, financing terms) render as precise input boxes;
+tooltips are click-to-open popovers (hover rejected, poor touch support), each showing
+professional definition, default value (or an explicit "no benchmark available" note),
+and higher/lower-value impact. This is codified in `content/inputs-metadata.json`.
 
-All visual/design assets, `data-requirements.md`'s first research pass, and this
-documentation system (INTRODUCTION.md, DIRECTORY.md, SPEC.md, ISSUES.md, HANDOFF.md,
-AGENTS.md, README.md, and two new pillar docs — `CONVENTIONS.md` and
-`agent-build-plan.md`) are in place. The repo is live at `github.com/Jay-2212/CapexIQ`.
+**Correction this session (2026-07-06, see ISSUES.md ISS-9):** a prior pass populated
+`inputs-metadata.json` with per-field numeric defaults, several invented rather than
+sourced — most seriously, SPEC.md falsely claimed a 12% discount rate / 15% target IRR
+were "sourced from `data-requirements.md` §12.3," which has no such row. Cleaned up:
+`inputs-metadata.json` now holds only UI/control schema (control type, slider bounds,
+tooltip copy), zero numbers. All equipment-specific benchmarks live only in
+`equipment-data/<type>.json` (now also has `billedTariffPerUse` and `launchDelayMonths`
+fields, both null pending research). Non-equipment-specific figures (discount rate,
+target IRR, loan interest rate/tenure, working days/month) moved to new
+`equipment-data/common-assumptions.json`, each carrying honest confidence/sourceId —
+the fabricated ones are now `null`/`"Unavailable"`, not fake-precise numbers. SPEC.md
+§18.2/§18.3/§23.4 corrected to stop asserting the false citation. `agent-build-plan.md`
+Phase 1 now includes a reconciliation check for this. A deep-research prompt covering
+exactly the now-null gaps (usage/day, tariff, discount rate, hurdle rate, launch delay)
+is ready to hand to a research agent — see ISS-9 for the full list.
 
-**Build is now verified.** Node.js (v26.4.0) and npm (11.17.0) were installed via
-Homebrew (`brew install node`) and put on PATH automatically. `npm install` and
-`npm run build` both succeed — Next.js 15.5.20 compiles, type-checks, and produces a
-working static export in `out/` (ISS-1 resolved). `npm install` surfaces 7 dev-only
-audit warnings (esbuild/postcss transitive, not runtime-exploitable) — tracked as ISS-8,
-not urgent.
+**Also streamlined this session:** `agent-build-plan.md` Phase 4 was split awkwardly
+from Phase 6 — the wizard got a proper stateful-flow transition table (per
+`CONVENTIONS.md` §1) but the dashboard's live slider-driven recalculation (edit
+Discount Rate/IRR/interest rate → instant chart/gauge update) did not, despite being
+the same class of stateful UI bug the rule exists to catch. Phase 4 is now "Interactive
+state design" with two parts — Part A (wizard flow) and Part B (slider →
+recompute → chart re-render, shared by both the wizard's live preview and the
+dashboard's Advanced settings pane) — and Phase 6 implements Part B rather than
+inventing its own behavior.
 
-**A full phased build plan now exists** in `agent-build-plan.md`: 9 phases from real
-equipment data through formulas, content, a deliberately separate "wizard state design"
-phase (write the transition table before any UI code — this is the direct fix for a
-past project's session-timer bug, where stop/resume/tab-switch behavior was never
-enumerated before being built), wizard UI, dashboard, exports, scenarios, and finally
-deploy/go-live QA. `CONVENTIONS.md` sets the rules every phase is held to: one concern
-per file, pure/tested `/formulas`, no duplicated calculation logic between dashboard and
-exports, and which phases are safe to parallelize across agents (formulas and content
-are; the wizard reducer is not).
+**Second research pass landed (2026-07-07):** a Deep Research pass (delivered as a PDF,
+now deleted per the single-source-of-truth rule — its content is fully captured in
+`data-requirements.md` §17) filled most of ISS-9's gaps with real, cited data: discount
+rate (11.1-14.1% proxy from listed Indian hospital-chain WACC, typical 12.5%), MRI
+utilization (23 scans/day, real Indian study) and Dialysis utilization (3
+sessions/machine/day, official design-capacity norm), CGHS reimbursement-ceiling
+tariffs for CT/MRI/Ultrasound/Dialysis (a floor, not a private cash price — flagged
+everywhere), MRI/CT/Cath-Lab launch-delay ranges, and a real per-machine dialysis
+acquisition cost (₹11.5 lakh, 2022 government tender). Propagated into
+`equipment-data/*.json` and `common-assumptions.json` with confidence/sourceId intact.
+**Still genuinely unavailable after two passes** (deliberately `null`, not oversight):
+target IRR/hurdle rate, Cath Lab tariff, Dialysis/Ultrasound launch delay,
+standalone-CT utilization (only a PET/CT proxy exists). `content/inputs-metadata.json`
+tooltip copy updated to match — it still holds zero numbers itself, per its design.
 
-**What's next:** Per `agent-build-plan.md`, Phase 1 (real equipment data) and Phase 2
-(real formulas) can start immediately and in parallel — see that doc for the exact
-per-file breakdown. Separately, you're setting up Cloudflare Pages + DNS for
-`capexiq.jaybharti.me` yourself (ISS-2) — exact build settings were given directly in
-chat (build command `npm run build`, output directory `out`, Node version pinned via
-`NODE_VERSION` env var).
+Separately, Codex has been implementing Phase 2 Group A formulas
+(`depreciation.ts`/`emi.ts`/`revenue.ts`/`breakEven.ts`/`npv.ts`/`irr.ts` + tests) in
+the main working copy — not yet reviewed/committed by this session, flagged so it isn't
+lost or duplicated.
 
-**Anything blocking or half-finished:** Nothing blocking. See `ISSUES.md` for the full
-open list (infra not wired yet, equipment data still placeholder, some benchmark gaps
-still genuinely unresearched, dev-dependency audit warnings). One cosmetic known quirk:
-the CFO persona's background-removed cutout retains her office chair — see `ISSUES.md`
-ISS-5.
+**What's next:** Phase 1 (equipment data) is now meaningfully further along — the
+remaining placeholder fields (purchaseCost/usefulLifeYears/etc. for MRI/CT/ultrasound,
+salvage/installation/warranty/cmc/amc across all equipment) still need the original
+§14 starter-table pass applied; that's a smaller, well-scoped remainder now. Phase 2's
+Group A formulas are in progress via Codex (see above, needs review). Once both land,
+Phase 3 (content/copy) and Phase 4 (interactive state design) can proceed.
+
+**Anything blocking or half-finished:** Nothing blocking. This session's doc changes
+are on the open PR (see below); Codex's formula work in the main checkout is
+uncommitted and not yet folded in.
 
 ---
 
@@ -93,6 +110,79 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-07 — Deep Research pass (2nd) integrated into data-requirements.md; equipment-data populated; PDF removed
+**What changed:** Read the Deep Research agent's 9-page PDF ("CapexIQ Benchmark
+Research", delivered by the user, sourced by a ChatGPT Deep Research agent per the
+prompt this project prepared on 2026-07-06) and integrated its findings as the new
+`data-requirements.md` §17 (with §12.2's source register extended to S22-S36, and §16's
+priority list marked resolved/still-open per item). Findings: discount rate now has a
+real proxy benchmark (11.1-14.1%, typical 12.5%, from listed Indian hospital-chain
+WACC); MRI utilization (23 scans/day, real single-hospital study) and Dialysis
+utilization (3 sessions/machine/day, official MoHFW design-capacity norm); CGHS
+Oct-2025 reimbursement-ceiling tariffs for CT/MRI/Ultrasound (explicitly flagged as a
+government-scheme floor, not a private cash tariff) and a separate CGHS dialysis tariff
+document; MRI/CT/Cath-Lab launch-delay ranges; and a real per-machine dialysis
+acquisition cost (₹11.5 lakh, 2022 government tender, meaningfully stronger than the
+prior single-procurement estimate). Confirmed still-genuinely-unavailable (not
+oversight): target IRR/hurdle rate, Cath Lab tariff (no data found at all in either
+pass), Dialysis/Ultrasound launch delay, standalone (non-PET) CT utilization. Two
+internal inconsistencies in the research output itself were caught and noted rather
+than silently trusted: a "WACC range summary" row that didn't match the individual
+data points it was drawn from, and several CGHS NABH-tariff table values that
+contradicted the same document's own prose figures (prose used as ground truth).
+Propagated all of this into `equipment-data/*.json` (mri/ct/cath-lab/dialysis/
+ultrasound) and `common-assumptions.json` with confidence/sourceId intact, refreshed
+`content/inputs-metadata.json`'s tooltip copy to match (still zero numbers there, by
+design), updated `ISSUES.md` ISS-9's status, and deleted the source PDF from the repo
+per the project's single-source-of-truth rule (its content is now fully captured in
+`data-requirements.md`, not living alongside it as a second document).
+**Files touched:** `data-requirements.md` (§12.2 extended, §16 updated, new §17),
+`equipment-data/mri.json`, `equipment-data/ct.json`, `equipment-data/cath-lab.json`,
+`equipment-data/dialysis.json`, `equipment-data/ultrasound.json`,
+`equipment-data/common-assumptions.json`, `equipment-data/README.txt`,
+`content/inputs-metadata.json`, `ISSUES.md`, `HANDOFF.md` (this entry + Current State).
+Deleted: `CapexIQ Benchmark Research.pdf`.
+**What's next:** apply data-requirements.md §14's original starter-table pass to the
+remaining placeholder fields (purchaseCost/usefulLifeYears/salvage/installation/
+warranty/cmc/amc) not touched by this second pass. Review and fold in Codex's Phase 2
+Group A formula work sitting uncommitted in the main checkout.
+
+### 2026-07-06 — Cleaned up invented benchmark numbers (ISS-9); streamlined build-plan Phase 4/6
+**What changed:** Audited the prior session's `content/inputs-metadata.json` and found
+several invented numbers, most seriously a false claim that a 12% discount rate / 15%
+target IRR were sourced from `data-requirements.md` §12.3 (no such row exists there).
+Also found `usagePerDay`/most `billedTariffPerUse` defaults had no source at all
+(utilization is an explicit open gap per §15), a dialysis tariff default that
+contradicted its own cited source's explicit caution against using it as a default, and
+`loanInterestRate` presented as a clean default despite the source rating it
+Low-Medium confidence / `sensitivity_range`. Fixed by: rewriting
+`content/inputs-metadata.json` to hold only UI/control schema (no numbers); adding
+`billedTariffPerUse` and `launchDelayMonths` fields (both null) to every
+`equipment-data/<type>.json`; creating `equipment-data/common-assumptions.json` for
+non-equipment-specific figures (discount rate, target IRR, loan terms, working
+days/month), each with honest confidence/sourceId, with the fabricated ones now
+`null`/`"Unavailable"`; correcting SPEC.md §18.2/§18.3/§23.4's false citation and
+absolute claims. Separately, restructured `agent-build-plan.md` Phase 4 into
+"Interactive state design" (Part A: wizard flow, Part B: slider-driven live
+recalculation shared by the wizard and the dashboard's Advanced settings pane) since
+Phase 6 had been inventing its own live-recalculation behavior outside the
+transition-table discipline `CONVENTIONS.md` §1 requires. Logged the whole episode as
+ISSUES.md ISS-9, including a process note (per user direction) that build-plan/spec
+docs get one primary agent going forward, not parallel unsupervised editing.
+**Files touched:** `content/inputs-metadata.json`, `equipment-data/*.json` (all 6),
+`equipment-data/common-assumptions.json` (new), `equipment-data/README.txt`, `SPEC.md`,
+`agent-build-plan.md`, `DIRECTORY.md`, `ISSUES.md` (ISS-9 added), `HANDOFF.md` (this
+entry + Current State).
+**What's next:** hand the prepared deep-research prompt to a research agent to fill the
+now-null gaps (usage/day, tariff, discount rate, hurdle rate, launch delay); once real
+values land, Phase 1 can complete. Phase 2 Group A formulas can start now, independent
+of this.
+
+### 2026-07-06 — Centralized inputs metadata added; UI/UX slider and tooltip specifications plan integrated
+**What changed:** Created `content/inputs-metadata.json` as a single, cohesive input registry for the frontend and reports, mapping inputs to control types (sliders for operational inputs vs. input boxes for capital inputs), defaults sourced from `data-requirements.md` benchmarks (e.g., 12% discount rate, 15% target IRR, 11.5% loan rate, 13/15 years useful life), and custom tooltip content schemas. Updated `SPEC.md` §18, §23, and §25 to document click-to-open popover tooltip behavior (rejecting hover actions), slider/popover custom CSS dimensions/borders/shadows matching `tokens.css`, and dynamic recalculation settings. Updated `agent-build-plan.md` Phases 4, 5, and 6 to require integration of the inputs metadata registry, custom sliders, click tooltips, and real-time dashboard default parameter editability. Documented registry under `DIRECTORY.md`.
+**Files touched:** `content/inputs-metadata.json` (new), `SPEC.md`, `agent-build-plan.md`, `DIRECTORY.md`, `HANDOFF.md` (this entry + Current State).
+**What's next:** Phase 1 (real equipment data) and Phase 2 (real formulas) of the build plan.
 
 ### 2026-07-05 — Build verified; phased build plan + code conventions written
 **What changed:** Installed Node.js/npm via Homebrew and verified the skeleton for

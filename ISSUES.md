@@ -12,6 +12,64 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
+### ISS-9 — Invented benchmark numbers from an unsupervised Gemini pass; cleaned up, real research still needed
+**Area:** data / docs
+**Status:** open
+**What:** A 2026-07-06 session (Gemini, working from chat instructions without the
+project's own sourcing discipline) added `content/inputs-metadata.json` with per-field
+numeric defaults, several of which were invented rather than sourced:
+- SPEC.md §18.2/§18.3 claimed a 12.0% discount rate and 15.0% target IRR were "sourced
+  from `data-requirements.md` §12.3" — **false**; §12.3 has no discount-rate or
+  hurdle-rate row at all. This is exactly the failure mode the project's own rules
+  (SPEC.md §24/§36, `data-requirements.md` §3/§9, `INTRODUCTION.md` rule 5) exist to
+  prevent, and it happened inside the safeguard doc itself.
+- Per-equipment `usagePerDay` and most `billedTariffPerUse` defaults had no
+  corresponding source anywhere in `data-requirements.md` (utilization is explicitly
+  listed as an open gap in §15). Dialysis's tariff default (₹2,000) even contradicted
+  its own cited source (S19), which explicitly says its private-tariff figure "should
+  not become a default revenue value."
+- `purchaseCost` defaults for MRI/CT (₹3.0 Cr / ₹2.0 Cr) didn't match the actual
+  ranges in §14 (₹2-14 Cr / ₹1.5-7 Cr, no stated midpoint) — fabricated single values
+  presented as if precise.
+- The registry dropped `confidence`/`sourceId` tracking entirely (unlike
+  `equipment-data/*.json`'s established schema), so `loanInterestRate: 11.5%` was shown
+  as a clean default despite `data-requirements.md` explicitly rating it Low-Medium
+  confidence and recommending `sensitivity_range` treatment, not `default_assumption` —
+  precisely the "hide low confidence behind a clean-looking default" anti-pattern that
+  file's own §9 warns against.
+**Resolution so far (2026-07-06):** `content/inputs-metadata.json` rewritten to hold
+only UI/control schema (control type, slider bounds, tooltip copy) — zero numeric
+defaults. All equipment-specific benchmark numbers now live only in
+`equipment-data/<type>.json` (added `billedTariffPerUse` and `launchDelayMonths`
+fields, both `null`). Non-equipment-specific figures (discount rate, target IRR, loan
+interest rate/tenure, working days/month) moved to new
+`equipment-data/common-assumptions.json`, each with honest confidence/sourceId — the
+false-citation numbers are now `null`/`"Unavailable"` instead of looking sourced.
+SPEC.md §18.2/§18.3 and §23.4 corrected to stop asserting the false citation.
+**Update (2026-07-07):** a deep-research pass (ChatGPT Deep Research, see
+data-requirements.md §17 for full findings) came back and filled most of the null
+gaps with real, cited data: discount rate (11.1-14.1% proxy from listed hospital-chain
+WACC), MRI/dialysis utilization, CGHS reimbursement-ceiling tariffs for CT/MRI/
+Ultrasound/Dialysis, MRI/CT/Cath-Lab launch-delay ranges, and a real per-machine
+dialysis acquisition-cost figure from a government tender. All propagated into
+`equipment-data/*.json` and `common-assumptions.json` with honest confidence/sourceId,
+replacing the `null`s. **Still genuinely unavailable after two research passes:**
+target IRR/hurdle rate (confirmed unresearchable, no public source exists — see §17.2),
+Cath Lab tariff (no data found at all), Dialysis and Ultrasound launch delay, and
+standalone (non-PET) CT utilization (only a weak proxy exists). These remain `null`/
+`"Unavailable"` deliberately, not from oversight.
+**Status:** downgraded to **accepted** for the fields now populated; **open** only for
+the still-genuinely-unavailable fields above, which should stay user-entered per
+data-requirements.md §7.3 rather than trigger a third research pass unless a
+significantly better source turns up.
+**Process note:** this is the second time a parallel/unsupervised agent session
+introduced an inconsistency this project's own docs were built to prevent (see ISS-7
+for the first). Per user direction (2026-07-06): going forward, build-plan and
+spec-level documents get one primary agent, not parallel multi-agent editing;
+independent, well-bounded, already-specified tasks (e.g. implementing a single pure
+formula file against an exact SPEC.md formula) may still be delegated to a second agent
+(Codex) when explicitly scoped by the primary agent first.
+
 ### ISS-2 — Cloudflare Pages + DNS not yet wired up for capexiq.jaybharti.me
 **Area:** infra
 **Status:** open

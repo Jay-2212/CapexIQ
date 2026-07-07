@@ -24,23 +24,35 @@ phase is fully checked, update `HANDOFF.md` and move to the next.
 
 ## Phase 1 — Real equipment data
 
-**Goal:** Replace the null placeholders in `/equipment-data/*.json` with real values,
-sourced from `data-requirements.md` §14's starter assumptions table.
-**Depends on:** nothing — can start immediately.
+**Goal:** Replace the null placeholders in `/equipment-data/*.json` and
+`/equipment-data/common-assumptions.json` with real values, sourced from
+`data-requirements.md` §14's starter assumptions table plus whatever the next research
+pass returns (see ISSUES.md ISS-9 — a prior pass invented several of these numbers
+instead of researching them, and they were stripped back to `null` on 2026-07-06).
+**Depends on:** nothing to start the already-sourced fields — can begin immediately.
+The genuinely-gap fields (usage/day, billed tariff, launch delay, discount rate, target
+IRR — see ISS-9) depend on the next deep-research pass landing in
+`data-requirements.md` before they can be filled without inventing numbers again.
 **Parallelizable:** yes, freely — pure data, no shared state, can even split by
 equipment type across sessions.
 **Do:**
 - [ ] For each of `mri.json` / `ct.json` / `cath-lab.json` / `dialysis.json` /
-      `ultrasound.json` / `custom.json`, fill every field from §14, keeping the
-      `confidence` / `sourceId` columns intact.
-- [ ] Where §14 has no value (the §15 gaps — payer realization %, DSO by payer,
-      specialist fees, vendor quotes), leave the field `null` **and** note why in the
+      `ultrasound.json` / `custom.json` / `common-assumptions.json`, fill every field
+      from §14 (and the next research pass once it lands), keeping the `confidence` /
+      `sourceId` columns intact.
+- [ ] Where no research value exists, leave the field `null` **and** note why in the
       file's own `_status` field — don't invent a number (SPEC.md §24/§36,
-      `INTRODUCTION.md` rule 5).
+      `INTRODUCTION.md` rule 5, ISSUES.md ISS-9).
+- [ ] Reconciliation check: before marking this phase done, confirm
+      `content/inputs-metadata.json` still contains zero numeric defaults (it should
+      only have `controlType`/`unit`/slider bounds/tooltip copy, per its `_note` field)
+      — if a future edit reintroduces a hardcoded default there, that's the same bug
+      class as ISS-9 recurring.
 - [ ] Add a small schema-validation test (or script) so a malformed/missing field fails
       loudly instead of silently reaching the UI later.
-**Definition of Done:** every field is either populated or explicitly and visibly
-marked unresearched; nothing is silently null.
+**Definition of Done:** every field is either populated (with confidence/sourceId) or
+explicitly and visibly marked unresearched; nothing is silently null, and no numeric
+default has leaked back into `inputs-metadata.json`.
 
 ---
 
@@ -97,16 +109,33 @@ alongside Phase 1 and Phase 2.
 
 ---
 
-## Phase 4 — Wizard state design (do not skip; do not start Phase 5 without this)
+## Phase 4 — Interactive state design (do not skip; do not start Phase 5/6 without this)
 
-**Goal:** Write `app/forms/wizard-state.md` — the explicit transition table for the
-7-step wizard (SPEC.md §7) — *before* writing any form component. This is the phase that
-exists specifically to prevent the extension-timer bug class (see `CONVENTIONS.md` §1).
-**Depends on:** SPEC.md §7/§10/§11 (already written); doesn't depend on Phase 1-3.
+**Goal:** Write `app/forms/wizard-state.md` — *before* writing any form or dashboard
+component — covering **two coupled state machines** that both drive the same
+sliders/charts/tooltips UX (the thing actually asked for: sliders that auto-update
+charts in real time, plus click-to-open tooltips):
+
+- **Part A — the 7-step wizard flow** (SPEC.md §7): step navigation, validation,
+  persistence.
+- **Part B — live-recalculation state**: every slider (in the wizard *and* in Phase 6's
+  dashboard Advanced settings pane) triggers a formula re-run and a chart/gauge
+  re-render. An earlier version of this plan split Part B's concerns into Phase 6 as a
+  freeform bullet list, which silently exempted it from the rule below — consolidated
+  here instead so one design covers both.
+
+This is the phase that exists specifically to prevent the extension-timer bug class
+(see `CONVENTIONS.md` §1) — Part B matters just as much as Part A here, since
+click-drag-recompute is exactly the kind of stateful flow that rule is about.
+**Depends on:** SPEC.md §7/§10/§11 (wizard) and §21/§25.5 (dashboard live-editing) —
+already written. Also depends on `content/inputs-metadata.json` (post ISS-9 cleanup)
+being the settled UI/control schema, since it defines which fields are sliders vs.
+input boxes — do not start this phase while that file is still in flux.
 **Parallelizable:** no — this is a single coherent design; one session should own it
-start to finish so the table stays internally consistent.
-**Must enumerate, explicitly, in the doc:**
-- [ ] Every step, every field in that step, and its validation rule.
+start to finish so both tables stay internally consistent with each other (they share
+state, per the bullet below on write-back).
+**Must enumerate, explicitly, in the doc — Part A (wizard):**
+- [ ] Every step, every field in that step, its validation rule, and its control type (sliders vs. static input boxes) referencing [inputs-metadata.json](file:///Users/jay/Documents/Roi_Calculator/content/inputs-metadata.json).
 - [ ] What Basic → Advanced → Basic toggling does to already-entered Advanced-only
       values (decision: they persist in memory even while hidden, never silently
       dropped).
@@ -119,29 +148,55 @@ start to finish so the table stays internally consistent.
       exact class of bug that shipped before).
 - [ ] Whether step submission is idempotent (double-click "Next" doesn't double-submit
       or skip a step).
-**Definition of Done:** the doc exists, covers every bullet above with a concrete
-answer (not "TBD"), and has been read back by whoever will implement Phase 5.
+**Must enumerate, explicitly, in the doc — Part B (sliders → live recalculation → charts):**
+- [ ] Recompute trigger: fire on every slider `input` event (recomputes while dragging)
+      or only on release/`change`? If drag-live, specify a debounce/throttle interval —
+      state explicitly why, since this is a real perf-vs-snappiness tradeoff, not a
+      default to leave implicit.
+- [ ] Which fields recompute inline during the wizard (live preview of a step's impact)
+      vs. which only exist on the Phase 6 results dashboard's Advanced settings pane
+      (Discount Rate, Target Hurdle IRR, Financing Interest Rate) — list both sets.
+- [ ] Whether editing a value in the dashboard's Advanced settings pane writes back into
+      the same wizard-state store the user came from (so reopening the wizard shows the
+      edited value) or is separate dashboard-only state — decide one, explicitly, and
+      say why (recommendation: same store, consistent with the Basic/Advanced
+      never-silently-drop rule above).
+- [ ] Determinism: rapid, out-of-order slider moves cannot produce a stale or
+      inconsistent chart — name the mechanism that prevents it (e.g. always recompute
+      from the latest full state snapshot, never from a captured closure).
+- [ ] Tooltip popover state: exactly one popover open at a time; opening a new one
+      closes the previous; outside-click/Escape/re-clicking the same trigger closes it.
+      Name the single source of truth (e.g. `openTooltipId: string | null`) so Phase 5
+      and Phase 6 don't each invent separate tooltip-visibility state.
+**Definition of Done:** the doc exists, both Part A and Part B are covered with a
+concrete answer for every bullet above (not "TBD"), and has been read back by whoever
+will implement Phase 5 and Phase 6.
 
 ---
 
 ## Phase 5 — Wizard UI implementation
 
 **Goal:** Build `app/forms/`, `app/advanced/`, and the step-navigation shell in
-`app/components/`, implementing exactly what Phase 4's `wizard-state.md` specifies.
-**Depends on:** Phase 4 (the doc must exist first), Phase 2 (forms need real formulas
-to validate against/preview live results, if that's part of the UX).
+`app/components/`, implementing exactly what Phase 4 Part A specifies, and using the central input registry in [inputs-metadata.json](file:///Users/jay/Documents/Roi_Calculator/content/inputs-metadata.json).
+**Depends on:** Phase 4 (both parts must exist first — Part B's slider/recompute
+mechanism is shared code the wizard's live preview also uses), Phase 2 (forms need real
+formulas to validate against/preview live results).
 **Parallelizable:** no — single reducer, single source of truth for wizard state; two
 agents editing it at once is exactly the coordination failure `CONVENTIONS.md` §7 warns
 about.
 **Do:**
 - [ ] One `useReducer` (or equivalent single state container) for all wizard state — no
       parallel `useState` calls for the same data scattered across step components.
-- [ ] A test file that runs every transition in `wizard-state.md`'s table, with test
-      names matching the plain-language scenario (e.g. `"back button after a validation
-      error does not clear other steps"`).
+- [ ] Render input elements dynamically using the metadata in `inputs-metadata.json` (rendering range sliders for operational values and input boxes for precise figures). Pull the actual default *value* for each field from `equipment-data/<type>.json` or `equipment-data/common-assumptions.json` per that field's `defaultSource` — never hardcode a number in the component.
+- [ ] Implement custom-styled range sliders using the design variables specified in SPEC.md §25.5.A, wired to the recompute trigger/debounce mechanism Phase 4 Part B specifies.
+- [ ] Implement click-to-open tooltip callouts (using CSS Popover API or relative dialog absolute rendering) containing the professional definition, default value (or an explicit "no benchmark available" note where `equipment-data` has `confidence: "Unavailable"`), and higher/lower impact, based on `inputs-metadata.json` tooltip schemas and the single `openTooltipId`-style state Phase 4 Part B defines. Hover behavior is disallowed.
+- [ ] A test file that runs every transition in `wizard-state.md`'s table (Part A and
+      Part B), with test names matching the plain-language scenario (e.g. `"back button
+      after a validation error does not clear other steps"`, `"dragging the usage-per-day
+      slider updates the break-even chart without a stale value"`).
 - [ ] Every edge case bullet from Phase 4 has a corresponding passing test — this is the
       concrete, checkable fix for "stop button didn't stop, resume didn't work."
-**Definition of Done:** every Phase-4-enumerated edge case has a named, passing test.
+**Definition of Done:** every Phase-4-enumerated edge case (both parts) has a named, passing test.
 
 ---
 
@@ -149,18 +204,32 @@ about.
 
 **Goal:** Build `app/results/` and `app/charts/` — Investment Outlook score, metric
 cards, break-even chart, cumulative cash-flow chart, risk callouts, narrative summary
-(SPEC.md §21, §27, §30).
-**Depends on:** Phase 2 (formulas) and Phase 5 (wizard output to render).
+(SPEC.md §21, §27, §30) — plus the Advanced settings pane, implementing exactly what
+Phase 4 Part B specifies (this phase no longer invents its own live-recalculation
+behavior; Phase 4 is where that got decided).
+**Depends on:** Phase 2 (formulas), Phase 4 Part B (live-recalculation state design),
+and Phase 5 (wizard output to render).
 **Parallelizable:** yes, alongside Phase 7 — disjoint files, both just consume
 `/formulas` output.
 **Do:**
 - [ ] Pure presentational components driven by formula output — no calculation logic
       inline here (per `CONVENTIONS.md` §3).
+- [ ] Include an **Advanced settings pane** (accordion or drawer) allowing users to edit
+      Discount Rate, Target Hurdle IRR, and Financing Interest Rate — using the same
+      slider/recompute-trigger mechanism and write-back decision Phase 4 Part B defines,
+      not a separately invented one.
+- [ ] Since Discount Rate and Target Hurdle IRR currently have no sourced default
+      (`equipment-data/common-assumptions.json`, confidence `Unavailable` — see ISSUES.md
+      ISS-9), the pane must visibly prompt the user to set these rather than silently
+      showing a blank or a number that looks authoritative.
 - [ ] Visual QA pass across at least 3 equipment types spanning strong/moderate/risky
       outcomes — dashboards are easy to get "technically correct but visually broken"
       for edge values (very large/very small numbers, 0% and 100% cases).
 **Definition of Done:** dashboard renders correctly (numbers and layout both) for the
-full range of Investment Outlook outcomes, not just one happy-path example.
+full range of Investment Outlook outcomes, and every edge case from Phase 4 Part B that
+applies to the dashboard (recompute determinism, tooltip state) has a named passing
+test — not just "dynamic parameter edits trigger real-time recalculations" asserted
+informally.
 
 ---
 

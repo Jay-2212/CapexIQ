@@ -1111,9 +1111,23 @@ This should be in Advanced Mode.
 
 Used for NPV calculation.
 
-The tool should let the user edit the discount rate.
+No sourced benchmark exists yet for an Indian private-healthcare-capex cost-of-capital
+figure — a prior draft of this section cited `data-requirements.md` §12.3 for a 12.0%
+default, but that citation was false (§12.3 has no discount-rate row; see ISSUES.md
+ISS-9). Until real research lands, the tool must ship with this field genuinely
+unset/user-entered rather than a fabricated-looking default, and must let the user edit
+it in the Advanced assumptions or settings pane, dynamically recalculating NPV in
+real-time. See `equipment-data/common-assumptions.json`.
 
-Possible default could be researched later.
+### 18.3 Target IRR (Hurdle Rate)
+
+Used to evaluate the Investment Outlook.
+
+Same problem as §18.2: a prior draft cited a 15.0% default as "sourced from
+`data-requirements.md` §12.3," which is false — no such row exists. Treat as
+unset/user-entered until researched (ISSUES.md ISS-9). The tool must let the user edit
+this value; if the calculated IRR meets or exceeds whatever hurdle the user sets, the
+investment outlook is scored as "Strong / Viable" (subject to other qualitative checks).
 
 Do not hardcode unsupported assumptions without sources.
 
@@ -1387,20 +1401,38 @@ Confidence: Medium.
 Applicability: Use only as directional context. Prefer your own hospital’s utilization estimate.
 ```
 
-### 23.4 UI pattern
+### 23.4 UI pattern (Click-to-Open Tooltip Callout)
 
-Use question-mark icons beside fields.
+Hover-based tooltips are rejected due to poor touch-screen and mobile support. The tool must implement click-triggered callout popovers:
 
-On hover/click:
+*   **Trigger**: A small `?` question-mark circle icon next to each complex input label.
+*   **Behavior**: Clicking the trigger toggles a small relative callout box (popover dialog). Clicking outside or clicking a close button dismisses it.
+*   **Central Registry**: Control type classifications (sliders vs. static input boxes), slider bounds, and tooltip texts are stored cohesively in [inputs-metadata.json](file:///Users/jay/Documents/Roi_Calculator/content/inputs-metadata.json) to avoid duplication. The actual default *values* are not stored there — they live in `equipment-data/<type>.json` (equipment-specific) or `equipment-data/common-assumptions.json` (shared), each carrying its own confidence/sourceId, per the fix in ISSUES.md ISS-9.
+*   **Content Schema**: Each popover contains:
+    1.  **Professional Definition**: Standard business/medical description of the variable.
+    2.  **Default Value**: Sourced from `data-requirements.md` benchmarks where one exists (e.g., 13 years useful life for diagnostics per Companies Act, S8, High confidence). Where no benchmark exists (e.g., discount rate, target IRR, usage per day — see ISSUES.md ISS-9), the popover must say so explicitly ("no benchmark available, enter your own estimate") rather than showing a number that looks sourced but isn't.
+    3.  **Higher Value Impact**: Clear description of what increasing this variable does to ROI, NPV, payback, or risk.
+    4.  **Lower Value Impact**: Clear description of what decreasing this variable does to the financial model.
 
-```text
-What does this mean?
-Typical range
-Source note
-Confidence level
-How to estimate this if unknown
-Why this assumption matters
-```
+### 23.5 Control Types: Sliders vs. Input Boxes
+
+Input controls are categorized to balance interactive scenario modeling with numeric precision:
+
+*   **Sliders**: Used for highly dynamic operational variables that users "play with" to observe real-time chart updates:
+    *   *Usage per Day* (scans/sessions/procedures)
+    *   *Average Billed Tariff per Use* (INR scan price)
+    *   *Working Days per Month* (Days)
+    *   *Moratorium / Launch Delay* (Months)
+    *   *Payer Mix %* (linked sliders summing to 100%)
+*   **Input Boxes**: Used for precise capital, structural, and financial benchmarks:
+    *   *Purchase Cost (Capex)* (INR)
+    *   *Salvage Value %* (Percentage)
+    *   *Useful Life (Years)* (Years)
+    *   *Consumables Cost per Use* (INR)
+    *   *Professional Fee per Use* (INR)
+    *   *Fixed Monthly Operating Costs* (INR)
+    *   *Financing Interest Rate %* and *Tenure* (Months)
+    *   *Discount Rate %* and *Target Hurdle IRR %*
 
 ---
 
@@ -1529,6 +1561,28 @@ Tabular numerals
 ```
 
 This can make financial values feel more structured and serious.
+
+### 25.5 Interactive Component Specifications (Sliders & Tooltip Callouts)
+
+All interactive UI components are built using the following design specifications, mapped directly to variables in `tokens.css`:
+
+#### A. Slider Styling (Custom Range Inputs)
+*   **Track Height / Thickness**: `4px` (for a thin, clean look) or `6px` on active focus.
+*   **Track Color**: Background track `var(--border-subtle)` (`#E6E4E0`); active fill track `var(--status-neutral)` (`#3E5C76`).
+*   **Thumb Shape**: Perfect circle, diameter `18px` or `20px`.
+*   **Thumb Color**: Solid `var(--accent-navy)` (`#1E2A3A`) outer boundary with a `4px` concentric center dot of `var(--bg-primary)` (`#FFFFFF`).
+*   **Hover & Focus State**: Thumb scales to `22px` on hover. Focus adds a soft ring of `0 0 0 3px var(--status-neutral-bg)` (`rgba(62, 92, 118, 0.15)`).
+*   **Value Indicator**: The numerical value is displayed directly above or adjacent to the slider in `var(--font-mono)` with a medium weight (`500`).
+
+#### B. Tooltip Callout Box Styling (Popover Dialogs)
+*   **Dimensions**: Auto width with a maximum width of `280px` (or `320px` on larger screens) to prevent blocking main content.
+*   **Background**: Solid `var(--bg-primary)` (`#FFFFFF`).
+*   **Border & Radius**: `1px solid var(--border-default)` (`#D8D6D1`); radius `var(--radius-sm)` (`6px`).
+*   **Shadow Elevation**: Standard `var(--shadow-modal)` (`0 4px 16px rgba(28, 28, 26, 0.10)`) for crisp elevation against off-white panels.
+*   **Padding**: `12px` padding on all sides, standard typography sizing (body text `12px` or `13px`, headings `14px`).
+*   **Relative Alignment**: Renders dynamically above or below the `?` icon. Displays a small CSS triangle arrow pointing directly at the trigger icon.
+*   **Dismissal**: Dismissed by clicking outside, clicking the close `x` icon, or clicking the trigger again.
+*   **Typography**: Popover title in `var(--font-ui)` bold; numeric values/benchmarks formatted in `var(--font-mono)` (`#1C1C1A`); general copy in `var(--text-secondary)` (`#5C5B57`).
 
 ---
 

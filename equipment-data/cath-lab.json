@@ -1,13 +1,14 @@
 {
-  "_status": "placeholder - not real data, see equipment-data/README.txt and ISSUES.md ISS-3",
+  "_status": "partially populated (2026-07-07 second research pass) - see data-requirements.md \u00a717 and ISSUES.md ISS-9",
   "equipmentType": "cath-lab",
   "purchaseCost": {
     "low": null,
-    "typical": null,
+    "typical": 9,
     "high": null,
-    "unit": "INR",
-    "confidence": null,
-    "sourceId": null
+    "unit": "INR (Crore)",
+    "confidence": "Low",
+    "sourceId": "S13",
+    "note": "Single Indian government-hospital project estimate (2022), configuration (single-plane vs biplane) unspecified. International USD pricing provides supplementary context only, NOT converted to INR per this project's rule against silent currency conversion: new single-plane $1-2M, new biplane $2-4M (S27); refurbished $200k-1.2M depending on configuration (S27,S35). Indian landed cost would add import duty/GST/logistics not reflected in these USD figures."
   },
   "usefulLifeYears": null,
   "salvageValuePercentage": null,
@@ -18,10 +19,34 @@
   "typicalUtilization": {
     "usagePerDay": null,
     "workingDaysPerMonth": null,
-    "rampUpMonths": null
+    "rampUpMonths": null,
+    "_usagePerDayRange": {
+      "low": 2,
+      "high": 6,
+      "confidence": "Low",
+      "sourceId": "S27",
+      "note": "Vendor guidance, not empirical. Blends two different procedure types: 4-6 diagnostic catheterizations/day OR 2-4 PCI/interventional procedures/day. Consistent with data-requirements.md \u00a713.3's existing caution that cath lab needs procedure-mix modeling, not one blended average."
+    }
   },
   "financingNorms": {
     "typicalLoanTenureYears": null,
     "typicalInterestRateRange": null
+  },
+  "billedTariffPerUse": {
+    "low": null,
+    "typical": null,
+    "high": null,
+    "unit": "INR",
+    "confidence": null,
+    "sourceId": null
+  },
+  "launchDelayMonths": {
+    "low": 4,
+    "typical": 6,
+    "high": 8,
+    "unit": "months",
+    "confidence": "Low-Medium",
+    "sourceId": "S27",
+    "note": "Vendor guide breakdown: 3-6mo room construction + 2-4wk equipment delivery + 2-4wk installation/calibration + 1-2wk commissioning/training. Not empirical, but a detailed, plausible breakdown."
   }
 }
