@@ -5,7 +5,7 @@ export function billedMonthlyRevenue(
   averageBilledRevenuePerUse: number,
   workingDaysPerMonth: number
 ): number {
-  throw new Error("not implemented");
+  return usagePerDay * averageBilledRevenuePerUse * workingDaysPerMonth;
 }
 
 export function monthlyRealizedRevenue(
@@ -13,5 +13,5 @@ export function monthlyRealizedRevenue(
   realizedRevenuePerUse: number,
   workingDaysPerMonth: number
 ): number {
-  throw new Error("not implemented");
+  return usagePerDay * realizedRevenuePerUse * workingDaysPerMonth;
 }

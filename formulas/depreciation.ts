@@ -5,5 +5,5 @@ export function annualStraightLineDepreciation(
   salvageValue: number,
   usefulLifeYears: number
 ): number {
-  throw new Error("not implemented");
+  return (purchaseCost - salvageValue) / usefulLifeYears;
 }
