@@ -1,19 +1,21 @@
 {
-  "_status": "partially populated - see ISSUES.md ISS-9 before treating any value here as final",
-  "_note": "Holds financial-model assumptions that are NOT equipment-specific (SPEC.md §11.1.F / §18) — same value would otherwise be repeated identically across every equipment-data/*.json file. Equipment-specific benchmarks (purchase cost, useful life, utilization, tariff, launch delay) stay in the per-equipment files, not here.",
+  "_status": "partially populated (2026-07-07 second research pass) - see ISSUES.md ISS-9/data-requirements.md \u00a717 before treating any value here as final",
+  "_note": "Holds financial-model assumptions that are NOT equipment-specific (SPEC.md \u00a711.1.F / \u00a718) \u2014 same value would otherwise be repeated identically across every equipment-data/*.json file. Equipment-specific benchmarks (purchase cost, useful life, utilization, tariff, launch delay) stay in the per-equipment files, not here.",
   "discountRate": {
-    "value": null,
+    "low": 11.1,
+    "typical": 12.5,
+    "high": 14.1,
     "unit": "% p.a.",
-    "confidence": "Unavailable",
-    "sourceId": null,
-    "note": "No source for this exists in data-requirements.md. A prior draft cited data-requirements.md §12.3 for a 12.0% default — that citation was false (§12.3 has no discount-rate row). Needs real research: WACC/cost-of-capital benchmark for Indian private healthcare capex. See ISSUES.md ISS-9."
+    "confidence": "Medium",
+    "sourceId": "S22,S23",
+    "note": "Proxy from listed-Indian-hospital-chain WACC (S22: HCG 12.2%, KMC 12.1%, Apollo 12.4%, Fortis 14.1%, Narayana 12.4%, Max 13.5%) plus one analyst DCF assumption (S23: 11.1%). Not an equipment-project-specific discount rate -- a company-level proxy. See data-requirements.md \u00a717.1. typical=12.5 is the rounded midpoint of the 12-13% cluster, not itself a quoted figure."
   },
   "targetIrr": {
     "value": null,
     "unit": "% p.a.",
     "confidence": "Unavailable",
     "sourceId": null,
-    "note": "Same fabricated-citation problem as discountRate (was wrongly attributed to §12.3 at 15.0%). Needs real research: typical hurdle-rate/target-equity-return benchmark for Indian private healthcare capex. See ISSUES.md ISS-9."
+    "note": "Confirmed unresearchable across two research passes (data-requirements.md \u00a717.2) -- no Indian hospital/investor hurdle-rate benchmark is publicly disclosed anywhere. Suggested UI guidance (a methodology, not a benchmark): offer discount rate + 300-500bps as a starting-point heuristic the user can override, clearly labeled as a suggestion, not a researched number."
   },
   "loanInterestRate": {
     "low": 8,
@@ -22,7 +24,7 @@
     "unit": "% p.a.",
     "confidence": "Low-Medium",
     "sourceId": "S11,S12",
-    "note": "S11 (Bajaj) gives up to 14% p.a.; S12 (Tata Capital) gives a broad 8-15% market range. data-requirements.md recommends this as sensitivity_range, not a clean single default — 11.5 is a derived midpoint of the cited ranges, not a quoted figure. UI must show it as an editable range with this confidence, not as a silent single default, and must prefer the user's actual lender quote per data-requirements.md §7.3."
+    "note": "S11 (Bajaj) gives up to 14% p.a.; S12 (Tata Capital) gives a broad 8-15% market range. data-requirements.md recommends this as sensitivity_range, not a clean single default \u2014 11.5 is a derived midpoint of the cited ranges, not a quoted figure. UI must show it as an editable range with this confidence, not as a silent single default, and must prefer the user's actual lender quote per data-requirements.md \u00a77.3."
   },
   "loanTenureMonths": {
     "low": 12,
@@ -38,6 +40,6 @@
     "unit": "days",
     "confidence": "N/A - modeling convention, not a researched benchmark",
     "sourceId": null,
-    "note": "Generic calendar assumption (25 working days assumes Sunday closure), classified as a 'safe default' under data-requirements.md §7.1, not a sourced benchmark. Always editable; do not present as researched."
+    "note": "Generic calendar assumption (25 working days assumes Sunday closure), classified as a 'safe default' under data-requirements.md \u00a77.1, not a sourced benchmark. Always editable; do not present as researched."
   }
 }

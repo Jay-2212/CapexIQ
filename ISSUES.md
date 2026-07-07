@@ -46,12 +46,22 @@ interest rate/tenure, working days/month) moved to new
 `equipment-data/common-assumptions.json`, each with honest confidence/sourceId — the
 false-citation numbers are now `null`/`"Unavailable"` instead of looking sourced.
 SPEC.md §18.2/§18.3 and §23.4 corrected to stop asserting the false citation.
-**Next action:** a deep-research pass is needed to actually fill the now-`null` gaps
-(usage/day by equipment+bed-size+city-tier, billed tariff per equipment, discount
-rate/hurdle-rate benchmark for Indian private healthcare capex, launch delay by
-equipment type) — see the research prompt prepared alongside this fix. Until that
-lands, Phase 1 of `agent-build-plan.md` cannot fill these fields without repeating the
-same mistake.
+**Update (2026-07-07):** a deep-research pass (ChatGPT Deep Research, see
+data-requirements.md §17 for full findings) came back and filled most of the null
+gaps with real, cited data: discount rate (11.1-14.1% proxy from listed hospital-chain
+WACC), MRI/dialysis utilization, CGHS reimbursement-ceiling tariffs for CT/MRI/
+Ultrasound/Dialysis, MRI/CT/Cath-Lab launch-delay ranges, and a real per-machine
+dialysis acquisition-cost figure from a government tender. All propagated into
+`equipment-data/*.json` and `common-assumptions.json` with honest confidence/sourceId,
+replacing the `null`s. **Still genuinely unavailable after two research passes:**
+target IRR/hurdle rate (confirmed unresearchable, no public source exists — see §17.2),
+Cath Lab tariff (no data found at all), Dialysis and Ultrasound launch delay, and
+standalone (non-PET) CT utilization (only a weak proxy exists). These remain `null`/
+`"Unavailable"` deliberately, not from oversight.
+**Status:** downgraded to **accepted** for the fields now populated; **open** only for
+the still-genuinely-unavailable fields above, which should stay user-entered per
+data-requirements.md §7.3 rather than trigger a third research pass unless a
+significantly better source turns up.
 **Process note:** this is the second time a parallel/unsupervised agent session
 introduced an inconsistency this project's own docs were built to prevent (see ISS-7
 for the first). Per user direction (2026-07-06): going forward, build-plan and

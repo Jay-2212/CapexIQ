@@ -1,5 +1,5 @@
 {
-  "_status": "placeholder - not real data, see equipment-data/README.txt and ISSUES.md ISS-3",
+  "_status": "partially populated (2026-07-07 second research pass) - see data-requirements.md \u00a717 and ISSUES.md ISS-9",
   "equipmentType": "ct",
   "purchaseCost": {
     "low": null,
@@ -18,24 +18,35 @@
   "typicalUtilization": {
     "usagePerDay": null,
     "workingDaysPerMonth": null,
-    "rampUpMonths": null
+    "rampUpMonths": null,
+    "_usagePerDayRange": {
+      "low": 15,
+      "high": 30,
+      "confidence": "Low-Medium",
+      "sourceId": "S26",
+      "note": "No genuine Indian standalone-CT utilization study found. low=15 is scans/day/scanner derived from an AIIMS PET/CT cost analysis (PET/CT throughput is not directly comparable to standard CT). high=30 is an unsourced 'engineering guide' estimate. Left as a range, not a single typical value, given the weak sourcing."
+    }
   },
   "financingNorms": {
     "typicalLoanTenureYears": null,
     "typicalInterestRateRange": null
   },
   "billedTariffPerUse": {
-    "low": null,
+    "low": 880,
     "typical": null,
-    "high": null,
+    "high": 1035,
     "unit": "INR",
-    "confidence": null,
-    "sourceId": null
+    "confidence": "Medium",
+    "sourceId": "S29",
+    "note": "CT head/brain (plain) CGHS reimbursement ceiling -- a government-scheme floor, NOT a private cash tariff. Other CT procedures price very differently: with contrast ~1870/2200, chest/HRCT ~1700/2000, whole abdomen with contrast ~4399/5175. This field anchors to plain head/brain as the baseline only. Stale (2013) private-hospital data point for context (S31): CT head ~INR 900, CT chest/abdomen ~INR 1200 -- 13 years old, do not use as a current default."
   },
   "launchDelayMonths": {
-    "value": null,
+    "low": 1,
+    "typical": null,
+    "high": 2.5,
     "unit": "months",
-    "confidence": null,
-    "sourceId": null
+    "confidence": "Low",
+    "sourceId": "S33,S34",
+    "note": "Delivery-to-first-scan once site is ready is only 3-5 days (S33); the dominant driver is AERB radiation approval, qualitatively described as 'a few weeks to a couple of months' with no exact source figure (S34, approximated here as 3-6 weeks). Does NOT include civil/room-shielding construction time itself, which no source quantified -- real-world total launch delay is likely higher than this range alone."
   }
 }

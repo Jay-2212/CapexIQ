@@ -35,7 +35,7 @@
     "defaultSource": "equipment-data/<type>.json#typicalUtilization.usagePerDay",
     "tooltip": {
       "definition": "The average number of patient procedures or scan sessions performed on the machine per working day.",
-      "defaultExplanation": "Hospital-specific utilization by bed size/city tier is a genuinely unresearched gap (data-requirements.md §15) — this field has no safe default. Enter your own estimate; see equipment-data/<type>.json for any sourced benchmark once available.",
+      "defaultExplanation": "Confidence varies a lot by equipment (see equipment-data/<type>.json and data-requirements.md §17.3): MRI has a real Indian study (23/day) and Dialysis has an official design-capacity norm (3 sessions/machine/day), but CT is proxy-only, Cath Lab is vendor-guidance-only, and Ultrasound has no Indian data at all. Always prefer your own hospital's estimate over any of these.",
       "higherImpact": "Linearly increases billed and realized revenue, boosting operating surplus, NPV, and IRR.",
       "lowerImpact": "Reduces revenue; if usage falls below the break-even threshold, the investment becomes financially non-viable."
     }
@@ -50,7 +50,7 @@
     "defaultSource": "equipment-data/<type>.json#billedTariffPerUse",
     "tooltip": {
       "definition": "The average gross price billed per procedure before adjusting for insurance deductions, scheme discounts, or collection delays.",
-      "defaultExplanation": "See equipment-data/<type>.json for any sourced tariff benchmark and its confidence level; several equipment types (cath lab, ultrasound) have no reliable tariff source yet per data-requirements.md §15 and require user entry.",
+      "defaultExplanation": "CT/MRI/Ultrasound/Dialysis have Medium-confidence CGHS reimbursement-ceiling figures (data-requirements.md §17.4) — treat these as a directional floor, not a private cash tariff, since private hospitals typically charge more. Cath Lab still has no tariff data from any research pass and requires user entry.",
       "higherImpact": "Boosts operating margins and average realized revenue per scan, reducing the daily usage count needed to break even.",
       "lowerImpact": "Shrinks margins and raises the daily break-even threshold."
     }
@@ -77,7 +77,7 @@
     "defaultSource": "equipment-data/common-assumptions.json#discountRate",
     "tooltip": {
       "definition": "The interest rate used to discount future cash flows back to their present value, representing the hospital's Cost of Capital.",
-      "defaultExplanation": "Unavailable — no sourced benchmark exists yet (see ISSUES.md ISS-9). Must be entered/confirmed by the user until a real WACC benchmark for Indian private healthcare capex is researched.",
+      "defaultExplanation": "Medium confidence, 11.1-14.1% range (typical 12.5%) — a proxy from listed Indian hospital chains' WACC, not an equipment-project-specific figure (data-requirements.md §17.1, see common-assumptions.json). Confirm against your own hospital's actual cost of capital where known.",
       "higherImpact": "Heavily discounts cash flows received in later years, reducing the calculated NPV.",
       "lowerImpact": "Preserves the value of future cash flows, resulting in a higher calculated NPV."
     }
@@ -89,7 +89,7 @@
     "defaultSource": "equipment-data/common-assumptions.json#targetIrr",
     "tooltip": {
       "definition": "The minimum acceptable Internal Rate of Return required by hospital management to approve the investment.",
-      "defaultExplanation": "Unavailable — no sourced benchmark exists yet (see ISSUES.md ISS-9). Must be entered/confirmed by the user until a real hurdle-rate benchmark for Indian private healthcare capex is researched.",
+      "defaultExplanation": "Unavailable — confirmed unresearchable across two research passes (data-requirements.md §17.2); no Indian hospital/investor hurdle-rate benchmark is publicly disclosed anywhere. Suggested starting point: discount rate + 300-500bps, clearly as a heuristic, not a benchmark. Must be entered/confirmed by the user.",
       "higherImpact": "Sets a stricter hurdle, making it more difficult for a project to score a 'Strong' Investment Outlook.",
       "lowerImpact": "Relaxes the hurdle, allowing moderate-return projects to be marked viable."
     }
@@ -128,7 +128,7 @@
     "defaultSource": "equipment-data/<type>.json#launchDelayMonths",
     "tooltip": {
       "definition": "The setup time required for site preparation, civil/shielding work, licensing/regulatory approval, and installation before first revenue-generating use.",
-      "defaultExplanation": "No sourced benchmark exists yet per equipment type — see equipment-data/<type>.json. Enter your own estimate based on civil work, AERB/licensing, and vendor installation timelines.",
+      "defaultExplanation": "MRI, CT, and Cath Lab now have Low-to-Medium-confidence vendor/consultant-sourced ranges (data-requirements.md §17.5); Dialysis and Ultrasound remain unavailable. See equipment-data/<type>.json for the value applied per equipment.",
       "higherImpact": "Extends the pre-revenue period, increasing pre-operative interest and the initial working capital gap.",
       "lowerImpact": "Achieves faster commercial operations, reducing pre-opening cash losses."
     }

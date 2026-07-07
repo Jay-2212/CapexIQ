@@ -1,5 +1,5 @@
 {
-  "_status": "placeholder - not real data, see equipment-data/README.txt and ISSUES.md ISS-3",
+  "_status": "partially populated (2026-07-07 second research pass) - see data-requirements.md \u00a717 and ISSUES.md ISS-9",
   "equipmentType": "ultrasound",
   "purchaseCost": {
     "low": null,
@@ -18,24 +18,30 @@
   "typicalUtilization": {
     "usagePerDay": null,
     "workingDaysPerMonth": null,
-    "rampUpMonths": null
+    "rampUpMonths": null,
+    "_usagePerDayRange": {
+      "confidence": "Unavailable",
+      "note": "No published Indian data exists. An unsourced international inference (15-30min/exam -> 16-32 scans/day) was explicitly flagged by the research pass as lacking an authoritative India source -- not used as a default."
+    }
   },
   "financingNorms": {
     "typicalLoanTenureYears": null,
     "typicalInterestRateRange": null
   },
   "billedTariffPerUse": {
-    "low": null,
+    "low": 680,
     "typical": null,
-    "high": null,
+    "high": 800,
     "unit": "INR",
-    "confidence": null,
-    "sourceId": null
+    "confidence": "Medium",
+    "sourceId": "S29",
+    "note": "Ultrasound whole-abdomen CGHS reimbursement ceiling -- a government-scheme floor, NOT a private cash tariff. Pelvis (~425/500) and small-parts (~655/770) studies price lower -- this field anchors to whole-abdomen as the baseline."
   },
   "launchDelayMonths": {
     "value": null,
     "unit": "months",
-    "confidence": null,
-    "sourceId": null
+    "confidence": "Unavailable",
+    "sourceId": null,
+    "note": "No formal timeline study found. Informal claim only: portable units need minimal site work and are 'usually usable immediately' -- not a quantified figure."
   }
 }

@@ -1,12 +1,19 @@
 Equipment assumption data files — CapexIQ (per SPEC.md §32.1: "equipment assumptions
 should live in editable data files").
 
-Status: schema-shaped placeholders only, not real data. See ISSUES.md ISS-3.
+Status: partially populated as of 2026-07-07 — purchaseCost/usefulLifeYears/salvage/
+installation/warranty/cmc/amc/financing fields are still schema-shaped placeholders
+(the original §14 starter pass hasn't been fully applied yet, see ISSUES.md ISS-3);
+typicalUtilization.usagePerDay, billedTariffPerUse, and launchDelayMonths were
+populated from a second research pass (data-requirements.md §17) and cath-lab/dialysis
+purchaseCost were also updated from that pass. Several fields remain deliberately null
+where two research passes confirmed no real data exists (see each file's own field
+notes and ISSUES.md ISS-9) — don't fill those with an invented number.
 
 Each file should be populated from data-requirements.md §14's starter assumptions
-table (equipment_type / metric / value range / unit / confidence / source_id) — don't
-invent numbers, and don't treat §14 values as final without checking their confidence
-column.
+table plus §17's second-pass findings (equipment_type / metric / value range / unit /
+confidence / source_id) — don't invent numbers, and don't treat any value as final
+without checking its confidence column.
 
 Files: mri.json, ct.json, cath-lab.json, dialysis.json, ultrasound.json, custom.json
 (matches SPEC.md §9's v1 equipment scope). Each also carries `billedTariffPerUse` and

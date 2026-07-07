@@ -11,7 +11,7 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-07-06)*
+*(Last updated: 2026-07-07)*
 
 **Where things stand:** Product is **CapexIQ**, tagline "Know if it pays for itself,
 before you buy it.", living at `capexiq.jaybharti.me` (confirmed resolving, HTTP 200).
@@ -54,14 +54,36 @@ recompute → chart re-render, shared by both the wizard's live preview and the
 dashboard's Advanced settings pane) — and Phase 6 implements Part B rather than
 inventing its own behavior.
 
-**What's next:** Get the deep-research pass done (prompt ready, see this session's
-conversation) to fill the now-null gaps in `equipment-data/`. Once that lands, Phase 1
-(equipment data) and Phase 2 (formula engine) of `agent-build-plan.md` can proceed in
-parallel — Phase 2's Group A formulas (pure, no data dependency) can actually start
-immediately, independent of the research pass.
+**Second research pass landed (2026-07-07):** a Deep Research pass (delivered as a PDF,
+now deleted per the single-source-of-truth rule — its content is fully captured in
+`data-requirements.md` §17) filled most of ISS-9's gaps with real, cited data: discount
+rate (11.1-14.1% proxy from listed Indian hospital-chain WACC, typical 12.5%), MRI
+utilization (23 scans/day, real Indian study) and Dialysis utilization (3
+sessions/machine/day, official design-capacity norm), CGHS reimbursement-ceiling
+tariffs for CT/MRI/Ultrasound/Dialysis (a floor, not a private cash price — flagged
+everywhere), MRI/CT/Cath-Lab launch-delay ranges, and a real per-machine dialysis
+acquisition cost (₹11.5 lakh, 2022 government tender). Propagated into
+`equipment-data/*.json` and `common-assumptions.json` with confidence/sourceId intact.
+**Still genuinely unavailable after two passes** (deliberately `null`, not oversight):
+target IRR/hurdle rate, Cath Lab tariff, Dialysis/Ultrasound launch delay,
+standalone-CT utilization (only a PET/CT proxy exists). `content/inputs-metadata.json`
+tooltip copy updated to match — it still holds zero numbers itself, per its design.
 
-**Anything blocking or half-finished:** Nothing blocking. Today's doc changes are
-uncommitted/unpushed as of this entry — see the open PR for this cleanup.
+Separately, Codex has been implementing Phase 2 Group A formulas
+(`depreciation.ts`/`emi.ts`/`revenue.ts`/`breakEven.ts`/`npv.ts`/`irr.ts` + tests) in
+the main working copy — not yet reviewed/committed by this session, flagged so it isn't
+lost or duplicated.
+
+**What's next:** Phase 1 (equipment data) is now meaningfully further along — the
+remaining placeholder fields (purchaseCost/usefulLifeYears/etc. for MRI/CT/ultrasound,
+salvage/installation/warranty/cmc/amc across all equipment) still need the original
+§14 starter-table pass applied; that's a smaller, well-scoped remainder now. Phase 2's
+Group A formulas are in progress via Codex (see above, needs review). Once both land,
+Phase 3 (content/copy) and Phase 4 (interactive state design) can proceed.
+
+**Anything blocking or half-finished:** Nothing blocking. This session's doc changes
+are on the open PR (see below); Codex's formula work in the main checkout is
+uncommitted and not yet folded in.
 
 ---
 
@@ -88,6 +110,43 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-07 — Deep Research pass (2nd) integrated into data-requirements.md; equipment-data populated; PDF removed
+**What changed:** Read the Deep Research agent's 9-page PDF ("CapexIQ Benchmark
+Research", delivered by the user, sourced by a ChatGPT Deep Research agent per the
+prompt this project prepared on 2026-07-06) and integrated its findings as the new
+`data-requirements.md` §17 (with §12.2's source register extended to S22-S36, and §16's
+priority list marked resolved/still-open per item). Findings: discount rate now has a
+real proxy benchmark (11.1-14.1%, typical 12.5%, from listed Indian hospital-chain
+WACC); MRI utilization (23 scans/day, real single-hospital study) and Dialysis
+utilization (3 sessions/machine/day, official MoHFW design-capacity norm); CGHS
+Oct-2025 reimbursement-ceiling tariffs for CT/MRI/Ultrasound (explicitly flagged as a
+government-scheme floor, not a private cash tariff) and a separate CGHS dialysis tariff
+document; MRI/CT/Cath-Lab launch-delay ranges; and a real per-machine dialysis
+acquisition cost (₹11.5 lakh, 2022 government tender, meaningfully stronger than the
+prior single-procurement estimate). Confirmed still-genuinely-unavailable (not
+oversight): target IRR/hurdle rate, Cath Lab tariff (no data found at all in either
+pass), Dialysis/Ultrasound launch delay, standalone (non-PET) CT utilization. Two
+internal inconsistencies in the research output itself were caught and noted rather
+than silently trusted: a "WACC range summary" row that didn't match the individual
+data points it was drawn from, and several CGHS NABH-tariff table values that
+contradicted the same document's own prose figures (prose used as ground truth).
+Propagated all of this into `equipment-data/*.json` (mri/ct/cath-lab/dialysis/
+ultrasound) and `common-assumptions.json` with confidence/sourceId intact, refreshed
+`content/inputs-metadata.json`'s tooltip copy to match (still zero numbers there, by
+design), updated `ISSUES.md` ISS-9's status, and deleted the source PDF from the repo
+per the project's single-source-of-truth rule (its content is now fully captured in
+`data-requirements.md`, not living alongside it as a second document).
+**Files touched:** `data-requirements.md` (§12.2 extended, §16 updated, new §17),
+`equipment-data/mri.json`, `equipment-data/ct.json`, `equipment-data/cath-lab.json`,
+`equipment-data/dialysis.json`, `equipment-data/ultrasound.json`,
+`equipment-data/common-assumptions.json`, `equipment-data/README.txt`,
+`content/inputs-metadata.json`, `ISSUES.md`, `HANDOFF.md` (this entry + Current State).
+Deleted: `CapexIQ Benchmark Research.pdf`.
+**What's next:** apply data-requirements.md §14's original starter-table pass to the
+remaining placeholder fields (purchaseCost/usefulLifeYears/salvage/installation/
+warranty/cmc/amc) not touched by this second pass. Review and fold in Codex's Phase 2
+Group A formula work sitting uncommitted in the main checkout.
 
 ### 2026-07-06 — Cleaned up invented benchmark numbers (ISS-9); streamlined build-plan Phase 4/6
 **What changed:** Audited the prior session's `content/inputs-metadata.json` and found

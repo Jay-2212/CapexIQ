@@ -1,13 +1,14 @@
 {
-  "_status": "placeholder - not real data, see equipment-data/README.txt and ISSUES.md ISS-3",
+  "_status": "partially populated (2026-07-07 second research pass) - see data-requirements.md \u00a717 and ISSUES.md ISS-9",
   "equipmentType": "dialysis",
   "purchaseCost": {
-    "low": null,
-    "typical": null,
-    "high": null,
-    "unit": "INR",
-    "confidence": null,
-    "sourceId": null
+    "low": 10,
+    "typical": 11.5,
+    "high": 11.5,
+    "unit": "INR (Lakh)",
+    "confidence": "Medium",
+    "sourceId": "S36",
+    "note": "2022 government tender (Indian Embassy, Nepal): 200 hemodialysis machines + 60 RO systems, total INR 23.49 crore, implying INR 11.5 lakh/machine. Caveats: (1) bulk-procurement price (200 units) -- a private hospital buying 1-2 units may pay more; (2) the total bundles RO/water-treatment systems across the machines, so this per-machine figure likely includes some pro-rata site/RO cost, not a bare machine-only price."
   },
   "usefulLifeYears": null,
   "salvageValuePercentage": null,
@@ -16,26 +17,33 @@
   "cmcYears": null,
   "amcAnnualCostPercentage": null,
   "typicalUtilization": {
-    "usagePerDay": null,
+    "usagePerDay": 3,
     "workingDaysPerMonth": null,
-    "rampUpMonths": null
+    "rampUpMonths": null,
+    "_usagePerDayRange": {
+      "confidence": "Medium",
+      "sourceId": "S28",
+      "note": "MoHFW/NITI official planning guideline: three 4-hour shifts/machine/day = 3 sessions/machine/day. This is a DESIGN-CAPACITY norm, not necessarily real-world utilization -- the same source notes real-world utilization 'may be lower in smaller facilities'."
+    }
   },
   "financingNorms": {
     "typicalLoanTenureYears": null,
     "typicalInterestRateRange": null
   },
   "billedTariffPerUse": {
-    "low": null,
+    "low": 1400,
     "typical": null,
-    "high": null,
+    "high": 1610,
     "unit": "INR",
-    "confidence": null,
-    "sourceId": null
+    "confidence": "Medium",
+    "sourceId": "S30",
+    "note": "Hemodialysis (seronegative) CGHS reimbursement ceiling -- a government-scheme floor, NOT a private cash tariff, from a different-vintage CGHS document (nominally 2014, updated 2024-02-05) than the imaging tariffs elsewhere in this file. Seropositive sessions price higher (~1650/1898), sustained low-efficiency lower (~1250/1438). A private-provider source (S19, from the original pass) gives ~1500-4000/session patient-cost content but explicitly cautions against use as a default -- not used here."
   },
   "launchDelayMonths": {
     "value": null,
     "unit": "months",
-    "confidence": null,
-    "sourceId": null
+    "confidence": "Unavailable",
+    "sourceId": null,
+    "note": "Confirmed unavailable across two research passes -- no credible source reports purchase-to-first-revenue duration for dialysis machines. Installation is mainly plumbing/water-treatment/staff training, but no duration figure was found."
   }
 }

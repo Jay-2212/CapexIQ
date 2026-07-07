@@ -1,5 +1,5 @@
 {
-  "_status": "placeholder - not real data, see equipment-data/README.txt and ISSUES.md ISS-3",
+  "_status": "partially populated (2026-07-07 second research pass) - see data-requirements.md \u00a717 and ISSUES.md ISS-9",
   "equipmentType": "mri",
   "purchaseCost": {
     "low": null,
@@ -16,26 +16,37 @@
   "cmcYears": null,
   "amcAnnualCostPercentage": null,
   "typicalUtilization": {
-    "usagePerDay": null,
+    "usagePerDay": 23,
     "workingDaysPerMonth": null,
-    "rampUpMonths": null
+    "rampUpMonths": null,
+    "_usagePerDayRange": {
+      "low": 20,
+      "high": 40,
+      "confidence": "Medium",
+      "sourceId": "S24,S25",
+      "note": "typical=23 is a real single-hospital Indian study (NIMS, tertiary teaching hospital -- a busy referral centre, may run higher than a typical smaller private setup). low/high=20/40 is global context (not India-specific)."
+    }
   },
   "financingNorms": {
     "typicalLoanTenureYears": null,
     "typicalInterestRateRange": null
   },
   "billedTariffPerUse": {
-    "low": null,
+    "low": 2338,
     "typical": null,
-    "high": null,
+    "high": 2750,
     "unit": "INR",
-    "confidence": null,
-    "sourceId": null
+    "confidence": "Medium",
+    "sourceId": "S29",
+    "note": "MRI head/brain (plain) CGHS reimbursement ceiling -- a government-scheme floor, NOT a private cash tariff (private hospitals typically charge more). Other body parts price differently (e.g. MRI knee ~2380/2800, MRI head with contrast ~4250/5000) -- this field anchors to the plain head/brain baseline only. A stale (2013) private-hospital data point exists for context (S31): ~INR 2500, 13 years old, do not use as a current default."
   },
   "launchDelayMonths": {
-    "value": null,
+    "low": 1.5,
+    "typical": 2,
+    "high": 2.5,
     "unit": "months",
-    "confidence": null,
-    "sourceId": null
+    "confidence": "Low-Medium",
+    "sourceId": "S32",
+    "note": "Converted from 6-10 weeks (civil work, RF shielding, magnet commissioning). Single vendor/supplier blog, not empirical. MRI does not require AERB licensing (non-ionizing)."
   }
 }
