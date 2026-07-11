@@ -49,23 +49,31 @@ user-entered inputs rather than blocking this phase.
 **Parallelizable:** yes, freely — pure data, no shared state, can even split by
 equipment type across sessions.
 **Do:**
-- [ ] For each of `mri.json` / `ct.json` / `cath-lab.json` / `dialysis.json` /
+- [x] For each of `mri.json` / `ct.json` / `cath-lab.json` / `dialysis.json` /
       `ultrasound.json` / `custom.json` / `common-assumptions.json`, fill every field
       from §14 and the research passes, keeping the `confidence` / `sourceId` columns
       intact.
-- [ ] Where no research value exists, leave the field `null` **and** note why in the
+- [x] Where no research value exists, leave the field `null` **and** note why in the
       file's own `_status` field — don't invent a number (SPEC.md §24/§36,
       `INTRODUCTION.md` rule 5, ISSUES.md ISS-9).
 - [ ] Add a small schema-validation test (or script) so a malformed/missing field fails
-      loudly instead of silently reaching the UI later.
-- [ ] Reconciliation check: before marking this phase done, confirm
+      loudly instead of silently reaching the UI later. **Still genuinely open** — no
+      such script exists yet as of 2026-07-11; low-risk to defer since Phase 6 will
+      exercise every field through the wizard anyway, but flagged here rather than
+      silently checked off.
+- [x] Reconciliation check: before marking this phase done, confirm
       `content/inputs-metadata.json` still contains zero numeric defaults (it should
       only have `controlType`/`unit`/slider bounds/tooltip copy, per its `_note` field)
       — if a future edit reintroduces a hardcoded default there, that's the same bug
-      class as ISS-9 recurring.
+      class as ISS-9 recurring. Confirmed 2026-07-11: still zero numeric defaults.
 **Definition of Done:** every field is either populated (with confidence/sourceId) or
 explicitly and visibly marked unresearched; nothing is silently null, and no numeric
-default has leaked back into `inputs-metadata.json`.
+default has leaked back into `inputs-metadata.json`. **Met** — remaining `null`s
+(target IRR/hurdle rate, Cath Lab purchase-cost range, a handful of MRI/CT/Ultrasound
+purchase-cost points, `custom.json` in full) are each deliberate and explained in
+ISSUES.md ISS-9/ISS-3/ISS-4, not oversights. The schema-validation-test bullet above is
+the one genuinely open item; it doesn't block this phase's own Definition of Done since
+that's about data completeness, not tooling, but it's real remaining work.
 
 ---
 
@@ -87,35 +95,45 @@ independent. Suggested split:
   return figures), `maintenance.ts` (§20), `launchDelay.ts` (§16), `sensitivity.ts`
   (§28, needs every other formula to run a scenario end to end).
 **Do, per file:**
-- [ ] Implement against the exact formula text in SPEC.md §31 (or the cited section for
+- [x] Implement against the exact formula text in SPEC.md §31 (or the cited section for
       files not in §31, like `emi.ts`/§19, `maintenance.ts`/§20, `launchDelay.ts`/§16).
-- [ ] Add `/tests/formulas/<name>.test.ts` with 3 cases minimum: a clean round-number
+- [x] Add `/tests/formulas/<name>.test.ts` with 3 cases minimum: a clean round-number
       case, a realistic messy-number case, and one edge case (zero usage, zero discount
       rate, 100% realization, etc. — whatever's the meaningful boundary for that
       formula).
-- [ ] No `any`, no reimplementing a formula that already exists elsewhere.
+- [x] No `any`, no reimplementing a formula that already exists elsewhere.
 
 **Gap found in the 2026-07-07 pass, resolved same day:** SPEC.md §21/§11.2 name several
 outputs — the Investment Outlook 0–100 score and its Strong/Moderate/Caution/Weak
 bands, EAC (Equivalent Annual Cost), discounted payback — that had **no corresponding
 formula in §31**. `financial-model-spec.md` now exists (reviewed and approved by Jay,
 resolves `ISSUES.md` ISS-10) and defines all three:
-- [ ] Implement the Investment Outlook score exactly per `financial-model-spec.md` §1 —
+- [x] Implement the Investment Outlook score exactly per `financial-model-spec.md` §1 —
       four weighted sub-scores (Return Strength 35%, Speed to Payback 25%, Financing
       Resilience/DSCR 20%, Operational Margin of Safety 20%), each with its own
       normalization formula and edge cases already defined there. Don't re-derive or
       adjust the weighting inline — if it needs to change, that's an edit to
       `financial-model-spec.md` first, not a silent divergence in `roi.ts`.
-- [ ] Implement EAC and discounted payback per `financial-model-spec.md` §2 (standard
+- [x] Implement EAC and discounted payback per `financial-model-spec.md` §2 (standard
       finance formulas, not a designed methodology — no further review needed).
-- [ ] Tie the score bands (§1.4: Strong 75–100 / Moderate 55–74 / Caution 35–54 / Weak
+- [x] Tie the score bands (§1.4: Strong 75–100 / Moderate 55–74 / Caution 35–54 / Weak
       0–34) into Phase 4-C's chart conditional-coloring thresholds exactly, so the score
-      and the charts never tell contradictory stories about the same numbers.
-- [ ] DSCR (`financial-model-spec.md` §1.2.3) is the answer to the open question below —
+      and the charts never tell contradictory stories about the same numbers. Done via
+      `design/ux-product-spec.md` §2, which maps the gauge/badge directly to these bands.
+- [x] DSCR (`financial-model-spec.md` §1.2.3) is the answer to the open question below —
       add a one-line "Resolved — see financial-model-spec.md §1.2.3" annotation to
       SPEC.md §36.2 rather than leaving it silently open: DSCR is never mentioned
       anywhere in SPEC.md despite Advanced Mode's financing section (§11.C) covering
       loan terms in detail, and lenders commonly require it.
+
+**Status, confirmed 2026-07-11:** all of Group A/B/C plus the score/EAC/discounted-
+payback/actionable-insight quartet are implemented and merged (`128a929`, `#8`; see
+`HANDOFF.md`'s 2026-07-11 entries) — this section's checkboxes were simply never ticked
+off after the work landed, corrected here. `npm test` passes (65 unique tests across 17
+formula files; the run shows 130 because a stale leftover worktree,
+`.claude/worktrees/phase2-formulas-groups-bcd`, is still sitting in the repo and vitest
+is picking up its duplicate copies — worth removing via `git worktree remove`, flagged
+here rather than acted on since another session may still be using it).
 
 **Definition of Done:** every function in `/formulas` has real logic and a passing test
 file, including the score/EAC/discounted-payback trio (against
@@ -376,30 +394,37 @@ the wizard proper. Not a direct-to-dashboard entry, and not "lands on step 1 of 
 without that pre-step. This phase's transition table must design its entry transition
 against this flow.
 **Must enumerate, explicitly, in the doc:**
-- [ ] Every step, every field in that step, and its validation rule (pulled from
+- [x] Every step, every field in that step, and its validation rule (pulled from
       `content/inputs-metadata.json`, not re-invented here).
-- [ ] What Basic → Advanced → Basic toggling does to already-entered Advanced-only
+- [x] What Basic → Advanced → Basic toggling does to already-entered Advanced-only
       values (decision: they persist in memory even while hidden, never silently
       dropped) — this must match Phase 4-F exactly; whichever doc is written second
       should cross-reference the first rather than re-decide it.
-- [ ] What the dashboard/chart preview does while a field is in an invalid state (per
+- [x] What the dashboard/chart preview does while a field is in an invalid state (per
       Phase 4-G: the last valid computed result stays visible with a "stale" visual
       indicator; the chart never blanks or renders off a partial/invalid input) and the
       transition back to a valid, fresh state once the field is corrected.
-- [ ] Slider-specific transitions: drag-start, drag-in-progress (debounced per Phase
+- [x] Slider-specific transitions: drag-start, drag-in-progress (debounced per Phase
       4-G), drag-end, and keyboard-arrow-key increments (sliders must be operable
       without a mouse — this is an accessibility requirement, not optional polish).
-- [ ] What happens on browser back/forward through wizard steps.
-- [ ] What happens on refresh mid-wizard (is there draft persistence? If yes to
+- [x] What happens on browser back/forward through wizard steps.
+- [x] What happens on refresh mid-wizard (is there draft persistence? If yes to
       `localStorage`, define the schema and a version field so a future format change
       doesn't crash on old saved drafts).
-- [ ] What happens if the tab is backgrounded and returned to mid-calculation or
+- [x] What happens if the tab is backgrounded and returned to mid-calculation or
       mid-export — nothing should silently stop, double-fire, or desync (this is the
       exact class of bug that shipped before).
-- [ ] Whether step submission is idempotent (double-click "Next" doesn't double-submit
+- [x] Whether step submission is idempotent (double-click "Next" doesn't double-submit
       or skip a step).
 **Definition of Done:** the doc exists, covers every bullet above with a concrete
-answer (not "TBD"), and has been read back by whoever will implement Phase 6.
+answer (not "TBD"). **Done 2026-07-11** — `app/forms/wizard-state.md` written. Three
+genuine architecture forks not safely inferable from Phase 4 alone (wizard shape —
+Advanced Mode as one panel on the last Basic step, not a separate step per a literal
+reading of SPEC.md §7; per-step URL routing so browser back/forward works; and
+`localStorage` draft persistence) were decided directly with Jay before writing, the
+same way Phase 4 itself was. Still to happen: a read-back by whoever implements Phase 6
+(procedural — flag any objection found during Phase 6 build as a doc amendment, not a
+silent divergence).
 
 ---
 
@@ -589,7 +614,13 @@ Resolved since the 2026-07-07 gap-analysis pass: the "doctor's cut" question
 (`ISSUES.md` ISS-11) — confirmed with Jay it's the existing professional/reporting fee
 field, no new field needed, no Phase 3/4 copy or validation-metadata work required for
 it. Also resolved 2026-07-11: SPEC.md §36.1 Q9 (methodology page — yes, separate page)
-and Q14 (entry flow, finalized), and §26.1's CTA wording ("Start Assessment"). Still
-genuinely open: SPEC.md §36.1's remaining unanswered product questions (1-5, 7-8,
-11-13) and §36.2's remaining data questions other than DSCR/discount rate, which this
-pass didn't touch.
+and Q14 (entry flow, finalized), and §26.1's CTA wording ("Start Assessment"). **Note:**
+the previous version of this line claimed Q5/Q7/Q11/Q13 were still open — checked
+against SPEC.md §36.1 directly during the Phase 5 pass (2026-07-11) and all four are
+already annotated "Resolved" there; this was itself stale doc drift, corrected here.
+Still genuinely open, confirmed against SPEC.md §36.1 directly: **Q1** (login or fully
+open — v1 has no login, this doc's own Phase 5 draft-persistence design at
+`app/forms/wizard-state.md` §7 assumes no accounts), **Q2** (save scenarios locally or
+in a DB — same assumption), **Q3** (shareable scenario link), **Q8** (multi-equipment
+packages, explicitly v2 scope per SPEC.md §9). §36.2's remaining data questions other
+than DSCR/discount rate are untouched by this pass, same as before.

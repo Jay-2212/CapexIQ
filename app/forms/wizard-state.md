@@ -1,0 +1,377 @@
+# app/forms/wizard-state.md — wizard state & transition table (Phase 5)
+
+This is the doc `agent-build-plan.md` Phase 5 requires before any wizard component gets
+written — "do not skip; do not start Phase 6 without this." It exists for the same
+reason `CONVENTIONS.md` §1 exists: an undocumented interaction rule becomes an
+inconsistent implementation you debug into consistency later, instead of a decision you
+get right once. Phase 6 (wizard UI), Phase 7 (results dashboard), and Phase 9
+(sensitivity UI) all consume this doc directly — they should not re-decide anything
+settled here.
+
+**Decided directly with Jay, 2026-07-11** (three architecture forks that this doc's
+first draft could not safely infer from existing docs alone — see each section below
+for why): the wizard shape, step-routing strategy, and draft-persistence approach. Every
+other transition rule below was inferable from Phase 4 (`design/ux-product-spec.md`,
+`agent-build-plan.md` Phase 4) and is stated here as a direct consequence, not a new
+decision — cross-referenced rather than re-argued.
+
+---
+
+## 1. The wizard shape
+
+**Resolved fork:** SPEC.md §7's "possible wizard-style layout" suggested 7 discrete
+steps including "Step 6: Advanced Model" as its own step. `agent-build-plan.md` Phase
+4-F decided Advanced Mode is "an inline, collapsible panel directly below the Basic
+Mode fields on the same screen — not a separate wizard step" — which contradicts a
+literal reading of SPEC.md §7. This doc resolves it: **Advanced Mode is not a step; it's
+a single collapsible panel attached to the last Basic Mode step**, matching the banner
+copy already written in `content/field-explanations.md` ("you can leave it as cash and
+skip straight to results, or open Advanced Mode for the full detail" — phrased as one
+consolidated action, not per-step toggles).
+
+### 1.1 Route map
+
+```
+/                    Landing page (not a wizard step)
+/assess              Pre-step — equipment + identity/context fields
+/assess/investment   Step 1 — Investment
+/assess/usage        Step 2 — Usage & Revenue
+/assess/costs        Step 3 — Operating Costs + Advanced Mode panel
+/results             Results Dashboard (Phase 7) — not a wizard step; the
+                     destination after the wizard. Export actions live here
+                     (SPEC.md §7's "Step 7: Export" is a set of buttons on this
+                     page, not a separate route).
+/methodology         Separate page (SPEC.md §36.1 Q9, resolved) — not part of
+                     the wizard flow, reachable from header/footer at any time.
+```
+
+Five routes carry wizard state, not seven — SPEC.md §7's "Results" (step 5) and
+"Export" (step 7) collapse into the one `/results` destination per Phase 4-G (results
+are live/immediate, never a separately-submitted step) and Phase 7's own scope (the
+results dashboard is where export buttons live). "Step 6: Advanced Model" is not a
+route at all, per the resolution above.
+
+### 1.2 Field-to-step assignment
+
+Mechanical assignment, pulled from `content/inputs-metadata.json` — not re-deriving
+bounds/validation here, only which screen each field lives on.
+
+**`/assess` (pre-step)** — identity/context fields, not "how much will this cost"
+fields. `cityTier` and `hospitalType` are grouped here (not Step 1) because they share
+`hospitalBedSize`'s benchmarking-lookup role (SPEC.md §36.1 Q5/Q7) rather than being
+investment figures; `equipmentNameModel` joins them as "name this specific unit," also
+identity, not cost:
+- `equipmentCategory`, `hospitalBedSize`, `cityTier`, `hospitalType`,
+  `equipmentNameModel`
+
+**`/assess/investment` (Step 1)**
+- `purchaseCost`, `installationCost`, `launchDelayMonths`, `acquisitionMode`
+
+**`/assess/usage` (Step 2)**
+- `usagePerDay`, `billedTariffPerUse`, `workingDaysPerMonth`
+
+**`/assess/costs` (Step 3)**
+- `consumableCostPerUse`, `professionalFeePerUse`, `otherVariableCostPerUse`,
+  `staffCostPerMonth`, `electricityCostPerMonth`, `otherFixedCostPerMonth`,
+  `warrantyYears`, `amcCmcCostPostWarranty`
+- **+ Advanced Mode panel** (collapsed by default, preview banner always visible above
+  it per Phase 4-F): opening it reveals all six `content/inputs-metadata.json#advanced`
+  groups (A–F) as labeled sections in a single continuous scroll — not nested
+  accordions, not nested collapse-per-group. Jay's brief for Advanced Mode is "CFO-grade,"
+  and the banner already names all six groups up front, so nothing is a surprise;
+  further hiding groups behind sub-toggles would add friction without adding clarity.
+  Group order in the panel is A→F, matching SPEC.md §11.1's own lettering:
+  - A. Revenue realization and payer mix
+  - B. Utilization ramp-up
+  - C. Financing (fields under `requiredIf: acquisitionMode = Loan` or `= Lease` read
+    `acquisitionMode` from `/assess/investment`'s state regardless of which step set
+    it — cross-step conditional requiredness, not re-asked here)
+  - D. Launch delay and pre-opening cost
+  - E. Maintenance and lifecycle cost (`maintenanceCostByYearPct` is an array whose
+    length equals Group F's `usefulLifeYears` — see §5 below for how a mid-array
+    length change is handled)
+  - F. Financial model assumptions
+
+**`/results`** — no input fields of its own from the main wizard, but Phase 7 adds a
+**separate, narrower** "Advanced settings pane": just `discountRate`, `targetIrr`, and
+`loanInterestRate` (financing rate), exposed as quick-tweak sliders for sensitivity
+exploration without leaving the dashboard. This is not the same UI element as the
+Step 3 Advanced Mode panel — it's a second, smaller surface for the same three
+underlying values (editing one updates the other's state; there's only one source of
+truth per field, never two independently-tracked copies of `discountRate`).
+
+### 1.3 Why 3 Basic steps instead of 1 long screen
+
+Keeps each screen short (SPEC.md Risk 1: "Keep Basic Mode short," "Use progressive
+disclosure") rather than a ~19-field single scroll, and matches SPEC.md §7's original
+Investment / Usage & Revenue / Operating Costs grouping, which already reads as a
+sensible three-part story (what it costs → what it earns → what it costs to run).
+
+---
+
+## 2. Per-step validation
+
+Every field's control type, bounds, decimal places, required-ness, and error copy come
+from `content/inputs-metadata.json` — this doc does not restate or re-derive any of
+that (`CONVENTIONS.md` §3's single-source-of-truth rule, extended from formulas to
+input metadata by `agent-build-plan.md` Phase 4). What this doc adds is the **timing**
+of validation, which `inputs-metadata.json` doesn't cover:
+
+- **Validate on every change, not on blur or submit.** Consistent with Phase 4-G's
+  "no debounce on typed fields" — an invalid value shows its `errorMessage` immediately
+  under the field, in `--text-xs`, `--status-risk` color, the moment it becomes invalid
+  (empty required field, out-of-bounds number, payer-mix group not summing to 100%,
+  etc.), and clears the instant it becomes valid again. No "you'll find out when you
+  hit Next."
+- **Step-level "can I proceed" gate:** a step's "Next" button is enabled only when every
+  `required: true` field on that step (and every `requiredIf`-triggered field, e.g.
+  Group C financing fields when `acquisitionMode` ≠ Cash) is both filled and valid.
+  Optional fields never block progression regardless of their content.
+- **Group constraints** (e.g. `payerMixSharePct`'s "5 payer shares must sum to 100%")
+  are evaluated across the whole group, not per-field — showing one error message
+  anchored to the group heading, not duplicated on all 5 sliders.
+- **Route guard:** landing directly on a step's URL (via back/forward, a bookmark, or a
+  fresh tab with an incompatible/absent draft — see §6) without its prerequisite steps
+  complete redirects to the earliest incomplete step. `/results` carries the same guard
+  against every Basic-required field across all three steps. This prevents computing
+  (or displaying stale placeholder numbers for) a result from partial input.
+
+---
+
+## 3. Basic ↔ Advanced toggle persistence
+
+Already decided, `agent-build-plan.md` Phase 4-F: entered Advanced values persist in
+memory even while the panel is collapsed — collapsing never discards them. This doc
+adds the concrete mechanism: Advanced field values live in the same top-level wizard
+state container as Basic values (§7 below — one reducer, not a second state tree that
+gets torn down on collapse). The panel's open/closed boolean is a separate, single piece
+of state (`advancedOpen`) that only controls visibility, never data lifecycle.
+
+---
+
+## 4. Live preview during input, and the invalid/stale contract
+
+Phase 4-G ("every numeric input... recalculates the visible dashboard/chart preview
+immediately") presupposes a preview is visible during input, not only after reaching
+`/results`. This doc makes that concrete:
+
+- A **persistent preview strip** (not the full dashboard — a compact bar: payback
+  period, a mini Investment Outlook badge, one headline risk note) is visible on all
+  three `/assess/*` steps once enough required fields are filled to compute something
+  meaningful (i.e., once `/assess/investment`'s required fields are valid — before that,
+  the strip shows an empty/dash state, not a stale zero that looks like a real answer).
+  It is **not** shown on `/assess` (the pre-step) since no cost/revenue data exists yet.
+- Both the preview strip and the full `/results` dashboard call the **same** computed-
+  results derivation from the **same** wizard state — never two independently-run
+  copies of the formula pipeline (`CONVENTIONS.md` §3's dependency-direction rule,
+  same reasoning `agent-build-plan.md` Phase 7 already applies to the dashboard's
+  charts vs. metric cards). Phase 6/7 own the exact function name and shape; this doc's
+  requirement is only that there is exactly one.
+- **Invalid-state contract** (Phase 4-G, restated precisely as a state machine): each
+  field is in exactly one of two states, `valid` or `invalid`. The preview strip and the
+  dashboard track a derived `resultState`: `fresh` (every currently-relevant field is
+  `valid`) or `stale` (at least one is `invalid` — the last successfully computed result
+  stays rendered, at reduced opacity, with a small "based on your last valid entries"
+  label; it never blanks, never shows a partial/zeroed calculation). Transition
+  `stale → fresh` happens the instant the offending field becomes valid — same
+  no-debounce timing as validation itself (§2).
+
+---
+
+## 5. Slider-specific transitions
+
+- **Drag-start (mousedown/touchstart on the thumb):** no recalculation fires yet — the
+  value hasn't changed.
+- **Drag-in-progress:** the slider's own numeric readout updates in real time (pure
+  local UI state, effectively free). The debounced recalculation Phase 4-G specifies
+  (~100–150ms) fires only after the drag pauses — a fast drag across the full range
+  does not fire dozens of recalculations.
+- **Drag-end (mouseup/touchend):** flushes the debounce immediately — the preview is
+  guaranteed fresh the moment the user releases, even if release happens inside the
+  debounce window.
+- **Keyboard arrow keys:** each keypress is a discrete step (native `<input
+  type="range" step={sliderStep}>` behavior, using each field's own `sliderStep` from
+  `content/inputs-metadata.json` — no new step values invented here) and is treated
+  like a typed change: recalculates immediately, no debounce, since a single keypress
+  isn't a rapid-fire drag. This is also the accessibility requirement Phase 5 must
+  enumerate — sliders are fully operable without a mouse via native range-input
+  semantics, nothing custom to build for basic operability.
+- **The paired numeric text input** (every slider has one, per Phase 6's "Do" list):
+  typing in it follows the plain typed-field rule (§2/§4) — no debounce, immediate
+  validation and recalculation, and it updates the slider thumb position live as the
+  user types (both controls always agree on one shared value; there is no moment where
+  they can disagree).
+- **`maintenanceCostByYearPct` array length change:** if the user changes
+  `usefulLifeYears` (Group F) after already entering values into the per-year array
+  (Group E), the array is truncated (life shortened) or extended with the row(s) left
+  empty/optional (life lengthened) — existing entered years are never silently
+  discarded or reset to a default. This is the one field whose shape depends on another
+  field's value, so it gets an explicit rule rather than falling under the general
+  "values persist" statement in §3.
+
+---
+
+## 6. Browser back/forward and step routing
+
+**Resolved fork:** each step is its own route (§1.1's route map), so browser
+back/forward moves between wizard steps the way a user expects from any multi-page
+form — not out of the assessment flow entirely. This was Jay's call over the simpler
+single-route/in-memory-only alternative, because losing the whole flow on one
+mis-tapped back button (common on mobile) is a worse experience than the added
+routing complexity.
+
+Mechanics:
+- Wizard state lives in a single context/reducer above all `/assess/*` routes (a
+  layout-level provider, not per-page local state) so navigating between steps via
+  the in-app "Next"/"Back" buttons is a normal client-side route change that never
+  tears down state.
+- A **real** back/forward (browser chrome, not the in-app buttons) is the same
+  client-side navigation under the hood (Next.js client routing) — state survives
+  identically. It does not trigger a full page reload, so §7's localStorage rehydration
+  path isn't invoked on every back/forward — only on an actual reload (§7).
+- Navigating back to an earlier step never clears that step's already-entered values,
+  and never re-validates/blocks re-entry into a later step you'd already completed —
+  you can go back, look, and go forward again without re-doing work.
+
+---
+
+## 7. Refresh, tab close, and draft persistence
+
+**Resolved fork:** yes, persist to `localStorage` — there is no login/accounts system
+(SPEC.md §36.1 Q1 is still open, and even if resolved to "yes" later, v1 has none), so
+this is the only safety net against losing a half-filled assessment to an accidental
+refresh, a mobile back-swipe, or a closed tab. The simpler "refresh just restarts"
+alternative was considered and rejected by Jay for the same reason as §6's routing
+call — real users will lose real work otherwise.
+
+### 7.1 Storage key and schema
+
+```
+localStorage key: "capexiq.wizardDraft.v1"
+
+{
+  "schemaVersion": 1,
+  "savedAt": "<ISO 8601 timestamp>",
+  "currentStep": "preStep" | "investment" | "usage" | "costs" | "results",
+  "preStep": { "equipmentCategory": ..., "hospitalBedSize": ..., "cityTier": ...,
+               "hospitalType": ..., "equipmentNameModel": ... },
+  "basic": { /* every field from content/inputs-metadata.json#basic except the
+               preStep ones above */ },
+  "advancedOpen": false,
+  "advanced": {
+    "A": { /* payer-mix template fields, expanded to concrete per-payer-type keys —
+             e.g. payerMixSharePct_privateCash, _insuranceTpa, _corporateCredit,
+             _pmJayGovt, _other, and the same 4-suffix pattern for
+             billedTariffByPayerType / realizationPctByPayerType /
+             claimDeductionPctByPayerType / collectionDelayDaysByPayerType */ },
+    "B": { /* utilizationRampPct_month1to3 / _month4to6 / _month7to12 / _year2Plus,
+             expectedMatureUtilization */ },
+    "C": { /* downPayment, loanInterestRate, loanTenureMonths, processingChargesPct,
+             emiStartMonth, moratoriumPeriodMonths, leaseRentalPerMonth */ },
+    "D": { /* civilWorkDurationMonths, installationDurationMonths,
+             licensingApprovalDurationMonths, trainingCommissioningDurationMonths,
+             preOpeningFixedCosts, workingCapitalBufferAmount */ },
+    "E": { "maintenanceCostByYearPct": [ /* array, length = F.usefulLifeYears */ ],
+           "maintenanceInflationPct": ..., "majorReplacementCost": ... },
+    "F": { "discountRate": ..., "targetIrr": ..., "inflationRate": ...,
+           "usefulLifeYears": ..., "salvageValuePercentage": ...,
+           "depreciationMethod": "Straight-line", "priceEscalationPct": ...,
+           "costEscalationPct": ... }
+  }
+}
+```
+
+The five fixed payer-type suffixes (`_privateCash`, `_insuranceTpa`,
+`_corporateCredit`, `_pmJayGovt`, `_other`) and four ramp-up suffixes
+(`_month1to3`, `_month4to6`, `_month7to12`, `_year2Plus`) are this doc's answer to
+`content/inputs-metadata.json`'s own note that it left template fields as "provisional
+machine IDs" for Phase 5 to fix — **these are now final**, re-keying elsewhere is
+mechanical from here. `maintenanceCostByYearPct` stays an array (not per-year suffixed
+keys) because its length is variable, driven by `usefulLifeYears` (1–30) — see §5's
+truncate/extend rule.
+
+### 7.2 Save/load rules
+
+- **Save triggers:** every field change is saved to `localStorage`, debounced ~500ms
+  (a UX-invisible delay, distinct from Phase 4-G's ~100–150ms recalculation debounce —
+  this one is about write frequency to storage, not chart freshness) — plus an
+  **immediate, un-debounced** save on every step transition (Next/Back) and every
+  `advancedOpen` toggle, so a refresh right after clicking "Next" never loses the step
+  you just completed.
+- **Load:** on mount of any `/assess/*` or `/results` route, read the draft. If
+  `schemaVersion` matches the app's current expected version, rehydrate the reducer
+  from it and route to `currentStep` (or the URL's own step, if further along and
+  still valid per §2's route guard). If `schemaVersion` doesn't match, or the draft is
+  malformed/unparseable, **discard it silently and start fresh** — no migration
+  attempt, no error shown to the user. This is the "future format change doesn't crash
+  on an old saved draft" requirement `agent-build-plan.md` Phase 5 calls for, resolved
+  as simply as possible: a version bump is a clean break, not a migration project.
+- **Clear:** the draft is deleted from `localStorage` on (a) a successful export
+  (Phase 8 — out of scope for this doc to define precisely, since export doesn't exist
+  yet; Phase 8 must call whatever "clear the draft" function this phase builds) or (b)
+  an explicit **"Start over"** action, which this doc adds as a required affordance
+  (a text link, low visual weight, present on every `/assess/*` step and on
+  `/results` — e.g. in the header) since there was previously no way to abandon a
+  draft and begin again short of manually clearing browser storage. "Start over"
+  shows a native `confirm()`-free warning (per this project's "avoid triggering
+  browser dialogs" convention — a simple inline confirmation state on the link
+  itself, "Click again to confirm," not a modal) before actually clearing.
+
+---
+
+## 8. Backgrounded tab / mid-calculation
+
+Every formula in `/formulas` is synchronous and pure (`CONVENTIONS.md` §3) — there is
+no in-flight async calculation for a backgrounded tab to interrupt anywhere in the
+wizard or `/results` dashboard as scoped by Phases 5–7. Backgrounding and returning to
+the tab has no special-cased behavior to define here: the reducer's state is
+untouched by visibility changes, and the next state-changing event (a keystroke, a
+slider release) simply recalculates from wherever state already was.
+
+The one genuinely async operation in the product — **export generation** (Phase 8:
+Excel/Word/ZIP) — is out of scope for this doc, since it isn't built yet and inventing
+its contract here would be exactly the kind of premature, undocumented mechanism this
+project's own discipline exists to avoid. Phase 8 must define its own
+backgrounded-tab/double-fire contract when it's written (at minimum: disable the export
+button for the duration of generation, matching §9's idempotency rule below applied to
+that action).
+
+---
+
+## 9. Idempotent step submission
+
+Clicking "Next" (or the equivalent Advanced-panel "Continue to Results" action) is
+made idempotent the standard way: the button disables itself the instant it's clicked,
+for the duration of the transition, and the reducer's step-advance action is a no-op
+if already mid-transition or already on the target step. A double-click cannot
+double-submit, skip a step, or fire two route changes. This needed a decision (not
+left as "obviously fine") because the debounced slider-drag path (§5) and the
+un-debounced step-transition save (§7.2) both touch state near a step change, and
+without an explicit guard a double-click could interleave them.
+
+---
+
+## 10. Definition of Done — cross-reference
+
+| Phase 5 requirement (`agent-build-plan.md`) | Resolved here |
+|---|---|
+| Every step, every field, its validation rule | §1.2 (assignment), §2 (timing) — bounds/errors stay in `content/inputs-metadata.json`, not duplicated |
+| Basic↔Advanced toggle effect on entered values | §3 (confirms Phase 4-F, adds the reducer mechanism) |
+| Dashboard/chart behavior during invalid state | §4 |
+| Slider drag-start/in-progress/end/keyboard transitions | §5 |
+| Browser back/forward | §6 |
+| Refresh mid-wizard / draft persistence | §7 |
+| Backgrounded tab mid-calculation/mid-export | §8 |
+| Idempotent step submission | §9 |
+
+All eight bullets have a concrete answer above — none deferred as "TBD." Three of
+them (`wizard shape` §1, `step routing` §6, `draft persistence` §7) were genuine
+architecture forks not safely inferable from Phase 4 alone and were decided directly
+with Jay before this doc was written, the same way Phase 4 itself was — recorded here,
+not re-litigated.
+
+**Next:** Phase 6 (wizard UI implementation) builds against this doc exactly — a single
+`useReducer` for all wizard state (§3, §6), one `<input type="range" step=...>`-backed
+slider component reused everywhere (§5), and a test file exercising every transition
+named above with a plain-language test name, per `agent-build-plan.md` Phase 6's own
+"Do" list.
