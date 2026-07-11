@@ -7,12 +7,39 @@ export function roi(
   initialInvestment: number,
   view: FinancialView
 ): number {
-  throw new Error("not implemented");
+  void view;
+  return (annualNetReturn / initialInvestment) * 100;
 }
 
 export function paybackPeriod(
   initialInvestment: number,
   annualNetCashFlow: number
 ): number {
-  throw new Error("not implemented");
+  if (annualNetCashFlow <= 0) {
+    return Infinity;
+  }
+
+  return initialInvestment / annualNetCashFlow;
+}
+
+export function paybackPeriodFromCashFlows(
+  initialInvestment: number,
+  annualNetCashFlows: number[]
+): number {
+  let cumulativeCashFlow = 0;
+
+  for (let yearIndex = 0; yearIndex < annualNetCashFlows.length; yearIndex += 1) {
+    const annualCashFlow = annualNetCashFlows[yearIndex];
+
+    if (
+      annualCashFlow > 0 &&
+      cumulativeCashFlow + annualCashFlow >= initialInvestment
+    ) {
+      return yearIndex + (initialInvestment - cumulativeCashFlow) / annualCashFlow;
+    }
+
+    cumulativeCashFlow += annualCashFlow;
+  }
+
+  return Infinity;
 }

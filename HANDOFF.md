@@ -14,16 +14,20 @@ of *how* we got here.
 *(Last updated: 2026-07-11)*
 
 **Where things stand today:** Phase 1 (equipment data) is effectively complete except
-two open human calls (ISS-12, ISS-13 below). Phase 2 (formula engine) is half done —
-Group A (`depreciation`/`emi`/`revenue`/`breakEven`/`npv`/`irr`) is implemented and
-tested (26 passing); Group B (`realization`/`dso`/`workingCapital`), Group C
+one open human call (ISS-12 below). **Phase 2 (formula engine) is now fully
+implemented:** Group A (`depreciation`/`emi`/`revenue`/`breakEven`/`npv`/`irr`, merged
+earlier) plus Group B (`realization`/`dso`/`workingCapital`), Group C
 (`roi`/`maintenance`/`launchDelay`/`sensitivity`), and the Investment Outlook
-score/EAC/discounted-payback trio are all still stubs (`throw new Error("not
-implemented")`) — handed to Codex today via a bounded prompt, not yet returned. Phase 3
-(content/copy) is all placeholder, not started. Phase 4 (design/UX) remains
-**deliberately paused** — see below, unchanged from 2026-07-07.
+score/EAC/discounted-payback/actionable-insight quartet from `financial-model-spec.md`
+were implemented by Codex, reviewed by Claude, and committed 2026-07-11. `npm test`
+passes 65 tests across 17 files; `npm run build` and `npx tsc --noEmit` are clean.
+Phase 3 (content/copy): 4 of 7 files now have real content (`glossary.md`,
+`benchmark-notes.md`, `field-explanations.md`, `disclaimer.md`); `methodology.md`/
+`formula-appendix.md` are now unblocked since Phase 2 is reviewed and final;
+`tooltip-copy.md` stays blocked on Phase 4. Phase 4 (design/UX) remains **deliberately
+paused** — see below, unchanged from 2026-07-07.
 
-**ISS-13 resolved today:** the dead `typicalUtilization.workingDaysPerMonth`/
+**ISS-13 resolved 2026-07-11:** the dead `typicalUtilization.workingDaysPerMonth`/
 `financingNorms` fields (null in every equipment file, duplicating
 `common-assumptions.json`) are removed from all five equipment files. Single source of
 truth for working days/month is `common-assumptions.json.workingDaysPerMonth` (flat 25,
@@ -81,6 +85,40 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-11 — Completed Phase 2 formula engine Groups B/C/D; 4 Phase 3 content files written; PR #7 merged
+**What changed:** Three threads from the same day landed together this session.
+1. **Phase 2 finished:** Codex implemented all seven remaining stubs in `/formulas`
+   (Group B: `realization`/`dso`/`workingCapital`; Group C:
+   `roi`/`maintenance`/`launchDelay`/`sensitivity`) plus the four modules required by
+   `financial-model-spec.md` (`investmentOutlookScore.ts`, `eac.ts`,
+   `discountedPayback.ts`, `actionableInsight.ts`). Design choices: explicit scenario
+   inputs instead of financial defaults; a separate CMC annual-cost parameter; payer
+   shares modeled as percentages; DSO output extended through the final delayed
+   collection; simple monthly pre-operative interest for launch delay; ROI returned as a
+   percentage with non-payback as `Infinity`; signed working-capital gaps retained. One
+   test file per formula (round-number, messy-number, edge coverage). Claude reviewed
+   the implementation against `financial-model-spec.md`/`SPEC.md`/`CONVENTIONS.md`
+   before committing, per this project's standing multi-agent workflow (Codex has no
+   push access here). **Verification:** `npm test` passes 65 tests across 17 files;
+   `npm run build` and `npx tsc --noEmit` both clean.
+2. **4 of Phase 3's 7 content files written** (also pending from earlier the same
+   session): `content/glossary.md`, `content/benchmark-notes.md`,
+   `content/field-explanations.md`, `report-templates/disclaimer.md` — real content, no
+   more placeholders. Remaining 3: `methodology.md`/`formula-appendix.md` were blocked
+   on Phase 2 being final (now unblocked by this entry); `tooltip-copy.md` stays blocked
+   on Phase 4 (paused).
+3. **PR #7 merged** (ISS-13 resolved, ISS-12 reframed, onboarding-flow idea captured —
+   see the entry directly below, already on `main` before this session's uncommitted
+   work was rebased on top). This entry's formula/content work was reconciled against
+   PR #7's `HANDOFF.md` rewrite by hand — no content dropped from either side.
+**Files touched:** `formulas/*.ts` (7 modified + 4 new), `tests/formulas/*.test.ts` (11
+new), `content/glossary.md`, `content/benchmark-notes.md`,
+`content/field-explanations.md`, `report-templates/disclaimer.md`, `HANDOFF.md`.
+**What's next:** `methodology.md` and `formula-appendix.md` can now be written against
+the final, reviewed formula set. `tooltip-copy.md` and all Phase 4 work stay paused.
+ISS-12 (MRI CMC bed/volume tiering) still needs a follow-up research pass plus AIIMS
+bed-count verification before it resolves.
 
 ### 2026-07-11 — ISS-13 resolved (dead schema removed); ISS-12 reframed as bed/volume tiering; onboarding-flow idea captured
 **What changed:** Full status review at Jay's request, then three concrete pieces of

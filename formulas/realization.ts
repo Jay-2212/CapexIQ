@@ -8,5 +8,12 @@ export interface PayerMixEntry {
 }
 
 export function realizedRevenuePerUse(payerMix: PayerMixEntry[]): number {
-  throw new Error("not implemented");
+  return payerMix.reduce(
+    (weightedRevenue, payer) =>
+      weightedRevenue +
+      (payer.shareOfVolume / 100) *
+        payer.billedTariff *
+        (payer.realizationPercentage / 100),
+    0
+  );
 }

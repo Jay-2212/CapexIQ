@@ -4,5 +4,5 @@ export function workingCapitalGap(
   cumulativeRealizedRevenue: number,
   cumulativeCashReceived: number
 ): number {
-  throw new Error("not implemented");
+  return cumulativeRealizedRevenue - cumulativeCashReceived;
 }

@@ -5,5 +5,5 @@ export function preOperativeInterest(
   annualInterestRate: number,
   launchDelayMonths: number
 ): number {
-  throw new Error("not implemented");
+  return principal * (annualInterestRate / 100 / 12) * launchDelayMonths;
 }
