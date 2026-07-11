@@ -10,5 +10,28 @@ export function cashReceivedByMonth(
   monthlyRealizedRevenueSeries: number[],
   payerCollectionProfiles: PayerCollectionProfile[]
 ): number[] {
-  throw new Error("not implemented");
+  if (monthlyRealizedRevenueSeries.length === 0) {
+    return [];
+  }
+
+  const maximumOffset = payerCollectionProfiles.reduce(
+    (largestOffset, payer) =>
+      Math.max(largestOffset, Math.ceil(payer.daysToCollect / 30)),
+    0
+  );
+  const cashReceived = Array.from(
+    { length: monthlyRealizedRevenueSeries.length + maximumOffset },
+    () => 0
+  );
+
+  monthlyRealizedRevenueSeries.forEach((monthlyRevenue, monthIndex) => {
+    payerCollectionProfiles.forEach((payer) => {
+      const collectionMonth =
+        monthIndex + Math.ceil(payer.daysToCollect / 30);
+      cashReceived[collectionMonth] +=
+        monthlyRevenue * (payer.shareOfVolume / 100);
+    });
+  });
+
+  return cashReceived;
 }
