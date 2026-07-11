@@ -13,8 +13,9 @@ of *how* we got here.
 
 *(Last updated: 2026-07-11)*
 
-**Where things stand today:** Phase 1 (equipment data) is effectively complete except
-one open human call (ISS-12 below). **Phase 2 (formula engine) is fully implemented:**
+**Where things stand today:** Phase 1 (equipment data) is effectively complete —
+**ISS-12 resolved 2026-07-11** (see below), no open Phase 1 human calls remain.
+**Phase 2 (formula engine) is fully implemented:**
 Group A (`depreciation`/`emi`/`revenue`/`breakEven`/`npv`/`irr`, merged earlier) plus
 Group B (`realization`/`dso`/`workingCapital`), Group C
 (`roi`/`maintenance`/`launchDelay`/`sensitivity`), and the Investment Outlook
@@ -28,6 +29,16 @@ resolved — see the Change Log entry below for the reasoning and the two follow
 flags for whoever wires up Phase 4/5). `npm test` passes 65 tests across 17 files;
 `npm run build` and `npx tsc --noEmit` are clean. Phase 4 (design/UX) remains
 **deliberately paused** — see below, unchanged from 2026-07-07.
+
+**ISS-12 resolved 2026-07-11 (a fourth research pass, same day as the reframe below):**
+the bed/volume-tiering theory for MRI's CMC contradiction was tested directly and is
+**not verified** — no Indian MRI tender, OEM schedule, or case study varying CMC/AMC
+price by bed count or scan volume exists anywhere. Also corrected: the study's hospital
+was never actually confirmed to be AIIMS (only the paper's authors were AIIMS-
+affiliated) — `data-requirements.md` §18.4/§19.5 and `equipment-data/mri.json` no
+longer describe it as an AIIMS case study. No bed-count-tiered CMC/AMC defaults will be
+built; the `_bedVolumeTierHypothesis` scaffold is removed. See `ISSUES.md` ISS-12 for
+the full resolution and reopen conditions.
 
 **ISS-13 resolved 2026-07-11:** the dead `typicalUtilization.workingDaysPerMonth`/
 `financingNorms` fields (null in every equipment file, duplicating
@@ -87,6 +98,50 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-11 — ISS-12 resolved: MRI CMC bed/volume-tiering hypothesis tested, not verified
+**What changed:** Jay commissioned a fourth, narrowly-scoped research pass (via Codex)
+against the bed/volume-tiering hypothesis captured in `data-requirements.md` §19 (see
+the "ISS-12 reframed" entry below). Findings, in full: `data-requirements.md` §19.5.
+1. **The MRI life-cycle-costing study (S53) never names its hospital.** Its authors
+   were affiliated with AIIMS New Delhi, but author affiliation isn't proof of which
+   institution owned the studied scanner. Every place this project described it as an
+   "AIIMS case study" was a real, if understandable, overreach — corrected in
+   `data-requirements.md` §18.4/§19.5 and `equipment-data/mri.json`'s two CMC notes,
+   which now say "unnamed tertiary-care teaching hospital."
+2. **AIIMS New Delhi's own bed count is now sourced** (S58: 1,559 across two named
+   facilities, High confidence) — but since the study site was never confirmed to be
+   AIIMS New Delhi, this is context, not evidence. The ~2,000+ bed figure §19.1
+   originally used was retired — it was never sourced.
+3. **No Indian MRI bed-count or scan-volume maintenance-pricing schedule exists** in
+   any source found (one vendor page recommends AMC vs. CMC by scan volume, but prices
+   by model, not volume — S59, Low confidence). CT and Dialysis show limited evidence
+   that fleet size/negotiation can matter in principle (a CCI order, S60; a bundled
+   tender, S61) but neither quantifies a usable discount or transfers to MRI.
+4. **Decision: no bed-count-tiered CMC/AMC defaults will be built.** The
+   `_bedVolumeTierHypothesis` scaffold in `equipment-data/mri.json` is removed. The two
+   MRI figures (3-10% tender ceiling, 0.224-0.285% one hospital's observed cost) stay
+   recorded separately, as they already were — never averaged, never silently defaulted.
+5. **SPEC.md §36.1 Q6's resolution corrected:** bed size stays a required Basic Mode
+   input, but the reasoning is now utilization/tariff benchmarking (§23.3) and
+   maintenance-quote context, not a CMC/AMC tiering lookup key.
+6. **A set of maintenance quote-context fields was captured for later** (annual scan
+   volume, same-OEM fleet size, equipment model/age, warranty status, uptime SLA, parts
+   coverage) — logged in `data-requirements.md` §19.5 point 4 as a candidate Advanced
+   Mode addition for whoever resumes Phase 4/5, not built now (still paused).
+**Files touched:** `data-requirements.md` (§18.4 corrected, new §19.5, source register
+S58-S61), `equipment-data/mri.json` (`_bedVolumeTierHypothesis` removed, AIIMS
+mislabeling corrected in two notes), `ISSUES.md` (ISS-12 moved to Resolved), `SPEC.md`
+(§36.1 Q6 reasoning corrected), `HANDOFF.md`. The source research write-up
+(`mri-maintenance-contract-scaling-findings.md`) was removed from the repo root after
+its findings were folded into `data-requirements.md`, per this project's standing
+practice of not keeping a second copy of an already-extracted research artifact.
+`npm test` 65/65, `npm run build` and `npx tsc --noEmit` clean — re-verified after
+these changes even though they're data/docs-only, per this project's own verification
+discipline.
+**What's next:** Phase 1, Phase 2, and Phase 3 are all now complete. The only open item
+left from this cluster of work is Phase 4 (design/UX), still deliberately paused —
+Phase 5 (`wizard-state.md`) is next once Jay reopens it.
 
 ### 2026-07-11 — Phase 3 (content/copy) fully completed
 **What changed:** Following the Phase 2 formula review and merge earlier the same day
