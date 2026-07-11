@@ -1057,6 +1057,10 @@ AMC/CMC annual cost and CMC coverage duration by equipment category — RESOLVED
   equipment-specific figure. MRI has an unresolved contradiction between the generic
   tender-ceiling range and one real hospital's much lower observed cost — needs a human
   call, see §18.4 and equipment-data/mri.json.
+AMC/CMC cost broken out by hospital bed-count or volume tier — NEW GAP, added
+  2026-07-11, see §19. Leading hypothesis for the MRI CMC contradiction above is that
+  it's really a volume/negotiating-leverage effect, not two competing estimates of the
+  same thing; not yet researched, no numeric tiers exist anywhere in this project.
 ```
 
 UI warning:
@@ -1481,3 +1485,63 @@ own annual cost — AMC and CMC are priced differently (labour-only vs. parts-in
 this pass found real, distinct numbers for both. Added a new field,
 `cmcAnnualCostPercentage`, alongside the existing `amcAnnualCostPercentage`, in all five
 equipment files.
+
+---
+
+## 19. Volume / Bed-Size Tiering for Maintenance Contracts (added 2026-07-11)
+
+### 19.1 The hypothesis
+
+Jay's read on ISS-12 (the MRI CMC contradiction, §18.4): S51/S52's 3-10% generic
+tender-ceiling range and S53's ~0.23-0.28% AIIMS-observed actual cost may not really be
+two competing estimates of the same thing. AIIMS is, by public reputation, a very
+large, very high-volume referral institute — plausibly on the order of 2,000+ beds —
+and a hospital operating at that scale and negotiating leverage would be expected to
+land a materially better CMC/AMC rate than a smaller private hospital paying close to
+the tender ceiling. If so, the "contradiction" is really two different points on a
+volume/bed-count curve, and the fix isn't to pick one number, it's to make the default
+bed-count-dependent.
+
+**Caveat, not yet cleared:** AIIMS's exact bed count was not independently verified or
+cited in S53 or anywhere else in this document's source register — the ~2,000+ figure
+above is public general knowledge, not a sourced data point, and must not be presented
+as one. Verifying it (or finding a source that states the bed count of the specific
+AIIMS institution S53's study was conducted at) is the first thing a follow-up pass
+should do, before the volume theory can be treated as more than a plausible hypothesis.
+
+### 19.2 Proposed structure
+
+Reuse the bed-size buckets already suggested in §2.3 rather than invent a new
+bucketing scheme (`<50`, `50-100`, `101-250`, `251-500`, `>500` beds, plus standalone
+diagnostic center) — those were defined for utilization tagging but the same buckets
+should work for maintenance-contract tiering. One likely adjustment: the open-ended
+`>500` bucket probably needs splitting further (e.g. `501-1000`, `>1000`), since a
+600-bed private hospital and a 2,000+-bed referral institute like AIIMS are not the
+same negotiating tier and currently fall in the same bucket.
+
+This generalizes beyond MRI's CMC field — the same volume-leverage logic plausibly
+applies to AMC for every equipment type (all five currently share one identical
+generic proxy, §18.4/§18.9), and potentially to other volume-sensitive contract terms
+Jay flagged in conversation (e.g. consumable/reagent supply agreements for Cath
+Lab/Dialysis), though those are a distinct question from CMC/AMC and not scoped here.
+
+A scaffold for this has been added to `equipment-data/mri.json`'s
+`cmcAnnualCostPercentage._bedVolumeTierHypothesis` — explicitly marked
+"hypothesis, not yet researched, do not use for defaults." No numeric bed-tier values
+exist yet anywhere in this project; per this project's own no-invented-numbers rule
+(§3, ISSUES.md ISS-9), they should come from a targeted research pass, not be guessed.
+
+### 19.3 Product implication
+
+If bed-count-tiered defaults are built, `Hospital bed size` (already listed as a Basic
+Mode input, SPEC.md §10.1) stops being optional context and becomes a required lookup
+key — see SPEC.md §36.1 Q6, resolved 2026-07-11 on this basis.
+
+### 19.4 Next action
+
+Added to §15's gap list. Candidate brief for a fourth targeted research pass: find
+Indian hospital tenders, case studies, or vendor pricing schedules that break out
+CMC/AMC cost (or discount off the standard rate) by hospital bed count or annual scan
+volume, for MRI at minimum and ideally CT/Cath Lab/Dialysis/Ultrasound too; separately,
+verify AIIMS's actual bed count at the specific institution S53 studied. Not
+commissioned yet — Jay's call on timing.

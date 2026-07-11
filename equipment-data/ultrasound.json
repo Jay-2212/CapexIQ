@@ -1,5 +1,5 @@
 {
-  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md \u00a717/\u00a718 and ISSUES.md ISS-9/ISS-3",
+  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md §17/§18 and ISSUES.md ISS-9/ISS-3",
   "equipmentType": "ultrasound",
   "purchaseCost": {
     "low": null,
@@ -66,16 +66,11 @@
   },
   "typicalUtilization": {
     "usagePerDay": null,
-    "workingDaysPerMonth": null,
     "rampUpMonths": null,
     "_usagePerDayRange": {
       "confidence": "Unavailable",
       "note": "No published Indian data exists. An unsourced international inference (15-30min/exam -> 16-32 scans/day) was explicitly flagged by the research pass as lacking an authoritative India source -- not used as a default."
     }
-  },
-  "financingNorms": {
-    "typicalLoanTenureYears": null,
-    "typicalInterestRateRange": null
   },
   "billedTariffPerUse": {
     "low": 680,

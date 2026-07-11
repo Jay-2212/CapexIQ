@@ -1,5 +1,5 @@
 {
-  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md \u00a717/\u00a718 and ISSUES.md ISS-9/ISS-3",
+  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md §17/§18 and ISSUES.md ISS-9/ISS-3",
   "equipmentType": "cath-lab",
   "purchaseCost": {
     "low": null,
@@ -71,19 +71,14 @@
   },
   "typicalUtilization": {
     "usagePerDay": null,
-    "workingDaysPerMonth": null,
     "rampUpMonths": null,
     "_usagePerDayRange": {
       "low": 2,
       "high": 6,
       "confidence": "Low",
       "sourceId": "S27",
-      "note": "Vendor guidance, not empirical. Blends two different procedure types: 4-6 diagnostic catheterizations/day OR 2-4 PCI/interventional procedures/day. Consistent with data-requirements.md \u00a713.3's existing caution that cath lab needs procedure-mix modeling, not one blended average."
+      "note": "Vendor guidance, not empirical. Blends two different procedure types: 4-6 diagnostic catheterizations/day OR 2-4 PCI/interventional procedures/day. Consistent with data-requirements.md §13.3's existing caution that cath lab needs procedure-mix modeling, not one blended average."
     }
-  },
-  "financingNorms": {
-    "typicalLoanTenureYears": null,
-    "typicalInterestRateRange": null
   },
   "billedTariffPerUse": {
     "low": 11920,

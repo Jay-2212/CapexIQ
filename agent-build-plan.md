@@ -351,6 +351,13 @@ transition table needs both to enumerate invalid-state transitions correctly, no
 happy-path steps. Doesn't depend on Phase 1-3.
 **Parallelizable:** no — this is a single coherent design; one session should own it
 start to finish so the table stays internally consistent.
+**Open question to resolve before writing this doc:** SPEC.md §36.1 Q14 (added
+2026-07-11) — Jay's floated a hero-page → "Start Assessment" CTA → dedicated
+equipment/bed-count pre-step, landing on the wizard proper only after that, not a
+direct-to-dashboard entry. Not finalized (UI/UX is still paused, his call to make it),
+but this phase's transition table needs to be designed against whatever the real entry
+point turns out to be — don't default to "lands on step 1 of 7" without checking SPEC.md
+§36.1 Q14 is still accurate when this phase actually starts.
 **Must enumerate, explicitly, in the doc:**
 - [ ] Every step, every field in that step, and its validation rule (pulled from
       `content/inputs-metadata.json`, not re-invented here).

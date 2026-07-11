@@ -11,129 +11,50 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-07-07)*
+*(Last updated: 2026-07-11)*
 
-**Where things stand:** Product is **CapexIQ**, tagline "Know if it pays for itself,
-before you buy it.", living at `capexiq.jaybharti.me` (confirmed resolving, HTTP 200).
-Repo is live at `github.com/Jay-2212/CapexIQ` (main). Build is verified: `npm install`/
-`npm run build` succeed (Next.js 15.5.20, static export to `out/`). Core docs:
-`CONVENTIONS.md` (code rules), `agent-build-plan.md` (now 10 phases after the gap-analysis
-pass below, dependencies, Definition of Done), `ISSUES.md` (open/accepted/resolved
-tracker — check before assuming anything is fine).
+**Where things stand today:** Phase 1 (equipment data) is effectively complete except
+two open human calls (ISS-12, ISS-13 below). Phase 2 (formula engine) is half done —
+Group A (`depreciation`/`emi`/`revenue`/`breakEven`/`npv`/`irr`) is implemented and
+tested (26 passing); Group B (`realization`/`dso`/`workingCapital`), Group C
+(`roi`/`maintenance`/`launchDelay`/`sensitivity`), and the Investment Outlook
+score/EAC/discounted-payback trio are all still stubs (`throw new Error("not
+implemented")`) — handed to Codex today via a bounded prompt, not yet returned. Phase 3
+(content/copy) is all placeholder, not started. Phase 4 (design/UX) remains
+**deliberately paused** — see below, unchanged from 2026-07-07.
 
-**All three PRs open as of this morning are now merged into main:** Codex's Phase 2
-Group A formulas (`depreciation.ts`/`emi.ts`/`revenue.ts`/`breakEven.ts`/`npv.ts`/
-`irr.ts` + tests), the benchmark-cleanup + 2nd research-pass integration, and the
-build-plan gap-analysis pass (new Phase 4, two UX decisions resolved). See the two
-Change Log entries below for what each contained; this paragraph is just the
-now-current combined state.
+**ISS-13 resolved today:** the dead `typicalUtilization.workingDaysPerMonth`/
+`financingNorms` fields (null in every equipment file, duplicating
+`common-assumptions.json`) are removed from all five equipment files. Single source of
+truth for working days/month is `common-assumptions.json.workingDaysPerMonth` (flat 25,
+a generic calendar convention, not a calendar-accurate 26/28/26 month-by-month figure).
 
-UI/UX decisions for the input layer are settled: operational variables (usage/day,
-billed tariff, working days, launch delay) render as sliders; structural/capital
-variables (purchase cost, useful life, financing terms) render as precise input boxes;
-tooltips are click-to-open popovers (hover rejected, poor touch support), each showing
-professional definition, default value (or an explicit "no benchmark available" note),
-and higher/lower-value impact. This is codified in `content/inputs-metadata.json`
-(control schema only — zero numeric defaults live there, see ISS-9).
+**ISS-12 reframed, still open:** Jay's theory is that the MRI CMC "contradiction"
+(generic 3-10% tender ceiling vs. one AIIMS hospital's ~0.25%/yr observed cost) is
+really a volume/bed-count effect, not two competing estimates — a very high-volume
+referral institute like AIIMS would negotiate a materially better rate than a smaller
+private hospital paying near the tender ceiling. Proposal: bed-count-tiered CMC/AMC
+defaults, reusing `data-requirements.md` §2.3's existing bed-size buckets (likely
+splitting the open-ended `>500` bucket further). Written up in a new
+`data-requirements.md` §19 and scaffolded (not populated with numbers) in
+`equipment-data/mri.json`. Not resolved — needs (a) independent verification of AIIMS's
+actual bed count, which isn't sourced anywhere in this project yet, and (b) a targeted
+research pass breaking CMC/AMC out by bed-count/volume tier. Also resolved SPEC.md
+§36.1 Q6 on this basis: hospital bed size is now a **required** Basic Mode input (it's
+the lookup key), not optional context.
 
-**Benchmark cleanup + two research passes (2026-07-06/07, ISS-9):** a prior pass had
-populated `inputs-metadata.json` with invented numbers — most seriously a false claim
-that a 12% discount rate / 15% target IRR were "sourced from `data-requirements.md`
-§12.3," which has no such row. Cleaned up by moving all numeric benchmarks out of
-`inputs-metadata.json` and into `equipment-data/<type>.json` / the new
-`equipment-data/common-assumptions.json`, each with honest confidence/sourceId. A
-follow-up Deep Research pass then filled most of the resulting gaps with real, cited
-data: discount rate (11.1-14.1% proxy, typical 12.5%), MRI/Dialysis utilization, CGHS
-reimbursement-ceiling tariffs for CT/MRI/Ultrasound/Dialysis, MRI/CT/Cath-Lab
-launch-delay ranges, and a real per-machine dialysis acquisition cost. **Still
-genuinely unavailable after two passes** (deliberately `null`, not oversight): target
-IRR/hurdle rate, Cath Lab tariff, Dialysis/Ultrasound launch delay, standalone-CT
-utilization. See ISS-9 for the full list; not blocking, these stay user-entered inputs.
+**New product idea captured, not built:** Jay floated an onboarding-flow concept —
+land on a hero page with a "Start Assessment" CTA, which opens a dedicated pre-step
+(equipment type + bed count, with imagery) before the full wizard, rather than landing
+directly on the wizard/dashboard. Logged as SPEC.md §36.1 Q14 and flagged inside
+`agent-build-plan.md` Phase 5's intro so it isn't designed against a stale
+direct-to-dashboard assumption. **Not started** — still UI/UX work, still paused per
+Jay's own call; this is intent-capture only.
 
-**Build-plan gap-analysis pass (2026-07-07):** `agent-build-plan.md` went through a
-dedicated gap-analysis pass, per the project's "plan before build" discipline, before
-any UI/dashboard component was written. Finding: SPEC.md lists *fields* exhaustively but
-left several *mechanisms* unresolved — how Advanced Mode is surfaced, whether the
-dashboard/charts update live as inputs change, tooltip content structure, chart color
-logic, input validation bounds, typography/spacing tokens, and the Excel-formula
-question. All now either resolved with a concrete decision or turned into a named,
-sequenced task, via a new **Phase 4** ("Design system, interaction & validation
-contract") — phases 4 onward renumbered from the prior 9-phase version (old 4→5, 5→6,
-6→7, 7→8, 8→9, 9→10); re-check any old phase-number citation against the current file.
-Two decisions made explicitly (asked directly rather than guessed): (1) Excel exports
-use **live, embedded formulas**, not static values; (2) Advanced Mode is an **inline
-collapsible panel below Basic Mode fields with a persistent preview banner**, not a
-drawer/modal/tab. `design/ux-product-spec.md` (Phase 4) is still not written.
+---
 
-**Codex's Phase 2 Group A formulas are merged:** `depreciation.ts`/`emi.ts`/
-`revenue.ts`/`breakEven.ts`/`npv.ts`/`irr.ts` plus their tests, reviewed and merged.
-
-**`financial-model-spec.md` is written and approved (resolves ISS-10):** defines the
-Investment Outlook score as 4 weighted sub-scores (Return Strength 35%, Speed to
-Payback 25%, Financing Resilience/DSCR 20%, Operational Margin of Safety 20%), each
-with a concrete normalization formula; standard EAC and discounted-payback formulas;
-confirms the discount rate (12.5% typical) and target IRR heuristic need no further
-work; and a new **automatic actionable-insight** feature Jay specifically asked for — a
-background price-increase suggestion, gated to only surface when it improves payback by
-≥6 months via a ≤15% price increase, silent otherwise. `agent-build-plan.md` Phase 2 and
-Phase 9 updated to implement against it. **ISS-11 (doctor's cut) is resolved:**
-confirmed with Jay it's the existing professional/reporting fee field, no new field
-needed; the separate referral-commission scenario is real but negligible at this tool's
-scale and is out of scope.
-
-**False-claim cleanup + data cross-check (2026-07-07, same day):** SPEC.md §36.3 item 1
-falsely claimed typography was "Resolved... `design/ux-product-spec.md` defines the type
-scale" — that file doesn't exist and no typography decision has actually been made;
-corrected to **Open**. (Items 6/9 in the same section were checked too and are fine —
-they cite `agent-build-plan.md`, which does exist and does contain those decisions.)
-Separately, cross-checked `data-requirements.md` against every `equipment-data/*.json`
-file: found `usefulLifeYears` was `null` everywhere despite a real High-confidence
-sourced answer already sitting in `data-requirements.md` §12.4/§14 (Companies Act
-Schedule II, source S8) — filled it in (13yr for MRI/CT/Ultrasound, 15yr for Cath
-Lab/Dialysis, see ISSUES.md for the category-mapping reasoning). Also found
-`salvageValuePercentage`/`installationAndAncillaryCostPercentage`/`warrantyYears`/
-`cmcYears`/`amcAnnualCostPercentage` have **zero research coverage in either research
-pass** and weren't even listed in `data-requirements.md` §15's gap list — added them
-there so a future pass doesn't miss them. `ISSUES.md` ISS-3 rewritten to reflect current
-reality (was stale, describing all equipment files as unpopulated placeholders when only
-`custom.json` still is).
-
-**Third research pass (2026-07-07, same day):** Jay commissioned a targeted third
-research pass (ChatGPT Deep Research, prompted with a detailed brief covering source
-hierarchy/citation format matching this doc's own conventions) against exactly the
-remaining Phase-1 gaps. Result, written up in `data-requirements.md` §18: `warrantyYears`,
-`salvageValuePercentage` (5% flat, all equipment, Schedule II), and
-`installationAndAncillaryCostPercentage` filled for all five equipment types;
-`cmcYears`/`amcAnnualCostPercentage` filled plus a new `cmcAnnualCostPercentage` field
-added (AMC and CMC turned out to be genuinely distinct contracts, not one concept); and
-**Cath Lab's `billedTariffPerUse`, empty through two prior passes, is now filled**
-(₹11,920-₹15,000, High confidence — CGHS + PM-JAY converge, independently re-verified
-this session via a live fetch of a second site). Two things flagged rather than silently
-resolved: the AMC figures are an identical generic proxy across all 5 equipment types,
-not equipment-specific research; and MRI's CMC cost has a real contradiction between a
-generic tender-ceiling range and one real hospital's much lower observed cost (new
-ISS-12, needs Jay's call). See `ISSUES.md` ISS-3 (now resolved) and ISS-12/ISS-13 (new,
-open) for the full picture. Phase 1 (equipment data) is now close to complete —
-`purchaseCost` for MRI/CT/Ultrasound and DSO/payer-mix/specialist-fee benchmarks (ISS-4)
-remain the main genuinely-open data gaps, correctly left as user-entered inputs.
-
-**What's next:** Phase 4 (design/UX) is **deliberately paused** — Jay is taking
-typography/spacing/chart-color/tooltip-mechanics/product-feel decisions on directly,
-not delegating them, and asked this not be touched until he picks it back up. Don't
-start `design/ux-product-spec.md` or any wizard/dashboard UI work without him. Until
-then: Phase 2's score/EAC/discounted-payback formulas (against `financial-model-spec.md`)
-and resolving ISS-12 (MRI CMC contradiction) are both fair game and don't touch design.
-
-**Cloudflare Pages + DNS (ISS-2) is done:** Jay confirmed 2026-07-07 he wired this up
-directly in the Cloudflare dashboard — `capexiq.jaybharti.me` is live. Resolved, see
-`ISSUES.md`. Note the live site currently only serves the 21-line skeleton
-`app/page.tsx` — Jay may want a placeholder/"coming soon" page there; not done yet,
-pending his call (this is a UI change, so it's paused along with the rest of Phase 4
-per the above).
-
-**Anything blocking or half-finished:** Nothing blocking. One cosmetic known quirk: the
-CFO persona's background-removed cutout retains her office chair — see `ISSUES.md`
-ISS-5.
+Full history of how we got here lives in the Change Log below (most recent first) —
+not duplicated here per this doc's own "overwrite, don't append" rule for this section.
 
 ---
 
@@ -160,6 +81,46 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-11 — ISS-13 resolved (dead schema removed); ISS-12 reframed as bed/volume tiering; onboarding-flow idea captured
+**What changed:** Full status review at Jay's request, then three concrete pieces of
+follow-up work from that conversation.
+1. **ISS-13 resolved:** `typicalUtilization.workingDaysPerMonth` and `financingNorms`
+   (both `null` in every equipment file, confirmed dead — duplicates of
+   `common-assumptions.json`) removed from all five `equipment-data/*.json` files.
+   Single source of truth for working days/month is now unambiguous: flat 25/month, a
+   modeling convention, not a calendar-accurate figure — flagged explicitly since Jay
+   asked whether it should vary by month (26/28/26); it doesn't currently, this wasn't
+   changed, just clarified.
+2. **ISS-12 reframed, still open:** Jay's hypothesis is that the MRI CMC "contradiction"
+   (§18.4 — generic 3-10% tender ceiling vs. one AIIMS hospital's ~0.25%/yr observed
+   cost) is a volume/bed-count effect, not two competing estimates of the same thing.
+   Wrote up a bed-count-tiered maintenance-contract design in new `data-requirements.md`
+   §19 (reuses §2.3's existing bed-size buckets, proposes splitting the open `>500`
+   bucket further) and scaffolded it (not populated with numbers, per this project's
+   no-invented-benchmarks rule) in `equipment-data/mri.json`'s
+   `cmcAnnualCostPercentage._bedVolumeTierHypothesis`. Needs a follow-up research pass
+   plus independent verification of AIIMS's actual bed count before any number ships.
+   Also resolved SPEC.md §36.1 Q6 on this basis: hospital bed size becomes a
+   **required** Basic Mode input, not optional context.
+3. **New onboarding-flow idea captured, not built:** Jay described a hero-page →
+   "Start Assessment" CTA → dedicated equipment/bed-count pre-step, before the wizard
+   proper (not a direct-to-dashboard landing). Logged as SPEC.md §36.1 Q14 and flagged
+   in `agent-build-plan.md` Phase 5's intro so that phase doesn't get designed against a
+   stale entry-point assumption. **Not started** — still Phase 4/UI territory, which
+   stays paused per Jay's 2026-07-07 call; this is intent-capture only.
+4. **Phase 2 remaining formulas handed to Codex:** Group B (`realization`/`dso`/
+   `workingCapital`), Group C (`roi`/`maintenance`/`launchDelay`/`sensitivity`), and the
+   Investment Outlook score/EAC/discounted-payback trio (`financial-model-spec.md`) are
+   still stubs — a bounded implementation prompt was written and handed to Jay to run
+   through Codex directly (Codex has no push access here, so Claude will review/test/
+   push once Codex's output comes back, per this project's standing multi-agent
+   workflow).
+**Files touched:** `equipment-data/mri.json` (+ ct/cath-lab/dialysis/ultrasound.json for
+the ISS-13 cleanup), `data-requirements.md` (new §19, §15 gap list), `SPEC.md` (§36.1
+Q6/Q14), `agent-build-plan.md` (Phase 5 intro note), `ISSUES.md` (ISS-12 updated,
+ISS-13 resolved), `HANDOFF.md`. `npm test` verified green (26 passing) after the JSON
+edits.
 
 ### 2026-07-07 — Third research pass: filled warranty/salvage/installation%/AMC/CMC, resolved Cath Lab tariff
 **What changed:** Following the false-claim cleanup earlier the same day, Jay commissioned

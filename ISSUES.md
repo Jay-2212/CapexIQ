@@ -82,23 +82,41 @@ life-cycle-costing study of one real AIIMS 1.5T MRI that found *actual* realized
 cost was only ~0.23-0.28%/year — roughly 25-30x lower. Both are recorded in
 `equipment-data/mri.json`'s `cmcAnnualCostPercentage` field (primary value + an
 `_observedActualAlternative` sub-object), not silently resolved one way.
-**Next action:** Jay's call needed before either number becomes a UI default — is the
-tender ceiling more representative of what a new private hospital should budget, or is
-AIIMS's real (possibly negotiated-government-rate) experience closer to reality? Worth
-a small targeted follow-up search for a second independent-hospital life-cycle-cost
-study before deciding, rather than picking blind.
+**Update (2026-07-11):** Jay's working theory — this may not be a contradiction at all,
+just two points on a volume/bed-count curve. AIIMS is a very large, high-volume
+referral institute and would plausibly negotiate a far better CMC/AMC rate than a
+smaller private hospital paying near the tender ceiling. Proposal: a bed-count-tiered
+default (reusing `data-requirements.md` §2.3's existing bed-size buckets, likely with
+the open-ended `>500` bucket split further, e.g. `501-1000`/`>1000`), generalized beyond
+MRI's CMC to AMC for all five equipment types (all currently share one identical
+generic proxy). Written up in `data-requirements.md` §19 and scaffolded (not populated)
+in `equipment-data/mri.json`'s `cmcAnnualCostPercentage._bedVolumeTierHypothesis`.
+**Next action:** two things needed before this becomes real, neither done yet: (1)
+independently verify AIIMS's actual bed count (not currently sourced/cited anywhere in
+this project — the ~2,000+ figure is public general knowledge, not a researched data
+point); (2) a targeted research pass looking for CMC/AMC (or other volume-sensitive
+contract terms) broken out by bed count or scan volume, not a single blended figure.
+Not commissioned yet — Jay's call on timing. Until then, no bed-tiered number should
+ship as a default.
 
-### ISS-13 — Equipment-data schema: workingDaysPerMonth/financingNorms per-equipment fields may be dead
+### ISS-13 — Equipment-data schema: workingDaysPerMonth/financingNorms per-equipment fields were dead
 **Area:** data / schema
-**Status:** open
-**What:** Each equipment file has `typicalUtilization.workingDaysPerMonth` and
-`financingNorms.typicalLoanTenureYears`/`typicalInterestRateRange` fields that are
-`null` in every equipment file — these duplicate values that already live at the shared
-level in `common-assumptions.json` (`workingDaysPerMonth`, `loanInterestRate`,
-`loanTenureMonths`) and don't appear to need an equipment-specific override per
-`data-requirements.md`. Neither the second nor third research pass touched these.
-**Next action:** confirm whether these per-equipment fields are dead schema (safe to
-remove) or intentional future overrides, next time Phase 1 is touched.
+**Status:** resolved
+**What:** Each equipment file had `typicalUtilization.workingDaysPerMonth` and
+`financingNorms.typicalLoanTenureYears`/`typicalInterestRateRange` fields that were
+`null` in every equipment file — these duplicated values that already live at the
+shared level in `common-assumptions.json` (`workingDaysPerMonth`, `loanInterestRate`,
+`loanTenureMonths`). Neither the second nor third research pass had touched these.
+**Resolution (2026-07-11):** confirmed dead — no per-equipment override was ever
+populated or flagged as needed by any research pass. Removed both fields from all five
+`equipment-data/*.json` files. Single source of truth for working days/month is now
+only `common-assumptions.json.workingDaysPerMonth` (**flat 25 days/month, a generic
+Sunday-closure calendar convention** — not a calendar-accurate month-by-month figure
+like 26/28/26; this was already the case before this cleanup, just now un-duplicated).
+Single source of truth for loan tenure/rate is `common-assumptions.json.loanTenureMonths`
+/`loanInterestRate`. If an equipment-specific override is ever genuinely needed (e.g. a
+lender treats MRI collateral differently from Dialysis), re-add the field then, with a
+real sourced value — not as dead scaffolding ahead of time.
 
 ### ISS-8 — Dev-dependency audit warnings (moderate/high/critical, all dev-only)
 **Area:** code / tooling

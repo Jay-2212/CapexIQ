@@ -1,5 +1,5 @@
 {
-  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md \u00a717/\u00a718 and ISSUES.md ISS-9/ISS-3",
+  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md §17/§18 and ISSUES.md ISS-9/ISS-3",
   "equipmentType": "ct",
   "purchaseCost": {
     "low": null,
@@ -66,7 +66,6 @@
   },
   "typicalUtilization": {
     "usagePerDay": null,
-    "workingDaysPerMonth": null,
     "rampUpMonths": null,
     "_usagePerDayRange": {
       "low": 15,
@@ -75,10 +74,6 @@
       "sourceId": "S26",
       "note": "No genuine Indian standalone-CT utilization study found. low=15 is scans/day/scanner derived from an AIIMS PET/CT cost analysis (PET/CT throughput is not directly comparable to standard CT). high=30 is an unsourced 'engineering guide' estimate. Left as a range, not a single typical value, given the weak sourcing. A third research pass (2026-07-07) found a similar-looking 15-30 range from IPHS district-hospital guidelines (S57), but that figure is a COMBINED X-ray+CT+ultrasound workload norm, not CT-specific -- weaker, not stronger, than the existing PET/CT-derived figure, so no change was made here. See data-requirements.md §18.7. Standalone CT utilization remains a genuine open gap."
     }
-  },
-  "financingNorms": {
-    "typicalLoanTenureYears": null,
-    "typicalInterestRateRange": null
   },
   "billedTariffPerUse": {
     "low": 880,
