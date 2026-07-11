@@ -14,18 +14,20 @@ of *how* we got here.
 *(Last updated: 2026-07-11)*
 
 **Where things stand today:** Phase 1 (equipment data) is effectively complete except
-one open human call (ISS-12 below). **Phase 2 (formula engine) is now fully
-implemented:** Group A (`depreciation`/`emi`/`revenue`/`breakEven`/`npv`/`irr`, merged
-earlier) plus Group B (`realization`/`dso`/`workingCapital`), Group C
+one open human call (ISS-12 below). **Phase 2 (formula engine) is fully implemented:**
+Group A (`depreciation`/`emi`/`revenue`/`breakEven`/`npv`/`irr`, merged earlier) plus
+Group B (`realization`/`dso`/`workingCapital`), Group C
 (`roi`/`maintenance`/`launchDelay`/`sensitivity`), and the Investment Outlook
 score/EAC/discounted-payback/actionable-insight quartet from `financial-model-spec.md`
-were implemented by Codex, reviewed by Claude, and committed 2026-07-11. `npm test`
-passes 65 tests across 17 files; `npm run build` and `npx tsc --noEmit` are clean.
-Phase 3 (content/copy): 4 of 7 files now have real content (`glossary.md`,
-`benchmark-notes.md`, `field-explanations.md`, `disclaimer.md`); `methodology.md`/
-`formula-appendix.md` are now unblocked since Phase 2 is reviewed and final;
-`tooltip-copy.md` stays blocked on Phase 4. Phase 4 (design/UX) remains **deliberately
-paused** — see below, unchanged from 2026-07-07.
+were implemented by Codex, reviewed by Claude, and committed 2026-07-11. **Phase 3
+(content/copy) is now also fully complete** — all 7 files written (`disclaimer.md`,
+`glossary.md`, `benchmark-notes.md`, `field-explanations.md`, `methodology.md`,
+`formula-appendix.md`, `tooltip-copy.md`), including `tooltip-copy.md` (previously
+blocked on Phase 4's tooltip-structure decision, which turned out to already be
+resolved — see the Change Log entry below for the reasoning and the two follow-ups it
+flags for whoever wires up Phase 4/5). `npm test` passes 65 tests across 17 files;
+`npm run build` and `npx tsc --noEmit` are clean. Phase 4 (design/UX) remains
+**deliberately paused** — see below, unchanged from 2026-07-07.
 
 **ISS-13 resolved 2026-07-11:** the dead `typicalUtilization.workingDaysPerMonth`/
 `financingNorms` fields (null in every equipment file, duplicating
@@ -85,6 +87,49 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-11 — Phase 3 (content/copy) fully completed
+**What changed:** Following the Phase 2 formula review and merge earlier the same day
+(see the entry directly below), wrote the 3 remaining Phase 3 files, closing the phase
+out completely.
+1. **`report-templates/formula-appendix.md`** — the authoritative formula reference,
+   one section per `/formulas` file, each formula transcribed exactly from the
+   implementation (not just from SPEC.md §31's earlier conceptual list, which predates
+   several implementation details like the IRR-undefined fallback and the zero-rate
+   EAC edge case).
+2. **`report-templates/methodology.md`** — a plain-language walkthrough of the full
+   calculation waterfall (usage → billed revenue → realized revenue → cash received →
+   costs → surplus → cash flow after EMI → payback/ROI/NPV/IRR → break-even → EAC →
+   Investment Outlook score → sensitivity/actionable-insight), for SPEC.md §22's "show
+   calculation background" audience, with one continuous illustrative worked example
+   threaded through every section.
+3. **`content/tooltip-copy.md`** — previously flagged as blocked on Phase 4 (tooltip
+   content structure). On inspection, that structure was already resolved: the 7-slot
+   format (definition, direction, default/typical value, confidence, source note,
+   how-to-estimate, why-it-matters) is fully specified in `agent-build-plan.md`'s own
+   Phase 3 task description, left over from the 2026-07-07 gap-analysis pass. Wrote the
+   full popover copy for every Basic Mode field and every Advanced Mode group (A-F),
+   keyed by readable field name rather than a final machine ID (Phase 5's
+   `wizard-state.md`, not yet written, will define those — re-keying is mechanical, not
+   a content rewrite). Flagged one real follow-up for whoever wires up the popover
+   component: `inputs-metadata.json` already carries an earlier, simpler 4-slot tooltip
+   object for 10 fields that predates this structure and should be reconciled to this
+   file, not kept as a second live format.
+4. Also wrote the Advanced Mode preview banner copy (a smaller Phase 3 "Do" item with
+   no prior home) into `content/field-explanations.md`'s Advanced Mode section,
+   extending SPEC.md §10.4's original soft-note to name all six §11 field groups by
+   label.
+**Files touched:** `report-templates/formula-appendix.md`, `report-templates/
+methodology.md`, `content/tooltip-copy.md`, `content/field-explanations.md` (banner
+copy addition), `agent-build-plan.md` (Phase 3 checklist marked done),
+`data-requirements.md`/`ISS-12` unaffected by this entry. `npm test` 65/65, `npx tsc
+--noEmit` clean, `npm run build` clean — re-verified after these changes (content-only,
+but re-ran the full suite per this project's own verification discipline).
+**Also this session:** wrote a small, narrowly-scoped research prompt for ISS-12 (verify
+AIIMS's actual bed count; find bed-count/volume-tiered CMC/AMC pricing data for MRI),
+handed to Jay to run through ChatGPT Deep Research — not yet commissioned.
+**What's next:** Phase 3 is done. Remaining open items: ISS-12 (pending the research
+pass above), and Phase 4 (design/UX), still deliberately paused.
 
 ### 2026-07-11 — Completed Phase 2 formula engine Groups B/C/D; 4 Phase 3 content files written; PR #7 merged
 **What changed:** Three threads from the same day landed together this session.

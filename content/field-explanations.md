@@ -118,6 +118,15 @@ Hidden by default — see the persistent preview banner shown above the collapse
 for what opening this unlocks. Everything below adds precision on top of Basic Mode's
 first-pass estimate; none of it is required to see an initial result.
 
+**Preview banner copy** (shown above the collapsed panel, per `agent-build-plan.md`
+Phase 4-F; extends SPEC.md §10.4's original soft-note to name all six groups below by
+label, so nothing Advanced unlocks stays invisible to a Basic-only user):
+
+> This first-pass view is based on billed revenue. Open Advanced Financial Assumptions
+> to model payer mix & realization, utilization ramp-up, financing/EMI, launch delay &
+> pre-opening cost, maintenance/lifecycle cost, and discount rate/depreciation/tax
+> assumptions.
+
 ### A. Revenue realization and payer mix
 
 **Private cash % / Insurance-TPA % / Corporate credit % / PM-JAY-government scheme % /

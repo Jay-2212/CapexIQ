@@ -135,35 +135,35 @@ accurately) and `methodology.md`; Phase 4-E (tooltip content structure) for
 **Parallelizable:** yes, fully — no file overlap with any code phase, safe to run
 alongside Phase 1 and Phase 2.
 **Do:**
-- [ ] `disclaimer.md` — real, careful wording that outputs are estimates from
+- [x] `disclaimer.md` — real, careful wording that outputs are estimates from
       user-entered assumptions, not financial advice. This blocks launch per
       `DIRECTORY.md`/`ISSUES.md` — don't leave it as a placeholder past this phase.
-- [ ] `glossary.md` — every term used in `formula-appendix.md` and the tooltip copy
+- [x] `glossary.md` — every term used in `formula-appendix.md` and the tooltip copy
       needs an entry; no orphaned jargon.
-- [ ] `tooltip-copy.md` — keyed by field name, matching whatever fields Phase 5's
-      wizard-state.md ends up defining. Each entry follows Phase 4-E's 7-slot
-      structure exactly (definition, direction, default/typical value + confidence,
-      source note, how-to-estimate, why-it-matters) — this is stricter than SPEC.md
-      §23.4's original 6 slots; "direction" (higher-is-better / lower-is-better /
-      context-dependent) is a new required slot this pass added because SPEC.md never
-      specified it and the product needs it (a user glancing at "DSO: 45 days" has no
-      way to know if that's good or bad without it).
-- [ ] Advanced Mode preview banner copy — the exact sentence(s) shown above the
-      collapsed Advanced panel (Phase 4-F), listing what it unlocks. Base it on SPEC.md
-      §10.4's existing soft-note string ("This first-pass view is based on billed
-      revenue. Open Advanced Financial Assumptions to model payer deductions,
-      collection delays, loan EMI timing, and working capital requirement.") but extend
-      it to name all six §11 field groups by label (payer mix & realization,
-      utilization ramp-up, financing/EMI, launch delay & pre-opening cost,
-      maintenance/lifecycle cost, discount rate/depreciation/tax assumptions) so nothing
-      Advanced unlocks is invisible to a Basic-only user.
-- [ ] The "professional/reporting fee" tooltip must explicitly state what it does and
-      doesn't cover (the doctor's own fee for performing/reporting the procedure). See
-      the open question logged in `ISSUES.md` about whether a separate
-      referral/commission "doctor's cut" field is needed — don't write copy that
-      silently assumes either answer before that's resolved.
+- [x] `tooltip-copy.md` — keyed by field name (readable name, not a final machine ID —
+      Phase 5's `wizard-state.md` will define those; re-keying is mechanical, not a
+      content rewrite). Each entry follows Phase 4-E's 7-slot structure exactly
+      (definition, direction, default/typical value, confidence, source note,
+      how-to-estimate, why-it-matters) — stricter than SPEC.md §23.4's original 4
+      slots; "direction" (higher-is-better / lower-is-better / context-dependent) is a
+      new required slot this pass added because SPEC.md never specified it and the
+      product needs it (a user glancing at "DSO: 45 days" has no way to know if that's
+      good or bad without it). Note: `inputs-metadata.json` still carries an earlier,
+      simpler 4-slot tooltip object for 10 fields, predating this structure — whoever
+      wires up the popover component should reconcile to this file, not keep both.
+- [x] Advanced Mode preview banner copy — written into `content/field-explanations.md`'s
+      Advanced Mode section, extending SPEC.md §10.4's original soft-note string to
+      name all six §11 field groups by label so nothing Advanced unlocks is invisible
+      to a Basic-only user.
+- [x] The "professional/reporting fee" tooltip explicitly states what it does and
+      doesn't cover (the doctor's own fee for performing/reporting the procedure),
+      without assuming an answer to the separate "doctor's cut" referral/commission
+      question — that's resolved as out of scope per `ISSUES.md` ISS-11, and the copy
+      reflects that.
 **Definition of Done:** no file in `/content` or `/report-templates` still says
-"placeholder, not yet written."
+"placeholder, not yet written." **Met 2026-07-11** — all 7 files written
+(`disclaimer.md`, `glossary.md`, `benchmark-notes.md`, `field-explanations.md`,
+`methodology.md`, `formula-appendix.md`, `tooltip-copy.md`).
 
 ---
 
