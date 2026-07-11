@@ -27,8 +27,23 @@ were implemented by Codex, reviewed by Claude, and committed 2026-07-11. **Phase
 blocked on Phase 4's tooltip-structure decision, which turned out to already be
 resolved — see the Change Log entry below for the reasoning and the two follow-ups it
 flags for whoever wires up Phase 4/5). `npm test` passes 65 tests across 17 files;
-`npm run build` and `npx tsc --noEmit` are clean. Phase 4 (design/UX) remains
-**deliberately paused** — see below, unchanged from 2026-07-07.
+`npm run build` and `npx tsc --noEmit` are clean.
+
+**Phase 4 (design/UX) is now resolved, 2026-07-11** — Jay lifted the 2026-07-07 pause
+himself and drove the design discussion directly. `design/ux-product-spec.md` (the
+Phase 4 deliverable SPEC.md §38 named since 2026-07-07) is written: resolves Phase
+4-A–H, corrects a real hover-vs-click tooltip contradiction between SPEC.md §23.4 and
+the original Phase 4-E draft, adds a "Signal" theme (promotes the existing
+`--status-neutral` slate-blue to double as the primary interactive/button/link/CTA
+color — `tokens.css`/`colors.md` updated), a type scale and 4px spacing scale (also
+added to `tokens.css`), landing-page structure and entry flow (resolves SPEC.md §36.1
+Q9 and Q14, supersedes §26.1's CTA wording — final CTA is "Start Assessment"), a
+default-value visual treatment (muted + "Typical" tag until edited), and
+micro-interaction principles. **One Phase 4 piece is still genuinely open, flagged
+explicitly rather than falsely closed:** `content/inputs-metadata.json`'s per-field
+validation contract (min/max/decimalPlaces/errorMessage per field) — deferred to run
+alongside Phase 5's `wizard-state.md`, which needs the same field-by-field pass.
+Phase 5 is next.
 
 **ISS-12 resolved 2026-07-11 (a fourth research pass, same day as the reframe below):**
 the bed/volume-tiering theory for MRI's CMC contradiction was tested directly and is
@@ -98,6 +113,70 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-11 — Phase 4 (design/UX) resolved: design/ux-product-spec.md written, "Signal" theme picked, tooltip contradiction fixed
+**What changed:** Jay lifted the 2026-07-07 UI/UX pause himself, mid-conversation,
+by dropping a long-form set of UX/UI thoughts (landing page, onboarding wizard,
+default-value handling, basic/advanced mode, sliders, visual tone). Rather than build
+anything immediately, did a full cohesion check first — read `HANDOFF.md`/`ISSUES.md`/
+`agent-build-plan.md`/`SPEC.md`/`design/colors.md`/`tokens.css` end to end — before
+drafting anything, per this project's own "plan before build" and doc-cohesion
+discipline. Then wrote `design/ux-product-spec.md`, the Phase 4 deliverable SPEC.md
+§38 has named since 2026-07-07.
+1. **Found and fixed one real cross-doc contradiction:** SPEC.md §23.4 explicitly
+   rejects hover-based tooltips ("poor touch-screen and mobile support") and mandates
+   click-to-open only; `agent-build-plan.md`'s original Phase 4-E draft (written one
+   day later, in the 2026-07-07 gap-analysis pass) said the opposite — hover-to-open
+   on desktop. Resolved in Jay's favor of the original SPEC.md reasoning: click-to-open
+   everywhere, no hover trigger on any device. `agent-build-plan.md` Phase 4-E
+   corrected in place.
+2. **New wizard-specific tooltip mechanism** (refines, doesn't contradict, Phase 4-E):
+   while entering data, fields show 2 lines of always-visible lighter text (definition
+   + higher/lower-is-better direction) with no click needed, plus a small optional
+   "more info" inline expansion (not a popover) for the remaining 5 content slots.
+   Outside the wizard, the existing click-to-open popover (SPEC.md §25.5's exact
+   280/320px spec) is unchanged.
+3. **"Signal" theme picked** (of 3 options presented): the existing
+   `--status-neutral` slate-blue (`#3E5C76`) is promoted to also be the primary
+   interactive color (buttons/links/CTA/active slider fill), given its own token name
+   `--accent-interactive` so it doesn't couple button color to status semantics.
+   `--accent-navy` narrows to header/logo/dark-surface use only — no longer the
+   primary button/slider-thumb color (SPEC.md §25.5 updated accordingly). Zero new
+   hues introduced — the full palette stays traceable to the original 2026-07-05
+   hand-built system, deliberately avoiding an AI-generated-website look.
+4. **Type scale (12/14/16/18/20/24/32/40px) and 4px-base spacing scale**
+   (4/8/12/16/24/32/48/64) added to `design/tokens.css`, resolving Phase 4-A/4-B,
+   which had been open since the design system was first built.
+5. **Landing page and entry flow finalized**, resolving SPEC.md §36.1 Q9 (yes, a
+   separate Methodology page — content already fully written in
+   `report-templates/methodology.md`/`formula-appendix.md`) and Q14 (hero → "Start
+   Assessment" CTA → equipment + bed-count pre-step → wizard proper). This also
+   resolves §26.1's three competing CTA phrasings ("Start Evaluation" in the original
+   spec, "Start Assessment" logged 2026-07-11 earlier the same day, "Start Analysis"
+   floated in the same conversation as this entry) in favor of "Start Assessment" —
+   Jay's own reasoning: the tool assesses viability, it doesn't perform open-ended
+   analysis. Explicitly rejected: any "nothing like this in the market" marketing
+   language — the landing page states capability, doesn't sell.
+6. **Default-value visual treatment** (new): pre-filled wizard fields show the default
+   in muted `--text-secondary` styling with a small "Typical" tag until the user edits
+   the field, then flip to normal styling — reuses existing tokens, no new colors.
+7. **Explicitly flagged as still open, not falsely closed:**
+   `content/inputs-metadata.json`'s per-field validation contract (min/max/
+   decimalPlaces/errorMessage per field) — deferred to Phase 5, which needs the same
+   field-by-field pass for `wizard-state.md` anyway. `agent-build-plan.md` Phase 4's
+   Definition of Done updated to show this checkbox still unchecked rather than
+   claiming Phase 4 is 100% done.
+**Files touched:** `design/ux-product-spec.md` (new), `design/tokens.css`,
+`design/colors.md`, `SPEC.md` (§25.5, §23.4, §26.1, §36.1 Q9/Q14), `agent-build-plan.md`
+(Phase 4-E correction, Phase 4 DoD, Phase 5 entry-point note, "Not yet in this plan"
+section), `HANDOFF.md` (this entry + Current State). No `/app`, `/formulas`,
+`/equipment-data`, or `/content` files touched — planning/design-token only, consistent
+with "not building yet, finishing UX/UI planning first" per Jay's explicit instruction
+this session.
+**What's next:** Phase 5 (`wizard-state.md`) — the transition table for the 7-step
+wizard, designed against the now-finalized entry flow, plus the deferred
+`inputs-metadata.json` per-field contract. Actual UI implementation (Phase 6 onward)
+was explicitly deferred by Jay to a future session, not this one.
 
 ### 2026-07-11 — ISS-12 resolved: MRI CMC bed/volume-tiering hypothesis tested, not verified
 **What changed:** Jay commissioned a fourth, narrowly-scoped research pass (via Codex)

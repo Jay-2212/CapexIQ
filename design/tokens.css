@@ -26,6 +26,15 @@
   --accent-navy: #1E2A3A;
   --accent-navy-hover: #152030;
 
+  /* Interactive accent ("Signal" theme, 2026-07-11 — see design/ux-product-spec.md §1).
+     Aliases --status-neutral/-bg on purpose: same color, promoted to a second job
+     (buttons/links/CTA/active slider fill), given its own token name so components
+     reference "interactive" rather than "neutral status" and the two can diverge later
+     without a silent recolor. --accent-navy stays reserved for header/logo/dark surfaces. */
+  --accent-interactive: #3E5C76;
+  --accent-interactive-hover: #354E64;
+  --accent-interactive-bg: #EAF0F5;
+
   /* Chart series (in order) */
   --chart-1: #1E2A3A; /* billed revenue */
   --chart-2: #3E5C76; /* realized revenue */
@@ -45,4 +54,24 @@
   --font-ui: 'IBM Plex Sans', 'Inter', -apple-system, sans-serif;
   --font-ui-alt: 'Inter', 'IBM Plex Sans', -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Type scale — see design/ux-product-spec.md §1.1 for role mapping */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 40px;
+
+  /* Spacing scale — 4px base, see design/ux-product-spec.md §1.2 for usage */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
 }

@@ -28,12 +28,22 @@ Each has a strong (icon/text) and a light (background tint) variant.
 | Weak / Risk          | `#B23B3B`           | `#FBEAEA`        | Muted brick red, not fire-engine red |
 | Neutral / Informational | `#3E5C76`         | `#EAF0F5`        | Slate blue-gray                  |
 
-## Brand / Accent (optional, used sparingly)
+## Brand / Accent
 
-| Token          | Hex       | Use                                    |
-|----------------|-----------|------------------------------------------|
-| `accent-navy`  | `#1E2A3A` | Header bar, primary buttons, logo mark   |
-| `accent-navy-hover` | `#152030` | Button hover state                  |
+**Updated 2026-07-11** (see `design/ux-product-spec.md` §1, "Signal" theme): the slate
+blue-gray above (`#3E5C76`), previously only a status color, is now also the product's
+primary interactive color — buttons, links, the CTA, active slider fill. It's given its
+own token name (`accent-interactive`) rather than reusing `status-neutral` directly, so
+components reference "interactive," not "neutral status." `accent-navy` narrows to
+header bar/logo/other dark surfaces only — it is **no longer** the primary button color.
+
+| Token                  | Hex       | Use                                              |
+|--------------------------|-----------|-----------------------------------------------------|
+| `accent-navy`            | `#1E2A3A` | Header bar, logo mark, other dark surfaces          |
+| `accent-navy-hover`      | `#152030` | Hover state for navy surfaces                       |
+| `accent-interactive`     | `#3E5C76` (= `status-neutral`) | Primary buttons, links, CTA, active slider fill |
+| `accent-interactive-hover` | `#354E64` | Hover/active state for the above                 |
+| `accent-interactive-bg`  | `#EAF0F5` (= `status-neutral-bg`) | Selected-state backgrounds, subtle highlight fills |
 
 ## Data visualization (charts)
 

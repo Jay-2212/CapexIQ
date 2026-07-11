@@ -222,11 +222,16 @@ extend "never rely on color alone" explicitly to every chart, not just the gauge
 conditional-color chart element pairs with a shape/icon or text label too.
 
 **E. Tooltip UI mechanics.** SPEC.md §23.4 defines tooltip *content* (6 slots) but not
-the interaction. Define: hover-to-open on a mouse/trackpad pointer, tap-to-open /
-tap-outside-to-dismiss on touch (hover alone doesn't exist on mobile — this needs to be
-explicit or it'll get missed), a max tooltip width so long source notes don't stretch
-off-screen, and the exact, required content order — 7 slots, one more than SPEC.md's
-original 6:
+the interaction. **Resolved 2026-07-11, see `design/ux-product-spec.md` §4** — this
+entry originally said "hover-to-open on a mouse/trackpad pointer, tap-to-open on
+touch," which directly contradicted SPEC.md §23.4's explicit, reasoned rejection of
+hover ("poor touch-screen and mobile support"). That was wrong and is corrected here:
+**click-to-open only, on every device, no hover trigger anywhere** — matching §23.4.
+`design/ux-product-spec.md` §4 also adds a second mechanism for wizard fields
+specifically (always-visible inline text, no popover at all — no click needed to see
+the basics). A max tooltip width (280/320px) so long source notes don't stretch
+off-screen was already specified precisely in SPEC.md §25.5. The exact, required
+content order remains 7 slots, one more than SPEC.md's original 6:
 1. Plain-language definition ("What does this mean?")
 2. **Direction** — "Higher is better" / "Lower is better" / "Context-dependent — see
    note below" (new: SPEC.md never specifies this; it's necessary for a user to
@@ -326,17 +331,27 @@ per field, is populated as part of this phase, not left as a 1-entry stub):
 ```
 
 **Definition of Done:**
-- [ ] `design/ux-product-spec.md` exists and gives a concrete answer (not "TBD") to
-      A–H above.
-- [ ] `design/tokens.css` has spacing and type-scale tokens added alongside the
-      existing color/shadow/radius/font-family tokens.
+- [x] `design/ux-product-spec.md` exists and gives a concrete answer (not "TBD") to
+      A–H above. **Done 2026-07-11** — written directly with Jay, also resolves
+      SPEC.md §36.1 Q9/Q14 and §26.1's CTA wording, corrects the Phase 4-E hover/click
+      contradiction above, and adds a "Signal" theme (accent color), default-value
+      visual treatment, landing-page structure, and micro-interaction principles that
+      weren't in this phase's original A–H scope.
+- [x] `design/tokens.css` has spacing and type-scale tokens added alongside the
+      existing color/shadow/radius/font-family tokens. **Done 2026-07-11** — also
+      added `--accent-interactive`/`-hover`/`-bg` for the Signal theme.
 - [ ] `content/inputs-metadata.json`'s schema is defined and populated for every Basic
-      and Advanced field, matching the worked example's shape.
-- [ ] Every SPEC.md §36.3 bullet this phase resolves has a one-line "Resolved — see
+      and Advanced field, matching the worked example's shape. **Still open** —
+      `design/ux-product-spec.md` §11 explicitly does not claim to close this; it's a
+      field-by-field pass better done alongside Phase 5's `wizard-state.md`, which
+      needs the same per-field detail. Don't mark Phase 4 fully closed without this.
+- [x] Every SPEC.md §36.3 bullet this phase resolves has a one-line "Resolved — see
       agent-build-plan.md Phase 4-X" annotation added directly in SPEC.md, so the two
       docs can't silently disagree the way ISS-7/ISS-9 already happened once (items 1,
       6, and the §29.5 export-philosophy line were annotated in the 2026-07-07 pass;
-      items 2-5, 7-8 remain genuinely open and unrelated to this phase).
+      items 2-5, 7-8 remain genuinely open and unrelated to this phase). §36.1 Q9/Q14
+      also annotated as part of the 2026-07-11 pass, though those are product
+      questions, not §36.3 design questions.
 
 ---
 
@@ -351,13 +366,12 @@ transition table needs both to enumerate invalid-state transitions correctly, no
 happy-path steps. Doesn't depend on Phase 1-3.
 **Parallelizable:** no — this is a single coherent design; one session should own it
 start to finish so the table stays internally consistent.
-**Open question to resolve before writing this doc:** SPEC.md §36.1 Q14 (added
-2026-07-11) — Jay's floated a hero-page → "Start Assessment" CTA → dedicated
-equipment/bed-count pre-step, landing on the wizard proper only after that, not a
-direct-to-dashboard entry. Not finalized (UI/UX is still paused, his call to make it),
-but this phase's transition table needs to be designed against whatever the real entry
-point turns out to be — don't default to "lands on step 1 of 7" without checking SPEC.md
-§36.1 Q14 is still accurate when this phase actually starts.
+**Entry point, finalized:** SPEC.md §36.1 Q14, resolved 2026-07-11 (see
+`design/ux-product-spec.md` §5.2) — hero page → "Start Assessment" CTA → a dedicated
+equipment + bed-count pre-step (real data collection, not a throwaway interstitial) →
+the wizard proper. Not a direct-to-dashboard entry, and not "lands on step 1 of 7"
+without that pre-step. This phase's transition table must design its entry transition
+against this flow.
 **Must enumerate, explicitly, in the doc:**
 - [ ] Every step, every field in that step, and its validation rule (pulled from
       `content/inputs-metadata.json`, not re-invented here).
@@ -560,16 +574,19 @@ not just asserted by unit tests.
 
 ## Not yet in this plan (flagged, not forgotten)
 
-SPEC.md §38 names two artifacts this build plan didn't originally replace:
-`ux-product-spec.md` (v0.4) and `financial-model-spec.md` (v0.5, **written and approved
-by Jay on 2026-07-07** — no longer missing, see Phase 2/Phase 9 above). `ux-product-spec.md`
-(v0.4) is still not written — Phase 4 depends on it directly and it remains a required
-deliverable, not optional.
+SPEC.md §38 named two artifacts this build plan didn't originally replace:
+`ux-product-spec.md` (v0.4) and `financial-model-spec.md` (v0.5). Both are now written
+and approved by Jay — `financial-model-spec.md` on 2026-07-07 (see Phase 2/Phase 9
+above), `ux-product-spec.md` on 2026-07-11 (see Phase 4 above). Neither is missing any
+longer. The one piece Phase 4 still doesn't close is `content/inputs-metadata.json`'s
+per-field validation contract — see Phase 4's Definition of Done, deferred to run
+alongside Phase 5.
 
 Resolved since the 2026-07-07 gap-analysis pass: the "doctor's cut" question
 (`ISSUES.md` ISS-11) — confirmed with Jay it's the existing professional/reporting fee
 field, no new field needed, no Phase 3/4 copy or validation-metadata work required for
-it. Still genuinely open: SPEC.md §36.1/§36.2/§36.3's remaining unresolved
-product/data/design questions this pass didn't touch (tone, homepage visuals,
-warning-display style, and the data-sourcing questions in §36.2 other than DSCR, which
-Phase 2 above now resolves).
+it. Also resolved 2026-07-11: SPEC.md §36.1 Q9 (methodology page — yes, separate page)
+and Q14 (entry flow, finalized), and §26.1's CTA wording ("Start Assessment"). Still
+genuinely open: SPEC.md §36.1's remaining unanswered product questions (1-5, 7-8,
+11-13) and §36.2's remaining data questions other than DSCR/discount rate, which this
+pass didn't touch.
