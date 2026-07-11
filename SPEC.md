@@ -524,7 +524,8 @@ Basic Mode should not be overloaded, but it must include the minimum inputs need
 Equipment category
 Equipment name / model, optional
 Hospital bed size
-City / tier
+City / tier (required — same benchmarking-lookup role as bed size)
+Hospital type: private / charitable-trust / corporate / government, optional
 Purchase cost
 Installation / civil cost
 Expected months before revenue starts
@@ -1405,6 +1406,16 @@ Applicability: Use only as directional context. Prefer your own hospital’s uti
 
 Hover-based tooltips are rejected due to poor touch-screen and mobile support. The tool must implement click-triggered callout popovers:
 
+**Wizard exception, added 2026-07-11** (`design/ux-product-spec.md` §4.B): while
+entering data in the wizard specifically, fields don't use this popover pattern at
+all — the definition and direction (slots 1-2 below) are always visible as plain text
+under the field, no click required. The click-popover pattern below applies outside
+the wizard (dashboard, results, everywhere else), plus an inline (non-popover)
+"more info" expansion inside the wizard for the remaining slots. See
+`design/ux-product-spec.md` §4 for the full mechanism and the 7-slot content
+structure (`content/tooltip-copy.md`), which supersedes the 4-slot schema sketched
+below.
+
 *   **Trigger**: A small `?` question-mark circle icon next to each complex input label.
 *   **Behavior**: Clicking the trigger toggles a small relative callout box (popover dialog). Clicking outside or clicking a close button dismisses it.
 *   **Central Registry**: Control type classifications (sliders vs. static input boxes), slider bounds, and tooltip texts are stored cohesively in [inputs-metadata.json](file:///Users/jay/Documents/Roi_Calculator/content/inputs-metadata.json) to avoid duplication. The actual default *values* are not stored there — they live in `equipment-data/<type>.json` (equipment-specific) or `equipment-data/common-assumptions.json` (shared), each carrying its own confidence/sourceId, per the fix in ISSUES.md ISS-9.
@@ -1570,7 +1581,7 @@ All interactive UI components are built using the following design specification
 *   **Track Height / Thickness**: `4px` (for a thin, clean look) or `6px` on active focus.
 *   **Track Color**: Background track `var(--border-subtle)` (`#E6E4E0`); active fill track `var(--status-neutral)` (`#3E5C76`).
 *   **Thumb Shape**: Perfect circle, diameter `18px` or `20px`.
-*   **Thumb Color**: Solid `var(--accent-navy)` (`#1E2A3A`) outer boundary with a `4px` concentric center dot of `var(--bg-primary)` (`#FFFFFF`).
+*   **Thumb Color**: Solid `var(--accent-interactive)` (`#3E5C76`) outer boundary with a `4px` concentric center dot of `var(--bg-primary)` (`#FFFFFF`). **Updated 2026-07-11** — was `--accent-navy`; the "Signal" theme (`design/ux-product-spec.md` §1) narrows `--accent-navy` to header/logo/dark-surface use only, so interactive elements like this thumb use `--accent-interactive` instead.
 *   **Hover & Focus State**: Thumb scales to `22px` on hover. Focus adds a soft ring of `0 0 0 3px var(--status-neutral-bg)` (`rgba(62, 92, 118, 0.15)`).
 *   **Value Indicator**: The numerical value is displayed directly above or adjacent to the slider in `var(--font-mono)` with a medium weight (`500`).
 
@@ -1589,6 +1600,11 @@ All interactive UI components are built using the following design specification
 ## 26. Interface Ideas
 
 ### 26.1 Landing page
+
+**Resolved 2026-07-11** — see `design/ux-product-spec.md` §5 for the finalized
+structure, entry flow, and CTA wording ("Start Assessment," superseding "Start
+Evaluation" below; "Explore Methodology" becomes a header/footer link, not a second
+hero CTA). The hero tagline and subtext below are still accurate and unchanged.
 
 Should be crisp and serious.
 
@@ -2163,7 +2179,12 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 2. Should scenarios be saved locally or in a database?
 3. Should users be able to share a scenario link?
 4. Should the tool include a disclaimer that outputs are indicative and not financial advice?
-5. Should the tool allow hospital type selection: private, charitable, trust, corporate, government?
+5. Should the tool allow hospital type selection: private, charitable, trust, corporate, government? —
+   **Resolved 2026-07-11**: yes, optional, in Basic Mode — informational/report-context
+   only. No formula in `financial-model-spec.md` or `/formulas` currently consumes it;
+   if a future version wants it to actually affect the model (e.g. tax treatment), that
+   needs a separate formula-design pass, not a silent assumption. See
+   `content/inputs-metadata.json#basic.hospitalType`.
 6. Should it ask bed size as a required input? — **Resolved 2026-07-11, reasoning
    updated same day:** yes, required — but as the lookup key for bed-size-dependent
    utilization/tariff benchmarks (§23.3) and as maintenance-quote context (a user
@@ -2171,26 +2192,42 @@ Built a healthcare capex decision-support tool for hospital equipment investment
    *default*. A hypothesis that CMC/AMC pricing itself scales with bed count was
    tested via a fourth research pass and found unsupported — see
    `data-requirements.md` §19.5, `ISSUES.md` ISS-12 (resolved).
-7. Should city tier be required or optional?
+7. Should city tier be required or optional? — **Resolved 2026-07-11**: required,
+   alongside bed size — same benchmarking-lookup role (§23.3's tooltip example already
+   references "Tier 2 city" as a benchmark dimension). See §10.1.
 8. Should the tool support multi-equipment packages later?
-9. Should there be a methodology page explaining formulas?
+9. Should there be a methodology page explaining formulas? — **Resolved 2026-07-11**:
+   yes, a separate page (not embedded in the landing page), linked from the header and
+   footer. Content already written: `report-templates/methodology.md` and
+   `formula-appendix.md`. See `design/ux-product-spec.md` §5.3.
 10. Should the score be shown immediately or only after advanced metrics are calculated?
     — **Resolved 2026-07-07**: immediately, live, no "Calculate" button or loading
     screen — see `agent-build-plan.md` Phase 4-G (live-recalculation contract);
     formulas are pure and cheap enough that there's nothing to wait on.
-11. Should Basic Mode show only billed revenue or also a simplified realized-revenue assumption?
+11. Should Basic Mode show only billed revenue or also a simplified realized-revenue
+    assumption? — **Found already resolved, annotated 2026-07-11**: §10.4 already
+    answers this — Basic Mode shows billed revenue only, with a soft note pointing to
+    Advanced Mode for realized-revenue modeling (payer deductions, collection delay).
+    No new decision needed; this was a doc-cross-reference gap, not an open question.
 12. Should the working capital gap be shown in v1 dashboard or only in Advanced Mode?
-13. Should professional/reporting fee be mandatory for specific equipment types?
+    — **Resolved 2026-07-11**: Advanced Mode only — §11.2 lists it under Advanced
+    outputs and §10.4's Basic outputs list omits it, consistent with keeping Basic
+    Mode's output set simple. Confirmed with Jay rather than left as a silent
+    inference from list placement alone.
+13. Should professional/reporting fee be mandatory for specific equipment types? —
+    **Found already resolved, annotated 2026-07-11**: §10.2 already answers this —
+    "optional but visible" in Basic Mode, uniformly across equipment types, not
+    mandatory and not equipment-specific. No new decision needed.
 14. What should the entry flow into the wizard look like — land directly on the
     wizard/dashboard, or a marketing hero page with an explicit CTA that launches a
-    dedicated assessment flow? Jay's initial idea (2026-07-11, not finalized): hero
-    page reads "Start Assessment"; clicking it opens a distinct pre-step (not the full
-    wizard yet) where the user picks equipment type and hospital bed count, with
-    equipment imagery, before proceeding into the full input flow. This reframes
-    Phase 5's assumption about the wizard's entry point — Phase 5 shouldn't design
-    against a "lands straight on the dashboard" model. Still open: UI/UX work is
-    deliberately paused (Jay's call, see `agent-build-plan.md` Phase 4 intro) — this is
-    captured here so the intent isn't lost, not a signal to start building it.
+    dedicated assessment flow? — **Resolved 2026-07-11**, finalized in
+    `design/ux-product-spec.md` §5.2: single-scroll landing page, hero reads "Start
+    Assessment" (see also §26.1 below, whose "Start Evaluation" wording this
+    supersedes). Clicking it opens a distinct pre-step (not the full wizard yet) where
+    the user picks equipment type and hospital bed count, with equipment imagery,
+    before proceeding into the full input flow. This reframes Phase 5's assumption
+    about the wizard's entry point — Phase 5 must design against this, not a "lands
+    straight on the dashboard" model.
 
 ### 36.2 Data questions
 
