@@ -62,21 +62,14 @@
     "unit": "percent of equipment cost per year",
     "confidence": "Low-Medium",
     "sourceId": "S51,S52",
-    "note": "IMPORTANT CONTRADICTION -- do not use as sole default: this is a generic tender-ceiling range (what vendors are contractually allowed to bid up to), not equipment-specific. A peer-reviewed life-cycle-costing study of one real AIIMS 1.5T MRI (S53) found ACTUAL post-warranty CMC cost was only ~0.23-0.28% of equipment value per year (Rs 9.7 lakh over 5 years on a ~Rs 7.5 crore machine) -- roughly 25-30x lower than this range. The tender range and the real-cost study may be measuring genuinely different things (contractual ceiling vs. one hospital's negotiated/actual experience), or one could be anomalous. Needs a human decision before either number becomes a UI default -- see data-requirements.md §18.4.",
+    "note": "IMPORTANT CONTRADICTION -- do not use as sole default: this is a generic tender-ceiling range (what vendors are contractually allowed to bid up to), not equipment-specific. A peer-reviewed life-cycle-costing study of one MRI at an unnamed tertiary-care teaching hospital (S53) found ACTUAL post-warranty CMC cost was only ~0.23-0.28% of equipment value per year (Rs 9.7 lakh over 5 years on a ~Rs 7.5 crore machine) -- roughly 25-30x lower than this range. A bed/volume-tiering theory for this gap was tested via a fourth research pass (2026-07-11) and is NOT verified -- no bed-count or scan-volume MRI maintenance-pricing schedule exists in any source found. See data-requirements.md §18.4/§19.5 (ISS-12, resolved).",
     "_observedActualAlternative": {
       "value": 0.25,
       "range": "0.23-0.28",
       "unit": "percent of equipment cost per year",
       "confidence": "Medium",
       "sourceId": "S53",
-      "note": "One AIIMS hospital's real observed cost from a peer-reviewed life-cycle-costing study. May be unusually low (negotiated government rate) rather than representative of a typical private hospital."
-    },
-    "_bedVolumeTierHypothesis": {
-      "status": "hypothesis, not yet researched -- do not use for defaults",
-      "hypothesis": "AIIMS is a very large, very high-volume referral institute (order of 2000+ beds by public reputation, not independently verified/cited this session), which plausibly negotiates CMC/AMC contract rates far below the generic tender-ceiling range that smaller-volume private hospitals would actually pay. If true, the S51/S52 vs S53 contradiction isn't really a contradiction -- it's two different points on a volume/bed-count curve, not two competing estimates of the same thing.",
-      "proposedTierStructure": "Reuse data-requirements.md §2.3's existing bed-size buckets (<50, 50-100, 101-250, 251-500, >500) rather than inventing a new bucketing scheme, but split the open-ended \">500\" bucket further (e.g. 501-1000, >1000) since a large referral institute like AIIMS is a materially different tier than a 600-bed private hospital -- both currently fall in the same bucket.",
-      "openedBy": "Jay, 2026-07-11 conversation",
-      "nextAction": "See data-requirements.md §19 -- needs (a) independent verification of AIIMS's actual bed count before treating the volume theory as confirmed, and (b) a targeted research pass looking for CMC/AMC (and other volume-sensitive contract terms, e.g. consumable/reagent supply deals) broken out by hospital bed-count or scan-volume tier, not just a single blended figure per equipment type."
+      "note": "One unnamed tertiary-care teaching hospital's real observed cost from a peer-reviewed life-cycle-costing study. The paper's authors were affiliated with AIIMS New Delhi, but the paper does not name the hospital, and author affiliation is not proof of which institution owned the scanner -- do not describe this as an AIIMS case study. May be unusually low (a legacy contract, limited coverage scope, exceptional negotiation, or a data/units issue) rather than representative of a typical private hospital. See data-requirements.md §19.5."
     }
   },
   "typicalUtilization": {

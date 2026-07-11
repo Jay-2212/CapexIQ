@@ -1347,19 +1347,21 @@ present this as if it were researched per equipment.
 - **Cath Lab is genuinely equipment-specific and stronger:** West Bengal's tender gives
   actual year-wise CMC rates, 6% in year 1 rising 0.1pp/year to 6.7% in year 8 — a real,
   detailed, single-source schedule. Medium-High confidence. (S43)
-- **MRI has a direct contradiction that needs a call, not a silent pick:** a peer-reviewed
-  life-cycle-costing study of one AIIMS 1.5T MRI (S53) found *actual* post-warranty CMC
-  cost was only ~0.23-0.28% of equipment value per year (₹9.7 lakh total over 5 years on a
+- **MRI has a direct contradiction that needed a call, not a silent pick:** a
+  peer-reviewed life-cycle-costing study of one MRI at an unnamed tertiary-care
+  teaching hospital (S53 — the paper's authors were affiliated with AIIMS New Delhi,
+  but author affiliation is not proof of which hospital owned the scanner, and the
+  paper itself never names the hospital) found *actual* post-warranty CMC cost was
+  only ~0.23-0.28% of equipment value per year (₹9.7 lakh total over 5 years on a
   ~₹7.5 crore machine) — **roughly 25-30x lower** than the generic 3-10% tender-ceiling
   range the pass otherwise applies to MRI. These measure different things: the tender
-  range is a contractual **ceiling** vendors are allowed to bid up to; the AIIMS figure is
-  **one hospital's actual realized cost**, which could be unusually low (a negotiated
-  AIIMS/government rate, a data or units error in the source paper, or the true norm with
-  tender ceilings being rarely reached in practice). **This file is not silently picking
-  one — both are recorded in equipment-data/mri.json with the discrepancy flagged. Jay:
-  this is worth a look before either number becomes a UI default** — probably resolvable
-  by checking whether the tender-ceiling range or a real-cost survey is more
-  representative of what a *new* private hospital should actually budget.
+  range is a contractual **ceiling** vendors are allowed to bid up to; the S53 figure is
+  **one unnamed hospital's actual realized cost**. **Resolved 2026-07-11 (a fourth,
+  targeted research pass) — see §19.5:** the working theory that this gap reflects
+  hospital scale/negotiating volume was tested directly and is **not verified**; no
+  bed-count or scan-volume MRI maintenance-pricing schedule exists in any source found.
+  Both figures stay recorded separately in `equipment-data/mri.json`, neither
+  presented as the default, per the product decision in §19.5.
 - **CT, Dialysis, Ultrasound:** all fall back to the same generic ranges — CT/Dialysis use
   the general GeM 3-10% CMC range (S51); Ultrasound uses SCTIMST's tighter 3-5% CAMC cap
   (S52) since that's what the pass happened to apply there. Low-Medium confidence, not
@@ -1472,6 +1474,10 @@ data point only. Standalone CT utilization remains a genuine open gap.
 | S55 | PM-JAY Health Benefit Package master list (HBP 2022) | Official government scheme document | https://ayushmanup.in/assets/doc/HBP-2022.pdf | Cath Lab (Right/Left Heart Catheterization) package rates | Medium-High |
 | S56 | Advance Engineers — RO plant installation & commissioning FAQ | Vendor/industry FAQ page | https://advancees.com/services/ro-plant-start-up-installation-commissioning/ | Generic (non-dialysis-specific) RO commissioning timeline | Low |
 | S57 | NHSRC — Indian Public Health Standards, Vol.1 (SDH/DH) | Government health-standards document | https://nhsrcindia.org/sites/default/files/Volume%201_SDH-DH_0.pdf | Combined imaging-modality workload norm, not CT-specific | Medium |
+| S58 | AIIMS New Delhi — Annual Report 2014-15 | Official government institute annual report | https://www.aiims.edu/aiims%20old/annual-report/AIIMS%20Report%20English%202014-15.pdf | Records 1,147 beds (Main Hospital) + 412 beds (Cardiothoracic and Neurosciences Centre) = 1,559 across those two named facilities; used to test (not confirm) the ISS-12 bed/volume-tiering hypothesis — this is AIIMS New Delhi's general bed count, not the S53 study site's, which the paper doesn't name — see §19.5 | High for the bed figures themselves; Unavailable as evidence about S53's study site |
+| S59 | Sunrays Image Technology — Siemens MRI AMC vs. CMC cost analysis | Vendor/promotional newsroom page | https://sunraysmedical.com/newsroom/siemens-mri-amc-vs-cmc-cost-analysis-india | Recommends AMC below ~15 scans/day and CMC above ~20 scans/day; prices vary by MRI model, not by volume/bed count — supports coverage-type guidance, not a volume-based price discount | Low (promotional vendor material, no underlying contracts) |
+| S60 | Competition Commission of India — Order dated 16 June 2022 | Official regulatory order | https://www.cci.gov.in/images/antitrustorder/en/0620221655379346.pdf | Portable CT AMC/CMC terms discounted for an expected multi-machine purchase (five-year CAMC ₹15 lakh/yr +2%/yr escalation; later quotes ₹65L→₹58.5L with X-ray tube, ₹35L→₹31.5L without, after negotiation). Shows fleet size/negotiation can affect imaging-maintenance terms in principle; doesn't quantify a clean fleet discount, establish a bed-count effect, or apply directly to MRI — some figures are disputed parties' own submissions | Medium |
+| S61 | HIMSR — CMC tender notice for 7 Fresenius dialysis machines (25 June 2026) | Government hospital tender notice | https://www.himsr.co.in/tenders/invitation-of-quotations-for-comprehensive-maintenance-contract-cmc-of-fresenius-dialysis-machines-07-units/ | Confirms bundled multi-machine CMC procurement happens; publishes no price and no single-machine comparator, so establishes bundling only, not a discount magnitude | Medium for bundling; Unavailable for any discount figure |
 
 Note: S29 and S30 (CGHS rate lists) were already in this file's source register from the
 second pass — this pass cited the same two documents again for cardiology/dialysis
@@ -1489,6 +1495,11 @@ equipment files.
 ---
 
 ## 19. Volume / Bed-Size Tiering for Maintenance Contracts (added 2026-07-11)
+
+**Resolved 2026-07-11, same day, via a fourth targeted research pass — see §19.5 for
+the findings and product decision.** §19.1-§19.4 below are kept as the historical
+record of the original hypothesis; the hypothesis was tested and **not verified** — do
+not build bed-count-tiered CMC/AMC defaults from this section.
 
 ### 19.1 The hypothesis
 
@@ -1545,3 +1556,70 @@ CMC/AMC cost (or discount off the standard rate) by hospital bed count or annual
 volume, for MRI at minimum and ideally CT/Cath Lab/Dialysis/Ultrasound too; separately,
 verify AIIMS's actual bed count at the specific institution S53 studied. Not
 commissioned yet — Jay's call on timing.
+
+### 19.5 Fourth research pass (2026-07-11) — findings and resolution
+
+The research above was commissioned the same day (§19.4) and returned findings the
+same day. Full write-up was delivered as `mri-maintenance-contract-scaling-findings.md`
+(extracted into this document, then removed per this project's convention of not
+keeping a second copy of a research artifact once its findings are captured here).
+
+**What the evidence establishes:**
+
+1. **S53's study hospital is not confirmed to be AIIMS.** The paper describes an
+   unnamed "tertiary care teaching hospital"; its authors were affiliated with AIIMS
+   New Delhi, but author affiliation is not proof the studied scanner was installed
+   there. §18.4 above has been corrected accordingly — this document must not describe
+   S53 as an AIIMS case study.
+2. **AIIMS New Delhi's own bed count is now sourced (S58: 1,147 Main Hospital + 412
+   Cardiothoracic/Neurosciences Centre = 1,559 across those two named facilities,
+   High confidence) — but it's context, not evidence about S53's actual study site**,
+   since that site was never confirmed to be AIIMS New Delhi at all. The ~2,000+ figure
+   §19.1 used is retired; it was never sourced and should not be cited going forward.
+3. **No Indian MRI bed-count or scan-volume price schedule was found** (S59 is a
+   vendor's model-based coverage-type recommendation, not a volume-based price
+   schedule; Low confidence, promotional material). **No bed-count or scan-volume
+   maintenance-cost multiplier is supported by any source located.**
+4. **CT and Dialysis provide limited, non-MRI evidence that fleet size/negotiation can
+   matter** (S60: a CCI order showing multi-machine CT AMC/CMC terms were discounted
+   for an expected fleet purchase, Medium confidence, doesn't quantify a clean
+   discount or establish a bed-count effect; S61: a bundled 7-machine dialysis CMC
+   tender, Medium confidence for bundling, no price published). Neither transfers to
+   MRI or establishes a usable pricing rule.
+5. **No usable scale-linked pricing evidence exists for Cath Lab or Ultrasound.**
+
+**Product decision (resolves ISS-12):**
+
+1. **Do not build bed-count-tiered AMC/CMC defaults.** The `_bedVolumeTierHypothesis`
+   scaffold in `equipment-data/mri.json` is removed — the proposed lookup curve is
+   unsupported by evidence and must not be populated.
+2. **Keep the actual vendor quote as the primary maintenance input**, not a benchmark
+   default — this was already this tool's stated preference (§3.2's source hierarchy)
+   and remains so.
+3. **Keep the two MRI figures (3-10% tender ceiling, 0.224-0.285% single unnamed
+   hospital's observed cost) separate**, as §18.4 already does — never averaged, never
+   silently picked as the sole default.
+4. **Captured for later, not built now (Phase 4/5 territory, still paused):** a set of
+   quote-context fields an Advanced Mode maintenance section could collect without
+   applying any automatic discount — hospital bed count (already collected), expected
+   scans/procedures per year, number of same-OEM machines under one contract,
+   equipment model and age, warranty status, uptime SLA, and coverage of coils/helium/
+   tube/detector/other major parts. These would help a user document and sanity-check
+   their own vendor quote, not compute a tiered default. Whoever resumes Phase 4/5
+   should treat this as a candidate addition to SPEC.md §11's maintenance group (E),
+   not as a new open research gap.
+5. **Scan volume may inform a coverage-type warning** (e.g. "high utilization makes
+   CMC's parts coverage more valuable than AMC's labour-only coverage" — S59's own
+   framing), but the evidence does not support letting volume move the quoted price up
+   or down.
+6. **Reopen tiering only when stronger evidence appears:** an OEM rate card, an awarded
+   contract with comparable single- and multi-unit prices, or several matched hospital
+   contracts (same model, age, scope, utilization) showing a consistent scale effect.
+
+**Resolution of the original hypothesis:** the scale-negotiation theory is plausible
+but not verified. Other explanations for S53's unusually low observed CMC remain
+viable — government procurement terms, a legacy contract, limited coverage scope,
+scanner-specific factors, exceptional negotiation, or a source-data/unit issue. This
+tool should model the resulting uncertainty (§18.4's "keep both figures separate, flag
+the discrepancy" approach) rather than convert an unverified theory into a product
+default.

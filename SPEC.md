@@ -2164,10 +2164,13 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 3. Should users be able to share a scenario link?
 4. Should the tool include a disclaimer that outputs are indicative and not financial advice?
 5. Should the tool allow hospital type selection: private, charitable, trust, corporate, government?
-6. Should it ask bed size as a required input? — **Resolved 2026-07-11:** yes, required
-   — it becomes the lookup key for bed/volume-tiered maintenance-contract defaults
-   (CMC/AMC) once researched, not just optional context. See
-   `data-requirements.md` §19.
+6. Should it ask bed size as a required input? — **Resolved 2026-07-11, reasoning
+   updated same day:** yes, required — but as the lookup key for bed-size-dependent
+   utilization/tariff benchmarks (§23.3) and as maintenance-quote context (a user
+   documenting their own vendor's CMC/AMC quote), not for a bed-tiered CMC/AMC
+   *default*. A hypothesis that CMC/AMC pricing itself scales with bed count was
+   tested via a fourth research pass and found unsupported — see
+   `data-requirements.md` §19.5, `ISSUES.md` ISS-12 (resolved).
 7. Should city tier be required or optional?
 8. Should the tool support multi-equipment packages later?
 9. Should there be a methodology page explaining formulas?

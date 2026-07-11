@@ -70,35 +70,6 @@ independent, well-bounded, already-specified tasks (e.g. implementing a single p
 formula file against an exact SPEC.md formula) may still be delegated to a second agent
 (Codex) when explicitly scoped by the primary agent first.
 
-### ISS-12 — MRI CMC cost: generic tender-ceiling range contradicts one real observed-cost study
-**Area:** data / product
-**Status:** open
-**What:** The third research pass (2026-07-07, see `data-requirements.md` §18.4) found
-two genuinely conflicting figures for MRI's post-warranty comprehensive-maintenance
-(CMC) cost: a generic tender-ceiling range of 3-10% of equipment value/year (what
-vendors are contractually allowed to bid, used as a fallback proxy across MRI/CT/
-Dialysis/Ultrasound in the absence of equipment-specific data), versus a peer-reviewed
-life-cycle-costing study of one real AIIMS 1.5T MRI that found *actual* realized CMC
-cost was only ~0.23-0.28%/year — roughly 25-30x lower. Both are recorded in
-`equipment-data/mri.json`'s `cmcAnnualCostPercentage` field (primary value + an
-`_observedActualAlternative` sub-object), not silently resolved one way.
-**Update (2026-07-11):** Jay's working theory — this may not be a contradiction at all,
-just two points on a volume/bed-count curve. AIIMS is a very large, high-volume
-referral institute and would plausibly negotiate a far better CMC/AMC rate than a
-smaller private hospital paying near the tender ceiling. Proposal: a bed-count-tiered
-default (reusing `data-requirements.md` §2.3's existing bed-size buckets, likely with
-the open-ended `>500` bucket split further, e.g. `501-1000`/`>1000`), generalized beyond
-MRI's CMC to AMC for all five equipment types (all currently share one identical
-generic proxy). Written up in `data-requirements.md` §19 and scaffolded (not populated)
-in `equipment-data/mri.json`'s `cmcAnnualCostPercentage._bedVolumeTierHypothesis`.
-**Next action:** two things needed before this becomes real, neither done yet: (1)
-independently verify AIIMS's actual bed count (not currently sourced/cited anywhere in
-this project — the ~2,000+ figure is public general knowledge, not a researched data
-point); (2) a targeted research pass looking for CMC/AMC (or other volume-sensitive
-contract terms) broken out by bed count or scan volume, not a single blended figure.
-Not commissioned yet — Jay's call on timing. Until then, no bed-tiered number should
-ship as a default.
-
 ### ISS-13 — Equipment-data schema: workingDaysPerMonth/financingNorms per-equipment fields were dead
 **Area:** data / schema
 **Status:** resolved
@@ -200,9 +171,42 @@ list.
   mismatched) Income Tax Department source to S8 — the well-known 5% figure itself wasn't
   independently re-verified against primary statutory text this session (3 verification
   attempts were inconclusive/blocked). Medium-High, not High.
-- MRI's CMC cost has a real, unresolved contradiction — see new ISS-12.
+- MRI's CMC cost has a real contradiction — see ISS-12 below (resolved 2026-07-11).
 - `custom.json` untouched throughout (no equipment type to map), remains a pure
   placeholder by design.
+
+### ISS-12 — MRI CMC cost: generic tender-ceiling range contradicts one real observed-cost study
+**Area:** data / product
+**What was flagged:** The third research pass (2026-07-07, see `data-requirements.md`
+§18.4) found two genuinely conflicting figures for MRI's post-warranty comprehensive-
+maintenance (CMC) cost: a generic tender-ceiling range of 3-10% of equipment value/year,
+versus a peer-reviewed life-cycle-costing study of one MRI at an unnamed tertiary-care
+teaching hospital that found *actual* realized CMC cost was only ~0.23-0.28%/year —
+roughly 25-30x lower. Jay's working theory (2026-07-11): this might be a volume/bed-
+count effect rather than a true contradiction, since the study's authors were AIIMS
+New Delhi-affiliated and a hospital that large would plausibly negotiate a far better
+rate than a smaller private hospital. Written up as a hypothesis in
+`data-requirements.md` §19 and scaffolded (not populated) in `equipment-data/mri.json`.
+**Resolution (2026-07-11, a fourth targeted research pass, same day):** the hypothesis
+was tested directly and is **not verified**. Key findings: (1) the study never names
+its hospital — author affiliation with AIIMS New Delhi is not proof the scanner was
+installed there, so this project must stop describing S53 as an AIIMS case study; (2)
+AIIMS New Delhi's own bed count is now sourced (1,559 across two named facilities,
+S58) but is irrelevant context, not evidence about the actual study site; (3) no
+Indian MRI tender, OEM schedule, or case study varying CMC/AMC price by bed count or
+scan volume was found anywhere; (4) CT and Dialysis show limited evidence that fleet
+size/negotiation can matter in principle (a CCI order, a bundled tender) but neither
+quantifies a usable discount or transfers to MRI. **Decision:** no bed-count-tiered
+CMC/AMC defaults will be built; the `_bedVolumeTierHypothesis` scaffold in
+`equipment-data/mri.json` has been removed. The two MRI figures stay recorded
+separately (never averaged, never silently picked as the sole default), per
+`data-requirements.md` §18.4/§19.5. A set of quote-context fields (bed count, annual
+scan volume, same-OEM fleet size, model/age, warranty status, uptime SLA, parts
+coverage) was captured as a candidate future Advanced Mode addition — not built, since
+Phase 4/5 (UI/UX) remains paused; see §19.5 point 4. **Reopen only if:** an OEM rate
+card, an awarded contract with comparable single- and multi-unit prices, or several
+matched hospital contracts (same model/age/scope/utilization) show a consistent scale
+effect.
 
 ### ISS-1 — Skeleton not build-verified
 **Area:** code / tooling
