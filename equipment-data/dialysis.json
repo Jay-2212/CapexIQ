@@ -1,5 +1,5 @@
 {
-  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md \u00a717/\u00a718 and ISSUES.md ISS-9/ISS-3",
+  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md §17/§18 and ISSUES.md ISS-9/ISS-3",
   "equipmentType": "dialysis",
   "purchaseCost": {
     "low": 10,
@@ -75,17 +75,12 @@
   },
   "typicalUtilization": {
     "usagePerDay": 3,
-    "workingDaysPerMonth": null,
     "rampUpMonths": null,
     "_usagePerDayRange": {
       "confidence": "Medium",
       "sourceId": "S28",
       "note": "MoHFW/NITI official planning guideline: three 4-hour shifts/machine/day = 3 sessions/machine/day. This is a DESIGN-CAPACITY norm, not necessarily real-world utilization -- the same source notes real-world utilization 'may be lower in smaller facilities'."
     }
-  },
-  "financingNorms": {
-    "typicalLoanTenureYears": null,
-    "typicalInterestRateRange": null
   },
   "billedTariffPerUse": {
     "low": 1400,

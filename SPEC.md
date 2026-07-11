@@ -2164,7 +2164,10 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 3. Should users be able to share a scenario link?
 4. Should the tool include a disclaimer that outputs are indicative and not financial advice?
 5. Should the tool allow hospital type selection: private, charitable, trust, corporate, government?
-6. Should it ask bed size as a required input?
+6. Should it ask bed size as a required input? — **Resolved 2026-07-11:** yes, required
+   — it becomes the lookup key for bed/volume-tiered maintenance-contract defaults
+   (CMC/AMC) once researched, not just optional context. See
+   `data-requirements.md` §19.
 7. Should city tier be required or optional?
 8. Should the tool support multi-equipment packages later?
 9. Should there be a methodology page explaining formulas?
@@ -2175,6 +2178,16 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 11. Should Basic Mode show only billed revenue or also a simplified realized-revenue assumption?
 12. Should the working capital gap be shown in v1 dashboard or only in Advanced Mode?
 13. Should professional/reporting fee be mandatory for specific equipment types?
+14. What should the entry flow into the wizard look like — land directly on the
+    wizard/dashboard, or a marketing hero page with an explicit CTA that launches a
+    dedicated assessment flow? Jay's initial idea (2026-07-11, not finalized): hero
+    page reads "Start Assessment"; clicking it opens a distinct pre-step (not the full
+    wizard yet) where the user picks equipment type and hospital bed count, with
+    equipment imagery, before proceeding into the full input flow. This reframes
+    Phase 5's assumption about the wizard's entry point — Phase 5 shouldn't design
+    against a "lands straight on the dashboard" model. Still open: UI/UX work is
+    deliberately paused (Jay's call, see `agent-build-plan.md` Phase 4 intro) — this is
+    captured here so the intent isn't lost, not a signal to start building it.
 
 ### 36.2 Data questions
 

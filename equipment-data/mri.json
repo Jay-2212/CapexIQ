@@ -1,5 +1,5 @@
 {
-  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md \u00a717/\u00a718 and ISSUES.md ISS-9/ISS-3",
+  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md §17/§18 and ISSUES.md ISS-9/ISS-3",
   "equipmentType": "mri",
   "purchaseCost": {
     "low": null,
@@ -70,11 +70,17 @@
       "confidence": "Medium",
       "sourceId": "S53",
       "note": "One AIIMS hospital's real observed cost from a peer-reviewed life-cycle-costing study. May be unusually low (negotiated government rate) rather than representative of a typical private hospital."
+    },
+    "_bedVolumeTierHypothesis": {
+      "status": "hypothesis, not yet researched -- do not use for defaults",
+      "hypothesis": "AIIMS is a very large, very high-volume referral institute (order of 2000+ beds by public reputation, not independently verified/cited this session), which plausibly negotiates CMC/AMC contract rates far below the generic tender-ceiling range that smaller-volume private hospitals would actually pay. If true, the S51/S52 vs S53 contradiction isn't really a contradiction -- it's two different points on a volume/bed-count curve, not two competing estimates of the same thing.",
+      "proposedTierStructure": "Reuse data-requirements.md §2.3's existing bed-size buckets (<50, 50-100, 101-250, 251-500, >500) rather than inventing a new bucketing scheme, but split the open-ended \">500\" bucket further (e.g. 501-1000, >1000) since a large referral institute like AIIMS is a materially different tier than a 600-bed private hospital -- both currently fall in the same bucket.",
+      "openedBy": "Jay, 2026-07-11 conversation",
+      "nextAction": "See data-requirements.md §19 -- needs (a) independent verification of AIIMS's actual bed count before treating the volume theory as confirmed, and (b) a targeted research pass looking for CMC/AMC (and other volume-sensitive contract terms, e.g. consumable/reagent supply deals) broken out by hospital bed-count or scan-volume tier, not just a single blended figure per equipment type."
     }
   },
   "typicalUtilization": {
     "usagePerDay": 23,
-    "workingDaysPerMonth": null,
     "rampUpMonths": null,
     "_usagePerDayRange": {
       "low": 20,
@@ -83,10 +89,6 @@
       "sourceId": "S24,S25",
       "note": "typical=23 is a real single-hospital Indian study (NIMS, tertiary teaching hospital -- a busy referral centre, may run higher than a typical smaller private setup). low/high=20/40 is global context (not India-specific)."
     }
-  },
-  "financingNorms": {
-    "typicalLoanTenureYears": null,
-    "typicalInterestRateRange": null
   },
   "billedTariffPerUse": {
     "low": 2338,
