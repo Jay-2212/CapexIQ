@@ -39,11 +39,15 @@ color — `tokens.css`/`colors.md` updated), a type scale and 4px spacing scale 
 added to `tokens.css`), landing-page structure and entry flow (resolves SPEC.md §36.1
 Q9 and Q14, supersedes §26.1's CTA wording — final CTA is "Start Assessment"), a
 default-value visual treatment (muted + "Typical" tag until edited), and
-micro-interaction principles. **One Phase 4 piece is still genuinely open, flagged
-explicitly rather than falsely closed:** `content/inputs-metadata.json`'s per-field
-validation contract (min/max/decimalPlaces/errorMessage per field) — deferred to run
-alongside Phase 5's `wizard-state.md`, which needs the same field-by-field pass.
-Phase 5 is next.
+micro-interaction principles. **`content/inputs-metadata.json`'s per-field validation
+contract is also now complete** (same session, second pass) — restructured under
+Basic/Advanced-A-F, old duplicate 4-slot tooltip text replaced with a `tooltipKey`
+pointer into `content/tooltip-copy.md`, payer-mix/ramp-up/by-year repeating fields
+written as explicit templates rather than enumerated per instance. Also resolved in
+the same pass: SPEC.md §36.1 Q5 (hospital type, optional/informational) and Q7 (city
+tier, required); Q11 and Q13 turned out to already be answered elsewhere in SPEC.md
+and just needed the cross-reference annotated. **Phase 4 is now fully closed — all
+four Definition of Done items checked.** Phase 5 (`wizard-state.md`) is next.
 
 **ISS-12 resolved 2026-07-11 (a fourth research pass, same day as the reframe below):**
 the bed/volume-tiering theory for MRI's CMC contradiction was tested directly and is
@@ -160,23 +164,45 @@ discipline. Then wrote `design/ux-product-spec.md`, the Phase 4 deliverable SPEC
 6. **Default-value visual treatment** (new): pre-filled wizard fields show the default
    in muted `--text-secondary` styling with a small "Typical" tag until the user edits
    the field, then flip to normal styling — reuses existing tokens, no new colors.
-7. **Explicitly flagged as still open, not falsely closed:**
-   `content/inputs-metadata.json`'s per-field validation contract (min/max/
-   decimalPlaces/errorMessage per field) — deferred to Phase 5, which needs the same
-   field-by-field pass for `wizard-state.md` anyway. `agent-build-plan.md` Phase 4's
-   Definition of Done updated to show this checkbox still unchecked rather than
-   claiming Phase 4 is 100% done.
-**Files touched:** `design/ux-product-spec.md` (new), `design/tokens.css`,
-`design/colors.md`, `SPEC.md` (§25.5, §23.4, §26.1, §36.1 Q9/Q14), `agent-build-plan.md`
-(Phase 4-E correction, Phase 4 DoD, Phase 5 entry-point note, "Not yet in this plan"
-section), `HANDOFF.md` (this entry + Current State). No `/app`, `/formulas`,
-`/equipment-data`, or `/content` files touched — planning/design-token only, consistent
-with "not building yet, finishing UX/UI planning first" per Jay's explicit instruction
-this session.
+7. **Second pass, same session — `content/inputs-metadata.json` built out in full**
+   (originally deferred to Phase 5 in the first pass above; Jay asked for it now
+   instead, after a punch-list-with-recommendations exchange). Restructured under
+   `basic`/`advanced` (A-F groups matching SPEC.md §11.1), full min/max/decimalPlaces/
+   allowNegative/required/errorMessage per field. Removed the old duplicate 4-slot
+   tooltip objects (10 fields) in favor of a `tooltipKey` pointer into
+   `content/tooltip-copy.md` — the reconciliation that file's own header had flagged
+   as outstanding since Phase 3. Payer-mix/utilization-ramp/by-year fields (which
+   repeat per payer type, ramp period, or maintenance year) are written once as
+   explicit templates rather than ~25 near-duplicate entries — Phase 5/6 expand these
+   into concrete machine keys. Every `tooltipKey` cross-checked programmatically
+   against `tooltip-copy.md`'s actual headings (all match). Numeric bounds are UI
+   sanity/validation bounds only, not benchmark claims, consistent with this project's
+   no-invented-benchmarks rule.
+8. **Also resolved in this second pass:** SPEC.md §36.1 Q5 (hospital type — optional,
+   Basic Mode, informational/report-context only, no formula consumes it yet) and Q7
+   (city tier — required, same benchmarking-lookup role as bed size). Q11 and Q13
+   turned out to already be answered by existing SPEC.md prose (§10.4, §10.2
+   respectively) and just needed the "Resolved" cross-reference added, not a new
+   decision. Q12 (working capital gap, Advanced-only) was a reasonably confident
+   inference from §10.4/§11.2's existing output-list placement, but was surfaced to
+   Jay for a one-line confirmation rather than silently asserted. Equipment-selection
+   imagery for the entry-flow pre-step: Custom equipment (no equipment to photograph)
+   gets an icon-based tile from the existing Lucide set instead of a stock photo;
+   Cath Lab's already-flagged approximate photo (`ISSUES.md` ISS-6) stays as-is.
+   `agent-build-plan.md` Phase 4's Definition of Done now shows all four items
+   checked — Phase 4 is fully closed, not partially.
+**Files touched:** `design/ux-product-spec.md` (new + Custom-imagery addendum),
+`design/tokens.css`, `design/colors.md`, `content/inputs-metadata.json` (rebuilt),
+`SPEC.md` (§10.1, §25.5, §23.4, §26.1, §36.1 Q5/Q7/Q9/Q11/Q12/Q13/Q14),
+`agent-build-plan.md` (Phase 4-E correction, Phase 4 DoD — all four items now checked,
+Phase 5 entry-point note, "Not yet in this plan" section), `HANDOFF.md` (this entry +
+Current State). No `/app` or `/formulas` files touched — planning/design-token/content
+-schema only, consistent with "not building yet, finishing UX/UI planning first" per
+Jay's explicit instruction this session.
 **What's next:** Phase 5 (`wizard-state.md`) — the transition table for the 7-step
-wizard, designed against the now-finalized entry flow, plus the deferred
-`inputs-metadata.json` per-field contract. Actual UI implementation (Phase 6 onward)
-was explicitly deferred by Jay to a future session, not this one.
+wizard, designed against the now-finalized entry flow and consuming
+`inputs-metadata.json` directly for field bounds. Actual UI implementation (Phase 6
+onward) was explicitly deferred by Jay to a future session, not this one.
 
 ### 2026-07-11 — ISS-12 resolved: MRI CMC bed/volume-tiering hypothesis tested, not verified
 **What changed:** Jay commissioned a fourth, narrowly-scoped research pass (via Codex)

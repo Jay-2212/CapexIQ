@@ -340,11 +340,14 @@ per field, is populated as part of this phase, not left as a 1-entry stub):
 - [x] `design/tokens.css` has spacing and type-scale tokens added alongside the
       existing color/shadow/radius/font-family tokens. **Done 2026-07-11** — also
       added `--accent-interactive`/`-hover`/`-bg` for the Signal theme.
-- [ ] `content/inputs-metadata.json`'s schema is defined and populated for every Basic
-      and Advanced field, matching the worked example's shape. **Still open** —
-      `design/ux-product-spec.md` §11 explicitly does not claim to close this; it's a
-      field-by-field pass better done alongside Phase 5's `wizard-state.md`, which
-      needs the same per-field detail. Don't mark Phase 4 fully closed without this.
+- [x] `content/inputs-metadata.json`'s schema is defined and populated for every Basic
+      and Advanced field, matching the worked example's shape. **Done 2026-07-11** —
+      restructured under `basic`/`advanced` (grouped A-F per SPEC.md §11.1), old
+      per-field 4-slot tooltip objects removed in favor of a `tooltipKey` pointer into
+      `content/tooltip-copy.md` (the reconciliation that file's own header flagged as
+      outstanding). Payer-mix/ramp-up/by-year fields are written once as templates
+      (repeat dimension named explicitly) rather than enumerated per instance —
+      Phase 5/6 expand these into concrete machine keys.
 - [x] Every SPEC.md §36.3 bullet this phase resolves has a one-line "Resolved — see
       agent-build-plan.md Phase 4-X" annotation added directly in SPEC.md, so the two
       docs can't silently disagree the way ISS-7/ISS-9 already happened once (items 1,
@@ -578,9 +581,9 @@ SPEC.md §38 named two artifacts this build plan didn't originally replace:
 `ux-product-spec.md` (v0.4) and `financial-model-spec.md` (v0.5). Both are now written
 and approved by Jay — `financial-model-spec.md` on 2026-07-07 (see Phase 2/Phase 9
 above), `ux-product-spec.md` on 2026-07-11 (see Phase 4 above). Neither is missing any
-longer. The one piece Phase 4 still doesn't close is `content/inputs-metadata.json`'s
-per-field validation contract — see Phase 4's Definition of Done, deferred to run
-alongside Phase 5.
+longer. `content/inputs-metadata.json`'s per-field validation contract, initially
+deferred to Phase 5, was also completed 2026-07-11 (same session) — **Phase 4 is now
+fully closed**, all four Definition of Done items checked.
 
 Resolved since the 2026-07-07 gap-analysis pass: the "doctor's cut" question
 (`ISSUES.md` ISS-11) — confirmed with Jay it's the existing professional/reporting fee

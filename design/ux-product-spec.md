@@ -235,6 +235,15 @@ pre-step is real data collection, not just an interstitial. Only after this does
 user land on the wizard proper. Phase 5's `wizard-state.md` needs to design its entry
 transition against this flow, not a "lands straight on step 1" assumption.
 
+**Equipment-tile imagery, decided 2026-07-11:** 5 of 6 equipment types
+(MRI/CT/Dialysis/Ultrasound + Cath Lab) use the existing sourced stock photos in
+`equipment-images/`. Cath Lab's photo is a known approximation (`ISSUES.md` ISS-6,
+accepted) — kept as-is, not worth new sourcing effort for a pre-step tile. **Custom**
+has no equipment to photograph by definition, so it uses an icon-based tile instead
+(from the already-sourced Lucide set) rather than a stock photo or a placeholder
+image — consistent with the rest of the product's restraint around imagery, and
+avoids the awkwardness of a generic/unrelated photo standing in for "something else."
+
 **CTA wording, finalized: "Start Assessment."** Three phrasings existed across the
 docs (SPEC.md §26.1's original "Start Evaluation," §36.1 Q14's "Start Assessment,"
 and "Start Analysis" floated in the same conversation as this doc) — "Start

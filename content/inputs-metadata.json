@@ -1,136 +1,725 @@
 {
-  "_status": "UI/control schema only, as of 2026-07-06 — see ISSUES.md ISS-9",
-  "_note": "This registry defines HOW each field is rendered (control type, slider bounds, tooltip copy) — it does NOT hold benchmark numbers. Actual default values live in equipment-data/<type>.json (equipment-specific) or equipment-data/common-assumptions.json (shared across equipment), each with its own confidence/sourceId. A prior version of this file duplicated numeric defaults inline, several of them invented (no traceable source in data-requirements.md) — removed 2026-07-06, see ISSUES.md ISS-9. Slider min/max/step below are UI interaction bounds only, not benchmark claims.",
-  "purchaseCost": {
-    "displayName": "Equipment Purchase Cost (Capex)",
-    "controlType": "input",
-    "unit": "INR (Crore)",
-    "defaultSource": "equipment-data/<type>.json#purchaseCost",
-    "tooltip": {
-      "definition": "The total upfront capital expenditure required to acquire the equipment, including basic machine costs and initial vendor pricing.",
-      "defaultExplanation": "See the selected equipment's data file for the sourced range and confidence level; prefer an actual vendor quotation over any benchmark.",
-      "higherImpact": "Increases initial financing or cash requirements, extends the payback period, and lowers the project's NPV/IRR.",
-      "lowerImpact": "Reduces upfront capital burden, shortens the payback period, and improves NPV/IRR."
+  "_status": "UI/control + validation schema, updated 2026-07-11 — see design/ux-product-spec.md Phase 4 Definition of Done and agent-build-plan.md Phase 4's 'Also produce' section.",
+  "_note": "This registry defines HOW each field is rendered and validated (control type, data type, numeric bounds, decimal places, required-ness, error copy) — it does NOT hold benchmark numbers or tooltip prose. Actual default values live in equipment-data/<type>.json (equipment-specific) or equipment-data/common-assumptions.json (shared), each with its own confidence/sourceId. Tooltip content lives in content/tooltip-copy.md (the 7-slot structure) — each entry below points to it via 'tooltipKey' rather than duplicating text, which is the reconciliation content/tooltip-copy.md's own header flagged as outstanding (this file previously carried an earlier, simpler 4-slot tooltip object for 10 fields; that's removed here in favor of the single tooltip-copy.md source of truth). Field keys below are readable, provisional machine IDs — Phase 5's wizard-state.md is the authoritative place final IDs get fixed; re-keying then is mechanical, not a schema rewrite. Numeric min/max bounds are UI sanity/validation bounds only, not benchmark claims — per this project's no-invented-benchmarks rule, they don't imply a 'typical' value.",
+  "_templateNote": "Several Advanced Mode fields repeat per payer type, per ramp-up period, or per year of useful life (SPEC.md §11.1 groups A/B/E). Rather than enumerate every instance as a separate near-duplicate entry, those are written once as a template with the repeat dimension named explicitly — Phase 5/6 expand each into concrete machine keys (e.g. one per payer type) using the same bounds.",
+
+  "basic": {
+    "equipmentCategory": {
+      "label": "Equipment category",
+      "controlType": "select",
+      "type": "select",
+      "options": ["MRI", "CT", "Cath Lab", "Dialysis", "Ultrasound", "Custom"],
+      "required": true,
+      "errorMessage": "Select an equipment type to continue.",
+      "tooltipKey": "Equipment category"
+    },
+    "equipmentNameModel": {
+      "label": "Equipment name / model",
+      "controlType": "text",
+      "type": "text",
+      "maxLength": 80,
+      "required": false,
+      "errorMessage": "Keep this under 80 characters.",
+      "tooltipKey": "Equipment name / model (optional)"
+    },
+    "hospitalBedSize": {
+      "label": "Hospital bed size",
+      "controlType": "input",
+      "type": "integer-count",
+      "unit": "beds",
+      "min": 1,
+      "max": 5000,
+      "allowNegative": false,
+      "required": true,
+      "errorMessage": "Enter your hospital's bed count (1-5000).",
+      "tooltipKey": "Hospital bed size"
+    },
+    "cityTier": {
+      "label": "City / tier",
+      "controlType": "select",
+      "type": "select",
+      "options": ["Tier 1", "Tier 2", "Tier 3"],
+      "required": true,
+      "errorMessage": "Select the city tier closest to your hospital's location.",
+      "resolvedNote": "SPEC.md §36.1 Q7, resolved 2026-07-11: required, same benchmarking-lookup role as bed size.",
+      "tooltipKey": "City / tier"
+    },
+    "hospitalType": {
+      "label": "Hospital type",
+      "controlType": "select",
+      "type": "select",
+      "options": ["Private", "Charitable / Trust", "Corporate", "Government"],
+      "required": false,
+      "errorMessage": "Select a hospital type, or leave blank.",
+      "resolvedNote": "SPEC.md §36.1 Q5, resolved 2026-07-11: optional, informational/report-context only — no formula in financial-model-spec.md or /formulas currently consumes this field.",
+      "tooltipKey": null
+    },
+    "purchaseCost": {
+      "label": "Purchase cost",
+      "controlType": "input",
+      "type": "currency",
+      "unit": "INR (Crore)",
+      "min": 0,
+      "max": 100,
+      "decimalPlaces": 2,
+      "allowNegative": false,
+      "required": true,
+      "defaultSource": "equipment-data/<type>.json#purchaseCost",
+      "errorMessage": "Enter the equipment's purchase cost (0-100 Crore).",
+      "tooltipKey": "Purchase cost"
+    },
+    "installationCost": {
+      "label": "Installation / civil cost",
+      "controlType": "input",
+      "type": "currency",
+      "unit": "INR (Crore)",
+      "min": 0,
+      "max": 50,
+      "decimalPlaces": 2,
+      "allowNegative": false,
+      "required": true,
+      "defaultSource": "equipment-data/<type>.json#installationAndAncillaryCostPercentage",
+      "errorMessage": "Enter installation/civil cost (0-50 Crore). Check your vendor's turnkey quote doesn't already include this.",
+      "tooltipKey": "Installation / civil cost"
+    },
+    "launchDelayMonths": {
+      "label": "Expected months before revenue starts",
+      "controlType": "slider",
+      "type": "integer-count",
+      "unit": "months",
+      "min": 0,
+      "max": 36,
+      "sliderStep": 1,
+      "allowNegative": false,
+      "required": true,
+      "defaultSource": "equipment-data/<type>.json#launchDelayMonths",
+      "errorMessage": "Enter a value between 0 and 36 months.",
+      "tooltipKey": "Expected months before revenue starts"
+    },
+    "usagePerDay": {
+      "label": "Expected usage per day",
+      "controlType": "slider",
+      "type": "decimal",
+      "unit": "scans/sessions/procedures",
+      "min": 0,
+      "max": 50,
+      "decimalPlaces": 1,
+      "sliderStep": 1,
+      "allowNegative": false,
+      "required": true,
+      "defaultSource": "equipment-data/<type>.json#typicalUtilization.usagePerDay",
+      "errorMessage": "Enter a number between 0 and 50 scans/procedures per day.",
+      "tooltipKey": "Expected usage per day"
+    },
+    "billedTariffPerUse": {
+      "label": "Average billed revenue per use",
+      "controlType": "slider",
+      "type": "currency",
+      "unit": "INR",
+      "min": 500,
+      "max": 25000,
+      "decimalPlaces": 0,
+      "sliderStep": 100,
+      "allowNegative": false,
+      "required": true,
+      "defaultSource": "equipment-data/<type>.json#billedTariffPerUse",
+      "errorMessage": "Enter a billed amount between ₹500 and ₹25,000.",
+      "tooltipKey": "Average billed revenue per use"
+    },
+    "workingDaysPerMonth": {
+      "label": "Working days per month",
+      "controlType": "slider",
+      "type": "integer-count",
+      "unit": "days",
+      "min": 20,
+      "max": 31,
+      "sliderStep": 1,
+      "allowNegative": false,
+      "required": true,
+      "defaultSource": "equipment-data/common-assumptions.json#workingDaysPerMonth",
+      "errorMessage": "Enter a value between 20 and 31 days.",
+      "tooltipKey": "Working days per month"
+    },
+    "consumableCostPerUse": {
+      "label": "Consumable cost per use",
+      "controlType": "input",
+      "type": "currency",
+      "unit": "INR",
+      "min": 0,
+      "max": 5000,
+      "decimalPlaces": 0,
+      "allowNegative": false,
+      "required": true,
+      "errorMessage": "Consumable cost per use can't be negative.",
+      "tooltipKey": "Consumable cost per use"
+    },
+    "professionalFeePerUse": {
+      "label": "Professional / reporting fee per use",
+      "controlType": "input",
+      "type": "currency",
+      "unit": "INR",
+      "min": 0,
+      "max": 10000,
+      "decimalPlaces": 0,
+      "allowNegative": false,
+      "required": false,
+      "resolvedNote": "SPEC.md §36.1 Q13 and §10.2, resolved: optional but visible in Basic Mode, uniformly across equipment types — not mandatory, not equipment-specific.",
+      "errorMessage": "Professional fee per use can't be negative.",
+      "tooltipKey": "Professional / reporting fee per use"
+    },
+    "otherVariableCostPerUse": {
+      "label": "Other variable cost per use",
+      "controlType": "input",
+      "type": "currency",
+      "unit": "INR",
+      "min": 0,
+      "max": 5000,
+      "decimalPlaces": 0,
+      "allowNegative": false,
+      "required": false,
+      "errorMessage": "Other variable cost per use can't be negative.",
+      "tooltipKey": "Other variable cost per use"
+    },
+    "staffCostPerMonth": {
+      "label": "Staff cost per month",
+      "controlType": "input",
+      "type": "currency",
+      "unit": "INR",
+      "min": 0,
+      "max": 2000000,
+      "decimalPlaces": 0,
+      "allowNegative": false,
+      "required": true,
+      "errorMessage": "Staff cost per month can't be negative.",
+      "tooltipKey": "Staff cost per month"
+    },
+    "electricityCostPerMonth": {
+      "label": "Electricity / utility cost per month",
+      "controlType": "input",
+      "type": "currency",
+      "unit": "INR",
+      "min": 0,
+      "max": 500000,
+      "decimalPlaces": 0,
+      "allowNegative": false,
+      "required": true,
+      "errorMessage": "Electricity/utility cost per month can't be negative.",
+      "tooltipKey": "Electricity / utility cost per month"
+    },
+    "otherFixedCostPerMonth": {
+      "label": "Other fixed operating cost per month",
+      "controlType": "input",
+      "type": "currency",
+      "unit": "INR",
+      "min": 0,
+      "max": 500000,
+      "decimalPlaces": 0,
+      "allowNegative": false,
+      "required": false,
+      "errorMessage": "Other fixed cost per month can't be negative.",
+      "tooltipKey": "Other fixed operating cost per month"
+    },
+    "warrantyYears": {
+      "label": "Warranty period",
+      "controlType": "input",
+      "type": "decimal",
+      "unit": "years",
+      "min": 0,
+      "max": 10,
+      "decimalPlaces": 1,
+      "allowNegative": false,
+      "required": true,
+      "defaultSource": "equipment-data/<type>.json#warrantyYears",
+      "errorMessage": "Enter a warranty period between 0 and 10 years.",
+      "tooltipKey": "Warranty period"
+    },
+    "amcCmcCostPostWarranty": {
+      "label": "AMC / CMC cost after warranty",
+      "controlType": "input",
+      "type": "percentage",
+      "unit": "% of purchase cost / year",
+      "min": 0,
+      "max": 20,
+      "decimalPlaces": 1,
+      "allowNegative": false,
+      "required": true,
+      "defaultSource": "equipment-data/<type>.json#amcAnnualCostPercentage / #cmcAnnualCostPercentage",
+      "errorMessage": "Enter a value between 0% and 20% of purchase cost.",
+      "tooltipKey": "AMC / CMC cost after warranty"
+    },
+    "acquisitionMode": {
+      "label": "Acquisition mode",
+      "controlType": "select",
+      "type": "select",
+      "options": ["Cash", "Loan", "Lease"],
+      "required": false,
+      "default": "Cash",
+      "errorMessage": "Select cash, loan, or lease.",
+      "tooltipKey": "Acquisition mode (cash / loan / lease)"
     }
   },
-  "usefulLifeYears": {
-    "displayName": "Useful Life (Years)",
-    "controlType": "input",
-    "unit": "Years",
-    "defaultSource": "equipment-data/<type>.json#usefulLifeYears",
-    "tooltip": {
-      "definition": "The expected operational lifespan of the equipment before it is decommissioned or replaced.",
-      "defaultExplanation": "Companies Act Schedule II (source S8, High confidence) sets 13 years for diagnostic scan equipment and 15 years for other medical/surgical equipment — see equipment-data/<type>.json for the value applied.",
-      "higherImpact": "Spreads depreciation over more years (improving annual book profits) and adds years of operational cash flow to NPV.",
-      "lowerImpact": "Accelerates annual depreciation and reduces the number of cash-flow years, lowering NPV."
-    }
-  },
-  "usagePerDay": {
-    "displayName": "Usage per Day",
-    "controlType": "slider",
-    "unit": "scans/sessions/procedures",
-    "min": 0,
-    "max": 50,
-    "step": 1,
-    "defaultSource": "equipment-data/<type>.json#typicalUtilization.usagePerDay",
-    "tooltip": {
-      "definition": "The average number of patient procedures or scan sessions performed on the machine per working day.",
-      "defaultExplanation": "Confidence varies a lot by equipment (see equipment-data/<type>.json and data-requirements.md §17.3): MRI has a real Indian study (23/day) and Dialysis has an official design-capacity norm (3 sessions/machine/day), but CT is proxy-only, Cath Lab is vendor-guidance-only, and Ultrasound has no Indian data at all. Always prefer your own hospital's estimate over any of these.",
-      "higherImpact": "Linearly increases billed and realized revenue, boosting operating surplus, NPV, and IRR.",
-      "lowerImpact": "Reduces revenue; if usage falls below the break-even threshold, the investment becomes financially non-viable."
-    }
-  },
-  "billedTariffPerUse": {
-    "displayName": "Average Billed Tariff per Use",
-    "controlType": "slider",
-    "unit": "INR",
-    "min": 500,
-    "max": 25000,
-    "step": 100,
-    "defaultSource": "equipment-data/<type>.json#billedTariffPerUse",
-    "tooltip": {
-      "definition": "The average gross price billed per procedure before adjusting for insurance deductions, scheme discounts, or collection delays.",
-      "defaultExplanation": "CT/MRI/Ultrasound/Dialysis have Medium-confidence CGHS reimbursement-ceiling figures (data-requirements.md §17.4) — treat these as a directional floor, not a private cash tariff, since private hospitals typically charge more. Cath Lab still has no tariff data from any research pass and requires user entry.",
-      "higherImpact": "Boosts operating margins and average realized revenue per scan, reducing the daily usage count needed to break even.",
-      "lowerImpact": "Shrinks margins and raises the daily break-even threshold."
-    }
-  },
-  "workingDaysPerMonth": {
-    "displayName": "Working Days per Month",
-    "controlType": "slider",
-    "unit": "Days",
-    "min": 20,
-    "max": 31,
-    "step": 1,
-    "defaultSource": "equipment-data/common-assumptions.json#workingDaysPerMonth",
-    "tooltip": {
-      "definition": "The number of days per month the service is operational for commercial patients.",
-      "defaultExplanation": "Defaults to 25 days, assuming Sunday closures or emergency-only/non-billing operations on Sundays — a modeling convention, not a researched benchmark (see common-assumptions.json).",
-      "higherImpact": "Increases annual procedure capacity and monthly revenue.",
-      "lowerImpact": "Reduces monthly procedural volume and revenue potential."
-    }
-  },
-  "discountRate": {
-    "displayName": "Discount Rate",
-    "controlType": "input",
-    "unit": "% p.a.",
-    "defaultSource": "equipment-data/common-assumptions.json#discountRate",
-    "tooltip": {
-      "definition": "The interest rate used to discount future cash flows back to their present value, representing the hospital's Cost of Capital.",
-      "defaultExplanation": "Medium confidence, 11.1-14.1% range (typical 12.5%) — a proxy from listed Indian hospital chains' WACC, not an equipment-project-specific figure (data-requirements.md §17.1, see common-assumptions.json). Confirm against your own hospital's actual cost of capital where known.",
-      "higherImpact": "Heavily discounts cash flows received in later years, reducing the calculated NPV.",
-      "lowerImpact": "Preserves the value of future cash flows, resulting in a higher calculated NPV."
-    }
-  },
-  "targetIrr": {
-    "displayName": "Target IRR (Hurdle Rate)",
-    "controlType": "input",
-    "unit": "% p.a.",
-    "defaultSource": "equipment-data/common-assumptions.json#targetIrr",
-    "tooltip": {
-      "definition": "The minimum acceptable Internal Rate of Return required by hospital management to approve the investment.",
-      "defaultExplanation": "Unavailable — confirmed unresearchable across two research passes (data-requirements.md §17.2); no Indian hospital/investor hurdle-rate benchmark is publicly disclosed anywhere. Suggested starting point: discount rate + 300-500bps, clearly as a heuristic, not a benchmark. Must be entered/confirmed by the user.",
-      "higherImpact": "Sets a stricter hurdle, making it more difficult for a project to score a 'Strong' Investment Outlook.",
-      "lowerImpact": "Relaxes the hurdle, allowing moderate-return projects to be marked viable."
-    }
-  },
-  "loanInterestRate": {
-    "displayName": "Financing Interest Rate",
-    "controlType": "input",
-    "unit": "% p.a.",
-    "defaultSource": "equipment-data/common-assumptions.json#loanInterestRate",
-    "tooltip": {
-      "definition": "The nominal annual interest rate charged by the financial institution on the borrowed capital.",
-      "defaultExplanation": "Low-Medium confidence market range of 8-15% p.a. (sources S11/S12); 11.5% is a derived midpoint, not a quoted rate. Prefer the user's actual lender quote — see common-assumptions.json.",
-      "higherImpact": "Increases monthly EMI payments and total interest costs, lowering net monthly cash flows.",
-      "lowerImpact": "Lowers debt service costs and enhances cash flow after debt payment."
-    }
-  },
-  "loanTenureMonths": {
-    "displayName": "Financing Tenure (Months)",
-    "controlType": "input",
-    "unit": "Months",
-    "defaultSource": "equipment-data/common-assumptions.json#loanTenureMonths",
-    "tooltip": {
-      "definition": "The duration of the loan payback term in months.",
-      "defaultExplanation": "Medium confidence, derived midpoint (60 months) of two cited lender ranges (S10: 12-84mo, S11: 3-120mo) — see common-assumptions.json.",
-      "higherImpact": "Reduces monthly EMI obligations but increases total cumulative interest paid over the life of the loan.",
-      "lowerImpact": "Increases monthly cash drain due to higher EMIs, but reduces total interest expense."
-    }
-  },
-  "launchDelayMonths": {
-    "displayName": "Moratorium / Launch Delay",
-    "controlType": "slider",
-    "unit": "Months",
-    "min": 0,
-    "max": 12,
-    "step": 1,
-    "defaultSource": "equipment-data/<type>.json#launchDelayMonths",
-    "tooltip": {
-      "definition": "The setup time required for site preparation, civil/shielding work, licensing/regulatory approval, and installation before first revenue-generating use.",
-      "defaultExplanation": "MRI, CT, and Cath Lab now have Low-to-Medium-confidence vendor/consultant-sourced ranges (data-requirements.md §17.5); Dialysis and Ultrasound remain unavailable. See equipment-data/<type>.json for the value applied per equipment.",
-      "higherImpact": "Extends the pre-revenue period, increasing pre-operative interest and the initial working capital gap.",
-      "lowerImpact": "Achieves faster commercial operations, reducing pre-opening cash losses."
+
+  "advanced": {
+    "A_revenueRealizationAndPayerMix": {
+      "_group": "SPEC.md §11.1 A — Revenue realization and payer mix",
+      "payerMixSharePct": {
+        "label": "Payer mix share",
+        "template": "Repeats per payer type: Private cash, Insurance/TPA, Corporate credit, PM-JAY/government, Other.",
+        "controlType": "slider",
+        "type": "percentage",
+        "unit": "%",
+        "min": 0,
+        "max": 100,
+        "decimalPlaces": 1,
+        "allowNegative": false,
+        "required": true,
+        "groupConstraint": "The 5 payer-type shares must sum to 100%.",
+        "errorMessage": "Enter a percentage between 0 and 100; all payer shares must sum to 100%.",
+        "tooltipKey": "Payer mix shares (private cash / insurance-TPA / corporate credit / PM-JAY-government / other)"
+      },
+      "billedTariffByPayerType": {
+        "label": "Billed tariff by payer type",
+        "template": "Repeats per payer type (see payerMixSharePct); optional override of Basic Mode's billedTariffPerUse.",
+        "controlType": "input",
+        "type": "currency",
+        "unit": "INR",
+        "min": 0,
+        "max": 50000,
+        "decimalPlaces": 0,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Billed tariff can't be negative.",
+        "tooltipKey": "Billed tariff by payer type"
+      },
+      "realizationPctByPayerType": {
+        "label": "Realization % by payer type",
+        "template": "Repeats per payer type.",
+        "controlType": "slider",
+        "type": "percentage",
+        "unit": "%",
+        "min": 0,
+        "max": 100,
+        "decimalPlaces": 1,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a percentage between 0 and 100.",
+        "tooltipKey": "Realization % by payer type"
+      },
+      "claimDeductionPctByPayerType": {
+        "label": "Claim deduction / disallowance % by payer type",
+        "template": "Repeats per payer type.",
+        "controlType": "slider",
+        "type": "percentage",
+        "unit": "%",
+        "min": 0,
+        "max": 100,
+        "decimalPlaces": 1,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a percentage between 0 and 100.",
+        "tooltipKey": "Claim deduction / disallowance % by payer type"
+      },
+      "collectionDelayDaysByPayerType": {
+        "label": "Collection delay / DSO by payer type",
+        "template": "Repeats per payer type.",
+        "controlType": "input",
+        "type": "integer-count",
+        "unit": "days",
+        "min": 0,
+        "max": 180,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a number of days between 0 and 180.",
+        "tooltipKey": "Collection delay / DSO by payer type"
+      }
+    },
+
+    "B_utilizationRampUp": {
+      "_group": "SPEC.md §11.1 B — Utilization ramp-up",
+      "utilizationRampPct": {
+        "label": "Utilization ramp-up %",
+        "template": "Repeats per period: Month 1-3, Month 4-6, Month 7-12, Year 2 onward.",
+        "controlType": "slider",
+        "type": "percentage",
+        "unit": "% of mature utilization",
+        "min": 0,
+        "max": 100,
+        "decimalPlaces": 1,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a percentage between 0 and 100.",
+        "tooltipKey": "Month 1-3 / 4-6 / 7-12 / Year 2+ utilization %"
+      },
+      "expectedMatureUtilization": {
+        "label": "Expected mature utilization",
+        "controlType": "slider",
+        "type": "decimal",
+        "unit": "scans/sessions/procedures per day",
+        "min": 0,
+        "max": 50,
+        "decimalPlaces": 1,
+        "sliderStep": 1,
+        "allowNegative": false,
+        "required": false,
+        "defaultSource": "same as basic.usagePerDay",
+        "errorMessage": "Enter a number between 0 and 50.",
+        "tooltipKey": "Expected mature utilization"
+      }
+    },
+
+    "C_financing": {
+      "_group": "SPEC.md §11.1 C — Financing (fields below apply only when basic.acquisitionMode is Loan or Lease)",
+      "downPayment": {
+        "label": "Down payment",
+        "controlType": "input",
+        "type": "currency",
+        "unit": "INR (Crore)",
+        "min": 0,
+        "max": 100,
+        "decimalPlaces": 2,
+        "allowNegative": false,
+        "required": false,
+        "requiredIf": "acquisitionMode = Loan",
+        "errorMessage": "Down payment can't be negative.",
+        "tooltipKey": "Down payment"
+      },
+      "loanInterestRate": {
+        "label": "Interest rate",
+        "controlType": "input",
+        "type": "percentage",
+        "unit": "% p.a.",
+        "min": 0,
+        "max": 30,
+        "decimalPlaces": 2,
+        "allowNegative": false,
+        "required": false,
+        "requiredIf": "acquisitionMode = Loan",
+        "defaultSource": "equipment-data/common-assumptions.json#loanInterestRate",
+        "errorMessage": "Enter an interest rate between 0% and 30%.",
+        "tooltipKey": "Interest rate"
+      },
+      "loanTenureMonths": {
+        "label": "Loan tenure",
+        "controlType": "input",
+        "type": "integer-count",
+        "unit": "months",
+        "min": 1,
+        "max": 240,
+        "allowNegative": false,
+        "required": false,
+        "requiredIf": "acquisitionMode = Loan",
+        "defaultSource": "equipment-data/common-assumptions.json#loanTenureMonths",
+        "errorMessage": "Enter a loan tenure between 1 and 240 months.",
+        "tooltipKey": "Loan tenure"
+      },
+      "processingChargesPct": {
+        "label": "Processing charges",
+        "controlType": "input",
+        "type": "percentage",
+        "unit": "% of loan amount",
+        "min": 0,
+        "max": 5,
+        "decimalPlaces": 2,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a value between 0% and 5%.",
+        "tooltipKey": "Processing charges"
+      },
+      "emiStartMonth": {
+        "label": "EMI start month",
+        "controlType": "input",
+        "type": "integer-count",
+        "unit": "month",
+        "min": 0,
+        "max": 36,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a month between 0 and 36.",
+        "tooltipKey": "EMI start month / Moratorium period"
+      },
+      "moratoriumPeriodMonths": {
+        "label": "Moratorium period",
+        "controlType": "input",
+        "type": "integer-count",
+        "unit": "months",
+        "min": 0,
+        "max": 24,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a value between 0 and 24 months.",
+        "tooltipKey": "EMI start month / Moratorium period"
+      },
+      "leaseRentalPerMonth": {
+        "label": "Lease rental",
+        "controlType": "input",
+        "type": "currency",
+        "unit": "INR / month",
+        "min": 0,
+        "max": 2000000,
+        "decimalPlaces": 0,
+        "allowNegative": false,
+        "required": false,
+        "requiredIf": "acquisitionMode = Lease",
+        "errorMessage": "Lease rental can't be negative.",
+        "tooltipKey": "Lease rental (if lease mode)"
+      }
+    },
+
+    "D_launchDelayAndPreOpeningCost": {
+      "_group": "SPEC.md §11.1 D — Launch delay and pre-opening cost",
+      "civilWorkDurationMonths": {
+        "label": "Civil work duration",
+        "controlType": "input",
+        "type": "integer-count",
+        "unit": "months",
+        "min": 0,
+        "max": 24,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a value between 0 and 24 months.",
+        "tooltipKey": "Civil work / installation / licensing-approval / training-commissioning duration"
+      },
+      "installationDurationMonths": {
+        "label": "Installation duration",
+        "controlType": "input",
+        "type": "integer-count",
+        "unit": "months",
+        "min": 0,
+        "max": 24,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a value between 0 and 24 months.",
+        "tooltipKey": "Civil work / installation / licensing-approval / training-commissioning duration"
+      },
+      "licensingApprovalDurationMonths": {
+        "label": "Licensing / approval duration",
+        "controlType": "input",
+        "type": "integer-count",
+        "unit": "months",
+        "min": 0,
+        "max": 24,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a value between 0 and 24 months.",
+        "tooltipKey": "Civil work / installation / licensing-approval / training-commissioning duration"
+      },
+      "trainingCommissioningDurationMonths": {
+        "label": "Training / commissioning duration",
+        "controlType": "input",
+        "type": "integer-count",
+        "unit": "months",
+        "min": 0,
+        "max": 24,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a value between 0 and 24 months.",
+        "tooltipKey": "Civil work / installation / licensing-approval / training-commissioning duration"
+      },
+      "preOpeningFixedCosts": {
+        "label": "Pre-opening fixed costs",
+        "controlType": "input",
+        "type": "currency",
+        "unit": "INR",
+        "min": 0,
+        "max": 5000000,
+        "decimalPlaces": 0,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Pre-opening fixed costs can't be negative.",
+        "tooltipKey": "Pre-opening fixed costs"
+      },
+      "workingCapitalBufferAmount": {
+        "label": "Working capital buffer",
+        "controlType": "input",
+        "type": "currency",
+        "unit": "INR",
+        "min": 0,
+        "max": 10000000,
+        "decimalPlaces": 0,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Working capital buffer can't be negative.",
+        "tooltipKey": "Working capital buffer"
+      }
+    },
+
+    "E_maintenanceAndLifecycleCost": {
+      "_group": "SPEC.md §11.1 E — Maintenance and lifecycle cost",
+      "maintenanceCostByYearPct": {
+        "label": "AMC / CMC cost by year",
+        "template": "Repeats per year of useful life (see advanced.F.usefulLifeYears); optional stepped-schedule override of basic.amcCmcCostPostWarranty.",
+        "controlType": "input",
+        "type": "percentage",
+        "unit": "% of purchase cost",
+        "min": 0,
+        "max": 20,
+        "decimalPlaces": 1,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a value between 0% and 20%.",
+        "tooltipKey": "AMC / CMC cost by year"
+      },
+      "maintenanceInflationPct": {
+        "label": "Maintenance inflation",
+        "controlType": "input",
+        "type": "percentage",
+        "unit": "% p.a.",
+        "min": 0,
+        "max": 15,
+        "decimalPlaces": 1,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Enter a value between 0% and 15%.",
+        "tooltipKey": "Maintenance inflation"
+      },
+      "majorReplacementCost": {
+        "label": "Major replacement cost",
+        "controlType": "input",
+        "type": "currency",
+        "unit": "INR",
+        "min": 0,
+        "max": 10000000,
+        "decimalPlaces": 0,
+        "allowNegative": false,
+        "required": false,
+        "errorMessage": "Major replacement cost can't be negative.",
+        "tooltipKey": "Major replacement cost (optional)"
+      },
+      "downtimeAssumption": {
+        "label": "Downtime assumption",
+        "controlType": "reserved",
+        "type": "reserved",
+        "required": false,
+        "note": "Not implemented in v1 — no formula consumes this. Reserved per tooltip-copy.md.",
+        "tooltipKey": "Downtime assumption (optional, later)"
+      }
+    },
+
+    "F_financialModelAssumptions": {
+      "_group": "SPEC.md §11.1 F — Financial model assumptions",
+      "discountRate": {
+        "label": "Discount rate",
+        "controlType": "input",
+        "type": "percentage",
+        "unit": "% p.a.",
+        "min": 0,
+        "max": 30,
+        "decimalPlaces": 2,
+        "allowNegative": false,
+        "required": true,
+        "defaultSource": "equipment-data/common-assumptions.json#discountRate",
+        "errorMessage": "Enter a discount rate between 0% and 30%.",
+        "tooltipKey": "Discount rate"
+      },
+      "targetIrr": {
+        "label": "Target IRR (hurdle rate)",
+        "controlType": "input",
+        "type": "percentage",
+        "unit": "% p.a.",
+        "min": 0,
+        "max": 50,
+        "decimalPlaces": 2,
+        "allowNegative": false,
+        "required": true,
+        "defaultSource": "equipment-data/common-assumptions.json#targetIrr (Unavailable — must visibly prompt, not silently blank, per agent-build-plan.md Phase 7)",
+        "errorMessage": "Enter a target IRR between 0% and 50%.",
+        "tooltipKey": "Target IRR / hurdle rate"
+      },
+      "inflationRate": {
+        "label": "Inflation rate",
+        "controlType": "input",
+        "type": "percentage",
+        "unit": "% p.a.",
+        "min": 0,
+        "max": 20,
+        "decimalPlaces": 2,
+        "allowNegative": false,
+        "required": false,
+        "note": "Not yet consumed by any formula in this version — collected for future use.",
+        "errorMessage": "Enter a value between 0% and 20%.",
+        "tooltipKey": "Inflation rate"
+      },
+      "usefulLifeYears": {
+        "label": "Useful life",
+        "controlType": "input",
+        "type": "integer-count",
+        "unit": "years",
+        "min": 1,
+        "max": 30,
+        "allowNegative": false,
+        "required": true,
+        "defaultSource": "equipment-data/<type>.json#usefulLifeYears",
+        "errorMessage": "Enter a useful life between 1 and 30 years.",
+        "tooltipKey": "Useful life"
+      },
+      "salvageValuePercentage": {
+        "label": "Salvage value",
+        "controlType": "input",
+        "type": "percentage",
+        "unit": "% of original cost",
+        "min": 0,
+        "max": 50,
+        "decimalPlaces": 1,
+        "allowNegative": false,
+        "required": true,
+        "defaultSource": "equipment-data/<type>.json#salvageValuePercentage",
+        "errorMessage": "Enter a value between 0% and 50%.",
+        "tooltipKey": "Salvage value"
+      },
+      "depreciationMethod": {
+        "label": "Depreciation method",
+        "controlType": "select",
+        "type": "select",
+        "options": ["Straight-line"],
+        "required": true,
+        "default": "Straight-line",
+        "note": "Only method supported in v1 — field exists for future extensibility, not currently a real choice.",
+        "tooltipKey": "Depreciation method"
+      },
+      "taxAssumptions": {
+        "label": "Tax assumptions",
+        "controlType": "reserved",
+        "type": "reserved",
+        "required": false,
+        "note": "Not implemented in v1 — no formula consumes this. Reserved per tooltip-copy.md.",
+        "tooltipKey": "Tax assumptions (optional)"
+      },
+      "priceEscalationPct": {
+        "label": "Price escalation",
+        "controlType": "input",
+        "type": "percentage",
+        "unit": "% p.a.",
+        "min": 0,
+        "max": 20,
+        "decimalPlaces": 1,
+        "allowNegative": false,
+        "required": false,
+        "note": "Not yet consumed by any formula in this version — distinct from the automatic actionable-insight engine's own tariff-increase testing (financial-model-spec.md §4).",
+        "errorMessage": "Enter a value between 0% and 20%.",
+        "tooltipKey": "Price escalation / Cost escalation"
+      },
+      "costEscalationPct": {
+        "label": "Cost escalation",
+        "controlType": "input",
+        "type": "percentage",
+        "unit": "% p.a.",
+        "min": 0,
+        "max": 20,
+        "decimalPlaces": 1,
+        "allowNegative": false,
+        "required": false,
+        "note": "Not yet consumed by any formula in this version.",
+        "errorMessage": "Enter a value between 0% and 20%.",
+        "tooltipKey": "Price escalation / Cost escalation"
+      },
+      "scenarioAssumptions": {
+        "label": "Scenario assumptions",
+        "controlType": "structural",
+        "type": "structural",
+        "required": false,
+        "note": "A named set of overrides for scenario comparison (SPEC.md §28), not a single validated field — its own UI is designed in Phase 9, not here.",
+        "tooltipKey": "Scenario assumptions"
+      }
     }
   }
 }

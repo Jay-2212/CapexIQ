@@ -524,7 +524,8 @@ Basic Mode should not be overloaded, but it must include the minimum inputs need
 Equipment category
 Equipment name / model, optional
 Hospital bed size
-City / tier
+City / tier (required — same benchmarking-lookup role as bed size)
+Hospital type: private / charitable-trust / corporate / government, optional
 Purchase cost
 Installation / civil cost
 Expected months before revenue starts
@@ -2178,7 +2179,12 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 2. Should scenarios be saved locally or in a database?
 3. Should users be able to share a scenario link?
 4. Should the tool include a disclaimer that outputs are indicative and not financial advice?
-5. Should the tool allow hospital type selection: private, charitable, trust, corporate, government?
+5. Should the tool allow hospital type selection: private, charitable, trust, corporate, government? —
+   **Resolved 2026-07-11**: yes, optional, in Basic Mode — informational/report-context
+   only. No formula in `financial-model-spec.md` or `/formulas` currently consumes it;
+   if a future version wants it to actually affect the model (e.g. tax treatment), that
+   needs a separate formula-design pass, not a silent assumption. See
+   `content/inputs-metadata.json#basic.hospitalType`.
 6. Should it ask bed size as a required input? — **Resolved 2026-07-11, reasoning
    updated same day:** yes, required — but as the lookup key for bed-size-dependent
    utilization/tariff benchmarks (§23.3) and as maintenance-quote context (a user
@@ -2186,7 +2192,9 @@ Built a healthcare capex decision-support tool for hospital equipment investment
    *default*. A hypothesis that CMC/AMC pricing itself scales with bed count was
    tested via a fourth research pass and found unsupported — see
    `data-requirements.md` §19.5, `ISSUES.md` ISS-12 (resolved).
-7. Should city tier be required or optional?
+7. Should city tier be required or optional? — **Resolved 2026-07-11**: required,
+   alongside bed size — same benchmarking-lookup role (§23.3's tooltip example already
+   references "Tier 2 city" as a benchmark dimension). See §10.1.
 8. Should the tool support multi-equipment packages later?
 9. Should there be a methodology page explaining formulas? — **Resolved 2026-07-11**:
    yes, a separate page (not embedded in the landing page), linked from the header and
@@ -2196,9 +2204,20 @@ Built a healthcare capex decision-support tool for hospital equipment investment
     — **Resolved 2026-07-07**: immediately, live, no "Calculate" button or loading
     screen — see `agent-build-plan.md` Phase 4-G (live-recalculation contract);
     formulas are pure and cheap enough that there's nothing to wait on.
-11. Should Basic Mode show only billed revenue or also a simplified realized-revenue assumption?
+11. Should Basic Mode show only billed revenue or also a simplified realized-revenue
+    assumption? — **Found already resolved, annotated 2026-07-11**: §10.4 already
+    answers this — Basic Mode shows billed revenue only, with a soft note pointing to
+    Advanced Mode for realized-revenue modeling (payer deductions, collection delay).
+    No new decision needed; this was a doc-cross-reference gap, not an open question.
 12. Should the working capital gap be shown in v1 dashboard or only in Advanced Mode?
-13. Should professional/reporting fee be mandatory for specific equipment types?
+    — **Resolved 2026-07-11**: Advanced Mode only — §11.2 lists it under Advanced
+    outputs and §10.4's Basic outputs list omits it, consistent with keeping Basic
+    Mode's output set simple. Confirmed with Jay rather than left as a silent
+    inference from list placement alone.
+13. Should professional/reporting fee be mandatory for specific equipment types? —
+    **Found already resolved, annotated 2026-07-11**: §10.2 already answers this —
+    "optional but visible" in Basic Mode, uniformly across equipment types, not
+    mandatory and not equipment-specific. No new decision needed.
 14. What should the entry flow into the wizard look like — land directly on the
     wizard/dashboard, or a marketing hero page with an explicit CTA that launches a
     dedicated assessment flow? — **Resolved 2026-07-11**, finalized in
