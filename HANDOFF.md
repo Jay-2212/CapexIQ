@@ -13,6 +13,26 @@ of *how* we got here.
 
 *(Last updated: 2026-07-11)*
 
+**Phase 5 (wizard state design) is now resolved, 2026-07-11** — `app/forms/wizard-state.md`
+is written: the full route map (`/assess` pre-step → `/assess/investment` →
+`/assess/usage` → `/assess/costs` + the Advanced Mode panel → `/results`), the
+field-to-step assignment, per-step validation timing, the Basic↔Advanced persistence
+mechanism, the live-preview/invalid-stale contract, slider drag/keyboard transitions,
+browser back/forward, `localStorage` draft persistence (schema + versioning),
+backgrounded-tab scoping, and idempotent step submission. Three genuine architecture
+forks not safely inferable from Phase 4 alone — whether Advanced Mode is a literal
+wizard step or one panel on the last Basic step, whether wizard steps get their own
+URLs, and whether to persist drafts to `localStorage` — were decided directly with Jay
+before writing, the same way Phase 4 itself was. **This closes the last planning gate:
+Phase 6 (wizard UI implementation) is next, and is pure build from here** — Phases 1-5
+are all complete. Also corrected in this pass: `agent-build-plan.md`'s Phase 1 and
+Phase 2 checkboxes were still unchecked despite that work being merged days earlier
+(commits `0c15c22`/`128a929`/etc.) — doc drift, not missing work; ticked off and
+annotated with the actual completion status. Flagged, not fixed: a stale leftover git
+worktree (`.claude/worktrees/phase2-formulas-groups-bcd`) is duplicating `npm test`'s
+discovered test files (130 runs instead of 65) — leaving it for a human `git worktree
+remove` rather than removing another session's possibly-still-in-use worktree.
+
 **Where things stand today:** Phase 1 (equipment data) is effectively complete —
 **ISS-12 resolved 2026-07-11** (see below), no open Phase 1 human calls remain.
 **Phase 2 (formula engine) is fully implemented:**
@@ -47,7 +67,8 @@ written as explicit templates rather than enumerated per instance. Also resolved
 the same pass: SPEC.md §36.1 Q5 (hospital type, optional/informational) and Q7 (city
 tier, required); Q11 and Q13 turned out to already be answered elsewhere in SPEC.md
 and just needed the cross-reference annotated. **Phase 4 is now fully closed — all
-four Definition of Done items checked.** Phase 5 (`wizard-state.md`) is next.
+four Definition of Done items checked.** Phase 5 (`wizard-state.md`) followed the same
+day — see the note at the top of this section.
 
 **ISS-12 resolved 2026-07-11 (a fourth research pass, same day as the reframe below):**
 the bed/volume-tiering theory for MRI's CMC contradiction was tested directly and is
@@ -117,6 +138,57 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-11 — Phase 5 (wizard state design) resolved: app/forms/wizard-state.md written; Phase 1/2 doc-drift corrected
+**What changed:** Jay asked what's left before build, in the spirit of this project's
+"plan very thorough, no issues once you build" philosophy. Audited every phase in
+`agent-build-plan.md` against actual repo state (not just its own checkboxes) first —
+ran `npm test` directly (130 tests passing, 65 unique — see the stray-worktree note
+below), read every equipment-data file's remaining `null`s against `ISSUES.md`, and
+confirmed Phases 1-4 are genuinely complete. Found Phase 5 (`app/forms/wizard-state.md`)
+was the one real gap: zero wizard/dashboard code exists yet, and this doc — the
+"do not skip" transition-table gate — hadn't been written.
+1. **Wrote `app/forms/wizard-state.md`**: route map (5 routes, not SPEC.md §7's literal
+   7 steps — see below), field-to-step assignment pulled mechanically from
+   `content/inputs-metadata.json`, per-step validation timing, the Basic↔Advanced
+   persistence mechanism (confirms Phase 4-F), the live-preview-strip + invalid/stale
+   contract (confirms/concretizes Phase 4-G), slider drag/keyboard transitions,
+   browser back/forward, `localStorage` draft persistence (full schema + versioning),
+   backgrounded-tab scoping (explicitly deferred export's own contract to Phase 8
+   rather than inventing one prematurely), and idempotent step submission.
+2. **Three real architecture forks**, not safely inferable from Phase 4 alone, decided
+   directly with Jay before writing (same process as Phase 4 itself):
+   - **Wizard shape** — SPEC.md §7 suggested "Step 6: Advanced Model" as its own step;
+     Phase 4-F says Advanced Mode lives "below the Basic Mode fields on the same
+     screen, not a separate step." Resolved: 3 Basic steps (Investment / Usage &
+     Revenue / Operating Costs) + one shared Advanced Mode panel attached to the last
+     Basic step (all 6 groups A-F in one continuous scroll, matching the
+     already-written banner copy in `content/field-explanations.md`) + a separate
+     Results Dashboard page (not a wizard step) where SPEC.md §7's "Results" and
+     "Export" steps collapse into one destination.
+   - **Step routing** — each step gets its own URL (`/assess/investment`, etc.) so
+     browser back/forward moves between steps naturally, over the simpler
+     single-route/in-memory-only alternative.
+   - **Draft persistence** — yes, to `localStorage` (versioned schema, silently
+     discarded on version mismatch rather than migrated), since v1 has no login/
+     accounts system and this is the only safety net against losing a half-filled
+     assessment to a refresh or closed tab.
+3. **Corrected doc drift found during the audit, unrelated to Phase 5 itself:**
+   `agent-build-plan.md` Phase 1 and Phase 2's checkboxes were still unchecked despite
+   that work being merged days earlier (Phase 1: `0c15c22` etc.; Phase 2:
+   `467de32`/`128a929`) — ticked off and annotated with real completion status
+   (Phase 1's schema-validation-test bullet is the one genuinely still-open item,
+   flagged rather than falsely checked). Also corrected a factually wrong "still open"
+   claim about SPEC.md §36.1 Q5/Q7/Q11/Q13 (all four are already marked "Resolved"
+   in SPEC.md itself) in the same file's closing section.
+4. **Flagged, not fixed:** a stale leftover git worktree
+   (`.claude/worktrees/phase2-formulas-groups-bcd`) is duplicating `npm test`'s
+   discovered test files (130 runs instead of 65) — left for a human `git worktree
+   remove` rather than removed here, since another session may still be using it.
+**Files touched:** `app/forms/wizard-state.md` (new), `app/forms/README.md`,
+`agent-build-plan.md`, `HANDOFF.md` (this entry).
+**What's next:** Phase 6 (wizard UI implementation) — pure build from here. Phases 1-5
+are all complete.
 
 ### 2026-07-11 — Phase 4 (design/UX) resolved: design/ux-product-spec.md written, "Signal" theme picked, tooltip contradiction fixed
 **What changed:** Jay lifted the 2026-07-07 UI/UX pause himself, mid-conversation,
