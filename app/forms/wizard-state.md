@@ -126,15 +126,42 @@ of validation, which `inputs-metadata.json` doesn't cover:
 - **Step-level "can I proceed" gate:** a step's "Next" button is enabled only when every
   `required: true` field on that step (and every `requiredIf`-triggered field, e.g.
   Group C financing fields when `acquisitionMode` ≠ Cash) is both filled and valid.
-  Optional fields never block progression regardless of their content.
+  Optional fields never block progression regardless of their content. **Resolved (UI
+  assurance audit F1, 2026-07-12, Jay's decision):** `targetIrr` (Group F) would
+  otherwise block Step 3's "Next" for any Basic-Mode-only user, since it's
+  `required: true` with no sourced default and sits inside the collapsed Advanced
+  panel — contradicting the product's Basic-Mode-standalone premise. Fixed at the
+  data layer, not the gate: the wizard reducer auto-fills `targetIrr` on
+  initialization with `discountRate + 400bps`, shown with the standard "Typical" tag
+  (`design/ux-product-spec.md` §6) and a tooltip stating it's a suggested starting
+  point, not a researched number. Because it's always populated, the gate rule above
+  needs no special case — `targetIrr` is simply valid by default like any other
+  sourced field, and a Basic-only user reaches `/results` without ever knowing the
+  panel exists. See `equipment-data/common-assumptions.json#targetIrr` and
+  `content/inputs-metadata.json#targetIrr` for the full mechanism.
+- **Disabled-"Next" discoverability (added — UI assurance audit F7, 2026-07-12):** a
+  disabled "Next" gives no clue *which* field is still blocking it, which is real
+  friction on Step 3's 8-field form. Clicking (or activating via keyboard) a disabled
+  "Next" moves focus to the first invalid/missing required field on the step and shows
+  its existing `errorMessage` from `content/inputs-metadata.json` (no new copy needed)
+  — the same behavior a native HTML form's `reportValidity()` gives for free, made
+  explicit here since this is a custom-built wizard, not a native `<form>` submit.
 - **Group constraints** (e.g. `payerMixSharePct`'s "5 payer shares must sum to 100%")
   are evaluated across the whole group, not per-field — showing one error message
-  anchored to the group heading, not duplicated on all 5 sliders.
+  anchored to the group heading, not duplicated on all 5 sliders. **Programmatic
+  association (added — UI assurance audit F8, 2026-07-12):** each of the grouped
+  sliders' `aria-describedby` includes that shared group-error element's id whenever
+  the group is in violation, so a screen-reader user tabbing through the 5 payer-mix
+  sliders one at a time is told about the group-level problem too, not just each
+  slider's own name/value/bounds — still one message, referenced by all 5 controls,
+  not duplicated text.
 - **Route guard:** landing directly on a step's URL (via back/forward, a bookmark, or a
   fresh tab with an incompatible/absent draft — see §6) without its prerequisite steps
   complete redirects to the earliest incomplete step. `/results` carries the same guard
   against every Basic-required field across all three steps. This prevents computing
-  (or displaying stale placeholder numbers for) a result from partial input.
+  (or displaying stale placeholder numbers for) a result from partial input. **Not
+  silent (added — UI assurance audit F6, 2026-07-12):** see §6.5 for the focus/
+  announcement this redirect (and every other step-change event) must produce.
 
 ---
 
@@ -235,6 +262,38 @@ Mechanics:
 
 ---
 
+## 6.5 Focus management and silent-state-change announcements (added — UI assurance audit F6, 2026-07-12)
+
+None of the sections above specify where keyboard/screen-reader focus lands after a
+state change that isn't a direct result of the user's own keystroke — a real gap for
+anyone not visually tracking the page. One rule per event, each reusing the wizard's
+existing `aria-live="polite"` region (introduced here, referenced by nothing else yet
+built) rather than inventing a separate mechanism per event:
+
+- **In-app "Next"/"Back" step change:** focus moves to the destination step's `h1`.
+  No announcement needed beyond the new heading itself being read (normal screen-reader
+  behavior on focus move).
+- **Route-guard redirect (§2):** focus moves to the redirect destination's `h1`,
+  and the live region announces why in one plain sentence, e.g. *"Returned you to
+  Investment — Usage & Revenue isn't complete yet."* A silent bounce-back is the
+  disorienting case this rule exists to prevent.
+- **Draft restored on load (§7.2):** focus stays on the page's own `h1` (nothing extra
+  to move to), and the live region announces *"Restored your saved progress from
+  <relative time, e.g. '2 hours ago'>."* alongside the existing "Start over" affordance
+  (§7.2) so the user can discard it if it's not what they expected.
+- **Draft silently discarded on version mismatch (§7.2):** the live region announces
+  *"Starting a new assessment."* — brief, since there's nothing to restore or discard
+  by choice, but a user who expected their old draft back should not be left wondering
+  why the wizard looks empty.
+- **Inline "More info" expansion (`design/ux-product-spec.md` §4.B):** focus stays on
+  the "More info" toggle itself (content expands below it, nothing forces focus away);
+  the toggle carries `aria-expanded` reflecting open/closed state.
+- **Disabled-"Next" activation (§2's new bullet, audit F7):** focus moves to the first
+  invalid/missing field on the step, per that bullet — not repeated here, cross-
+  referenced only.
+
+---
+
 ## 7. Refresh, tab close, and draft persistence
 
 **Resolved fork:** yes, persist to `localStorage` — there is no login/accounts system
@@ -317,6 +376,37 @@ truncate/extend rule.
   browser dialogs" convention — a simple inline confirmation state on the link
   itself, "Click again to confirm," not a modal) before actually clearing.
 
+### 7.3 Multi-tab behavior and shared-device disclosure (resolved — UI assurance audit F5, 2026-07-12, Jay's decision)
+
+Not addressed above: what happens if the same draft is open in two tabs at once (easy
+to trigger accidentally — a middle-click, a mobile "open in new tab"). As written,
+each tab's reducer independently debounce-saves to the same `capexiq.wizardDraft.v1`
+key with no cross-tab awareness — the tab that saves last silently wins, and the
+other tab's edits vanish on its own next save or reload with no warning. This is a
+real way to lose real data on exactly the shared hospital workstation this feature
+exists to protect. Also unaddressed: nothing tells the user this draft — hospital
+name, bed count, cost figures — sits in the browser's storage indefinitely on a
+possibly-shared device until "Start over" is clicked.
+
+**Resolved, two-part fix (chosen over a full live-sync alternative — real-time
+cross-tab sync via `BroadcastChannel` was considered and rejected as disproportionate
+engineering for a single-user, single-assessment tool with no other client-side sync
+surface anywhere; also rejected: doing nothing beyond a text warning, since a note
+that's easy to miss doesn't actually stop silent data loss):**
+
+1. **Conflict warning:** every `/assess/*` and `/results` route listens for the
+   browser's native `storage` event on `capexiq.wizardDraft.v1`. If another tab writes
+   a draft with a newer `savedAt` than the one this tab last loaded, show a small,
+   non-blocking banner: *"This assessment was updated in another tab — reload to see
+   the latest version."* The current tab's state is never silently overwritten or
+   auto-reloaded out from under the user — they choose when to reload, same principle
+   as §6.5's other silent-state-change rules.
+2. **Shared-device disclosure:** a small, persistent note near the "Start over" link
+   (§7.2) — *"Your progress is saved in this browser only."* — plus "Start over"
+   itself already serves as the one-click clear-draft control this needed; no second
+   affordance required, just the added copy making its purpose (and the data's
+   persistence) explicit.
+
 ---
 
 ## 8. Backgrounded tab / mid-calculation
@@ -363,12 +453,21 @@ without an explicit guard a double-click could interleave them.
 | Refresh mid-wizard / draft persistence | §7 |
 | Backgrounded tab mid-calculation/mid-export | §8 |
 | Idempotent step submission | §9 |
+| Focus management / silent-state-change announcements (audit F6) | §6.5 |
+| Disabled-"Next" first-invalid-field focus (audit F7) | §2 |
+| Group-constraint `aria-describedby` wiring (audit F8) | §2 |
+| Multi-tab behavior / shared-device disclosure (audit F5) | §7.3 — **resolved** |
+| `targetIrr` required/no-default step-gate contradiction (audit F1) | §2 — **resolved** |
 
-All eight bullets have a concrete answer above — none deferred as "TBD." Three of
-them (`wizard shape` §1, `step routing` §6, `draft persistence` §7) were genuine
+All eight original bullets have a concrete answer above — none deferred as "TBD." Three
+of them (`wizard shape` §1, `step routing` §6, `draft persistence` §7) were genuine
 architecture forks not safely inferable from Phase 4 alone and were decided directly
 with Jay before this doc was written, the same way Phase 4 itself was — recorded here,
-not re-litigated.
+not re-litigated. Seven more concrete rules (F1, F3, F5, F6, F7, F8, F9) were added and
+resolved by the 2026-07-12 UI assurance planning audit, same standard as the original
+eight — F1 and F5 were genuine judgment calls, brought to Jay directly (with an
+independent second opinion from a stronger model) rather than decided silently; both
+are now resolved, see §2 and §7.3.
 
 **Next:** Phase 6 (wizard UI implementation) builds against this doc exactly — a single
 `useReducer` for all wizard state (§3, §6), one `<input type="range" step=...>`-backed

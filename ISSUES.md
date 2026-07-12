@@ -165,6 +165,52 @@ is a placeholder only, safe to replace once real product screenshots exist.
 
 ## Resolved
 
+### ISS-15 — No multi-tab or shared-device behavior defined for the wizard's localStorage draft
+**Area:** design / product
+**What was flagged:** the 2026-07-12 `$capexiq-ui-assurance` planning audit (finding
+F5) found that `app/forms/wizard-state.md`'s `localStorage` draft persistence (§7) had
+no defined behavior for two tabs open on the same draft at once — each tab
+independently debounce-saves to the same key, so the last tab to save silently wins
+and the other tab's edits vanish with no warning. Also unaddressed: nothing disclosed
+to the user that a draft (hospital name, bed count, cost figures) persists
+indefinitely in the browser on a possibly-shared device.
+**Resolution (2026-07-12, Jay's decision, informed by an independent Opus advisor
+opinion):** a two-part fix, chosen over a full real-time cross-tab sync
+(`BroadcastChannel` — rejected as disproportionate engineering for a single-user v1
+tool) and over doing nothing but adding a warning note (rejected as too easy to miss
+to actually prevent silent data loss): (1) a `storage`-event conflict banner — *"This
+assessment was updated in another tab — reload to see the latest version"* — the user
+chooses when to reload, nothing is silently overwritten; (2) explicit shared-device
+copy next to the existing "Start over" control stating the draft is saved in this
+browser only. See `app/forms/wizard-state.md` §7.3.
+
+### ISS-14 — Target IRR field's `required` flag would have blocked Basic Mode entirely
+**Area:** design / product
+**What was flagged:** the 2026-07-12 `$capexiq-ui-assurance` planning audit (finding
+F1) found that `content/inputs-metadata.json`'s `targetIrr` field was `required: true`
+with no sourced default (confirmed unresearchable, see ISS-9), sitting inside the
+Advanced Mode panel that's collapsed by default. Per `app/forms/wizard-state.md` §2's
+own step-gate rule ("Next" enabled only when every required field on that step is
+valid), this meant a Basic-Mode-only user — the hospital-administrator persona this
+product is explicitly built to serve, not just the CFO — could never reach `/results`
+without manually opening a panel they don't know exists and entering a number that,
+by this project's own research, doesn't publicly exist anywhere for Indian hospitals.
+Directly contradicted the product's central Basic/Advanced value proposition.
+**Resolution (2026-07-12, Jay's decision, informed by an independent Opus advisor
+opinion):** rather than fabricating a benchmark or leaving the field blocking, the
+wizard auto-fills `targetIrr` with a computed heuristic (`discountRate + 400bps`,
+the midpoint of the range `equipment-data/common-assumptions.json` already suggested
+for exactly this situation), shown with the same "Typical" tag every sourced default
+uses, with its tooltip stating explicitly that this is a suggested starting point, not
+a researched number — distinct in kind from every other default in this product,
+which is a cited figure. The field stays fully user-editable in Advanced Mode; the
+Investment Outlook score itself doesn't even consume this field directly
+(`financial-model-spec.md` §1.6 uses `discountRate` as the hurdle), so nothing about
+the scoring model changed. See `content/inputs-metadata.json#targetIrr`,
+`equipment-data/common-assumptions.json#targetIrr`, `design/ux-product-spec.md` §6,
+`app/forms/wizard-state.md` §2, `SPEC.md` §18.3, and `content/benchmark-notes.md` §2
+for the full mechanism, each updated to match.
+
 ### ISS-13 — Equipment-data schema: workingDaysPerMonth/financingNorms per-equipment fields were dead
 **Area:** data / schema
 **Resolution (2026-07-11):** each equipment file had `typicalUtilization.workingDaysPerMonth`

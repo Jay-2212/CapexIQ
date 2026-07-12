@@ -201,8 +201,12 @@ forced into a "risk" framing.
 - **`targetIrr` is `"Unavailable"`** (confirmed unresearchable, see
   `equipment-data/common-assumptions.json`): this component doesn't consume
   `targetIrr` directly (it uses `discountRate` as the hurdle), so this is not a
-  blocker. `targetIrr`'s only UI role is the Advanced settings pane's suggested
-  starting value (`discountRate + 300–500bps`), separate from this scoring model.
+  blocker. `targetIrr`'s only UI role is a suggested starting value
+  (`discountRate + 300–500bps`), separate from this scoring model. **Resolved
+  2026-07-12** (UI assurance audit F1): this heuristic is now auto-filled at the
+  wizard-field level, not only in the Phase 7 Advanced settings pane — see
+  `app/forms/wizard-state.md` §2 for why (an unresourced required field would
+  otherwise have blocked Basic Mode's step gate).
 
 ### 1.7 Worked example (illustrative numbers only, not a real equipment scenario)
 

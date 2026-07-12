@@ -13,10 +13,12 @@ of *how* we got here.
 
 *(Last updated: 2026-07-12)*
 
-**Planning is done. Phases 1-5 of `agent-build-plan.md` are complete and merged into
-`main`. Phase 6 (wizard UI implementation) is next, and is pure build from here —
-`/app` is still skeleton (`layout.tsx`/`page.tsx`/empty-scaffold READMEs), no real UI
-exists yet.**
+**Planning is done, and now audited. Phases 1-5 of `agent-build-plan.md` are complete;
+the `$capexiq-ui-assurance` planning audit was run against Phases 4-5 and all nine
+findings are resolved (seven fixed directly, two — required judgment calls — decided
+by Jay with an independent Opus-model second opinion first). Phase 6 (wizard UI
+implementation) is next, and is pure build from here — `/app` is still skeleton
+(`layout.tsx`/`page.tsx`/empty-scaffold READMEs), no real UI exists yet.**
 
 - **Phase 1 (equipment data):** complete. Five research passes (`data-requirements.md`
   §12-§20) populated every field with a responsible source; every remaining `null` is
@@ -60,6 +62,38 @@ Assessment" CTA → equipment/bed-count pre-step → wizard) is already designed
 `design/ux-product-spec.md` and `app/forms/wizard-state.md` — this is now a Phase 6
 build target, not an open question.
 
+**`$capexiq-ui-assurance` planning audit run and resolved, 2026-07-12.** Nine findings
+against Phases 4-5, all closed before Phase 6 starts:
+- **Fixed directly (no product decision needed):** no accessible data-table equivalent
+  for charts (F2, added to Phase 7); no `prefers-reduced-motion` handling for the
+  micro-interaction spec (F3, `ux-product-spec.md` §10); slider thumb below the WCAG
+  2.5.8 touch-target minimum (F4, added to Phase 6); no focus-management rule for step
+  change/redirect/draft-restore/inline-expansion (F6, `wizard-state.md` §6.5); a
+  disabled "Next" gave no clue which field was blocking it (F7, `wizard-state.md` §2);
+  payer-mix group errors weren't wired to the individual sliders via
+  `aria-describedby` (F8, `wizard-state.md` §2); no Indian number-formatting rule
+  despite the India-first premise (F9, `ux-product-spec.md` §10.5).
+- **Judgment calls, decided by Jay** (options drafted by Claude, sanity-checked by an
+  Opus advisor pass first, per Jay's requested three-layer process): `targetIrr` was
+  `required` with no sourced default inside the collapsed-by-default Advanced panel,
+  which would have blocked every Basic-Mode-only user from ever reaching a result
+  (F1/ISS-14) — resolved by auto-filling it with a labeled `discountRate + 400bps`
+  heuristic, never presented as a benchmark. No multi-tab or shared-device behavior
+  was defined for the `localStorage` draft (F5/ISS-15) — resolved with a
+  `storage`-event conflict banner plus explicit shared-device copy, over a full
+  real-time sync (rejected as overkill for a single-user v1 tool).
+- **Bonus doc-drift catch while investigating F1:** `agent-build-plan.md` Phase 7 and
+  `design/ux-product-spec.md` §6 both incorrectly grouped Discount Rate with Target
+  IRR as "no sourced default" — Discount Rate actually has a real one (12.5% typical,
+  Medium confidence). Corrected in both places plus `SPEC.md` §18.3/§23.4 and
+  `content/benchmark-notes.md`.
+- **Files touched:** `design/ux-product-spec.md`, `app/forms/wizard-state.md`,
+  `agent-build-plan.md`, `content/inputs-metadata.json`,
+  `equipment-data/common-assumptions.json`, `SPEC.md` (§18.3, §23.4),
+  `financial-model-spec.md` (§1.6), `content/benchmark-notes.md`, `ISSUES.md`
+  (ISS-14, ISS-15 added, both Resolved). No `/app`, `/formulas`, or `/equipment-data`
+  numeric values touched beyond `common-assumptions.json`'s `targetIrr` note.
+
 ---
 
 Full history of how we got here lives in the Change Log below (most recent first) —
@@ -90,6 +124,80 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-12 — Ran `$capexiq-ui-assurance` planning audit against Phases 4-5; all nine findings resolved before Phase 6
+**What changed:** Jay asked to run the newly-added UI assurance skill against Phases
+4-5 as a planning audit (no runtime yet, so pure doc/spec review), then implement
+every fix the audit could make on its own judgment, and for anything requiring a real
+product decision: draft options, get an independent second opinion from a stronger
+model first (Opus, used as an "advisor" layer), then bring simplified options to Jay
+as the final decision-maker — a three-layer process (Claude's judgment → advisor
+model → Jay) Jay specified explicitly for this session.
+1. **Audit produced 9 evidence-backed findings**, one P0 and four P1s, none of them
+   requiring any change to the Signal visual design — full report given in the
+   conversation this session came from (not persisted as a separate file, per this
+   project's "don't duplicate content" rule; `agent-build-plan.md`'s Phase 4/5 DoD
+   sections and `ISSUES.md` now carry the durable record instead).
+2. **Seven findings fixed directly**, no product decision needed: F2 (no accessible
+   data-table equivalent for charts — added to Phase 7's "Do" list), F3 (no
+   `prefers-reduced-motion` handling for the micro-interaction spec — `ux-product-
+   spec.md` §10), F4 (slider thumb below WCAG 2.5.8's touch-target minimum — added to
+   Phase 6's "Do" list, visual size unchanged, only the hit-target padded), F6 (no
+   focus-management rule for step change/route-guard redirect/draft restore-or-
+   discard/inline tooltip expansion — new `wizard-state.md` §6.5), F7 (a disabled
+   "Next" gave no clue which field was blocking it — `wizard-state.md` §2, now moves
+   focus to the first invalid field on click), F8 (payer-mix group-sum errors weren't
+   programmatically wired to the individual sliders — `wizard-state.md` §2, `aria-
+   describedby`), F9 (no Indian number-formatting rule despite the explicit India-first
+   premise — new `ux-product-spec.md` §10.5, `Intl.NumberFormat('en-IN')`, lakh/crore
+   grouping, `-₹` for negatives, full-figure-in-exports rule).
+3. **Two findings were genuine judgment calls, resolved with Jay directly after an
+   Opus advisor pass:**
+   - **F1/ISS-14 — `targetIrr` (Group F) was `required: true` with no sourced default,
+     sitting inside the Advanced Mode panel that's collapsed by default.** Per
+     `wizard-state.md` §2's own step-gate rule, this meant a Basic-Mode-only user
+     could never reach `/results` without opening a panel they don't know exists and
+     entering a number that, per two research passes, doesn't publicly exist anywhere
+     for Indian hospitals — directly contradicting the product's Basic/Advanced
+     premise. **Resolved:** auto-fill `targetIrr` with a computed `discountRate +
+     400bps` heuristic (the midpoint of the range `common-assumptions.json` already
+     suggested for exactly this case), shown with the same "Typical" tag every sourced
+     default uses and a tooltip explicit that it's a suggestion, not research — the
+     Investment Outlook score itself never consumed this field directly
+     (`financial-model-spec.md` §1.6 uses `discountRate` as the hurdle), so nothing
+     about the scoring model changed. Jay chose this over (a) the same auto-fill plus
+     an extra one-click confirmation step on the results page, and (b) leaving it
+     required-but-deferred to a prompt on `/results` instead of the wizard step.
+   - **F5/ISS-15 — no multi-tab or shared-device behavior was defined for the wizard's
+     `localStorage` draft.** Two tabs open on the same draft would each independently
+     debounce-save to the same key with no cross-tab awareness — last save silently
+     wins, the other tab's edits vanish with no warning; also nothing disclosed that
+     the draft (hospital name, bed count, cost figures) persists indefinitely on a
+     possibly-shared device. **Resolved:** a `storage`-event conflict banner ("updated
+     in another tab — reload to see the latest version") plus explicit shared-device
+     copy next to the existing "Start over" control. Jay chose this over (a) full
+     real-time cross-tab sync via `BroadcastChannel` (both Claude and the Opus advisor
+     flagged this as disproportionate engineering for a single-user v1 tool with no
+     other client-side sync surface), and (b) a text-only warning with no actual
+     conflict detection (flagged as too easy to miss to prevent real data loss).
+4. **Bonus doc-drift catch, found while investigating F1:** `agent-build-plan.md`
+   Phase 7 and `design/ux-product-spec.md` §6 both incorrectly grouped Discount Rate
+   with Target IRR as "no sourced default, must visibly prompt" — Discount Rate
+   actually has a real one (`typical: 12.5%`, Medium confidence, S22/S23, already in
+   `common-assumptions.json`). Corrected in both places, plus the same stale pairing
+   in `SPEC.md` §18.3 and §23.4, and `content/benchmark-notes.md`'s "why some fields
+   show no default" example (swapped its Target-IRR example for inflation rate, which
+   genuinely is still left blank, and added the Target-IRR heuristic exception
+   underneath).
+**Files touched:** `design/ux-product-spec.md`, `app/forms/wizard-state.md`,
+`agent-build-plan.md`, `content/inputs-metadata.json`,
+`equipment-data/common-assumptions.json`, `SPEC.md` (§18.3, §23.4),
+`financial-model-spec.md` (§1.6), `content/benchmark-notes.md`, `ISSUES.md` (ISS-14,
+ISS-15 added, both Resolved), `HANDOFF.md` (this entry + Current State). No `/app`,
+`/formulas`, or equipment-specific `equipment-data/*.json` files touched — this was a
+planning/spec-layer pass, consistent with Phase 6 not having started yet.
+**What's next:** Phase 6 (wizard UI implementation) — pure build from here, against a
+now-audited Phase 4/5 spec set. No open planning items remain blocking it.
 
 ### 2026-07-12 — Fifth research pass (live web search) on ISS-9's last two gaps; full DIRECTORY.md + stale-README rewrite
 **What changed:** Jay asked to (a) attempt resolving ISS-9's two remaining

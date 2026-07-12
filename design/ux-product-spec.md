@@ -275,11 +275,25 @@ Every wizard field is pre-filled with its default/typical value where one exists
 
 This gets the low-friction benefit of a pre-filled field (most users accept most
 defaults) without the risk of a default being mistaken for a value the user actually
-entered — the muted styling and tag make the field's state legible at a glance. Fields
-with no sourced default (e.g. discount rate, target IRR — both `Unavailable` per
-`common-assumptions.json`) show empty, not a fabricated default, per this project's
-no-invented-benchmarks rule — and per Phase 7's existing requirement to visibly prompt
-for these rather than showing a blank that looks authoritative.
+entered — the muted styling and tag make the field's state legible at a glance.
+
+**Correction (2026-07-12, UI assurance audit) — this paragraph previously grouped
+discount rate and target IRR together as both having "no sourced default," which was
+wrong for discount rate.** Discount rate has a real sourced default (`typical: 12.5%`,
+Medium confidence, `equipment-data/common-assumptions.json`) and is pre-filled exactly
+like any other sourced field, above. **Target IRR is the one field with no sourced
+benchmark** (confirmed unresearchable, `Unavailable` per `common-assumptions.json`) —
+**resolved (audit F1, Jay's decision):** rather than showing empty and blocking the
+Basic-Mode step gate (see `agent-build-plan.md` Phase 5's F1 note), it is auto-filled
+with a computed heuristic (`discountRate + 400bps`) using the exact same "Typical" tag
+treatment above, with its tooltip explicit that this is a suggested starting point, not
+a researched number — distinguishing a labeled heuristic from a fabricated benchmark.
+The user can edit or accept it in Advanced Mode; Phase 7's Advanced settings pane shows
+it the same way. No field in this product ever shows a blank pre-fill that could look
+authoritative, and no field's default is ever silently presented as sourced when it
+isn't — target IRR's tag and tooltip make its provisional nature explicit, and this is
+the *only* field in the product using a computed (rather than directly sourced) value
+as its "Typical" default.
 
 ---
 
@@ -337,6 +351,41 @@ gimmicks. Concrete rules for Phase 6/7 implementation:
   single user action (e.g. a button that ripples *and* bounces *and* changes color all
   at once reads as noisy, not thoughtful). Pick the single most legible motion for
   each interaction.
+- **`prefers-reduced-motion` (added — UI assurance audit F3, 2026-07-12):** every
+  decorative motion above (the click ripple, section fade/slide, hover/focus 150ms
+  transitions) is suppressed under `@media (prefers-reduced-motion: reduce)` — ripple
+  and fade/slide become an instant cut, hover/focus transitions become immediate
+  (0ms) state changes. State changes themselves (a field turning invalid, a step
+  advancing) must remain fully understandable with zero motion; nothing here is
+  load-bearing information, all of it is optional polish. This doesn't change any
+  visual design, only removes motion under the OS-level preference.
+
+---
+
+## 10.5 Number formatting (added — UI assurance audit F9, 2026-07-12)
+
+No prior version of this doc fixed a display-formatting rule for INR values, despite
+the product being explicitly India-first (`INTRODUCTION.md`). Without one, an
+implementer could default to US-style grouping, which would look wrong to the exact
+CFO/administrator audience this product targets. Fixed here, once:
+
+- **Digit grouping:** Indian convention (lakh/crore grouping — `12,34,567`, not
+  `1,234,567`) everywhere an INR value renders — wizard fields, dashboard metric
+  cards, chart labels, tables, and export previews. Use `Intl.NumberFormat('en-IN')`
+  (or an equivalent grouping implementation) rather than hand-rolled comma insertion,
+  so edge cases (negative values, decimals) stay correct without custom logic.
+- **Negative values (e.g. cash flow before break-even):** a leading minus sign,
+  `-₹12,34,567` — not accounting-style parentheses. Matches this product's plain-
+  language tone (§5.1's "no sales language" restraint extends to not adopting
+  finance-jargon formatting conventions where a simpler one reads just as clearly).
+- **Compact vs. full figure:** dashboard metric cards may use a compact lakh/crore
+  form (e.g. "₹1.2 Cr") only where §1.1's type scale already calls for a large mono
+  metric callout; tables, wizard inputs, chart axis labels, and every export always
+  show the full figure — a visual abbreviation never hides the exact value a CFO
+  would need to check.
+- **Currency symbol:** `₹` prefix, no space, consistent with `content/inputs-metadata.json`'s
+  existing `unit: "INR"` fields — this doesn't change any existing field's unit, only
+  fixes how the number renders around it.
 
 ---
 
@@ -358,6 +407,8 @@ gimmicks. Concrete rules for Phase 6/7 implementation:
 | Theme / accent color | §1 | `tokens.css` |
 | Default-value treatment | §6 | — |
 | Micro-interactions | §10 | — |
+| Reduced motion (audit F3) | §10 | — |
+| Number formatting (audit F9) | §10.5 | — |
 
 **Definition of Done for Phase 4, per `agent-build-plan.md`:** this doc exists and
 gives a concrete answer to A–H (done, above); `tokens.css` has spacing/type-scale
