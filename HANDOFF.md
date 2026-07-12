@@ -11,27 +11,46 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-07-11)*
+*(Last updated: 2026-07-12)*
 
-**Phase 5 (wizard state design) is now resolved, 2026-07-11** — `app/forms/wizard-state.md`
-is written: the full route map (`/assess` pre-step → `/assess/investment` →
-`/assess/usage` → `/assess/costs` + the Advanced Mode panel → `/results`), the
-field-to-step assignment, per-step validation timing, the Basic↔Advanced persistence
-mechanism, the live-preview/invalid-stale contract, slider drag/keyboard transitions,
-browser back/forward, `localStorage` draft persistence (schema + versioning),
-backgrounded-tab scoping, and idempotent step submission. Three genuine architecture
-forks not safely inferable from Phase 4 alone — whether Advanced Mode is a literal
-wizard step or one panel on the last Basic step, whether wizard steps get their own
-URLs, and whether to persist drafts to `localStorage` — were decided directly with Jay
-before writing, the same way Phase 4 itself was. **This closes the last planning gate:
-Phase 6 (wizard UI implementation) is next, and is pure build from here** — Phases 1-5
-are all complete. Also corrected in this pass: `agent-build-plan.md`'s Phase 1 and
-Phase 2 checkboxes were still unchecked despite that work being merged days earlier
-(commits `0c15c22`/`128a929`/etc.) — doc drift, not missing work; ticked off and
-annotated with the actual completion status. Flagged, not fixed: a stale leftover git
-worktree (`.claude/worktrees/phase2-formulas-groups-bcd`) is duplicating `npm test`'s
-discovered test files (130 runs instead of 65) — leaving it for a human `git worktree
-remove` rather than removing another session's possibly-still-in-use worktree.
+**Phase 5 (`app/forms/wizard-state.md`) merged into `main` 2026-07-12** — it had been
+sitting in draft PR #12 since 2026-07-11, one PR behind what this file's own narrative
+described. Now on `main`. **This closes the last planning gate: Phase 1-5 are all
+complete and merged. Phase 6 (wizard UI implementation) is next, and `/app` is still
+just skeleton (`layout.tsx`/`page.tsx`/READMEs) — no real UI exists yet.**
+
+**Repo housekeeping, 2026-07-12:** the stale leftover git worktree flagged in PR #12
+(`.claude/worktrees/phase2-formulas-groups-bcd`, already-merged and duplicating
+`npm test`'s discovered files) and the freshly-obsolete `phase5-wizard-state` worktree
+were both removed via `git worktree remove`, along with every fully-merged local/remote
+branch (`worktree-phase2-formulas-groups-bcd`, `worktree-phase5-wizard-state`,
+`codex/phase2-group-a-formulas`, `iss12-iss13-onboarding-note`, `pr3-rebase`,
+`worktree-clean-build-plan`, `worktree-plan-gap-analysis`) — each verified merged via
+its GitHub PR before deletion, not just `git branch --merged` (which doesn't detect
+squash-merges). `npm test` now correctly reports 65/65 instead of 195 (65×3, was
+silently counting both stray worktrees' copies).
+
+**ISS-8/ISS-4/ISS-9 status review, 2026-07-12:**
+- **ISS-8** (dev-dependency audit warnings): the `esbuild`/`vite` chain is fixed —
+  bumped `vitest` `^2.1.0` → `^4.1.10` directly (not via `npm audit fix --force`, which
+  was proposing a bad resolution). All 65 tests, `tsc --noEmit`, and `npm run build`
+  pass unchanged, no test-file edits needed. The `postcss`/`next` chain has no viable
+  fix without a `next@16` major migration (`next` bundles its own pinned `postcss`
+  internally, already on the latest 15.x) — moved to Accepted, not left as a stale
+  "open."
+- **ISS-4** (payer-wise realization/DSO/specialist fees/vendor quotes): reclassified
+  from "open research gap" to Accepted — `data-requirements.md` §7.3 already designs
+  exactly this list as permanently hospital-specific/commercially-sensitive, so no
+  research pass could ever responsibly replace them with a shared default. This was a
+  mischaracterization to fix, not a task to complete.
+- **ISS-9**: its "still genuinely unavailable" list was stale — Cath Lab tariff and
+  Dialysis/Ultrasound launch delay were actually filled by the third research pass
+  (ISS-3) after this entry was last written. Narrowed to the two fields that are
+  actually still unresolved after three passes: target IRR/hurdle rate (§17.2,
+  confirmed unresearchable) and standalone CT utilization (§18.7, only a weak proxy
+  exists). Not re-researched this session — see ISSUES.md for the reasoning on why a
+  fourth pass wasn't attempted.
+See `ISSUES.md` for the full corrected entries.
 
 **Where things stand today:** Phase 1 (equipment data) is effectively complete —
 **ISS-12 resolved 2026-07-11** (see below), no open Phase 1 human calls remain.
@@ -138,6 +157,73 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-12 — Merged Phase 5 PR; repo/branch/worktree cleanup; ISS-8/ISS-4/ISS-9 status corrected
+**What changed:** Jay asked what's left overall, then to clean up remaining stale
+branches and resolve ISS-8/ISS-4/ISS-9 if possible.
+1. **Merged PR #12** (Phase 5, `app/forms/wizard-state.md`) into `main` — it had been
+   left in Draft since 2026-07-11 and hadn't actually reached `main` despite the
+   previous session's own Current State describing it as done. Marked ready for review,
+   squash-merged, pulled locally.
+2. **Removed both stray git worktrees** under `.claude/worktrees/`
+   (`phase2-formulas-groups-bcd`, `phase5-wizard-state`) and every fully-merged
+   local/remote branch (`worktree-phase2-formulas-groups-bcd`,
+   `worktree-phase5-wizard-state`, `codex/phase2-group-a-formulas`,
+   `iss12-iss13-onboarding-note`, `pr3-rebase`, `worktree-clean-build-plan`,
+   `worktree-plan-gap-analysis`) — each verified against its actual GitHub PR
+   (`gh pr view --json state,mergedAt/mergeCommit`) before deletion, since
+   `git branch --merged` doesn't detect squash-merges and would have under-reported
+   what was safe to remove. Confirmed via `npm test`: 195 → 65 (the stray worktrees had
+   been silently tripling every test run since at least 2026-07-11).
+3. **ISS-8 (dev-dependency audit warnings) — half-fixed, half-confirmed-unfixable.**
+   Bumped `vitest` `^2.1.0` → `^4.1.10` directly (a real, non-forced major-version
+   upgrade, not `npm audit fix --force`), which resolves the `esbuild`/`vite` half of
+   the vulnerability chain — `npm audit` goes from 7 to 2 findings. All 65 tests,
+   `npx tsc --noEmit`, and `npm run build` pass unchanged on the new version, no test
+   code needed updating. Checked whether the remaining `postcss`/`next` chain has a
+   real fix: it doesn't — `next` is already on the latest 15.x (`15.5.20`) and bundles
+   its own pinned `postcss@8.4.31` internally regardless of app-level version, so
+   there's no path to the fixed `postcss@>=8.5.10` short of a `next@16` major
+   migration. Confirmed `npm audit fix --force`'s own suggested "fix" is to
+   **downgrade** `next` to `9.3.3` — a severe regression, not a real fix, validating
+   the original "don't force it" call. Moved from Open to Accepted in `ISSUES.md`.
+4. **ISS-4 (payer-wise realization/DSO/specialist fees/vendor quotes) — reclassified,
+   not researched.** This was logged as an "open research gap," implying a future
+   research pass could eventually supply defaults. Re-read `data-requirements.md` §7.3
+   and found it already classifies this exact list — hospital-specific utilization,
+   hospital-specific payer mix, negotiated insurance realization, actual vendor
+   quotation, actual professional payout agreement — as permanently "highly local,
+   commercially sensitive, or too variable" for any single benchmark value to be
+   correct. No research pass can close this by the nature of the fields themselves
+   (every hospital's payer mix and vendor quote genuinely differs). Moved to Accepted
+   with the corrected reasoning; noted a future pass could still add *supplementary*
+   benchmark tooltip ranges per §7.2 without replacing the required user-input field —
+   that's new scope, not this issue reopening.
+5. **ISS-9 — stale "still open" list corrected, not re-researched.** It still listed
+   Cath Lab tariff and Dialysis/Ultrasound launch delay as unavailable, but the third
+   research pass (`ISSUES.md` ISS-3, resolved 2026-07-07) had already filled both —
+   this entry just hadn't been updated after that landed. Narrowed the genuinely-still-
+   open list to the two fields that survived three research passes: target IRR/hurdle
+   rate (`data-requirements.md` §17.2, confirmed unresearchable — no public source
+   exists) and standalone (non-PET) CT utilization (§18.7, only a weak combined-modality
+   proxy exists). Deliberately did not attempt a fourth research pass on these two this
+   session — §17.2 already concluded target IRR has no findable public source, and
+   spending more effort chasing it has a real prior-art risk of producing a low-quality
+   or unverifiable source (as already happened once with the AIIMS case-study mixup,
+   see ISS-12's resolution) rather than a genuine answer. Flagged to Jay as a real open
+   question: attempt a targeted live web-search pass now that Claude Code has direct
+   `WebSearch` access, or leave these as intentionally-permanent `null`/"Unavailable"
+   user-input fields.
+**Files touched:** `ISSUES.md` (ISS-8 moved to Accepted with resolution, ISS-4 moved to
+Accepted with corrected reasoning, ISS-9's stale list corrected), `package.json`/
+`package-lock.json` (`vitest` bump), `HANDOFF.md` (this entry + Current State). No
+`/app`, `/formulas`, `/equipment-data`, `/content`, or `/design` files touched.
+`npm test` 65/65, `npx tsc --noEmit` clean, `npm run build` clean — all re-verified
+after the `vitest` bump specifically, not assumed compatible.
+**What's next:** Phase 6 (wizard UI implementation) is the next real build work — `/app`
+is still skeleton. Jay's call on whether to attempt live research for ISS-9's two
+remaining gaps (target IRR/hurdle rate, standalone CT utilization) or leave them
+permanently user-entered.
 
 ### 2026-07-11 — Phase 5 (wizard state design) resolved: app/forms/wizard-state.md written; Phase 1/2 doc-drift corrected
 **What changed:** Jay asked what's left before build, in the spirit of this project's

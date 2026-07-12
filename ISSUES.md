@@ -53,14 +53,18 @@ WACC), MRI/dialysis utilization, CGHS reimbursement-ceiling tariffs for CT/MRI/
 Ultrasound/Dialysis, MRI/CT/Cath-Lab launch-delay ranges, and a real per-machine
 dialysis acquisition-cost figure from a government tender. All propagated into
 `equipment-data/*.json` and `common-assumptions.json` with honest confidence/sourceId,
-replacing the `null`s. **Still genuinely unavailable after two research passes:**
-target IRR/hurdle rate (confirmed unresearchable, no public source exists — see §17.2),
-Cath Lab tariff (no data found at all), Dialysis and Ultrasound launch delay, and
-standalone (non-PET) CT utilization (only a weak proxy exists). These remain `null`/
-`"Unavailable"` deliberately, not from oversight.
-**Status:** downgraded to **accepted** for the fields now populated; **open** only for
-the still-genuinely-unavailable fields above, which should stay user-entered per
-data-requirements.md §7.3 rather than trigger a third research pass unless a
+replacing the `null`s.
+**Update (2026-07-12, doc-accuracy correction):** this entry's "still genuinely
+unavailable" list was stale — a third research pass (2026-07-07, see `ISSUES.md` ISS-3,
+resolved) already filled Cath Lab tariff (₹11,920-₹15,000/procedure, High confidence)
+and Dialysis/Ultrasound launch delay (Low confidence) after this entry was last written.
+Corrected list of what's **actually still unavailable after three research passes:**
+target IRR/hurdle rate (confirmed unresearchable, no public source exists — see §17.2)
+and standalone (non-PET) CT utilization (only a weak proxy exists, see §18.7). Both
+remain `null`/`"Unavailable"` deliberately, not from oversight.
+**Status:** **accepted** for every field now populated (the large majority). **Open**
+only for the two fields named above, which should stay user-entered per
+data-requirements.md §7.3 rather than trigger another research pass unless a
 significantly better source turns up.
 **Process note:** this is the second time a parallel/unsupervised agent session
 introduced an inconsistency this project's own docs were built to prevent (see ISS-7
@@ -89,31 +93,54 @@ Single source of truth for loan tenure/rate is `common-assumptions.json.loanTenu
 lender treats MRI collateral differently from Dialysis), re-add the field then, with a
 real sourced value — not as dead scaffolding ahead of time.
 
-### ISS-8 — Dev-dependency audit warnings (moderate/high/critical, all dev-only)
-**Area:** code / tooling
-**Status:** open
-**What:** `npm install` reports 7 vulnerabilities: `esbuild<=0.24.2` (dev server can be
-sent arbitrary requests — GHSA-67mh-4wv8-2f99), pulled in transitively through
-`vite`/`vitest`; and `postcss<8.5.10` (XSS in CSS stringify — GHSA-qx2v-qp2m-jg93),
-pulled in transitively through `next`. Both are dev/build-tooling paths, not runtime
-code shipped to users, and neither is exploitable in a static-export production build.
-`npm audit fix --force` would resolve them but pulls in `vitest@4` and `next@9` — both
-breaking-change downgrades/upgrades not worth forcing onto an otherwise-fine skeleton.
-**Next action:** revisit next time `next`/`vitest` get a routine version bump anyway;
-don't force it just for this.
-
-### ISS-4 — Genuinely unresearched benchmark gaps
-**Area:** data
-**Status:** open
-**What:** Payer-wise realization %, DSO by payer, specialist fees, and actual vendor
-quotes remain unresearched — see `data-requirements.md` §15 for the full list. These are
-correctly left as user-entered inputs for now rather than guessed at.
-**Next action:** deepen research if/when better sources surface; not blocking for v1
-since these are meant to be user inputs, not hardcoded benchmarks.
-
 ---
 
 ## Accepted (known, not being fixed)
+
+### ISS-8 — Dev-dependency audit warnings (moderate, dev-only)
+**Area:** code / tooling
+**What was flagged:** `npm install` reported 7 vulnerabilities: `esbuild<=0.24.2` (dev
+server can be sent arbitrary requests — GHSA-67mh-4wv8-2f99), pulled in transitively
+through `vite`/`vitest`; and `postcss<8.5.10` (XSS in CSS stringify —
+GHSA-qx2v-qp2m-jg93), pulled in transitively through `next`. Both are dev/build-tooling
+paths, not runtime code shipped to users, and neither is exploitable in a static-export
+production build.
+**Resolution (2026-07-12):** the `esbuild`/`vite` chain is fixed — bumped
+`vitest` `^2.1.0` → `^4.1.10` directly (not via `npm audit fix --force`, which was
+proposing a bad resolution, see below). `npm audit` confirms that chain is clean; all
+65 tests, `npx tsc --noEmit`, and `npm run build` pass unchanged on the new version — no
+test-file changes needed. **The `postcss`/`next` chain has no viable fix and stays
+accepted:** `next` is already pinned to its latest 15.x release (15.5.20); Next.js
+bundles its own `postcss@8.4.31` internally regardless of app-level `postcss` version,
+so there is no way to get the fixed `postcss@>=8.5.10` without jumping to `next@16`
+(a real breaking major-version migration, not warranted for a dev-only XSS-in-
+CSS-stringify issue that doesn't reach the static-export production build).
+`npm audit fix --force`'s own suggested "fix" is actually to **downgrade** `next` to
+`9.3.3` — a severe regression, not a fix; confirms forcing it is the wrong move, as
+originally assessed.
+**Next action:** revisit the `postcss`/`next` half next time a `next@16` migration is
+independently warranted; don't force it just for this.
+
+### ISS-4 — Hospital-specific figures correctly stay user-entered, not a research gap to close
+**Area:** data
+**What was flagged:** payer-wise realization %, DSO by payer, specialist fees, and
+actual vendor quotes have no benchmark default anywhere in this project.
+**Why accepted, not open (corrected 2026-07-12):** these were previously logged as an
+open research gap implying a future research pass could eventually supply defaults.
+That's not accurate — `data-requirements.md` §7.3 already classifies exactly this list
+(hospital-specific utilization, hospital-specific payer mix, negotiated insurance
+realization, actual vendor quotation, actual professional payout agreement) as
+**"highly local, commercially sensitive, or too variable"** to ever have a single
+correct benchmark value: every hospital's payer mix, negotiated insurer rates, and
+vendor quote genuinely differs, so a "sourced default" for these would be actively
+misleading, not just low-confidence. This is a permanent design decision, not a
+temporary data gap — no amount of research closes it, by the nature of the fields
+themselves. (A future research pass could still add *benchmark tooltip ranges*, per
+§7.2, alongside the required user-entered field — that's a real, still-open
+possibility, just not "resolving" ISS-4 as originally framed.)
+**Next action:** none required. If a future session wants supplementary benchmark
+tooltip ranges for these fields (not replacement defaults), that's new scope, not this
+issue reopening.
 
 ### ISS-5 — CFO persona cutout retains office chair
 **Area:** assets
