@@ -621,7 +621,7 @@
         "decimalPlaces": 2,
         "allowNegative": false,
         "required": true,
-        "defaultSource": "equipment-data/common-assumptions.json#targetIrr (Unavailable — must visibly prompt, not silently blank, per agent-build-plan.md Phase 7)",
+        "defaultSource": "Computed heuristic (audit F1, resolved 2026-07-12, Jay's decision): discountRate + 400bps, auto-filled and shown with the standard 'Typical' tag (design/ux-product-spec.md §6) — never left blank. Not a researched benchmark; equipment-data/common-assumptions.json#targetIrr stays 'Unavailable' as the honest research status, this is a UI-level suggested-starting-point heuristic (already documented there and in financial-model-spec.md §1.6) applied so Basic Mode never blocks on an unresearchable field. User can override in Advanced Mode; not consumed by the Investment Outlook score itself (financial-model-spec.md §1.6 uses discountRate as the hurdle).",
         "errorMessage": "Enter a target IRR between 0% and 50%.",
         "tooltipKey": "Target IRR / hurdle rate"
       },

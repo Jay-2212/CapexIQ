@@ -15,7 +15,7 @@
     "unit": "% p.a.",
     "confidence": "Unavailable",
     "sourceId": null,
-    "note": "Confirmed unresearchable across two research passes (data-requirements.md \u00a717.2) -- no Indian hospital/investor hurdle-rate benchmark is publicly disclosed anywhere. Suggested UI guidance (a methodology, not a benchmark): offer discount rate + 300-500bps as a starting-point heuristic the user can override, clearly labeled as a suggestion, not a researched number."
+    "note": "Confirmed unresearchable across two research passes (data-requirements.md \u00a717.2) -- no Indian hospital/investor hurdle-rate benchmark is publicly disclosed anywhere. Suggested UI guidance (a methodology, not a benchmark): offer discount rate + 300-500bps as a starting-point heuristic the user can override, clearly labeled as a suggestion, not a researched number. **Decision (2026-07-12, UI assurance audit F1, Jay's call):** the wizard auto-fills targetIrr with discountRate + 400bps (midpoint of this range) as an editable 'Typical'-tagged value, per content/inputs-metadata.json -- this value stays 'Unavailable' here as the honest research-confidence record; the heuristic is a UI-level default, not a claimed benchmark, and is never presented as sourced."
   },
   "loanInterestRate": {
     "low": 8,

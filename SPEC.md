@@ -1125,10 +1125,19 @@ real-time. See `equipment-data/common-assumptions.json`.
 Used to evaluate the Investment Outlook.
 
 Same problem as §18.2: a prior draft cited a 15.0% default as "sourced from
-`data-requirements.md` §12.3," which is false — no such row exists. Treat as
-unset/user-entered until researched (ISSUES.md ISS-9). The tool must let the user edit
-this value; if the calculated IRR meets or exceeds whatever hurdle the user sets, the
-investment outlook is scored as "Strong / Viable" (subject to other qualitative checks).
+`data-requirements.md` §12.3," which is false — no such row exists. Confirmed
+unresearchable after two research passes (`ISSUES.md` ISS-9, `data-requirements.md`
+§17.2) — no fabricated benchmark is ever shown for this field.
+
+**Resolved 2026-07-12** (UI assurance audit finding F1, Jay's decision) — see
+`design/ux-product-spec.md` §6 and `agent-build-plan.md` Phase 5: rather than leaving
+this genuinely blank (which would block Basic Mode's step-gate on an unresearchable
+field), the wizard auto-fills it with a computed heuristic (`discountRate + 400bps`),
+shown with the same "Typical" tag every sourced default uses, and its tooltip states
+explicitly that this is a suggested starting point, not a researched number — the field
+stays fully user-editable. The Investment Outlook score itself does not consume this
+field directly (`financial-model-spec.md` §1.6 uses `discountRate` as the hurdle); its
+only role is this UI comparison/starting-value.
 
 Do not hardcode unsupported assumptions without sources.
 
@@ -1421,7 +1430,7 @@ below.
 *   **Central Registry**: Control type classifications (sliders vs. static input boxes), slider bounds, and tooltip texts are stored cohesively in [inputs-metadata.json](file:///Users/jay/Documents/Roi_Calculator/content/inputs-metadata.json) to avoid duplication. The actual default *values* are not stored there — they live in `equipment-data/<type>.json` (equipment-specific) or `equipment-data/common-assumptions.json` (shared), each carrying its own confidence/sourceId, per the fix in ISSUES.md ISS-9.
 *   **Content Schema**: Each popover contains:
     1.  **Professional Definition**: Standard business/medical description of the variable.
-    2.  **Default Value**: Sourced from `data-requirements.md` benchmarks where one exists (e.g., 13 years useful life for diagnostics per Companies Act, S8, High confidence). Where no benchmark exists (e.g., discount rate, target IRR, usage per day — see ISSUES.md ISS-9), the popover must say so explicitly ("no benchmark available, enter your own estimate") rather than showing a number that looks sourced but isn't.
+    2.  **Default Value**: Sourced from `data-requirements.md` benchmarks where one exists (e.g., 13 years useful life for diagnostics per Companies Act, S8, High confidence, or discount rate at 12.5% typical, Medium confidence). Where no benchmark exists at all (target IRR is the one such field — see ISSUES.md ISS-9 and §18.3's 2026-07-12 resolution for its labeled-heuristic exception), the popover must say so explicitly ("no benchmark available, enter your own estimate") rather than showing a number that looks sourced but isn't.
     3.  **Higher Value Impact**: Clear description of what increasing this variable does to ROI, NPV, payback, or risk.
     4.  **Lower Value Impact**: Clear description of what decreasing this variable does to the financial model.
 

@@ -373,6 +373,14 @@ per field, is populated as part of this phase, not left as a 1-entry stub):
       items 2-5, 7-8 remain genuinely open and unrelated to this phase). §36.1 Q9/Q14
       also annotated as part of the 2026-07-11 pass, though those are product
       questions, not §36.3 design questions.
+- [x] **2026-07-12 UI assurance planning audit (`.claude/skills/capexiq-ui-assurance/`)
+      applied.** Found and fixed: no `prefers-reduced-motion` handling for §10's
+      micro-interactions (F3, fixed in `ux-product-spec.md` §10); no Indian number-
+      formatting rule despite the India-first premise (F9, fixed in `ux-product-spec.md`
+      §10.5). One finding (F4, slider touch-target size) routed to Phase 6's "Do" list
+      instead, since it's an implementation detail, not a design-mechanism decision.
+      Full findings: see the audit conversation or re-run
+      `$capexiq-ui-assurance` for the complete report.
 
 ---
 
@@ -426,6 +434,33 @@ same way Phase 4 itself was. Still to happen: a read-back by whoever implements 
 (procedural — flag any objection found during Phase 6 build as a doc amendment, not a
 silent divergence).
 
+**2026-07-12 UI assurance planning audit applied — seven concrete rules added, all
+resolved (two via Jay's direct decision, informed by an independent Opus advisor
+opinion):**
+- [x] Focus management for step change, route-guard redirect, draft restore/discard,
+      and inline tooltip expansion (F6) — `wizard-state.md` §6.5.
+- [x] Disabled-"Next" first-invalid-field focus, so a blocked step tells the user which
+      field is the problem (F7) — `wizard-state.md` §2.
+- [x] Group-constraint `aria-describedby` wiring for the payer-mix sliders (F8) —
+      `wizard-state.md` §2, cross-referenced from Phase 6's "Do" list above.
+- [x] **F1, resolved:** `targetIrr`'s `required: true` with no sourced default, sitting
+      inside the collapsed-by-default Advanced panel, would have blocked Step 3's
+      "Next" for any Basic-Mode-only user — contradicting the product's Basic/Advanced
+      premise. **Decision:** auto-fill `targetIrr` with a computed `discountRate +
+      400bps` heuristic, shown with the standard "Typical" tag and a tooltip stating
+      it's a suggestion, not a benchmark — never blocks the gate, never silently
+      claims to be sourced. See `wizard-state.md` §2, `design/ux-product-spec.md` §6,
+      `content/inputs-metadata.json`, `equipment-data/common-assumptions.json`, and
+      `SPEC.md` §18.3.
+- [x] **F5, resolved:** no multi-tab or shared-device-privacy behavior was defined for
+      the `localStorage` draft — two tabs open on the same draft could silently lose
+      edits. **Decision:** a `storage`-event conflict banner ("updated in another tab
+      — reload to see the latest version") plus explicit shared-device copy next to
+      the existing "Start over" control ("Your progress is saved in this browser
+      only."). A full real-time cross-tab sync (`BroadcastChannel`) was considered and
+      rejected as disproportionate engineering for a single-user v1 tool. See
+      `wizard-state.md` §7.3.
+
 ---
 
 ## Phase 6 — Wizard UI implementation
@@ -457,6 +492,18 @@ about.
       error does not clear other steps"`).
 - [ ] Every edge case bullet from Phase 5 has a corresponding passing test — this is the
       concrete, checkable fix for "stop button didn't stop, resume didn't work."
+- [ ] **Slider touch target (added — UI assurance audit F4, 2026-07-12):** SPEC.md
+      §25.5's 18-20px visible thumb is an author-styled control, not the browser's
+      native rendering, so it doesn't get WCAG 2.5.8's user-agent-size exception. Keep
+      the visible diameter exactly as specced, but give the actual hit-target a
+      transparent ≥24×24 CSS px touch area centered on the thumb (a standard native-
+      range-input styling technique) — no visual change, only the tappable area grows.
+- [ ] **Group-constraint `aria-describedby` wiring (added — UI assurance audit F8,
+      2026-07-12):** `wizard-state.md` §2's payer-mix group-sum error is one message
+      anchored to the group heading — wire each of the 5 payer-mix sliders'
+      `aria-describedby` to that shared message's id whenever the group is in
+      violation, so a screen-reader user tabbing through the sliders individually is
+      told about the group-level problem too.
 **Definition of Done:** every Phase-5-enumerated edge case has a named, passing test.
 
 ---
@@ -490,17 +537,37 @@ live-recalculation behavior; Phase 4 is where that got decided).
       Discount Rate, Target Hurdle IRR, and Financing Interest Rate — using the same
       slider/recompute-trigger mechanism Phase 4-G defines, not a separately invented
       one.
-- [ ] Since Discount Rate and Target Hurdle IRR currently have no sourced default
-      (`equipment-data/common-assumptions.json`, confidence `Unavailable` — see ISSUES.md
-      ISS-9), the pane must visibly prompt the user to set these rather than silently
-      showing a blank or a number that looks authoritative.
+- [x] **Corrected 2026-07-12 (doc-drift fix, found during the UI assurance audit):**
+      this bullet previously said Discount Rate *and* Target Hurdle IRR both "have no
+      sourced default" — false for Discount Rate, which `equipment-data/common-
+      assumptions.json` gives a real `typical: 12.5%` (Medium confidence, S22/S23).
+      Only **Target Hurdle IRR** is genuinely `Unavailable` (confirmed unresearchable,
+      `ISSUES.md` ISS-9/`data-requirements.md` §17.2). **Resolved (audit finding F1,
+      Jay's decision):** rather than a blank prompt, the pane shows Target Hurdle IRR
+      pre-filled with a computed `discountRate + 400bps` heuristic under the same
+      "Typical" tag treatment as any sourced default, with its tooltip stating plainly
+      that it's a suggestion, not a researched number — never blank, never silently
+      presented as sourced. This also resolved a Phase 5/6 step-gate contradiction (an
+      unresourced required field inside the collapsed Advanced panel would otherwise
+      have blocked Basic-Mode-only users from ever reaching this pane) — see
+      `wizard-state.md` §2.
+- [ ] **Accessible chart data (added — UI assurance audit F2, 2026-07-12):** every
+      chart (break-even, cumulative cash-flow, sensitivity) renders — or discloses via
+      a "View as table" toggle — an accessible table/structured-text equivalent of the
+      exact same values, sourced from the same single computed-results object the
+      chart itself renders from (never a second, independently-derived copy). Canvas/
+      SVG pixels and hover-only tooltips are not sufficient on their own for a
+      screen-reader or low-vision user to get the same payback/break-even/cash-flow
+      numbers a sighted user gets — a real gap for a financial-decision tool, not a
+      cosmetic one.
 - [ ] Visual QA pass across at least 3 equipment types spanning strong/moderate/risky
       outcomes — dashboards are easy to get "technically correct but visually broken"
       for edge values (very large/very small numbers, 0% and 100% cases). Include a
       contrast check per Phase 4-D as part of this pass, not deferred to Phase 10.
 **Definition of Done:** dashboard renders correctly (numbers and layout both) for the
 full range of Investment Outlook outcomes, not just one happy-path example; every chart
-data label passes Phase 4-D's contrast rule.
+data label passes Phase 4-D's contrast rule; every chart has a working accessible-table
+equivalent.
 
 ---
 
