@@ -1,2 +1,15 @@
 User-facing copy for CapexIQ (field explanations, benchmark notes, glossary, tooltip
-copy) — SPEC.md §23, §32. Empty scaffolds, not yet written.
+copy) — SPEC.md §23, §32. **Complete as of 2026-07-11 (Phase 3)** — real content in
+every file, no placeholders:
+
+- `field-explanations.md` — plain-language field definitions + Advanced Mode preview
+  banner copy
+- `benchmark-notes.md` — sourced context for benchmark ranges shown in the UI
+- `glossary.md` — financial/medical term definitions
+- `tooltip-copy.md` — full 7-slot popover copy (definition, direction, default/typical
+  value, confidence, source note, how-to-estimate, why-it-matters) for every field,
+  keyed by readable field name — `app/forms/wizard-state.md` defines the final machine
+  keys; re-keying is mechanical, not a content rewrite
+- `inputs-metadata.json` — UI/control schema only (control type, slider bounds,
+  validation rules, `tooltipKey` pointer into `tooltip-copy.md`) — **zero numeric
+  defaults**, by design, see ISSUES.md ISS-9/ISS-4

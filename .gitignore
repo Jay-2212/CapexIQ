@@ -20,6 +20,10 @@ coverage/
 .vscode/
 .idea/
 
+# claude code local-only config (skills/ under .claude/ IS tracked)
+.claude/settings.local.json
+.claude/worktrees/
+
 # vercel/cloudflare
 .vercel/
 .wrangler/

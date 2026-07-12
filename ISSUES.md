@@ -12,9 +12,17 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
-### ISS-9 — Invented benchmark numbers from an unsupervised Gemini pass; cleaned up, real research still needed
+*(Nothing open as of 2026-07-12 — every tracked issue is either accepted or resolved.
+Check back here first before assuming that stays true; add a new entry the moment you
+spot a real problem.)*
+
+---
+
+## Accepted (known, not being fixed)
+
+### ISS-9 — Invented benchmark numbers from an unsupervised Gemini pass; cleaned up, final two gaps confirmed unresearchable after five passes
 **Area:** data / docs
-**Status:** open
+**Status:** accepted
 **What:** A 2026-07-06 session (Gemini, working from chat instructions without the
 project's own sourcing discipline) added `content/inputs-metadata.json` with per-field
 numeric defaults, several of which were invented rather than sourced:
@@ -62,10 +70,29 @@ Corrected list of what's **actually still unavailable after three research passe
 target IRR/hurdle rate (confirmed unresearchable, no public source exists — see §17.2)
 and standalone (non-PET) CT utilization (only a weak proxy exists, see §18.7). Both
 remain `null`/`"Unavailable"` deliberately, not from oversight.
-**Status:** **accepted** for every field now populated (the large majority). **Open**
-only for the two fields named above, which should stay user-entered per
-data-requirements.md §7.3 rather than trigger another research pass unless a
-significantly better source turns up.
+**Update (2026-07-12, fifth pass — live web search):** Jay asked whether Claude Code's
+own `WebSearch`/`WebFetch` access (not available to earlier passes, which went through
+externally-run ChatGPT Deep Research) could close these last two fields. It didn't —
+see `data-requirements.md` §20 for the full write-up. Checked and rejected: an ICRA
+hospital-sector credit-rating report (real, but no IRR/hurdle-rate figure), a
+government PPP practitioner's guide for diagnostic centers (procedural, names "the
+IRR" as a DPR line item without stating one), two more Indian CT-utilization studies
+(wrong metric type — a single-hospital capacity-percentage figure and a
+per-million-population epidemiological rate, neither is per-scanner scans/day), and a
+re-check of the CCI market study already in this project's register (confirmed, via
+full-text search, that it has never covered utilization). **Notable side-finding:**
+`WebSearch`'s own result-summarization hallucinated two figures that don't exist in
+their cited sources (a "14-18% IRR" claim and a "5-15 scans/day" claim) — caught by
+verifying each against the primary source directly before recording anything, per this
+issue's own standing lesson. See §20.1 for detail; flagged as a process note for any
+future live-search research pass on this project, not just this one.
+**Status:** **accepted** for every field now populated (the large majority — unchanged).
+**Accepted, not open, for the two remaining fields** (target IRR/hurdle rate, standalone
+CT utilization) — five research passes across two different methods (external Deep
+Research, direct live web search) found nothing usable. Per `data-requirements.md`
+§20.5: don't re-run the same kind of general search a sixth time; only revisit if a
+qualitatively different lead surfaces (a leaked lender credit memorandum, a hospital
+finance-committee policy document, or a dedicated India CT-utilization field study).
 **Process note:** this is the second time a parallel/unsupervised agent session
 introduced an inconsistency this project's own docs were built to prevent (see ISS-7
 for the first). Per user direction (2026-07-06): going forward, build-plan and
@@ -73,29 +100,6 @@ spec-level documents get one primary agent, not parallel multi-agent editing;
 independent, well-bounded, already-specified tasks (e.g. implementing a single pure
 formula file against an exact SPEC.md formula) may still be delegated to a second agent
 (Codex) when explicitly scoped by the primary agent first.
-
-### ISS-13 — Equipment-data schema: workingDaysPerMonth/financingNorms per-equipment fields were dead
-**Area:** data / schema
-**Status:** resolved
-**What:** Each equipment file had `typicalUtilization.workingDaysPerMonth` and
-`financingNorms.typicalLoanTenureYears`/`typicalInterestRateRange` fields that were
-`null` in every equipment file — these duplicated values that already live at the
-shared level in `common-assumptions.json` (`workingDaysPerMonth`, `loanInterestRate`,
-`loanTenureMonths`). Neither the second nor third research pass had touched these.
-**Resolution (2026-07-11):** confirmed dead — no per-equipment override was ever
-populated or flagged as needed by any research pass. Removed both fields from all five
-`equipment-data/*.json` files. Single source of truth for working days/month is now
-only `common-assumptions.json.workingDaysPerMonth` (**flat 25 days/month, a generic
-Sunday-closure calendar convention** — not a calendar-accurate month-by-month figure
-like 26/28/26; this was already the case before this cleanup, just now un-duplicated).
-Single source of truth for loan tenure/rate is `common-assumptions.json.loanTenureMonths`
-/`loanInterestRate`. If an equipment-specific override is ever genuinely needed (e.g. a
-lender treats MRI collateral differently from Dialysis), re-add the field then, with a
-real sourced value — not as dead scaffolding ahead of time.
-
----
-
-## Accepted (known, not being fixed)
 
 ### ISS-8 — Dev-dependency audit warnings (moderate, dev-only)
 **Area:** code / tooling
@@ -160,6 +164,21 @@ is a placeholder only, safe to replace once real product screenshots exist.
 ---
 
 ## Resolved
+
+### ISS-13 — Equipment-data schema: workingDaysPerMonth/financingNorms per-equipment fields were dead
+**Area:** data / schema
+**Resolution (2026-07-11):** each equipment file had `typicalUtilization.workingDaysPerMonth`
+and `financingNorms.typicalLoanTenureYears`/`typicalInterestRateRange` fields that were
+`null` in every equipment file, duplicating `common-assumptions.json`'s shared-level
+values (`workingDaysPerMonth`, `loanInterestRate`, `loanTenureMonths`). Confirmed dead —
+no per-equipment override was ever populated or flagged as needed by any research pass —
+and removed from all five `equipment-data/*.json` files. Single source of truth for
+working days/month is now only `common-assumptions.json.workingDaysPerMonth` (flat 25
+days/month, a generic Sunday-closure calendar convention, not a calendar-accurate
+26/28/26 month-by-month figure — this was already the case before the cleanup, just now
+un-duplicated). If an equipment-specific override is ever genuinely needed (e.g. a
+lender treats MRI collateral differently from Dialysis), re-add the field then, with a
+real sourced value — not as dead scaffolding ahead of time.
 
 ### ISS-2 — Cloudflare Pages + DNS not yet wired up for capexiq.jaybharti.me
 **Area:** infra

@@ -1,27 +1,22 @@
 Equipment assumption data files — CapexIQ (per SPEC.md §32.1: "equipment assumptions
 should live in editable data files").
 
-Status: partially populated as of 2026-07-07 — purchaseCost/usefulLifeYears/salvage/
-installation/warranty/cmc/amc/financing fields are still schema-shaped placeholders
-(the original §14 starter pass hasn't been fully applied yet, see ISSUES.md ISS-3);
-typicalUtilization.usagePerDay, billedTariffPerUse, and launchDelayMonths were
-populated from a second research pass (data-requirements.md §17) and cath-lab/dialysis
-purchaseCost were also updated from that pass. Several fields remain deliberately null
-where two research passes confirmed no real data exists (see each file's own field
-notes and ISSUES.md ISS-9) — don't fill those with an invented number.
-
-Each file should be populated from data-requirements.md §14's starter assumptions
-table plus §17's second-pass findings (equipment_type / metric / value range / unit /
-confidence / source_id) — don't invent numbers, and don't treat any value as final
-without checking its confidence column.
+Status: **effectively complete as of 2026-07-11 (Phase 1 closed)** — five research
+passes (data-requirements.md §12-§20) have populated every field that has a
+responsible source, with honest confidence/sourceId tracking throughout. Every
+remaining `null` is deliberate, not an oversight: target IRR/hurdle rate and standalone
+CT utilization are confirmed unresearchable after five passes (see ISSUES.md ISS-9,
+data-requirements.md §17.2/§18.7/§20); payer mix, DSO, specialist fees, and vendor
+quotes stay permanently user-entered by design, not a research gap (ISSUES.md ISS-4,
+data-requirements.md §7.3). Don't fill any of these with an invented number.
 
 Files: mri.json, ct.json, cath-lab.json, dialysis.json, ultrasound.json, custom.json
-(matches SPEC.md §9's v1 equipment scope). Each also carries `billedTariffPerUse` and
-`launchDelayMonths` fields (added 2026-07-06, see ISSUES.md ISS-9) — these were
-previously invented as fake defaults in `content/inputs-metadata.json` instead of
-living here; that file no longer holds any numbers, only UI/control schema.
+(matches SPEC.md §9's v1 equipment scope; `custom.json` stays a pure placeholder — no
+equipment type to research). Each also carries `billedTariffPerUse` and
+`launchDelayMonths` fields — see ISSUES.md ISS-9 for the history of why these live
+here and not in `content/inputs-metadata.json` (UI/control schema only, zero numbers).
 
-`common-assumptions.json` (new, 2026-07-06) holds financial-model assumptions that are
-NOT equipment-specific (discount rate, target IRR, loan interest rate/tenure, working
-days per month) — one value, not repeated per equipment. See its own `_note` field and
-ISSUES.md ISS-9 for what's still unsourced.
+`common-assumptions.json` holds financial-model assumptions that are NOT
+equipment-specific (discount rate, target IRR, loan interest rate/tenure, working days
+per month) — one value, not repeated per equipment. See its own `_note` field and
+ISSUES.md ISS-9 for what's still `"Unavailable"` and why.

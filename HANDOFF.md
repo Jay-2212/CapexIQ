@@ -13,119 +13,52 @@ of *how* we got here.
 
 *(Last updated: 2026-07-12)*
 
-**Phase 5 (`app/forms/wizard-state.md`) merged into `main` 2026-07-12** — it had been
-sitting in draft PR #12 since 2026-07-11, one PR behind what this file's own narrative
-described. Now on `main`. **This closes the last planning gate: Phase 1-5 are all
-complete and merged. Phase 6 (wizard UI implementation) is next, and `/app` is still
-just skeleton (`layout.tsx`/`page.tsx`/READMEs) — no real UI exists yet.**
+**Planning is done. Phases 1-5 of `agent-build-plan.md` are complete and merged into
+`main`. Phase 6 (wizard UI implementation) is next, and is pure build from here —
+`/app` is still skeleton (`layout.tsx`/`page.tsx`/empty-scaffold READMEs), no real UI
+exists yet.**
 
-**Repo housekeeping, 2026-07-12:** the stale leftover git worktree flagged in PR #12
-(`.claude/worktrees/phase2-formulas-groups-bcd`, already-merged and duplicating
-`npm test`'s discovered files) and the freshly-obsolete `phase5-wizard-state` worktree
-were both removed via `git worktree remove`, along with every fully-merged local/remote
-branch (`worktree-phase2-formulas-groups-bcd`, `worktree-phase5-wizard-state`,
-`codex/phase2-group-a-formulas`, `iss12-iss13-onboarding-note`, `pr3-rebase`,
-`worktree-clean-build-plan`, `worktree-plan-gap-analysis`) — each verified merged via
-its GitHub PR before deletion, not just `git branch --merged` (which doesn't detect
-squash-merges). `npm test` now correctly reports 65/65 instead of 195 (65×3, was
-silently counting both stray worktrees' copies).
+- **Phase 1 (equipment data):** complete. Five research passes (`data-requirements.md`
+  §12-§20) populated every field with a responsible source; every remaining `null` is
+  deliberate and documented (`ISSUES.md` ISS-4, ISS-9, ISS-12), not an oversight.
+- **Phase 2 (formula engine):** complete. All 13 modules in `/formulas` implemented and
+  tested — 65 passing tests across 17 files. `npm test`/`npm run build`/`npx tsc
+  --noEmit` all clean.
+- **Phase 3 (content/copy):** complete. All 7 files in `content/`/`report-templates/`
+  have real content, no placeholders.
+- **Phase 4 (design/UX):** complete. `design/ux-product-spec.md` resolves every open
+  design/interaction/validation question; `content/inputs-metadata.json` has a full
+  per-field validation contract.
+- **Phase 5 (wizard state):** complete. `app/forms/wizard-state.md` — the full route
+  map, field-to-step assignment, validation timing, and `localStorage` draft
+  persistence — merged into `main` 2026-07-12 (had been sitting in draft PR #12 since
+  2026-07-11).
 
-**ISS-8/ISS-4/ISS-9 status review, 2026-07-12:**
-- **ISS-8** (dev-dependency audit warnings): the `esbuild`/`vite` chain is fixed —
-  bumped `vitest` `^2.1.0` → `^4.1.10` directly (not via `npm audit fix --force`, which
-  was proposing a bad resolution). All 65 tests, `tsc --noEmit`, and `npm run build`
-  pass unchanged, no test-file edits needed. The `postcss`/`next` chain has no viable
-  fix without a `next@16` major migration (`next` bundles its own pinned `postcss`
-  internally, already on the latest 15.x) — moved to Accepted, not left as a stale
-  "open."
-- **ISS-4** (payer-wise realization/DSO/specialist fees/vendor quotes): reclassified
-  from "open research gap" to Accepted — `data-requirements.md` §7.3 already designs
-  exactly this list as permanently hospital-specific/commercially-sensitive, so no
-  research pass could ever responsibly replace them with a shared default. This was a
-  mischaracterization to fix, not a task to complete.
-- **ISS-9**: its "still genuinely unavailable" list was stale — Cath Lab tariff and
-  Dialysis/Ultrasound launch delay were actually filled by the third research pass
-  (ISS-3) after this entry was last written. Narrowed to the two fields that are
-  actually still unresolved after three passes: target IRR/hurdle rate (§17.2,
-  confirmed unresearchable) and standalone CT utilization (§18.7, only a weak proxy
-  exists). Not re-researched this session — see ISSUES.md for the reasoning on why a
-  fourth pass wasn't attempted.
-See `ISSUES.md` for the full corrected entries.
+**Repo hygiene, 2026-07-12:** all stray git worktrees and every fully-merged
+local/remote branch removed (each verified against its actual GitHub PR first, since
+squash-merges don't show as `git branch --merged`). `npm test` now correctly reports
+65/65 — two stray worktrees had been silently tripling every run to 195. `ISSUES.md`'s
+Open section is now empty; every tracked issue is Accepted or Resolved, each
+reclassified accurately rather than left stale (see ISS-4/ISS-8/ISS-9/ISS-13). A fifth
+research pass (`data-requirements.md` §20, live `WebSearch`) confirmed target IRR and
+standalone CT utilization are genuinely unresearchable, not just unattempted — see
+ISS-9. `DIRECTORY.md` and five stale sub-folder READMEs (`content/`, `report-templates/`,
+`equipment-data/`, `tests/formulas/`, `design/`) were rewritten to match actual current
+state — several had still described Phase 1-3 work as unbuilt placeholders.
 
-**Where things stand today:** Phase 1 (equipment data) is effectively complete —
-**ISS-12 resolved 2026-07-11** (see below), no open Phase 1 human calls remain.
-**Phase 2 (formula engine) is fully implemented:**
-Group A (`depreciation`/`emi`/`revenue`/`breakEven`/`npv`/`irr`, merged earlier) plus
-Group B (`realization`/`dso`/`workingCapital`), Group C
-(`roi`/`maintenance`/`launchDelay`/`sensitivity`), and the Investment Outlook
-score/EAC/discounted-payback/actionable-insight quartet from `financial-model-spec.md`
-were implemented by Codex, reviewed by Claude, and committed 2026-07-11. **Phase 3
-(content/copy) is now also fully complete** — all 7 files written (`disclaimer.md`,
-`glossary.md`, `benchmark-notes.md`, `field-explanations.md`, `methodology.md`,
-`formula-appendix.md`, `tooltip-copy.md`), including `tooltip-copy.md` (previously
-blocked on Phase 4's tooltip-structure decision, which turned out to already be
-resolved — see the Change Log entry below for the reasoning and the two follow-ups it
-flags for whoever wires up Phase 4/5). `npm test` passes 65 tests across 17 files;
-`npm run build` and `npx tsc --noEmit` are clean.
+**`.claude/skills/capexiq-ui-assurance/` is available** — a project-local audit skill
+for Phase 4-5 planning review and later implementation/browser/release QA. Preserves
+the finalized Signal design and treats project specs as authoritative; doesn't
+redesign the product. Covers WCAG 2.2, forms/financial error prevention, focus/
+screen-reader behavior, sliders, dynamic calculations, accessible chart equivalents,
+zoom/reflow, mobile/virtual-keyboard behavior, Indian number formatting, persistence/
+recovery, and measured React/Next.js performance. Worth invoking (`$capexiq-ui-
+assurance`) before or during Phase 6 to catch implementation gaps early.
 
-**Phase 4 (design/UX) is now resolved, 2026-07-11** — Jay lifted the 2026-07-07 pause
-himself and drove the design discussion directly. `design/ux-product-spec.md` (the
-Phase 4 deliverable SPEC.md §38 named since 2026-07-07) is written: resolves Phase
-4-A–H, corrects a real hover-vs-click tooltip contradiction between SPEC.md §23.4 and
-the original Phase 4-E draft, adds a "Signal" theme (promotes the existing
-`--status-neutral` slate-blue to double as the primary interactive/button/link/CTA
-color — `tokens.css`/`colors.md` updated), a type scale and 4px spacing scale (also
-added to `tokens.css`), landing-page structure and entry flow (resolves SPEC.md §36.1
-Q9 and Q14, supersedes §26.1's CTA wording — final CTA is "Start Assessment"), a
-default-value visual treatment (muted + "Typical" tag until edited), and
-micro-interaction principles. **`content/inputs-metadata.json`'s per-field validation
-contract is also now complete** (same session, second pass) — restructured under
-Basic/Advanced-A-F, old duplicate 4-slot tooltip text replaced with a `tooltipKey`
-pointer into `content/tooltip-copy.md`, payer-mix/ramp-up/by-year repeating fields
-written as explicit templates rather than enumerated per instance. Also resolved in
-the same pass: SPEC.md §36.1 Q5 (hospital type, optional/informational) and Q7 (city
-tier, required); Q11 and Q13 turned out to already be answered elsewhere in SPEC.md
-and just needed the cross-reference annotated. **Phase 4 is now fully closed — all
-four Definition of Done items checked.** Phase 5 (`wizard-state.md`) followed the same
-day — see the note at the top of this section.
-
-**ISS-12 resolved 2026-07-11 (a fourth research pass, same day as the reframe below):**
-the bed/volume-tiering theory for MRI's CMC contradiction was tested directly and is
-**not verified** — no Indian MRI tender, OEM schedule, or case study varying CMC/AMC
-price by bed count or scan volume exists anywhere. Also corrected: the study's hospital
-was never actually confirmed to be AIIMS (only the paper's authors were AIIMS-
-affiliated) — `data-requirements.md` §18.4/§19.5 and `equipment-data/mri.json` no
-longer describe it as an AIIMS case study. No bed-count-tiered CMC/AMC defaults will be
-built; the `_bedVolumeTierHypothesis` scaffold is removed. See `ISSUES.md` ISS-12 for
-the full resolution and reopen conditions.
-
-**ISS-13 resolved 2026-07-11:** the dead `typicalUtilization.workingDaysPerMonth`/
-`financingNorms` fields (null in every equipment file, duplicating
-`common-assumptions.json`) are removed from all five equipment files. Single source of
-truth for working days/month is `common-assumptions.json.workingDaysPerMonth` (flat 25,
-a generic calendar convention, not a calendar-accurate 26/28/26 month-by-month figure).
-
-**ISS-12 reframed, still open:** Jay's theory is that the MRI CMC "contradiction"
-(generic 3-10% tender ceiling vs. one AIIMS hospital's ~0.25%/yr observed cost) is
-really a volume/bed-count effect, not two competing estimates — a very high-volume
-referral institute like AIIMS would negotiate a materially better rate than a smaller
-private hospital paying near the tender ceiling. Proposal: bed-count-tiered CMC/AMC
-defaults, reusing `data-requirements.md` §2.3's existing bed-size buckets (likely
-splitting the open-ended `>500` bucket further). Written up in a new
-`data-requirements.md` §19 and scaffolded (not populated with numbers) in
-`equipment-data/mri.json`. Not resolved — needs (a) independent verification of AIIMS's
-actual bed count, which isn't sourced anywhere in this project yet, and (b) a targeted
-research pass breaking CMC/AMC out by bed-count/volume tier. Also resolved SPEC.md
-§36.1 Q6 on this basis: hospital bed size is now a **required** Basic Mode input (it's
-the lookup key), not optional context.
-
-**New product idea captured, not built:** Jay floated an onboarding-flow concept —
-land on a hero page with a "Start Assessment" CTA, which opens a dedicated pre-step
-(equipment type + bed count, with imagery) before the full wizard, rather than landing
-directly on the wizard/dashboard. Logged as SPEC.md §36.1 Q14 and flagged inside
-`agent-build-plan.md` Phase 5's intro so it isn't designed against a stale
-direct-to-dashboard assumption. **Not started** — still UI/UX work, still paused per
-Jay's own call; this is intent-capture only.
+**Open product idea, not built:** an onboarding-flow concept (hero page → "Start
+Assessment" CTA → equipment/bed-count pre-step → wizard) is already designed into
+`design/ux-product-spec.md` and `app/forms/wizard-state.md` — this is now a Phase 6
+build target, not an open question.
 
 ---
 
@@ -157,6 +90,92 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-12 — Fifth research pass (live web search) on ISS-9's last two gaps; full DIRECTORY.md + stale-README rewrite
+**What changed:** Jay asked to (a) attempt resolving ISS-9's two remaining
+"confirmed unresearchable" fields using Claude Code's own live `WebSearch`/`WebFetch`
+access rather than another externally-run Deep Research pass, using judgment on
+whether to actually change anything if a real source turned up, and (b) fix
+`DIRECTORY.md` and anything else that had drifted, since "a lot has changed" and the
+project needs to be genuinely ready to build.
+1. **Fifth research pass on target IRR/hurdle rate and standalone CT utilization —
+   both remain `Unavailable`.** Checked an ICRA hospital-sector credit-rating report,
+   a Dept. of Economic Affairs PPP practitioner's guide for diagnostic centers, two
+   more Indian CT-utilization studies, and re-confirmed the CCI market study already
+   in this project's register has never covered utilization. None qualified — either
+   no IRR/hurdle-rate figure at all, or the wrong metric type for utilization (a
+   single-hospital capacity-percentage figure and a per-million-population
+   epidemiological rate, neither is per-scanner scans/day). Full write-up in
+   `data-requirements.md` §20, five new source-register entries (S62-S66).
+2. **Caught `WebSearch`'s own result-summarization hallucinating twice** — a "14-18%
+   IRR" figure and a "5-15 scans/day" figure that don't exist in the sources the tool
+   attributed them to, verified false by fetching each primary source directly before
+   recording anything. Logged as a process note (`data-requirements.md` §20.1/§20.5)
+   for any future live-search research pass on this project: treat the search tool's
+   synthesized answer as a lead to verify, never as the citation itself.
+3. **ISS-9 reclassified from Open to Accepted** — five passes across two research
+   methods is enough to call these two fields permanently `Unavailable` rather than
+   leave the issue open implying more of the same-shaped effort would help. `ISSUES.md`
+   restructured: Open section is now empty (ISS-13, which was already marked
+   `Status: resolved` internally but mis-filed under Open, moved to Resolved).
+4. **Full `DIRECTORY.md` rewrite** — the folder map, quick-lookup table, and "What's
+   NOT here yet" section still described formulas as unimplemented, equipment data as
+   placeholder, and content/report-templates as empty scaffolds, all stale by a day or
+   more (Phases 1-3 completed 2026-07-11). Rewrote to reflect actual state: added a
+   `formulas/` contents table (all 13 modules, what each computes), corrected every
+   phase-completion claim, updated the `data-requirements.md` section table through
+   §20, and rewrote "What's NOT here yet" to correctly describe Phase 6-10 (the actual
+   remaining work) instead of Phase 1-3 (already done).
+5. **Five stale sub-folder READMEs fixed** to match: `content/README.txt` and
+   `report-templates/README.txt` said "Empty scaffolds, not yet written" (false —
+   Phase 3 complete); `equipment-data/README.txt` said "partially populated as of
+   2026-07-07" (false — Phase 1 complete); `tests/formulas/README.md` said "Empty
+   scaffold" (false — 65 passing tests exist); `design/README.txt` was missing
+   `ux-product-spec.md` from its file table.
+6. **`HANDOFF.md`'s own Current State block consolidated** — it had drifted from
+   "overwrite" into "append" across several sessions (Phase 4 mechanics, ISS-12/13
+   history, and more were duplicated here and in the Change Log below). Rewritten as a
+   single current snapshot; the detailed history stays in the Change Log entries below,
+   where it already lived.
+**Files touched:** `data-requirements.md` (new §20 + source register), `ISSUES.md`
+(ISS-9 updated and moved to Accepted, ISS-13 moved to Resolved, Open section now
+empty), `DIRECTORY.md` (full rewrite), `content/README.txt`, `report-templates/
+README.txt`, `equipment-data/README.txt`, `tests/formulas/README.md`,
+`design/README.txt`, `HANDOFF.md` (this entry + Current State). No `/app`, `/formulas`,
+or `/equipment-data` *data* files touched — docs/research only. `npm test` 65/65,
+`npx tsc --noEmit` clean, `npm run build` clean — re-verified after these changes.
+**What's next:** Phase 6 (wizard UI implementation) — the project is now genuinely
+ready to build against: every planning doc is accurate, every tracked issue is
+resolved or a documented permanent-accept, and the repo has no stale worktrees,
+branches, or drifted documentation left. Consider running
+`$capexiq-ui-assurance` against Phases 4-5 before starting, per the entry below.
+
+### 2026-07-12 — Added project-local CapexIQ UI assurance skill
+**What changed:** Jay wanted a technical UI/UX review discipline that could find
+missed engineering considerations without imposing a generated theme on the design he
+already shaped. Created `.claude/skills/capexiq-ui-assurance/` for Claude Code. The
+skill makes `ux-product-spec.md`, `tokens.css`, `wizard-state.md`, input metadata, and
+the project specs authoritative; separates planning, implementation, browser, and
+release audits; and forbids aesthetic redesign unless a demonstrable technical failure
+requires the smallest possible change. Added progressive references for the full
+technical audit matrix, runtime test matrix, React/Next.js performance priorities, and
+source provenance. The matrix adds explicit gates for WCAG 2.2, error prevention in a
+financial workflow, focus and live-region behavior, non-drag slider alternatives,
+accessible chart data, 400% reflow, virtual keyboards, forced colors, Indian number
+formatting, persisted-state recovery/privacy, and measured recalculation performance.
+The skill was validated with the official skill-creator validator; no Phase 4/5 audit
+or build-plan edit was performed in this session. `DIRECTORY.md` now maps the skill.
+
+**Sources:** W3C WCAG 2.2 and WAI-ARIA APG; Vercel Labs' MIT-licensed
+`web-design-guidelines` and `react-best-practices` skills, selectively distilled rather
+than installed wholesale.
+
+**Files touched:** `.claude/skills/capexiq-ui-assurance/` (new), `DIRECTORY.md`,
+`HANDOFF.md`.
+
+**What's next:** Run `$capexiq-ui-assurance` in Claude Code against Phases 4-5, review
+and accept/reject its evidence-backed findings, then update `agent-build-plan.md`
+before beginning Phase 6.
 
 ### 2026-07-12 — Merged Phase 5 PR; repo/branch/worktree cleanup; ISS-8/ISS-4/ISS-9 status corrected
 **What changed:** Jay asked what's left overall, then to clean up remaining stale

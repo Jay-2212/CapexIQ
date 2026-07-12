@@ -22,6 +22,9 @@ og-image.svg / .png    - 1200x630 social share preview (LinkedIn/WhatsApp/Twitte
 site.webmanifest       - PWA manifest pairing with the favicon set (name, colors, icon refs)
 head-tags-snippet.html - copy-paste <head> tags wiring up favicons, manifest, OG/Twitter meta
 rebrand-brief.md       - the brief that drove the Healthcare Capex -> CapexIQ rename, kept for history
+ux-product-spec.md     - Phase 4 deliverable (2026-07-11): typography/spacing scale, tooltip
+                          mechanics, "Signal" theme (accent-interactive color), landing page +
+                          entry flow, default-value visual treatment, micro-interactions
 
 All colors trace back to tokens.css — if you change a hex there, update the SVGs to match.
 Fonts referenced (IBM Plex Sans/Mono, Inter) are in ../fonts/.

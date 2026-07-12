@@ -1623,3 +1623,96 @@ scanner-specific factors, exceptional negotiation, or a source-data/unit issue. 
 tool should model the resulting uncertainty (§18.4's "keep both figures separate, flag
 the discrepancy" approach) rather than convert an unverified theory into a product
 default.
+
+---
+
+## 20. Fifth research pass (2026-07-12) — target IRR/hurdle rate and standalone CT utilization, live web search
+
+Jay asked whether ISS-9's last two genuinely-unavailable fields (target IRR/hurdle
+rate, §17.2; standalone CT utilization, §18.7) could now be resolved using Claude
+Code's own `WebSearch`/`WebFetch` tools, rather than another externally-run ChatGPT
+Deep Research pass. **Result: neither is resolved. Both remain `Unavailable`, now
+after five research passes total, four of them targeted specifically at gaps
+including these two.** Documented in full below because the pass surfaced a real
+process finding, not just a null result.
+
+### 20.1 A live-search-specific risk: the search tool's own summarization hallucinated twice
+
+Two claims surfaced by `WebSearch`'s built-in result summary, on direct verification
+against the actual source page via `WebFetch`, **did not exist in the cited source at
+all**:
+
+1. A synthesized claim that a Substack article (`abhaysahukar.substack.com`) stated a
+   "14-18% IRR" benchmark for Indian hospital capex. Fetching the article directly
+   found no such figure anywhere in it — its only IRR-adjacent content is an
+   unsourced illustrative 12% WACC used in an unrelated worked example, and ROCE
+   figures for listed hospital chains (a different metric).
+2. A synthesized claim that an Indian CT-utilization study reported "5-15 scans/day,
+   8/day average" for the private sector. Fetching the actual article
+   (`ijop.net`/DOI `10.37506/mlu.v21i2.2861`) directly found no such figure — the
+   paper's only India-relevant data point is CT scans **per million population** by
+   World Bank income group (14.7 High-Income / 7.3 Upper-Middle / 3.7 Lower-Middle),
+   an epidemiological rate, not a per-scanner daily-throughput figure, and not
+   equivalent to what `equipment-data/ct.json`'s `typicalUtilization` field needs.
+
+Neither fabricated figure was used anywhere in this project — both were caught by this
+pass's own verification step, per this document's standing rule (§3, `ISSUES.md`
+ISS-9) to check a claim against its actual cited source before recording it. Recorded
+here as a **process finding for future live-search-based research passes on this
+project**: treat a search tool's synthesized answer as a lead to verify via direct
+fetch, never as the citation itself — the failure mode is the same one this whole
+document exists to prevent, just introduced by tooling instead of an unsupervised
+agent session this time.
+
+### 20.2 Target IRR / hurdle rate — sources checked, none qualify
+
+| Source checked | Type/tier | Why it doesn't qualify |
+|---|---|---|
+| S62: ICRA, "Indian Hospital Sector" sector report (2019) | Credit-rating-agency industry report (§3.1 tier 7) | Read in full (9 pages). Covers occupancy, ARPOB, EBITDA margin, and debt-protection ratios (interest coverage, net debt/EBITDA) for listed hospital chains — real, relevant financial context, but **contains no IRR or hurdle-rate figure anywhere.** |
+| S63: `abhaysahukar.substack.com` hospital-sector analysis | Independent analyst newsletter (§3.1 tier 9, weak supporting context only) | The "14-18% IRR" figure attributed to it by search summarization does not appear in the actual article — see §20.1. Contains only an unsourced illustrative 12% WACC and listed-company ROCE figures, neither a hurdle-rate benchmark. |
+| S64: Dept. of Economic Affairs, "Guide for Practitioners for PPP in Diagnostic Centre" (`pppinindia.gov.in`) | Indian government PPP-guidance document (§3.1 tier 1) | Read in full (32 pages) via direct text extraction. This is a **procedural/template guide** for structuring diagnostic-center PPP concession agreements (what a DPR's financial section *should contain*, e.g. "the IRR" as a line item to fill in) — it does not itself state a target IRR or hurdle-rate number anywhere. |
+| financialmodelslab.com "7 KPIs for Diagnostic Imaging Centers" (18% IRR claim) | Financial-model-template SaaS content-marketing blog (§3.1 tier 9) | Not fetched/cited — this is exactly the "unsourced blog claims" category §3.1 explicitly says not to use as a benchmark value. Noted here only so a future pass doesn't re-surface it as if new. |
+
+**Conclusion, unchanged from §17.2:** no credible source discloses a target IRR or
+hurdle rate used by Indian hospitals/healthcare investors for equipment-capex
+approval, after five research passes across two different research methods (ChatGPT
+Deep Research, live `WebSearch`/`WebFetch`). `recommended_use`: `user_input_required`,
+confidence **Unavailable**, unchanged. §17.2's suggested heuristic (target IRR =
+discount rate + 300-500bps risk premium, offered as a labeled starting-point
+suggestion, not a researched number) still stands as the only usable UI guidance.
+
+### 20.3 Standalone (non-PET) CT utilization — sources checked, none qualify
+
+| Source checked | Type/tier | Why it doesn't qualify |
+|---|---|---|
+| S65: "Study of utilisation of CT scan machine at a tertiary care teaching hospital," *Clinical Medicine Insights* Vol 4 No 4 (2023), SKIMS | Peer-reviewed article, single Indian hospital (§3.1 tier 7) | Reports a **60% "utilization coefficient"** for the studied CT machine — a percentage-of-capacity metric, not scans/day, and not directly convertible to one without the paper's own capacity-denominator assumption (not obtained). Different metric type from what `ct.json` already carries (S26's ~15 scans/scanner/day PET/CT proxy), so it can't replace or strengthen that figure, only sit alongside it as a differently-shaped data point. Single-hospital, Kashmir tertiary teaching hospital — not obviously generalizable to a private standalone CT setup either. |
+| S66: "Utilization Review of Imaging Equipment: An insight into CT Scanning," *Medico-Legal Update* Vol 21 No 2 (2021) | Literature-review article (§3.1 tier 7) | Its only India-relevant figure is CT scans **per million population** by income group (see §20.1) — an epidemiological/demand-side metric, not a per-scanner throughput figure. Wrong metric type; does not help. |
+| S1 (already in this document's register — CCI/Deloitte market study) | Government market study (§3.1 tier 1) | Re-checked specifically for utilization content this pass (full-text search of the downloaded PDF for "utili[sz]ation"): **zero matches.** S1 covers equipment cost, refurbished-market discount, warranty, and CMC pricing context — confirmed it has never covered utilization, so no re-reading is needed on future passes either. |
+| CT market-research reports (Mordor Intelligence, IMARC, etc.) | Paid market-research firm reports (§3.1 tier 7, but only free previews accessible) | Public preview content covers installed-base density (80-100 CT scanners/million population in India vs. 300-400/million in high-income countries) and qualitative utilization *constraints* (radiologist shortage limiting after-hours coverage, service-technician scarcity outside metros) — real context, but no numeric scans/day figure in the free preview. Full reports are paywalled; not purchased for a single benchmark field. |
+
+**Conclusion, unchanged from §18.7:** standalone CT utilization remains a genuine open
+gap after five research passes. `equipment-data/ct.json`'s existing figure (derived
+from S26's AIIMS PET/CT throughput proxy, Low-Medium confidence, already flagged as
+imperfect) is unchanged — nothing found this pass is a stronger source than what's
+already there.
+
+### 20.4 Source register additions (S62-S66)
+
+| Source ID | Source name | Type | URL | What it covers | Confidence |
+|---|---|---|---|---|---|
+| S62 | ICRA, "Indian Hospital Sector: Despite the regulatory headwinds, outlook on the sector remains stable" (2019) | Credit-rating-agency industry report | https://www.icra.in/Rating/DownloadResearchSummaryReport/2397 | Sector-level occupancy/ARPOB/EBITDA/debt-coverage trends for listed hospital chains; no IRR/hurdle-rate figure | Medium (real, relevant financial data; doesn't answer the target-IRR question it was checked against) |
+| S63 | Abhay Sahukar, "Understanding the Hospital Sector (Part 8)" | Independent analyst newsletter (Substack) | https://abhaysahukar.substack.com/p/understanding-the-hospital-sector-c88 | An illustrative, unsourced 12% WACC in a worked example, and listed-company ROCE figures; **not** the "14-18% IRR" figure a search-tool summary incorrectly attributed to it — see §20.1 | Low (independent commentary, illustrative figure explicitly not sourced by the author) |
+| S64 | Dept. of Economic Affairs, "Guide for Practitioners for PPP in Diagnostic Centre" | Indian government PPP-guidance document | https://www.pppinindia.gov.in/report/Guide%20for%20Practitioners%20for%20Diagnostic%20Centre.pdf_1685171743.pdf | Procedural guidance for structuring diagnostic-center PPP concession agreements; names "the IRR" as a DPR line item without stating one | Medium (genuine government source; contains no numeric benchmark) |
+| S65 | "Study of utilisation of CT scan machine at a tertiary care teaching hospital", *Clinical Medicine Insights* Vol 4 No 4 (2023), SKIMS | Peer-reviewed article, single hospital | https://medicineinsights.info/index.php/cmi/article/view/76 | 60% CT "utilization coefficient" at one Kashmir tertiary teaching hospital — a capacity-percentage metric, not scans/day | Low-Medium (single hospital, different metric type than needed) |
+| S66 | "Utilization Review of Imaging Equipment: An insight into CT Scanning", *Medico-Legal Update* Vol 21 No 2 (2021) | Literature-review article | https://ijop.net/index.php/mlu/article/view/2861 (DOI 10.37506/mlu.v21i2.2861) | CT scans per million population by World Bank income group (14.7 HI / 7.3 UMI / 3.7 LMI) — epidemiological demand-side rate, not per-scanner throughput | Low (wrong metric type for the utilization field this project needs) |
+
+### 20.5 Process note for future passes
+
+Both gaps have now had a dedicated, methodologically different fourth/fifth attempt
+each (external Deep Research, then direct live search) return the same negative
+result. Per this document's own §3.3 guidance ("Unavailable = no responsible value
+found"), further passes on these exact two fields should wait for a **qualitatively
+different lead** (e.g. a leaked/published lender credit memorandum, a hospital
+finance-committee policy document, or a dedicated India CT-utilization field study —
+not another general web search using the same query shapes already tried across two
+passes now).

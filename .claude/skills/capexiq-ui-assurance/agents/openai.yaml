@@ -1,0 +1,4 @@
+interface:
+  display_name: "CapexIQ UI Assurance"
+  short_description: "Audit CapexIQ UI engineering without redesigning it"
+  default_prompt: "Use $capexiq-ui-assurance to audit CapexIQ UI planning or implementation and produce evidence-backed findings without changing the established design."
