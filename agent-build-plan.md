@@ -695,11 +695,16 @@ live-recalculation behavior; Phase 4 is where that got decided).
 full range of Investment Outlook outcomes, not just one happy-path example; every chart
 data label passes Phase 4-D's contrast rule; every chart has a working accessible-table
 equivalent. **Status 2026-07-13: contrast rule and accessible-table equivalents are
-both met. The "full range of outcomes" clause is not fully met** — verified Caution and
-Moderate bands on one equipment type (MRI); Strong, Weak, and other equipment types
-(CT, Cath Lab, Dialysis, Ultrasound, Custom) remain untested live. Chart-level hover
-tooltips and the multi-equipment/multi-band visual QA pass are the two concrete items
-left for a follow-up session before Phase 7 can be called fully closed.
+both met. The "full range of outcomes" clause is partially met** — verified Caution and
+Moderate bands live in the browser on one equipment type (MRI); Strong, Weak, and other
+equipment types (CT, Cath Lab, Dialysis, Ultrasound, Custom) remain untested live.
+`tests/results/charts.test.tsx` (added same day) closes the sharpest edge of this gap
+at the unit level — `BreakEvenBar`'s unreachable-break-even branch and `CashFlowChart`
+on an all-negative (losing-investment) series are now both rendered and asserted on,
+which they weren't before — but a live-browser pass across equipment types and the
+Strong/Weak bands is still outstanding. Chart-level hover tooltips and that
+multi-equipment/multi-band visual QA pass are the two concrete items left for a
+follow-up session before Phase 7 can be called fully closed.
 
 ---
 
