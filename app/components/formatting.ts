@@ -30,3 +30,19 @@ export function formatYears(value: number): string {
   if (!Number.isFinite(value)) return "Never (within useful life)";
   return `${formatNumber(value, 1)} yr`;
 }
+
+const CRORE = 1e7;
+const LAKH = 1e5;
+
+/** Lakh/Crore-compact form for the Phase 7 chart axis labels this module's own header
+ *  comment flagged as outstanding — e.g. "₹1.4 Cr", "₹18L". Values under a lakh fall
+ *  back to formatInr's full-figure form since a compact unit would be meaningless
+ *  (and misleadingly imprecise) at that scale. */
+export function formatInrCompact(value: number): string {
+  if (!Number.isFinite(value)) return value > 0 ? "∞" : "−∞";
+  const sign = value < 0 ? "−" : "";
+  const abs = Math.abs(value);
+  if (abs >= CRORE) return `${sign}₹${formatNumber(abs / CRORE, 2)} Cr`;
+  if (abs >= LAKH) return `${sign}₹${formatNumber(abs / LAKH, 2)} L`;
+  return formatInr(value);
+}

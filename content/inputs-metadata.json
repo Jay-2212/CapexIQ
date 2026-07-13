@@ -13,6 +13,15 @@
       "errorMessage": "Select an equipment type to continue.",
       "tooltipKey": "Equipment category"
     },
+    "hospitalName": {
+      "label": "Hospital name",
+      "controlType": "text",
+      "type": "text",
+      "maxLength": 100,
+      "required": true,
+      "errorMessage": "Enter the hospital name to continue.",
+      "tooltipKey": null
+    },
     "equipmentNameModel": {
       "label": "Equipment name / model",
       "controlType": "text",

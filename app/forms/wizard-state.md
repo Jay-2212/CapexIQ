@@ -15,6 +15,29 @@ other transition rule below was inferable from Phase 4 (`design/ux-product-spec.
 `agent-build-plan.md` Phase 4) and is stated here as a direct consequence, not a new
 decision — cross-referenced rather than re-argued.
 
+### 2026-07-13 experience amendment
+
+Jay replaced the original long-form presentation with a narrated, grouped-question
+experience. The route map and canonical calculation values do not change, but these
+interaction rules now supersede older presentation language below:
+
+- Each route is one chapter in the assessment story and shows **2–4 closely related
+  questions per visual group**. It is not a one-field-per-page wizard and not one
+  undifferentiated schema scroll.
+- `/assess` also collects the required `hospitalName`. Equipment selection remains on
+  that route and visually carries the selected equipment into the hospital profile
+  group before the user continues.
+- `purchaseCost` and `installationCost` stay canonical Crore values in persisted and
+  formula state. Independent `currencyUnits` view state lets the user enter and see
+  either Lakh or Crore; conversion happens only at the field boundary.
+- Validation still recalculates on change, but an error is rendered only after that
+  field has been touched or the user tries to continue from its step. The attempted
+  step is recorded in `attemptedSteps`.
+- Completing Basic presents two explicit paths: **Continue with Basic and see my
+  result** or **Enter Advanced Mode**. Advanced remains on `/assess/costs`, but is now
+  a six-topic workspace showing one topic at a time instead of six continuous groups.
+  Its selected topic is local, non-durable UI state; `advancedOpen` remains persisted.
+
 ---
 
 ## 1. The wizard shape
@@ -62,6 +85,7 @@ fields. `cityTier` and `hospitalType` are grouped here (not Step 1) because they
 investment figures; `equipmentNameModel` joins them as "name this specific unit," also
 identity, not cost:
 - `equipmentCategory`, `hospitalBedSize`, `cityTier`, `hospitalType`,
+  `hospitalName`, `equipmentCategory`, `hospitalBedSize`, `cityTier`, `hospitalType`,
   `equipmentNameModel`
 
 **`/assess/investment` (Step 1)**
@@ -74,13 +98,10 @@ identity, not cost:
 - `consumableCostPerUse`, `professionalFeePerUse`, `otherVariableCostPerUse`,
   `staffCostPerMonth`, `electricityCostPerMonth`, `otherFixedCostPerMonth`,
   `warrantyYears`, `amcCmcCostPostWarranty`
-- **+ Advanced Mode panel** (collapsed by default, preview banner always visible above
-  it per Phase 4-F): opening it reveals all six `content/inputs-metadata.json#advanced`
-  groups (A–F) as labeled sections in a single continuous scroll — not nested
-  accordions, not nested collapse-per-group. Jay's brief for Advanced Mode is "CFO-grade,"
-  and the banner already names all six groups up front, so nothing is a surprise;
-  further hiding groups behind sub-toggles would add friction without adding clarity.
-  Group order in the panel is A→F, matching SPEC.md §11.1's own lettering:
+- **+ Advanced Mode workspace** (collapsed by default, choice banner always visible
+  above it): opening it reveals a topic navigator and one active
+  `content/inputs-metadata.json#advanced` group at a time. Group order is A→F,
+  matching SPEC.md §11.1's own lettering:
   - A. Revenue realization and payer mix
   - B. Utilization ramp-up
   - C. Financing (fields under `requiredIf: acquisitionMode = Loan` or `= Lease` read

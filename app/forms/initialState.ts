@@ -55,6 +55,7 @@ export function emptyWizardState(): WizardState {
     currentStep: "preStep",
     preStep: {
       equipmentCategory: null,
+      hospitalName: "",
       hospitalBedSize: null,
       cityTier: null,
       hospitalType: null,
@@ -78,6 +79,10 @@ export function emptyWizardState(): WizardState {
       amcCmcCostPostWarranty: null,
     },
     advancedOpen: false,
+    currencyUnits: {
+      purchaseCost: "Crore",
+      installationCost: "Lakh",
+    },
     advanced: {
       A: {
         payerMixSharePct: defaultPayerMixShare(),

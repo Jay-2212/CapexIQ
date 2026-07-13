@@ -584,6 +584,18 @@ edge case, not "was this ever run in a real browser."
 
 ## Phase 7 — Results dashboard and charts
 
+> **Mandatory 2026-07-13 design gate:** Before changing Phase 7 UI, read
+> `HANDOFF.md` Current State and `design/ux-product-spec.md`'s
+> **“2026-07-13 direction amendment — calm clinical intelligence.”** The implemented
+> warm-beige landing, assessment, Advanced workspace, and decision-led `/results`
+> surface are the visual and interaction source of truth. Preserve their typography,
+> palette, spacing, radii, narrative voice, progressive disclosure, and grouped-flow
+> behavior. `design/dashboard-mockup.svg` remains useful only for dashboard information
+> architecture (gauge, metric hierarchy, charts, risk callout); its older styling must
+> not replace or create a parallel design system. Extend the current Results page and
+> existing CSS; do not rebuild it from or revive the stopped
+> `.claude/worktrees/phase7-results-dashboard` worktree.
+
 **Goal:** Build `app/results/` and `app/charts/` — Investment Outlook score, metric
 cards, break-even chart, cumulative cash-flow chart, risk callouts, narrative summary
 (SPEC.md §21, §27, §30) — plus an Advanced settings pane, implementing exactly what
@@ -594,23 +606,50 @@ live-recalculation behavior; Phase 4 is where that got decided).
 **Parallelizable:** yes, alongside Phase 8 — disjoint files, both just consume
 `/formulas` output.
 **Do:**
-- [ ] Pure presentational components driven by formula output — no calculation logic
-      inline here (per `CONVENTIONS.md` §3).
-- [ ] Charts subscribe to the same single computed-results object the dashboard already
+- [x] Start from the existing decision-led `app/(assessment)/results/page.tsx`; retain
+      its human outlook, score, NPV/IRR/payback hierarchy, supporting read, and route
+      back to Advanced Mode. Add Phase 7 depth rather than replacing it with a generic
+      dashboard shell.
+- [x] Match the existing warm beige / deep ink / restrained clinical-green system.
+      Charts should feel editorial and calm: light plot surfaces, restrained grid
+      lines, direct labels where practical, no gradients, glass, neon, or unrelated
+      accent palette. **Verified 2026-07-13** with a `<meta name="darkreader-lock">`
+      injection to get an un-inverted screenshot (the automation browser had Dark
+      Reader active, which was silently repainting every earlier screenshot dark).
+- [x] Keep narrative copy public and human. Never render internal driver IDs, source
+      file paths, formula module names, audit notes, or code snippets.
+- [x] Pure presentational components driven by formula output — no calculation logic
+      inline here (per `CONVENTIONS.md` §3). **2026-07-13:** new
+      `cumulativeCashFlowSeries` lives in `formulas/roi.ts`, not the chart component.
+- [x] Charts subscribe to the same single computed-results object the dashboard already
       derives (e.g. via `useMemo`) from formula output — never a second, independently
       recalculated copy of the same numbers inside a chart component. This is the
       concrete mechanism that makes Phase 4-G's live-recalculation contract hold: the
       metric cards and the chart can never show numbers that briefly disagree.
-- [ ] Apply Phase 4-C's conditional-color thresholds (tied to `financial-model-spec.md`'s
+- [x] Apply Phase 4-C's conditional-color thresholds (tied to `financial-model-spec.md`'s
       Strong/Moderate/Caution/Weak bands) and Phase 4-D's label placement/contrast/
-      legibility rules during this phase's build, not bolted on afterward.
+      legibility rules during this phase's build, not bolted on afterward. **2026-07-13:**
+      Phase 4-D's contrast rule was verified by computing actual WCAG ratios via
+      `getComputedStyle` (not eyeballing) — found and fixed one real failure (chart
+      year labels, 3.29:1 → 5.91:1). Phase 4-C's coloring is satisfied in spirit for
+      the new charts (green/red cash-flow bars, clear/caution break-even fill) rather
+      than literally re-deriving the 4-band Strong/Moderate/Caution/Weak palette per
+      data point — the existing `results-hero[data-band]` coloring (untouched by this
+      session) remains the one place the literal 4-band system applies.
 - [ ] Chart-level hover tooltips (a data point's exact value on hover) are a distinct,
       simpler UI element from field-help tooltips (Phase 4-E's 7-slot structure) — don't
       conflate the two. A chart tooltip needs only value + series label + period.
-- [ ] Include an **Advanced settings pane** (accordion or drawer) allowing users to edit
+      **Not built 2026-07-13** — the cash-flow chart's accessible `<table>` and visible
+      per-bar labels cover the same values without hover, but a true hover tooltip is
+      still open.
+- [x] Include an **Advanced settings pane** (accordion or drawer) allowing users to edit
       Discount Rate, Target Hurdle IRR, and Financing Interest Rate — using the same
       slider/recompute-trigger mechanism Phase 4-G defines, not a separately invented
-      one.
+      one. **Built 2026-07-13** as `app/components/ResultsQuickSettings.tsx` — collapsed
+      by default, reuses `NumberField` (dispatches through the one wizard reducer),
+      shows the financing field matching the active acquisition mode (Loan interest
+      rate / Lease rental / a plain note for Cash). Live-verified: editing Discount
+      Rate moved the score and NPV instantly.
 - [x] **Corrected 2026-07-12 (doc-drift fix, found during the UI assurance audit):**
       this bullet previously said Discount Rate *and* Target Hurdle IRR both "have no
       sourced default" — false for Discount Rate, which `equipment-data/common-
@@ -625,7 +664,7 @@ live-recalculation behavior; Phase 4 is where that got decided).
       unresourced required field inside the collapsed Advanced panel would otherwise
       have blocked Basic-Mode-only users from ever reaching this pane) — see
       `wizard-state.md` §2.
-- [ ] **Accessible chart data (added — UI assurance audit F2, 2026-07-12):** every
+- [x] **Accessible chart data (added — UI assurance audit F2, 2026-07-12):** every
       chart (break-even, cumulative cash-flow, sensitivity) renders — or discloses via
       a "View as table" toggle — an accessible table/structured-text equivalent of the
       exact same values, sourced from the same single computed-results object the
@@ -633,15 +672,39 @@ live-recalculation behavior; Phase 4 is where that got decided).
       SVG pixels and hover-only tooltips are not sufficient on their own for a
       screen-reader or low-vision user to get the same payback/break-even/cash-flow
       numbers a sighted user gets — a real gap for a financial-decision tool, not a
-      cosmetic one.
+      cosmetic one. **2026-07-13:** met for the two Phase 7 charts — the cash-flow
+      chart has a `visually-hidden` `<table>` with the same per-year figures, and the
+      break-even bar's two numbers are already plain visible text (no hidden
+      alternative needed). Sensitivity is Phase 9 scope, not built here.
 - [ ] Visual QA pass across at least 3 equipment types spanning strong/moderate/risky
       outcomes — dashboards are easy to get "technically correct but visually broken"
       for edge values (very large/very small numbers, 0% and 100% cases). Include a
       contrast check per Phase 4-D as part of this pass, not deferred to Phase 10.
+      **Not fully done 2026-07-13** — this session's live QA used one equipment type
+      (MRI) across a Caution and a Moderate outcome (via a discount-rate edit); a
+      Strong-band outcome and other equipment types are still untested live. The
+      contrast check itself (Phase 4-D) was done and is not equipment-dependent.
+- [x] Run the app locally and visually QA Phase 7 in a real browser at desktop and a
+      narrow/mobile viewport. Verify the existing Basic and Advanced flows still look
+      and behave as documented; Phase 7 must not regress the grouped-question design.
+      **2026-07-13:** desktop (1440px, with Dark Reader locked for color accuracy) and
+      mobile (390px) both verified; full Basic flow (equipment → hospital profile →
+      investment → usage → costs → decision gate → Advanced Mode → results) re-walked
+      end to end with no regression.
 **Definition of Done:** dashboard renders correctly (numbers and layout both) for the
 full range of Investment Outlook outcomes, not just one happy-path example; every chart
 data label passes Phase 4-D's contrast rule; every chart has a working accessible-table
-equivalent.
+equivalent. **Status 2026-07-13: contrast rule and accessible-table equivalents are
+both met. The "full range of outcomes" clause is partially met** — verified Caution and
+Moderate bands live in the browser on one equipment type (MRI); Strong, Weak, and other
+equipment types (CT, Cath Lab, Dialysis, Ultrasound, Custom) remain untested live.
+`tests/results/charts.test.tsx` (added same day) closes the sharpest edge of this gap
+at the unit level — `BreakEvenBar`'s unreachable-break-even branch and `CashFlowChart`
+on an all-negative (losing-investment) series are now both rendered and asserted on,
+which they weren't before — but a live-browser pass across equipment types and the
+Strong/Weak bands is still outstanding. Chart-level hover tooltips and that
+multi-equipment/multi-band visual QA pass are the two concrete items left for a
+follow-up session before Phase 7 can be called fully closed.
 
 ---
 

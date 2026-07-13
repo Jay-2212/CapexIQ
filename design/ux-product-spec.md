@@ -1,4 +1,4 @@
-# design/ux-product-spec.md — CapexIQ UX/UI Product Spec (v0.4)
+# design/ux-product-spec.md — CapexIQ UX/UI Product Spec (v0.5)
 
 This is the `design/ux-product-spec.md` artifact `agent-build-plan.md` Phase 4 and
 SPEC.md §38 have named since 2026-07-07 but never produced. It resolves Phase 4-A
@@ -17,6 +17,38 @@ doc-drift failure class).
 
 Phase 5 (`wizard-state.md`) and Phase 6/7 (implementation) consume this doc directly —
 they should not re-decide anything settled here.
+
+## 2026-07-13 direction amendment — calm clinical intelligence
+
+Jay's live review supersedes v0.4's white/slate presentation where the two conflict.
+The product now uses a warm beige editorial canvas, deep ink typography, restrained
+clinical green, quiet borders, generous radii, and very limited shadow. The desired
+character is premium and human, not ornamental: strong type hierarchy, asymmetrical
+composition, contextual medical imagery, and calm motion do the work.
+
+The assessment is a narrated sequence of **grouped questions**, normally 2–4 related
+inputs in one card. It must not become either a one-question-per-screen marathon or a
+long form exposing every field at once. Each chapter opens with plain-language context
+(`What are you considering?`, `What will it take to open?`, `What does a normal month
+look like?`) and moves from hospital identity → investment → demand/revenue → costs.
+
+Equipment selection uses a gentle lift/scale/fade and then carries the chosen image
+into the hospital-profile area. Respect `prefers-reduced-motion`; there is no looping
+decorative movement. Basic completion is a deliberate decision point with two clear
+actions: see the result now, or enter Advanced Mode for payer, ramp-up, financing,
+opening, lifecycle, and finance detail. Advanced is a topic workspace with a persistent
+six-item navigator and one active topic, not six stacked groups.
+
+Help is progressive disclosure behind `Need help answering this?`. It contains only
+human guidance: how to estimate, why it matters, its likely effect, and a readable
+source label. Repository paths, internal IDs, formula code, and audit commentary never
+appear in public UI. Methodology follows the same rule.
+
+Financial inputs use a local Lakh/Crore segmented control when scale varies in Indian
+practice. The chosen display unit never changes formula contracts; values are converted
+to the canonical unit at the input boundary. Errors wait until touch or a blocked
+continue action. Results lead with a plain-language outlook and the three decision
+metrics, then progressively disclose supporting detail.
 
 ---
 

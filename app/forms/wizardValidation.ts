@@ -62,6 +62,7 @@ export function payerMixGroupError(state: WizardState): string | null {
 const STEP_FIELD_PATHS: Record<Exclude<WizardStep, "results">, string[]> = {
   preStep: [
     "preStep.equipmentCategory",
+    "preStep.hospitalName",
     "preStep.hospitalBedSize",
     "preStep.cityTier",
     "preStep.hospitalType",
@@ -105,7 +106,7 @@ export { STEP_FIELD_PATHS };
  *  test/context that renders a field without RouteGuard mounted. A field's step is a
  *  static fact about the field, not something that should depend on which route
  *  happens to be active when it renders.
- *  `preStep.*`/`basic.*` are exhaustively covered by STEP_FIELD_PATHS (5 and 15
+ *  `preStep.*`/`basic.*` are exhaustively covered by STEP_FIELD_PATHS (6 and 15
  *  fields respectively, matching PreStepFields/BasicFields exactly) — every
  *  `advanced.*` path not explicitly listed there still belongs to "costs", since
  *  AdvancedPanel (all of Groups A-F) only ever mounts on the costs step page. */

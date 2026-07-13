@@ -103,8 +103,8 @@ describe("StepNav — disabled-\"Next\" moves focus to the first invalid field (
   });
 });
 
-describe("PreStepPage — blocked \"Next: Investment\" reveals its own required fields too (ISS-25 follow-up)", () => {
-  it("has no red on a fresh load, and clicking Next while incomplete reveals both missing required fields with focus on the first", () => {
+describe("PreStepPage — blocked \"Begin the assessment\" reveals its own required fields too (ISS-25 follow-up)", () => {
+  it("has no red on a fresh load, and clicking the continue button while incomplete reveals missing required fields with focus on the first", () => {
     render(
       <WizardProvider>
         <PreStepPage />
@@ -113,23 +113,23 @@ describe("PreStepPage — blocked \"Next: Investment\" reveals its own required 
 
     fireEvent.click(screen.getByText("MRI"));
 
-    // ISS-25: fresh, untouched render — no red yet, even though both fields are
+    // ISS-25: fresh, untouched render — no red yet, even though the fields are
     // genuinely empty/required underneath.
-    expect(
-      screen.queryByText(/Enter your hospital.s bed count/)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Enter the hospital name to continue/)).not.toBeInTheDocument();
     expect(
       screen.queryByText(/Select the city tier closest to your hospital/)
     ).not.toBeInTheDocument();
 
-    const nextButton = screen.getByRole("button", { name: "Next: Investment" });
+    const nextButton = screen.getByRole("button", { name: /Begin the assessment/ });
     expect(nextButton).toHaveAttribute("aria-disabled", "true");
 
     fireEvent.click(nextButton);
 
-    const bedSizeInput = screen.getByLabelText(/Hospital bed size/);
-    expect(bedSizeInput).toHaveFocus();
-    expect(screen.getByText(/Enter your hospital.s bed count/)).toBeInTheDocument();
+    // hospitalName precedes hospitalBedSize in STEP_FIELD_PATHS's preStep order, so
+    // it's the first invalid field to get focus.
+    const hospitalNameInput = screen.getByLabelText(/Hospital name/);
+    expect(hospitalNameInput).toHaveFocus();
+    expect(screen.getByText(/Enter the hospital name to continue/)).toBeInTheDocument();
     expect(
       screen.getByText(/Select the city tier closest to your hospital/)
     ).toBeInTheDocument();

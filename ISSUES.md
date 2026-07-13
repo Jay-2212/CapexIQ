@@ -12,7 +12,19 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
-(empty)
+### ISS-28 — Live deploy (`capexiq.jaybharti.me`) is badly stale
+**Area:** deployment
+**What was found:** 2026-07-13, during Phase 7 browser QA. The live Cloudflare Pages
+site still serves the pre-Phase-6 scaffold placeholder ("This is a scaffold...") —
+none of Phase 6's wizard, Phase 4-13's redesign, or Phase 7's dashboard are live.
+`/assess` 404s directly (static-export routing not configured for direct navigation,
+separate from the staleness). Likely Cloudflare Pages isn't auto-deploying from
+`origin/main` pushes, or the last successful deploy predates Phase 6 entirely.
+**Not fixed this session:** deployment configuration is outside this session's scope
+and may be an intentional pause — flagged for Jay to decide, not silently changed.
+
+No other open issues from the 2026-07-13 visual audit. Phase 7 formula/export items
+remain tracked below under their existing IDs.
 
 ---
 
@@ -163,84 +175,30 @@ is a placeholder only, safe to replace once real product screenshots exist.
 
 ## Resolved
 
-### ISS-25 — Required-field errors showed immediately on a completely untouched page load
-**Area:** UX / validation
-**What was flagged:** 2026-07-13, first manual browser QA pass of Phase 6. On a fresh
-`/assess` load with no draft, required fields (e.g. Hospital bed size, City/tier)
-showed a red border and red error text before the user had touched anything.
-Confirmed spec-intended per `app/forms/wizard-state.md` §2 at the time ("Validate on
-every change... shows immediately... no 'you'll find out when you hit Next'") but
-flagged for Jay to reconsider rather than silently accepted or silently changed.
-**Resolution (2026-07-13, follow-up session, advisor-checked before implementation):**
-kept validation *truth* exactly as before — still computed live, on every change, with
-zero debounce, and still the sole thing driving the step-gate/route guard — but split
-off *display* from truth. A field's red error now only surfaces once that field has
-been **revealed**: either the user has edited it (the existing `touched` map, same one
-that drives the "Typical" pill, §6), or the user clicked "Next" while the containing
-step was incomplete (a new, deliberately separate `attemptedSteps` map — writing this
-to `touched` instead, as first drafted, would have incorrectly cleared the "Typical"
-pill on every still-default, still-valid field on the same step; the advisor caught
-this before implementation). A blocked "Next" now reveals every blocked field on that
-step at once (previously only the one field that received focus), which is a strict
-improvement over the prior F7 behavior, not just a reveal-timing change. A field's
-"step," for gating purposes, is resolved via a new static path→step lookup
-(`wizardValidation.ts`'s `stepForFieldPath`) rather than `state.currentStep` — the
-latter is only synced by `RouteGuard`'s effect on route change and isn't reliable
-before that effect runs (the same race class ISS-26 already fixed once for hydration).
-`app/forms/wizard-state.md` §2 rewritten to describe the reveal rule precisely instead
-of contradicting the code. 8 new/updated tests across
-`tests/wizard/{wizardReducer,wizardValidation,components}.test.tsx`, including a
-regression test that a blocked "Next" doesn't clear a sibling field's "Typical" pill.
-Verified live in the browser: no red on a fresh load, both blockers appear together on
-a blocked "Next," and the "Typical" pill on `acquisitionMode` survives that click.
-**Regression caught by the advisor before this was called done:** the pre-step
-(`app/(assessment)/assess/page.tsx`) predates `StepNav`'s extraction and had its own
-inline `Button` using the native `disabled` attribute instead of `StepNav`'s
-`aria-disabled` + focus-jump pattern — so a blocked "Next: Investment" there fired no
-`onClick` at all. Combined with the reveal-gating above, the pre-step's own required
-fields (Hospital bed size, City/tier — the exact fields ISS-25 was originally reported
-against) would have shown no red *ever* until individually touched, with a dead
-button giving no hint why. Fixed by giving the pre-step's Next button the same
-`goNext` logic `StepNav` uses (dispatch `ATTEMPT_STEP` for `"preStep"`, focus the
-first invalid field) — `stepForFieldPath` already resolved `"preStep"` correctly, only
-the dispatch trigger was missing. New component test, verified live in the browser.
-**Files touched:** `app/forms/wizardTypes.ts`, `app/forms/wizardReducer.ts`,
-`app/forms/initialState.ts`, `app/forms/useFieldController.ts`,
-`app/forms/wizardValidation.ts`, `app/components/StepNav.tsx`,
-`app/advanced/GroupA.tsx`, `app/forms/wizard-state.md`,
-`app/(assessment)/assess/page.tsx`.
+### Phase 7 build + reconciliation of two divergent design efforts
+**Resolved:** 2026-07-13. Jay's local `main` checkout had a large uncommitted diff (the
+full warm-beige redesign) while `origin/main` was one commit ahead with an
+independently-merged PR (#17) that fixed the same validation-reveal bug and rebuilt
+Methodology, using different code touching the same 11 files. Reconciled by keeping
+`origin/main`'s more robust validation-gating and Methodology-page implementations
+while layering the uncommitted diff's actual new scope (hospital name, Lakh/Crore
+`CurrencyUnitField`, landing rebuild, equipment-image motion) on top — see HANDOFF.md's
+2026-07-13 "Phase 7 results dashboard built" entry for the full mechanism. Built Phase
+7's break-even bar, cumulative cash-flow chart, and risk callout on the reconciled
+foundation; found and fixed one real chart-label-density bug and one real Phase 4-D
+contrast failure via live browser QA. Confirmed the red-validation-before-touch bug
+Jay asked to fix was already resolved by the touched/attempted-step gating — could not
+reproduce it anywhere after reconciliation, verified via a direct `data-invalid` DOM
+check (extension-proof, not a screenshot-only claim).
 
-### ISS-24 — Methodology page was unstyled/functional-only, not a designed page
-**Area:** UI / design
-**What was flagged:** 2026-07-13, same manual QA pass. `app/methodology/page.tsx`
-rendered `report-templates/methodology.md`/`formula-appendix.md` through a small
-markdown-to-JSX renderer with plain prose CSS — readable, on-brand tokens, but no
-bespoke layout, unlike the landing page and wizard.
-**Resolution (2026-07-13, follow-up session):** before restyling, read both source
-docs in full rather than assuming the renderer's own "doesn't handle lists/tables/
-links" caveat was benign — it wasn't fully benign: neither doc actually uses lists,
-tables, or links (confirmed directly), but both use extensive single-backtick inline
-code spans (`` `formulas/revenue.ts` `` style, 93 lines combined) that
-`renderSimpleMarkdown`'s `renderInline` didn't handle at all, rendering literal stray
-backtick characters around plain text — a real, visible defect, not just a missing
-style. Fixed `app/methodology/renderSimpleMarkdown.tsx`: `renderInline` now handles
-`` `code` `` alongside `**bold**`, and every heading gets a slugified `id` (via a new
-`idPrefix` argument, namespaced per source doc to avoid collisions since both docs
-share one page) plus a new `extractHeadings`/`nestHeadings` pair so the page can build
-a table of contents from the exact same heading set. Rebuilt `app/methodology/
-page.tsx` as a two-column documentation layout: a sticky in-page table of contents
-(grouped "Methodology" / "Formula Appendix", with formula-appendix's h3 subsections
-nested under their h2 parent) next to the rendered content, reusing the landing
-page's own header/footer for visual consistency. Fixed an incidental a11y issue found
-while doing this: the old version let each source doc's own leading `# Title` line
-render as a second/third page-level `<h1>`; the page now strips that line
-(`splitTitle`) and supplies its own single `<h1>`, with the appendix's own title
-demoted to an `<h2>` section header. No new marketing copy introduced — the ToC
-labels are the docs' own section titles, per §5.3's "no sales language" rule; no
-gradients/glassmorphism per §1.3. Collapses to a single column below 900px (the
-existing 640px breakpoint is too narrow for a sensible two-column split).
-**Files touched:** `app/methodology/renderSimpleMarkdown.tsx`, `app/methodology/
-page.tsx`, `app/globals.css`.
+### ISS-27 / ISS-24 / ISS-25 — Frontend experience, Methodology design, and early errors
+**Resolved:** 2026-07-13. Implemented the warm-beige narrated grouped-question
+experience documented in `design/frontend-experience-audit-2026-07-13.md`: distinct
+persona imagery, generated CT hero, hospital name, contextual equipment motion,
+Lakh/Crore input choices, Basic/Advanced branching, one-topic Advanced workspace,
+humanized help/Methodology, decision-led Results, and touch/attempt-gated validation.
+Verified with the in-app browser plus root tests, typecheck, and static build. Phase 7
+charts/exports are deliberately separate scope, not a reopening of this design issue.
 
 ### ISS-26 — First manual browser QA of Phase 6: 3 real bugs found and fixed, landing page built
 **Area:** UI / state management / new feature

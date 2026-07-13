@@ -9,6 +9,7 @@ import path from "node:path";
 export default defineConfig({
   plugins: [react()],
   test: {
+    exclude: ["**/node_modules/**", "**/.claude/worktrees/**"],
     environment: "jsdom",
     environmentOptions: {
       jsdom: {

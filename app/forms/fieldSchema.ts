@@ -75,6 +75,7 @@ function buildRegistry(): Map<string, FieldDefinition> {
 
   const preStepKeys = new Set([
     "equipmentCategory",
+    "hospitalName",
     "hospitalBedSize",
     "cityTier",
     "hospitalType",

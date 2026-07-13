@@ -58,6 +58,7 @@ describe("RouteGuard — redirects to the earliest incomplete step (wizard-state
       currentStep: "investment" as const,
       preStep: {
         equipmentCategory: "MRI" as const,
+        hospitalName: "Lotus Hospital",
         hospitalBedSize: 150,
         cityTier: "Tier 1" as const,
         hospitalType: null,

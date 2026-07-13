@@ -16,6 +16,7 @@ export type FieldValue = number | string | null;
 
 export interface PreStepFields {
   equipmentCategory: EquipmentCategory | null;
+  hospitalName: string;
   hospitalBedSize: number | null;
   cityTier: "Tier 1" | "Tier 2" | "Tier 3" | null;
   hospitalType: "Private" | "Charitable / Trust" | "Corporate" | "Government" | null;
@@ -109,6 +110,7 @@ export interface AdvancedFields {
  *  §6 of design/ux-product-spec.md's default-value visual treatment. Keyed by the
  *  same dotted path used elsewhere (see fieldPath.ts). */
 export type TouchedFieldMap = Record<string, boolean>;
+export type CurrencyUnit = "Lakh" | "Crore";
 
 /** True once the user has clicked "Next" while a given step was incomplete —
  *  reveals every blocked field's error on that step at once (wizard-state.md §2's
@@ -126,6 +128,10 @@ export interface WizardState {
   basic: BasicFields;
   advancedOpen: boolean;
   advanced: AdvancedFields;
+  currencyUnits: {
+    purchaseCost: CurrencyUnit;
+    installationCost: CurrencyUnit;
+  };
   /** true once a field has been edited by the user — drives the "Typical" tag and
    *  the untouched/edited visual states (ux-product-spec.md §6). Defaults (once
    *  applied) are NOT in this map, so they render muted until first edited. */

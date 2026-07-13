@@ -43,3 +43,20 @@ export function paybackPeriodFromCashFlows(
 
   return Infinity;
 }
+
+/** Running investment position by year-end, starting from -initialInvestment —
+ *  the same crossing-point logic paybackPeriodFromCashFlows uses, but returning the
+ *  full trajectory (one entry per year of annualNetCashFlows) instead of just the
+ *  crossing year. Feeds the Results cumulative cash-flow chart (Phase 7) — the chart
+ *  must never re-derive this itself (CONVENTIONS.md §3: one engine for dashboard and
+ *  exports alike). */
+export function cumulativeCashFlowSeries(
+  initialInvestment: number,
+  annualNetCashFlows: number[]
+): number[] {
+  let running = -initialInvestment;
+  return annualNetCashFlows.map((cashFlow) => {
+    running += cashFlow;
+    return running;
+  });
+}

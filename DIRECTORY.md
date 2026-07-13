@@ -31,6 +31,10 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │                                  wizard UI) are complete; Phase 7 (results dashboard) is next
 ├── financial-model-spec.md      <- Investment Outlook score, EAC, discounted payback,
 │                                  automatic actionable-insight engine — implemented
+├── design/frontend-experience-audit-2026-07-13.md
+│                               <- live-browser frontend critique and phased redesign
+│                                  plan (ISS-27): guided flow, units, help, assets,
+│                                  Advanced workspace, Methodology, and Results
 ├── SPEC.md                      <- full product spec (has its own index, don't read
 │                                  front-to-back)
 ├── data-requirements.md          research brief + five completed research passes on
@@ -49,32 +53,38 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │   │                              page, and the full wizard (Phase 6, real code as
 │   │                              of 2026-07-13) are all REAL and built:
 │   ├── layout.tsx                root route, not nested — subdomain, not a path
-│   ├── page.tsx                  landing page (design/ux-product-spec.md §5) —
-│   │                              header, hero, how-it-works, personas, footer
-│   ├── methodology/page.tsx      Methodology page (§5.3) — renders report-templates/
-│   │                              methodology.md + formula-appendix.md as a two-column
-│   │                              docs layout with a sticky table of contents (ISS-24)
-│   ├── globals.css               imports design/tokens.css + all Phase 6 component CSS
+│   ├── page.tsx                  premium beige landing page — editorial hero,
+│   │                              assessment story, depth choice, personas, CTA
+│   ├── landing.css               landing-only responsive layout and visual system
+│   ├── methodology/page.tsx      designed public Methodology page; renders the
+│   │                              human methodology without internal formula/code paths
+│   ├── globals.css               imports design/tokens.css + responsive 2026 experience CSS
 │   ├── (assessment)/             route group sharing one WizardProvider across
 │   │   │                          /assess/* and /results (route groups don't affect
 │   │   │                          the URL) — see its own README.md
 │   │   ├── layout.tsx            WizardProvider, persistence, route guard, live region
-│   │   ├── assess/page.tsx       pre-step — equipment tiles + bed size/city tier
+│   │   ├── assess/page.tsx       narrated equipment + hospital identity chapter
 │   │   ├── assess/investment/    Step 1
 │   │   ├── assess/usage/         Step 2
-│   │   ├── assess/costs/         Step 3 + the Advanced Mode panel
-│   │   └── results/page.tsx      minimal real results (no charts yet — Phase 7)
+│   │   ├── assess/costs/         grouped costs + Basic/Advanced decision point
+│   │   └── results/page.tsx      decision-led result story + Phase 7 depth: score,
+│   │                              metrics, break-even bar, cash-flow chart, risk callout
 │   ├── forms/                    wizard reducer/schema/validation/persistence logic —
 │   │   │                          NOT routed pages, see its own README.md's file table
 │   │   └── wizard-state.md       <- Phase 5 deliverable. Full route map,
 │   │                              field-to-step assignment, validation timing,
 │   │                              localStorage draft persistence — read this before
 │   │                              touching any wizard component.
-│   ├── advanced/                 the Advanced Mode panel + its 6 groups (A-F) — built
-│   ├── components/               shared field controls, buttons, preview strip — built
-│   └── charts/README.md          break-even / cash-flow charts — still empty, Phase 7
+│   ├── advanced/                 six-topic Advanced workspace; one group active at a time
+│   ├── components/               shared field controls, buttons, preview strip, plus
+│   │   │                          formatting.ts (Indian currency incl. compact Lakh/
+│   │   │                          Crore form), RiskCallout.tsx, and
+│   │   │                          ResultsQuickSettings.tsx (Phase 7 — collapsed
+│   │   │                          Discount Rate / Target IRR / financing-rate pane)
+│   └── charts/                   BreakEvenBar.tsx, CashFlowChart.tsx (Phase 7) — see
+│                                  its own README.md
 ├── public/                       Next.js static-export assets (equipment-images/,
-│   │                              people-personas/, design/hero-background.svg copies)
+│   │                              people-personas/, generated CT hero, legacy hero SVG)
 │   └── README.md                  for the pre-step tiles/landing page — see its own README for why
 ├── formulas/                     15 calculation modules, ALL REAL — implemented,
 │                                 reviewed, and tested (Phase 2 + Phase 6). See below.
@@ -109,7 +119,7 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │                                   app/forms/ (Phase 6) — see its own README.md
 ├── equipment-images/             9 equipment/hero photos (JPG, hi-res, free stock)
 │   └── sources.txt
-├── people-personas/              4 persona photos (JPG) for "who this is for" section
+├── people-personas/              4 sourced persona photos; public also has generated COO v2
 │   ├── sources.txt
 │   └── transparent/             same 4, background removed (PNG, transparent)
 │       └── README.txt
@@ -184,7 +194,7 @@ than duplicating it.
 | `realization.ts` | Payer-mix-weighted realization percentage |
 | `dso.ts` | Days sales outstanding, extended through final delayed collection |
 | `workingCapital.ts` | Working-capital gap (signed, not floored at zero) |
-| `roi.ts` | Return on investment (percentage; `Infinity` when non-payback) |
+| `roi.ts` | Return on investment; also `cumulativeCashFlowSeries` (**new, Phase 7** — the running investment-position-by-year the Results cash-flow chart plots, never re-derived in the component) |
 | `maintenance.ts` | AMC/CMC annual cost |
 | `launchDelay.ts` | Simple monthly pre-operative interest during launch delay |
 | `sensitivity.ts` | Scenario-level sensitivity grid, needs every other formula to run end to end |
@@ -279,9 +289,9 @@ collected but not yet consumed by the canonical pipeline, and a note that no
 interactive browser QA was possible in that session's environment) — none block Phase
 6's own Definition of Done, but read them before extending the wizard or the pipeline.
 One quirk stays here because it's pure trivia, not an issue:
-`people-personas/01-hospital-administrator.jpg` and `02-operations-head-coo.jpg` are two
-different photos from the same original photoshoot (same photographer/setting) — fine
-individually, just visually similar side by side.
+The sourced Administrator/COO photos are from the same photoshoot and looked duplicated
+side by side. The live landing page now uses the generated distinct COO v2 under
+`public/people-personas/`; keep the sourced originals for provenance/history only.
 
 Also worth knowing: Investment Outlook / risk colors are green/amber/red, the hardest
 pair for red-green colorblindness. Always pair color with the icons in
@@ -292,20 +302,20 @@ accessibility note).
 
 ## What's NOT here yet
 
-Phases 1-6 of `agent-build-plan.md` are complete: real equipment data (five research
-passes), a fully implemented and tested formula engine, complete content/copy, a
-finished design system + UX spec, the wizard state-transition doc, the wizard UI
-itself — the pre-step, 3-step Basic Mode wizard, and Advanced Mode panel — and, as of
-the first manual browser QA session (2026-07-13), the landing page (`app/page.tsx`)
-and a Methodology page (`app/methodology/page.tsx`, given a full design pass in a
-same-day follow-up session — see `ISSUES.md` ISS-24). All of it is real,
-working code with 183 passing tests (`npm test`), a clean `npm run build`, and a clean
-`npx tsc --noEmit`. Specifically remaining:
+Phases 1-6 of `agent-build-plan.md` are complete: real equipment data, the tested
+formula engine, content, the wizard state contract, and the full wizard. The
+2026-07-13 experience redesign is also implemented: premium beige landing,
+narrated/grouped Basic flow, one-topic Advanced workspace, designed Methodology, and
+decision-led Results foundation. All of it is real working code with 175 passing tests,
+a clean build, clean typecheck, and live desktop/mobile browser QA. Specifically
+remaining:
 
-- **Phase 7 — Results dashboard and charts.** `/results` currently shows real numbers
-  (Investment Outlook score/band, NPV/IRR/payback/ROI/EAC) in a plain list — no gauge,
-  metric cards, break-even/cash-flow charts, risk callouts, or narrative summary yet.
-  `design/dashboard-mockup.svg` is the visual reference. Phase 7 also adds the
+- **Phase 7 — Results dashboard and charts.** `/results` already has the redesigned
+  outlook story, score ring, NPV/IRR/payback cards, supporting metrics, and Advanced
+  route. It still needs break-even/cash-flow charts, richer risk/narrative depth, and
+  accessible table equivalents. The mandatory design gate at the top of
+  `agent-build-plan.md` Phase 7 governs styling. `design/dashboard-mockup.svg` is an
+  information-architecture reference only, not the current visual language. Phase 7 adds the
   Advanced settings pane (`discountRate`/`targetIrr`/`loanInterestRate` quick-tweak,
   wizard-state.md §1.2) — not built.
 - **Phase 8 — Exports.** `exports/*.ts` are stubs (`throw new Error("not implemented")`).

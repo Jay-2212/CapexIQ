@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  cumulativeCashFlowSeries,
   paybackPeriod,
   paybackPeriodFromCashFlows,
   roi,
@@ -46,5 +47,25 @@ describe("paybackPeriodFromCashFlows", () => {
 
   it("returns Infinity when payback does not occur in the horizon", () => {
     expect(paybackPeriodFromCashFlows(1000, [100, -50, 200])).toBe(Infinity);
+  });
+});
+
+describe("cumulativeCashFlowSeries", () => {
+  it("returns one running-total entry per year, starting below zero by the initial investment", () => {
+    expect(cumulativeCashFlowSeries(1000, [200, 400, 800])).toEqual([-800, -400, 400]);
+  });
+
+  it("matches paybackPeriodFromCashFlows's crossing year for a realistic uneven series", () => {
+    const initialInvestment = 2375000;
+    const cashFlows = [386425.75, 510000.5, 625500.25, 910000];
+    const series = cumulativeCashFlowSeries(initialInvestment, cashFlows);
+    expect(series).toHaveLength(4);
+    expect(series[2]).toBeLessThan(0);
+    expect(series[3]).toBeGreaterThan(0);
+    expect(paybackPeriodFromCashFlows(initialInvestment, cashFlows)).toBeCloseTo(3.9374434065934065, 8);
+  });
+
+  it("stays negative throughout when cash flow never recovers the investment", () => {
+    expect(cumulativeCashFlowSeries(1000, [100, -50, 200])).toEqual([-900, -950, -750]);
   });
 });

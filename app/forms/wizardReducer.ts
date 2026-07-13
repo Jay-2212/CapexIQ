@@ -6,6 +6,7 @@ import { setFieldValue } from "./fieldPath";
 import { applyEquipmentDefaults, emptyWizardState } from "./initialState";
 import type {
   EquipmentCategory,
+  CurrencyUnit,
   FieldValue,
   WizardState,
   WizardStep,
@@ -15,6 +16,7 @@ export type WizardAction =
   | { type: "SET_FIELD"; path: string; value: FieldValue }
   | { type: "SELECT_EQUIPMENT_CATEGORY"; category: EquipmentCategory }
   | { type: "TOGGLE_ADVANCED" }
+  | { type: "SET_CURRENCY_UNIT"; field: "purchaseCost" | "installationCost"; unit: CurrencyUnit }
   | { type: "BEGIN_TRANSITION" }
   | { type: "GO_TO_STEP"; step: WizardStep }
   | { type: "RESTORE_DRAFT"; state: WizardState; savedAt: string }
@@ -68,6 +70,16 @@ export function wizardReducer(
       return { ...state, advancedOpen: !state.advancedOpen };
     }
 
+    case "SET_CURRENCY_UNIT": {
+      return {
+        ...state,
+        currencyUnits: {
+          ...(state.currencyUnits ?? { purchaseCost: "Crore", installationCost: "Lakh" }),
+          [action.field]: action.unit,
+        },
+      };
+    }
+
     case "BEGIN_TRANSITION": {
       // Idempotent step submission (wizard-state.md §9): a second BEGIN_TRANSITION
       // while one is already in flight is a no-op.
@@ -91,6 +103,14 @@ export function wizardReducer(
       // forward (and older drafts predate the field entirely).
       return {
         ...action.state,
+        preStep: {
+          ...action.state.preStep,
+          hospitalName: action.state.preStep.hospitalName ?? "",
+        },
+        currencyUnits: action.state.currencyUnits ?? {
+          purchaseCost: "Crore",
+          installationCost: "Lakh",
+        },
         attemptedSteps: {},
         restoredDraftSavedAt: action.savedAt,
         hasHydrated: true,
