@@ -5,6 +5,7 @@
 // instance despite /results not being nested under /assess in the URL.
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { WizardProvider, useWizard } from "../forms/WizardContext";
 import { useWizardPersistence } from "../forms/useWizardPersistence";
 import { RouteGuard } from "../forms/RouteGuard";
@@ -20,11 +21,17 @@ function AssessmentShell({ children }: { children: ReactNode }) {
       <LiveRegion />
       <RouteGuard />
       <header className="assessment-header">
-        <StartOver clearDraft={persistence.clearDraft} />
+        <Link href="/" className="assessment-header__brand">CapexIQ</Link>
+        {state.preStep.equipmentCategory && (
+          <span className="assessment-header__context">
+            {state.preStep.hospitalName || "New hospital"} · {state.preStep.equipmentCategory}
+          </span>
+        )}
+        <div className="assessment-header__actions">
+          <StartOver clearDraft={persistence.clearDraft} />
         {/* Shared-device disclosure (wizard-state.md §7.3 point 2). */}
-        <p className="assessment-header__privacy-note">
-          Your progress is saved in this browser only.
-        </p>
+          <p className="assessment-header__privacy-note">Saved in this browser</p>
+        </div>
       </header>
       {persistence.conflictBannerVisible && (
         <div role="alert" className="banner banner--info">

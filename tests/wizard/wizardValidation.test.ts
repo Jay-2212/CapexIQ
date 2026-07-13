@@ -21,6 +21,7 @@ function completeMri() {
   const set = (path: string, value: number | string) => {
     state = wizardReducer(state, { type: "SET_FIELD", path, value });
   };
+  set("preStep.hospitalName", "Lotus Hospital");
   set("preStep.hospitalBedSize", 200);
   set("preStep.cityTier", "Tier 1");
   set("basic.purchaseCost", 3.5);
@@ -155,6 +156,11 @@ describe("earliestIncompleteStep — route guard (wizard-state.md §2)", () => {
     let state = wizardReducer(emptyWizardState(), {
       type: "SELECT_EQUIPMENT_CATEGORY",
       category: "MRI",
+    });
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: "preStep.hospitalName",
+      value: "Lotus Hospital",
     });
     state = wizardReducer(state, {
       type: "SET_FIELD",

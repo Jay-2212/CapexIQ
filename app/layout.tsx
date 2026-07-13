@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./landing.css";
 
 export const metadata: Metadata = {
   title: "CapexIQ — Know if it pays for itself, before you buy it.",
