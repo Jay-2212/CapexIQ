@@ -21,6 +21,8 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 ├── README.md                    <- public-facing repo landing page (GitHub renders this)
 ├── INTRODUCTION.md              <- start here (project brief + rules), agent/dev-facing
 ├── HANDOFF.md                   <- current state + change log — read this first, always
+├── handoff-archive/             <- old Change Log entries, moved out once HANDOFF.md's
+│                                  live log exceeds ~150 lines (its own archive rule)
 ├── DIRECTORY.md                 <- this file
 ├── ISSUES.md                    <- open/accepted/resolved tracker, check every session
 ├── CONVENTIONS.md               <- how code gets written here — read before coding
@@ -74,7 +76,10 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 ├── tests/
 │   ├── formulas/                  65 passing tests across 17 files (Phase 2 complete)
 │   │   └── README.md
-│   └── scenarios/README.md        end-to-end scenario tests — empty scaffold, Phase 9
+│   └── scenarios/                 5 golden end-to-end scenario files, 44 passing
+│                                   tests (added 2026-07-13, capexiq-prebuild-assurance
+│                                   PBA-10) — independently-derived regression coverage,
+│                                   distinct from Phase 9's scenario-comparison UI
 ├── equipment-images/             9 equipment/hero photos (JPG, hi-res, free stock)
 │   └── sources.txt
 ├── people-personas/              4 persona photos (JPG) for "who this is for" section
@@ -269,8 +274,9 @@ and empty-scaffold READMEs. Specifically:
   should consume the same `/formulas` engine that powers the dashboard, not
   reimplement it.
 - **Phase 9 — Scenario comparison / sensitivity UI.** `formulas/sensitivity.ts` is
-  implemented and tested; there's no UI surfacing it yet. `tests/scenarios/` is still
-  an empty scaffold.
+  implemented and tested; there's no UI surfacing it yet. `tests/scenarios/` now holds
+  golden end-to-end regression tests (2026-07-13), not the scenario-comparison UI
+  itself — that's still nothing built.
 - **Phase 10 — Deploy and go-live QA.** The site is live at `capexiq.jaybharti.me`
   (Cloudflare Pages), but that's serving the current skeleton, not a finished product —
   real go-live QA happens once Phases 6-9 land.

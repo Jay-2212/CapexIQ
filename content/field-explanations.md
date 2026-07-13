@@ -12,6 +12,23 @@ version, sourced from this file plus each field's default/confidence from
 
 ---
 
+## Where your data goes (added 2026-07-13, capexiq-prebuild-assurance PBA-8; wording
+reconciled 2026-07-13 to the exact copy `app/forms/wizard-state.md` §7.3 already
+decided, per `capexiq-ui-assurance`'s F5 finding — one source of truth, not two
+independently-drafted versions of the same sentence)
+
+Wizard copy, placed near the "Start over" control (`app/forms/wizard-state.md` §7.3 —
+required, not optional, since real hospital financial figures are involved and a
+shared admin-office computer is a realistic usage context):
+
+> Your progress is saved in this browser only.
+
+This is input-time UX copy, distinct from `report-templates/disclaimer.md` (which
+covers the exported report's financial-advice disclaimer, not browser storage) — don't
+conflate the two or merge this into that file.
+
+---
+
 ## Basic Mode
 
 ### Equipment category

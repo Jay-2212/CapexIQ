@@ -189,9 +189,9 @@ equipment's data file at render time.
 - **Why it matters:** Determines when the maintenance cliff (warranty → CMC/AMC) hits your cash flow.
 
 ### AMC / CMC cost after warranty
-- **Definition:** Annual maintenance cost once warranty ends (see the glossary for AMC vs. CMC).
+- **Definition:** Annual maintenance cost once warranty ends (see the glossary for AMC vs. CMC). Basic Mode applies this as one flat rate for the entire post-warranty period — it doesn't distinguish the pricier CMC years from the cheaper AMC years that follow; open Advanced Mode's "CMC coverage period after warranty" and per-year override if you want that precision.
 - **Direction:** Lower is better.
-- **Default/typical value:** See `equipment-data/<type>.json#amcAnnualCostPercentage` / `#cmcAnnualCostPercentage`.
+- **Default/typical value:** A blend of `equipment-data/<type>.json#cmcAnnualCostPercentage` and `#amcAnnualCostPercentage` — see that field's `defaultSource` note in `content/inputs-metadata.json` for the exact formula.
 - **Confidence:** Mixed — AMC figures are a generic proxy across all 5 equipment types (Medium); MRI's CMC has an open, unresolved contradiction between a generic tender ceiling and one hospital's much lower observed cost (`ISSUES.md` ISS-12) — shown as a flagged range, not averaged.
 - **Source note:** `equipment-data/<type>.json`; see `content/benchmark-notes.md` §4 on why some figures show as a flagged range rather than one number.
 - **How to estimate:** Use your actual AMC/CMC quote if you have one — this is one of the more contract-specific figures, and generic benchmarks are weak evidence for your particular deal.
@@ -363,6 +363,15 @@ equipment's data file at render time.
 - **Why it matters:** Protects against a cash crunch in the early operating period.
 
 ### E. Maintenance and lifecycle cost
+
+#### CMC coverage period after warranty
+- **Definition:** How many years of CMC (comprehensive, parts-and-labor) coverage follow the warranty, before AMC (labor-only) coverage begins. Added 2026-07-13 (`capexiq-prebuild-assurance` PBA-4) — the underlying formula always needed this; it had no wizard field before.
+- **Direction:** Context-dependent — a longer CMC period is a cost (higher rate) but usually means better coverage; there's no universal "better" direction.
+- **Default/typical value:** See `equipment-data/<type>.json#cmcYears`.
+- **Confidence:** Varies by equipment type — see each equipment file's own note.
+- **Source note:** `equipment-data/<type>.json`.
+- **How to estimate:** Use your actual vendor contract's CMC term.
+- **Why it matters:** Only affects the result if you're using the per-year "AMC / CMC cost by year" override below — Basic Mode's single blended rate doesn't need this field at all.
 
 #### AMC / CMC cost by year
 - **Definition:** Year-by-year maintenance cost detail, instead of one blended post-warranty figure.

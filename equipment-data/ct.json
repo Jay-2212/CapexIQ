@@ -24,11 +24,13 @@
     "note": "Companies Act Schedule II caps residual value at 5% of original cost unless separately justified. See data-requirements.md §18.2 for the citation-correction caveat (same as MRI)."
   },
   "installationAndAncillaryCostPercentage": {
-    "value": 10,
+    "low": 10,
+    "typical": 10,
+    "high": 10,
     "unit": "percent of equipment cost",
     "confidence": "Medium",
     "sourceId": "S40",
-    "note": "NEIGRIHMS 128-slice CT tender requires a minimum 10% of product cost allocated to installation/commissioning/testing -- a tender-mandated bid-allocation floor, not measured actual average spend. See data-requirements.md §18.3."
+    "note": "NEIGRIHMS 128-slice CT tender requires a minimum 10% of product cost allocated to installation/commissioning/testing -- a tender-mandated bid-allocation floor, not measured actual average spend. See data-requirements.md §18.3. Normalized to {low,typical,high} 2026-07-13 (PBA-1) for cross-equipment schema consistency -- a single reported figure, not a real range, so low=typical=high."
   },
   "warrantyYears": {
     "low": 3,
@@ -40,11 +42,13 @@
     "note": "Karnataka KKRDB tender specifies 3-year warranty; NEIGRIHMS 128-slice CT tender specifies 5-year warranty + 5yr CMC. Genuine tender-to-tender variation. See data-requirements.md §18.1."
   },
   "cmcYears": {
-    "value": 5,
+    "low": 5,
+    "typical": 5,
+    "high": 5,
     "unit": "years",
     "confidence": "Medium",
     "sourceId": "S40",
-    "note": "Follows the 5-year warranty in the NEIGRIHMS tender. See data-requirements.md §18.4."
+    "note": "Follows the 5-year warranty in the NEIGRIHMS tender. See data-requirements.md §18.4. Normalized to {low,typical,high} 2026-07-13 (PBA-1) -- a single reported figure, not a real range, so low=typical=high."
   },
   "amcAnnualCostPercentage": {
     "low": 2,
