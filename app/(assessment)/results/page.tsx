@@ -6,11 +6,13 @@ import { ArrowLeft, ArrowUpRight, Gauge, IndianRupee, LineChart, TimerReset } fr
 import { cumulativeCashFlowSeries } from "@/formulas/roi";
 import { useWizard } from "../../forms/WizardContext";
 import { useAssessmentResult } from "../../forms/useAssessmentResult";
+import { toAssessmentInputs } from "../../forms/toAssessmentInputs";
 import { formatInr, formatPercent, formatYears } from "../../components/formatting";
 import { BreakEvenBar } from "../../charts/BreakEvenBar";
 import { CashFlowChart } from "../../charts/CashFlowChart";
 import { RiskCallout } from "../../components/RiskCallout";
 import { ResultsQuickSettings } from "../../components/ResultsQuickSettings";
+import { ExportPanel } from "../../components/ExportPanel";
 
 const DRIVER_LABELS: Record<string, string> = {
   returnStrength: "the return relative to your cost of capital",
@@ -101,6 +103,13 @@ export default function ResultsPage() {
       />
 
       <ResultsQuickSettings />
+
+      <ExportPanel
+        inputs={toAssessmentInputs(state)}
+        result={result}
+        hospitalName={hospital}
+        equipmentCategory={equipment}
+      />
 
       <p className="results-disclaimer">
         Indicative only, based on entered assumptions and editable benchmarks — not

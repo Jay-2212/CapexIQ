@@ -10,39 +10,7 @@
 
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import type { InvestmentOutlookResult } from "@/formulas/investmentOutlookScore";
-import { formatInrCompact, formatNumber } from "./formatting";
-
-const CAUTION_FLOOR = 55;
-
-function financingNote(financingResilience: number | null): string | null {
-  if (financingResilience === null || financingResilience >= CAUTION_FLOOR) return null;
-  return "financing risk — the loan or lease payment leaves a thin cash cushion in the months it's due";
-}
-
-function utilizationNote(
-  operationalMarginOfSafety: number,
-  usagePerDay: number,
-  breakEvenUsagePerDay: number | null
-): string | null {
-  if (operationalMarginOfSafety >= CAUTION_FLOOR) return null;
-  if (breakEvenUsagePerDay === null) {
-    return "utilization risk — the entered cost and revenue assumptions never reach break-even";
-  }
-  return `utilization risk — profitability is sensitive to daily volume; if usage falls below ${formatNumber(
-    breakEvenUsagePerDay,
-    1
-  )} uses/day (expected: ${formatNumber(usagePerDay, 1)}), the investment may not break even within its useful life`;
-}
-
-function returnNote(returnStrength: number): string | null {
-  if (returnStrength >= CAUTION_FLOOR) return null;
-  return "return risk — the return implied by these cash flows is close to or below the discount rate used to evaluate it";
-}
-
-function speedNote(speedToPayback: number): string | null {
-  if (speedToPayback >= CAUTION_FLOOR) return null;
-  return "payback risk — recovering the initial commitment takes a large share of the equipment's useful life";
-}
+import { deriveRiskNotes } from "./riskNotes";
 
 export function RiskCallout({
   outlook,
@@ -57,20 +25,13 @@ export function RiskCallout({
   workingCapitalPeakGap: number;
   workingCapitalPeakGapMonth: number;
 }) {
-  const notes = [
-    returnNote(outlook.subScores.returnStrength),
-    speedNote(outlook.subScores.speedToPayback),
-    financingNote(outlook.subScores.financingResilience),
-    utilizationNote(outlook.subScores.operationalMarginOfSafety, usagePerDay, breakEvenUsagePerDay),
-  ].filter((note): note is string => note !== null);
-
-  if (workingCapitalPeakGap > 0) {
-    notes.push(
-      `cash-flow timing risk — collections lag enough to create a working-capital gap of approximately ${formatInrCompact(
-        workingCapitalPeakGap
-      )} around month ${workingCapitalPeakGapMonth + 1}`
-    );
-  }
+  const notes = deriveRiskNotes({
+    outlook,
+    usagePerDay,
+    breakEvenUsagePerDay,
+    workingCapitalPeakGap,
+    workingCapitalPeakGapMonth,
+  });
 
   if (notes.length === 0) {
     return (
@@ -91,7 +52,7 @@ export function RiskCallout({
         <h3>Key risk notes</h3>
         <ul>
           {notes.map((note, index) => (
-            <li key={index}>{note.charAt(0).toUpperCase() + note.slice(1)}.</li>
+            <li key={index}>{note}</li>
           ))}
         </ul>
       </div>

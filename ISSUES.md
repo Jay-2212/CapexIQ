@@ -12,6 +12,30 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
+### ISS-29 — `computeAssessment.ts` ramps realized revenue and variable cost by `utilizationRamp`, but never ramps billed revenue — asymmetry surfaced by Phase 8, not yet decided
+**Area:** formulas / product decision
+**What was found:** 2026-07-14, while building the Phase 8 Excel/Word exports' monthly
+breakdown (`formulas/monthlySeries.ts`). `computeAssessment.ts` applies Advanced Group
+B's month-1-through-year-2+ utilization ramp to `monthlyRealizedSeries` and
+`monthlyVariableCostSeries` (both used in the annual cash-flow build), but
+`monthlyBilledRevenue`/`roiBilled` are a flat, unramped scalar — usage/day × weighted
+billed tariff × working days, computed once, with no month-by-month ramp fraction
+applied anywhere. This means a hospital with a slow ramp-up sees its *realized*
+revenue depressed in early months (correctly) but its *billed* revenue/ROI-billed view
+unaffected by the same ramp — an inconsistency between the two revenue views that
+predates this session but was only surfaced now, because Phase 8 needed a true
+monthly series for the Excel export and this is the first place the discrepancy
+becomes externally visible (a monthly Billed Revenue column that's flat every month
+next to a Realized Revenue column that visibly ramps, in the same workbook).
+**Not fixed this session:** deliberately not "fixed" by ramping billed revenue inside
+the new export code — that would invent a second, export-only version of billed
+revenue that disagrees with what `roiBilled`/the dashboard already shows for the same
+inputs, trading one inconsistency for a worse one. `formulas/monthlySeries.ts` and
+`report-templates/excel-sheet-structure.md` are both explicit that the monthly billed
+figure is flat, faithfully matching the existing engine. Whether billed revenue
+*should* ramp too is a product/methodology question for Jay, not an export-layer
+implementation detail.
+
 ### ISS-28 — Live deploy (`capexiq.jaybharti.me`) is badly stale
 **Area:** deployment
 **What was found:** 2026-07-13, during Phase 7 browser QA. The live Cloudflare Pages

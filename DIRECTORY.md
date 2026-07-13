@@ -86,8 +86,9 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 ├── public/                       Next.js static-export assets (equipment-images/,
 │   │                              people-personas/, generated CT hero, legacy hero SVG)
 │   └── README.md                  for the pre-step tiles/landing page — see its own README for why
-├── formulas/                     15 calculation modules, ALL REAL — implemented,
-│                                 reviewed, and tested (Phase 2 + Phase 6). See below.
+├── formulas/                     16 calculation modules, ALL REAL — implemented,
+│                                 reviewed, and tested (Phase 2 + Phase 6 + Phase 8's
+│                                 monthlySeries.ts). See below.
 ├── equipment-data/                mri/ct/cath-lab/dialysis/ultrasound/custom.json —
 │   │                               populated from five research passes, Phase 1 complete
 │   ├── common-assumptions.json    non-equipment-specific benchmarks (discount rate,
@@ -95,8 +96,9 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │   │                               the two fields still honestly `"Unavailable"`
 │   └── README.txt
 ├── report-templates/              word/excel/methodology/disclaimer — CONTENT COMPLETE
-│   └── README.txt                 (Phase 3); the actual generators are still stubs,
-│                                   see exports/ below (Phase 8, not started)
+│   └── README.txt                 (Phase 3); excel-sheet-structure.md and
+│                                   word-report-template.md written for real in Phase 8
+│                                   — see exports/ below (Phase 8, built)
 ├── content/                       field-explanations/benchmark-notes/glossary/tooltip —
 │   ├── inputs-metadata.json       CONTENT COMPLETE (Phase 3/4). inputs-metadata.json is
 │   │                               UI/control schema only (control type, slider bounds,
@@ -105,8 +107,12 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │   │                               Phase 6; regenerate via scripts/generateTooltipCopy.mjs
 │   └── README.txt
 ├── scripts/                       one-off build/content scripts, see its own README.md
-├── exports/                       excel/word/zip generator stubs — still
-│   └── README.md                  `throw new Error("not implemented")`, Phase 8
+├── exports/                       excel/word/zip generators — REAL (Phase 8, 2026-07-14)
+│   ├── workbookPlan.ts             pure cell/formula plan, verified via HyperFormula
+│   ├── excel-generator.ts         writes the plan into a real .xlsx via exceljs
+│   ├── word-generator.ts          12-section Word proposal via docx
+│   ├── zip-generator.ts           bundles both via jszip
+│   └── README.md
 ├── tests/
 │   ├── formulas/                  19 files (17 from Phase 2 + 2 new canonical-pipeline
 │   │   │                          test files from Phase 6)
@@ -149,7 +155,7 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 |---|---|---|
 | To understand the product | `SPEC.md` | Use its index at the top, don't read front-to-back |
 | Where things stand right now | `HANDOFF.md` | Current State block at the top — the actual source of truth |
-| Which phase to build next | `agent-build-plan.md` | Phases 1-6 done; Phase 7 (results dashboard) is next |
+| Which phase to build next | `agent-build-plan.md` | Phases 1-6, 8 done; Phase 7's multi-equipment/multi-band visual QA pass and Phase 9 (scenario comparison) remain |
 | The wizard's route map, field-to-step assignment, and state transitions | `app/forms/wizard-state.md` | Read before writing any wizard component |
 | The actual wizard reducer/schema/validation code | `app/forms/README.md` | Full per-file table — reducer, field schema, validation, persistence |
 | The canonical wizard-to-result calculation pipeline | `formulas/computeAssessment.ts` | Validated against `tests/scenarios/`'s golden numbers; the preview strip and `/results` both call this, never a second copy |
@@ -202,6 +208,7 @@ than duplicating it.
 | `eac.ts` | Equivalent Annual Cost |
 | `discountedPayback.ts` | Discounted payback period |
 | `actionableInsight.ts` | The automatic "cheapest win" tariff/timing suggestion engine |
+| `monthlySeries.ts` | **New, Phase 8** — month-by-month billed/realized revenue, costs, EMI/lease, and cash-received (extracted from `computeAssessment.ts`'s own internal logic, byte-identical refactor), feeding the Excel export's Monthly tab. Billed revenue is deliberately flat/unramped, matching the engine's existing (flagged, see `ISSUES.md` ISS-29) behavior. |
 | `computeAssessment.ts` | **New, Phase 6.** The canonical wizard-inputs → full-result pipeline — the single derivation `app/forms/wizard-state.md` §4 requires; validated against `tests/scenarios/`'s golden numbers |
 | `workingCapitalPeak.ts` | **New, Phase 6.** Peak working-capital gap across a DSO-extended horizon (SPEC.md §14.2's dashboard-warning framing) |
 
@@ -318,10 +325,12 @@ remaining:
   information-architecture reference only, not the current visual language. Phase 7 adds the
   Advanced settings pane (`discountRate`/`targetIrr`/`loanInterestRate` quick-tweak,
   wizard-state.md §1.2) — not built.
-- **Phase 8 — Exports.** `exports/*.ts` are stubs (`throw new Error("not implemented")`).
-  Excel exports need live, embedded formulas, not static values (SPEC.md §29.5) —
-  should consume the same `/formulas` engine that powers the dashboard, not
-  reimplement it.
+- **Phase 8 — Exports. Built 2026-07-14.** `exports/*.ts` generate real Excel (live
+  embedded formulas, verified via a HyperFormula test oracle — SPEC.md §29.5), Word,
+  and ZIP files from the same `AssessmentInputs`/`AssessmentResult` the dashboard
+  renders. Chart images deferred (data tables stand in); see `ISSUES.md` ISS-29 for
+  one engine-level question this phase surfaced but didn't resolve (flat billed vs.
+  ramped realized revenue).
 - **Phase 9 — Scenario comparison / sensitivity UI, plus 3 pipeline gaps from Phase 6.**
   `formulas/sensitivity.ts` is implemented and tested; there's no UI surfacing it yet.
   `tests/scenarios/` holds golden end-to-end regression tests (2026-07-13), not the
