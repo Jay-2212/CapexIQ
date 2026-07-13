@@ -5,12 +5,12 @@ each folder's own `README.txt`/`sources.txt` for detail (license, attribution, s
 notes) rather than repeating that content here. If a description below feels thin,
 that's on purpose — go to the file it points to.
 
-**Last full accuracy pass: 2026-07-12.** Before this, several sections here had drifted
-badly out of date (describing formulas as unimplemented, equipment data as placeholder,
-content/report-templates as empty scaffolds — all wrong by the time of this pass;
-Phases 1-3 had been complete for a day or more). Check `HANDOFF.md`'s Current State
-block if anything below feels stale again — it's the actual source of truth, this file
-is a map onto it.
+**Last full accuracy pass: 2026-07-13 (Phase 6).** Before this, several sections here
+had drifted badly out of date (describing formulas as unimplemented, equipment data as
+placeholder, content/report-templates as empty scaffolds — all wrong by the time of
+this pass; Phases 1-3 had been complete for a day or more). Check `HANDOFF.md`'s
+Current State block if anything below feels stale again — it's the actual source of
+truth, this file is a map onto it.
 
 ---
 
@@ -27,8 +27,8 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 ├── ISSUES.md                    <- open/accepted/resolved tracker, check every session
 ├── CONVENTIONS.md               <- how code gets written here — read before coding
 ├── agent-build-plan.md          <- phased build plan (10 phases), dependencies, DoD —
-│                                  Phases 1-5 (data/formulas/content/design/wizard-state)
-│                                  are complete; Phase 6 (wizard UI) is next
+│                                  Phases 1-6 (data/formulas/content/design/wizard-state/
+│                                  wizard UI) are complete; Phase 7 (results dashboard) is next
 ├── financial-model-spec.md      <- Investment Outlook score, EAC, discounted payback,
 │                                  automatic actionable-insight engine — implemented
 ├── SPEC.md                      <- full product spec (has its own index, don't read
@@ -41,22 +41,38 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │                                              skill for Claude Code; preserves the
 │                                              existing design and checks planning,
 │                                              accessibility, runtime, and performance
-├── app/                          Next.js App Router UI — still skeleton, this is the
-│   │                              next real build work (Phase 6 onward)
+├── .claude/skills/capexiq-prebuild-assurance/ <- project-local pre-build
+│                                              audit for whole-model/schema
+│                                              correctness plus browser/privacy/
+│                                              export/deployment security
+├── app/                          Next.js App Router UI. Landing page still a
+│   │                              placeholder (Phase 7-ish); the wizard (Phase 6,
+│   │                              2026-07-13) is REAL and built:
 │   ├── layout.tsx                root route, not nested — subdomain, not a path
-│   ├── page.tsx                  placeholder landing page, not the real wizard yet
-│   ├── globals.css               imports design/tokens.css
-│   ├── components/README.md      shared UI components — empty scaffold
-│   ├── forms/                    7-step wizard inputs — empty scaffold, EXCEPT:
-│   │   └── wizard-state.md       <- Phase 5 deliverable, written and merged 2026-07-12.
-│   │                              Full route map, field-to-step assignment, validation
-│   │                              timing, localStorage draft persistence — read this
-│   │                              before writing any wizard component.
-│   ├── results/README.md         decision dashboard — empty scaffold
-│   ├── charts/README.md          break-even / cash-flow charts — empty scaffold
-│   └── advanced/README.md        Advanced Mode UI — empty scaffold
-├── formulas/                     13 calculation modules, ALL REAL — implemented,
-│                                 reviewed, and tested (Phase 2 complete). See below.
+│   ├── page.tsx                  placeholder landing page, not the real hero yet
+│   ├── globals.css               imports design/tokens.css + all Phase 6 component CSS
+│   ├── (assessment)/             route group sharing one WizardProvider across
+│   │   │                          /assess/* and /results (route groups don't affect
+│   │   │                          the URL) — see its own README.md
+│   │   ├── layout.tsx            WizardProvider, persistence, route guard, live region
+│   │   ├── assess/page.tsx       pre-step — equipment tiles + bed size/city tier
+│   │   ├── assess/investment/    Step 1
+│   │   ├── assess/usage/         Step 2
+│   │   ├── assess/costs/         Step 3 + the Advanced Mode panel
+│   │   └── results/page.tsx      minimal real results (no charts yet — Phase 7)
+│   ├── forms/                    wizard reducer/schema/validation/persistence logic —
+│   │   │                          NOT routed pages, see its own README.md's file table
+│   │   └── wizard-state.md       <- Phase 5 deliverable. Full route map,
+│   │                              field-to-step assignment, validation timing,
+│   │                              localStorage draft persistence — read this before
+│   │                              touching any wizard component.
+│   ├── advanced/                 the Advanced Mode panel + its 6 groups (A-F) — built
+│   ├── components/               shared field controls, buttons, preview strip — built
+│   └── charts/README.md          break-even / cash-flow charts — still empty, Phase 7
+├── public/                       Next.js static-export assets (equipment-images/ copy
+│   └── README.md                  for the pre-step tiles) — see its own README for why
+├── formulas/                     15 calculation modules, ALL REAL — implemented,
+│                                 reviewed, and tested (Phase 2 + Phase 6). See below.
 ├── equipment-data/                mri/ct/cath-lab/dialysis/ultrasound/custom.json —
 │   │                               populated from five research passes, Phase 1 complete
 │   ├── common-assumptions.json    non-equipment-specific benchmarks (discount rate,
@@ -70,16 +86,22 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │   ├── inputs-metadata.json       CONTENT COMPLETE (Phase 3/4). inputs-metadata.json is
 │   │                               UI/control schema only (control type, slider bounds,
 │   │                               tooltipKey) — NO numeric defaults, see ISS-9/ISS-4
+│   ├── tooltip-copy.generated.json <- machine-readable parse of tooltip-copy.md, added
+│   │                               Phase 6; regenerate via scripts/generateTooltipCopy.mjs
 │   └── README.txt
+├── scripts/                       one-off build/content scripts, see its own README.md
 ├── exports/                       excel/word/zip generator stubs — still
 │   └── README.md                  `throw new Error("not implemented")`, Phase 8
 ├── tests/
-│   ├── formulas/                  65 passing tests across 17 files (Phase 2 complete)
+│   ├── formulas/                  19 files (17 from Phase 2 + 2 new canonical-pipeline
+│   │   │                          test files from Phase 6)
 │   │   └── README.md
-│   └── scenarios/                 5 golden end-to-end scenario files, 44 passing
-│                                   tests (added 2026-07-13, capexiq-prebuild-assurance
-│                                   PBA-10) — independently-derived regression coverage,
-│                                   distinct from Phase 9's scenario-comparison UI
+│   ├── scenarios/                 5 golden end-to-end scenario files — independently-
+│   │                               derived regression coverage (2026-07-13,
+│   │                               capexiq-prebuild-assurance PBA-10), distinct from
+│   │                               Phase 9's scenario-comparison UI
+│   └── wizard/                    reducer/validation/persistence/component tests for
+│                                   app/forms/ (Phase 6) — see its own README.md
 ├── equipment-images/             9 equipment/hero photos (JPG, hi-res, free stock)
 │   └── sources.txt
 ├── people-personas/              4 persona photos (JPG) for "who this is for" section
@@ -112,8 +134,10 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 |---|---|---|
 | To understand the product | `SPEC.md` | Use its index at the top, don't read front-to-back |
 | Where things stand right now | `HANDOFF.md` | Current State block at the top — the actual source of truth |
-| Which phase to build next | `agent-build-plan.md` | Phases 1-5 done; Phase 6 (wizard UI) is next |
+| Which phase to build next | `agent-build-plan.md` | Phases 1-6 done; Phase 7 (results dashboard) is next |
 | The wizard's route map, field-to-step assignment, and state transitions | `app/forms/wizard-state.md` | Read before writing any wizard component |
+| The actual wizard reducer/schema/validation code | `app/forms/README.md` | Full per-file table — reducer, field schema, validation, persistence |
+| The canonical wizard-to-result calculation pipeline | `formulas/computeAssessment.ts` | Validated against `tests/scenarios/`'s golden numbers; the preview strip and `/results` both call this, never a second copy |
 | How code should be structured/tested | `CONVENTIONS.md` | Read before writing or editing any code |
 | Real Indian data on equipment cost/maintenance/financing/utilization | `data-requirements.md` | §12-§20 have five research passes' findings; see its own table below |
 | The Investment Outlook score, EAC, discounted-payback, actionable-insight formulas | `financial-model-spec.md` | Implemented in `formulas/investmentOutlookScore.ts` etc. |
@@ -140,9 +164,9 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 
 ## formulas/ — full contents
 
-13 modules, all implemented and tested (Phase 2 complete, 2026-07-11). No `any`, no
-reimplemented logic — each pulls shared math from elsewhere in `/formulas` rather than
-duplicating it.
+15 modules, all implemented and tested (13 from Phase 2, 2 new from Phase 6). No `any`,
+no reimplemented logic — each pulls shared math from elsewhere in `/formulas` rather
+than duplicating it.
 
 | File | What it computes |
 |---|---|
@@ -163,9 +187,11 @@ duplicating it.
 | `eac.ts` | Equivalent Annual Cost |
 | `discountedPayback.ts` | Discounted payback period |
 | `actionableInsight.ts` | The automatic "cheapest win" tariff/timing suggestion engine |
+| `computeAssessment.ts` | **New, Phase 6.** The canonical wizard-inputs → full-result pipeline — the single derivation `app/forms/wizard-state.md` §4 requires; validated against `tests/scenarios/`'s golden numbers |
+| `workingCapitalPeak.ts` | **New, Phase 6.** Peak working-capital gap across a DSO-extended horizon (SPEC.md §14.2's dashboard-warning framing) |
 
-Tests: `tests/formulas/*.test.ts`, one file per module, 65 passing tests total (3+
-cases each: clean round-number, realistic messy-number, edge case). Run via `npm test`.
+Tests: `tests/formulas/*.test.ts`, one file per module (plus 2 new pipeline test files),
+run via `npm test`. See `tests/formulas/README.md` for current counts.
 
 ---
 
@@ -241,9 +267,13 @@ equipment-data field either has a real sourced value or is deliberately, permane
 ## Known quirks and open issues
 
 Tracked in **`ISSUES.md`**, not here — check it before assuming something's fine, and add
-to it the moment you spot a new problem. **As of 2026-07-12, `ISSUES.md`'s Open section
-is empty** — every tracked issue is Accepted (by design, or a confirmed-unresearchable
-data gap) or Resolved. One quirk stays here because it's pure trivia, not an issue:
+to it the moment you spot a new problem. **As of 2026-07-13, `ISSUES.md`'s Open section
+has 5 items from Phase 6** (ISS-17 through ISS-21: a realization/claim-deduction
+composition judgment call, a Lease-financing assumption, two Advanced Mode fields
+collected but not yet consumed by the canonical pipeline, and a note that no
+interactive browser QA was possible in that session's environment) — none block Phase
+6's own Definition of Done, but read them before extending the wizard or the pipeline.
+One quirk stays here because it's pure trivia, not an issue:
 `people-personas/01-hospital-administrator.jpg` and `02-operations-head-coo.jpg` are two
 different photos from the same original photoshoot (same photographer/setting) — fine
 individually, just visually similar side by side.
@@ -257,29 +287,39 @@ accessibility note).
 
 ## What's NOT here yet
 
-Phases 1-5 of `agent-build-plan.md` are complete: real equipment data (five research
+Phases 1-6 of `agent-build-plan.md` are complete: real equipment data (five research
 passes), a fully implemented and tested formula engine, complete content/copy, a
-finished design system + UX spec, and the wizard state-transition doc. **What's
-actually missing is the product itself** — `/app` is still just `layout.tsx`/`page.tsx`
-and empty-scaffold READMEs. Specifically:
+finished design system + UX spec, the wizard state-transition doc, and now the wizard
+UI itself — the pre-step, 3-step Basic Mode wizard, and Advanced Mode panel are real,
+working code with 161 passing tests (`npm test`), a clean `npm run build`, and a clean
+`npx tsc --noEmit`. The landing page (`app/page.tsx`) is still a placeholder — the real
+hero/hero-CTA/entry-flow described in `design/ux-product-spec.md` §5 hasn't been built
+(the pre-step it links to has, at `/assess`). Specifically remaining:
 
-- **Phase 6 — Wizard UI implementation.** The pre-step, the 3-step Basic Mode wizard,
-  and the Advanced Mode panel, built against `app/forms/wizard-state.md` and
-  `content/inputs-metadata.json`. Nothing here yet.
-- **Phase 7 — Results dashboard and charts.** Investment Outlook gauge, metric cards,
-  break-even/cash-flow charts, risk callouts, narrative summary — `design/
-  dashboard-mockup.svg` is the visual reference. Nothing here yet.
+- **Landing page.** Hero, "How it works," "Who it's for," Methodology link — `design/
+  ux-product-spec.md` §5 has the full spec. Not built; `/assess` works standalone via
+  direct URL in the meantime.
+- **Phase 7 — Results dashboard and charts.** `/results` currently shows real numbers
+  (Investment Outlook score/band, NPV/IRR/payback/ROI/EAC) in a plain list — no gauge,
+  metric cards, break-even/cash-flow charts, risk callouts, or narrative summary yet.
+  `design/dashboard-mockup.svg` is the visual reference. Phase 7 also adds the
+  Advanced settings pane (`discountRate`/`targetIrr`/`loanInterestRate` quick-tweak,
+  wizard-state.md §1.2) — not built.
 - **Phase 8 — Exports.** `exports/*.ts` are stubs (`throw new Error("not implemented")`).
   Excel exports need live, embedded formulas, not static values (SPEC.md §29.5) —
   should consume the same `/formulas` engine that powers the dashboard, not
   reimplement it.
-- **Phase 9 — Scenario comparison / sensitivity UI.** `formulas/sensitivity.ts` is
-  implemented and tested; there's no UI surfacing it yet. `tests/scenarios/` now holds
-  golden end-to-end regression tests (2026-07-13), not the scenario-comparison UI
-  itself — that's still nothing built.
+- **Phase 9 — Scenario comparison / sensitivity UI, plus 3 pipeline gaps from Phase 6.**
+  `formulas/sensitivity.ts` is implemented and tested; there's no UI surfacing it yet.
+  `tests/scenarios/` holds golden end-to-end regression tests (2026-07-13), not the
+  scenario-comparison UI itself. Also see `ISSUES.md` ISS-19: utilization ramp-up and
+  the per-year maintenance schedule override are collected in wizard state but not yet
+  consumed by `computeAssessment.ts` — likely Phase 9 work, since sensitivity/ramp
+  modeling are closely related.
 - **Phase 10 — Deploy and go-live QA.** The site is live at `capexiq.jaybharti.me`
-  (Cloudflare Pages), but that's serving the current skeleton, not a finished product —
-  real go-live QA happens once Phases 6-9 land.
+  (Cloudflare Pages), but that's serving the current skeleton (landing page still a
+  placeholder), not a finished product — real go-live QA happens once Phases 7-9 land.
+  See `ISSUES.md` ISS-21: Phase 6 itself has not had an interactive browser QA pass.
 
 Check `HANDOFF.md`'s Current State block and `ISSUES.md` before assuming any of the
 above is still missing or that new gaps haven't appeared — they're the source of truth

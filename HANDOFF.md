@@ -13,46 +13,55 @@ of *how* we got here.
 
 *(Last updated: 2026-07-13)*
 
-**Planning is done, and now doubly audited. Phases 1-5 of `agent-build-plan.md` are
-complete; two independent audits both ran against them this week —
-`$capexiq-ui-assurance` (Phases 4-5, nine findings) and `$capexiq-prebuild-assurance`
-(whole-model/schema/security, thirteen findings) — and every finding from both is
-resolved. Phase 6 (wizard UI implementation) is next, and is pure build from here —
-`/app` is still skeleton (`layout.tsx`/`page.tsx`/empty-scaffold READMEs), no real UI
-exists yet.**
+**Phase 6 (wizard UI implementation) is built.** `/app` now has a real, working
+pre-step + 3-step Basic Mode wizard + Advanced Mode panel + a minimal `/results` page,
+all wired to a single canonical calculation pipeline. Planning was already doubly
+audited before this session started (`$capexiq-ui-assurance` + `$capexiq-prebuild-
+assurance`, both merged 2026-07-12); this session is the first real product code.
 
-- **Phases 1-5:** complete, merged into `main` as of 2026-07-12 (equipment data,
-  formula engine, content/copy, design/UX, wizard-state). See prior Change Log entries
-  for detail — unchanged this session except where noted below.
-- **`$capexiq-ui-assurance` planning audit run and resolved, 2026-07-12** — nine
-  findings against Phases 4-5, seven fixed directly, two (`targetIrr`'s required flag,
-  `localStorage` multi-tab/shared-device behavior) decided by Jay with an Opus-advisor
-  second opinion first. See the Change Log entry below.
-- **`$capexiq-prebuild-assurance` audit run 2026-07-13, then acted on in full the same
-  session** — thirteen findings (PBA-1 through PBA-13), all fixed; the one genuine
-  product-judgment call (Basic Mode's AMC/CMC default-source formula, ISS-16) was
-  confirmed by Jay same session and is closed. **This session also discovered, at
-  merge time, that the two audits' branches had run in parallel and collided on
-  overlapping findings** (both independently caught the `targetIrr`-blocks-Basic-Mode
-  defect and the false discount-rate-`Unavailable` claim) — reconciled by hand,
-  deferring to whichever session's resolution was more complete rather than keeping
-  both; see the Change Log entry below for the full reconciliation record.
-- **Both project-local audit skills remain available** for Phase 6-implementation/
-  browser/release QA.
+- **Canonical pipeline (`formulas/computeAssessment.ts`, new):** the single
+  wizard-inputs-to-full-result derivation `wizard-state.md` §4 requires. Composition
+  order (accrual-basis NPV/IRR, DSO-extended array feeding a separate working-capital
+  metric, Basic Mode's flat blended maintenance rate vs. Advanced Mode's
+  `cmcYears`-plus-sourced-rate schedule, financing-mode cash-flow treatment) is not
+  guessed — it's copied exactly from `tests/scenarios/`'s independently-hand-derived
+  golden scenarios (A-D), and a new test file (`tests/formulas/computeAssessment.test.ts`)
+  reproduces every one of those golden numbers.
+- **Full wizard**, `app/(assessment)/` (a Next.js route group sharing one
+  `WizardProvider` across `/assess/*` and `/results`): pre-step (equipment tiles + bed
+  size/city tier), Investment/Usage & Revenue/Operating Costs steps, the Advanced Mode
+  panel (all 6 groups A-F), a live preview strip, `localStorage` draft persistence
+  (debounce, multi-tab conflict banner, write-failure handling), the route guard, focus
+  management, and "Start over." `app/forms/` holds the reducer/schema/validation/
+  persistence logic; `app/advanced/` and `app/components/` hold the UI.
+- **Verification:** 161 tests pass (109 pre-existing + 52 new — reducer transitions,
+  validation, financing-mode mapping, persistence, and 2 React Testing Library
+  component tests), `npm run build` and `npx tsc --noEmit` both clean. **No interactive
+  browser QA was possible this session** (no working Chrome extension connection) — see
+  `ISSUES.md` ISS-21 for exactly what that leaves unverified and a recommended manual
+  pass.
+- **Six items logged to `ISSUES.md`'s Open section (ISS-17 through ISS-21, ISS-23)** —
+  judgment calls (a realization/claim-deduction composition rule, a Lease-financing
+  assumption with no bounded term), deferred scope (utilization ramp-up and the
+  per-year maintenance override are collected but not yet consumed by the pipeline),
+  and verification/coverage gaps (not every wizard-state.md edge case has its own test;
+  the slider touch-target audit ask isn't achievable with a native range input) —
+  flagged proactively, none block Phase 6's core functionality. **One bug found and
+  fixed the same session:** `payerMixSharePct`'s `required: true` had no default,
+  same class of issue as the already-resolved `targetIrr`/F1 bug — fixed with the same
+  pattern (auto-filled implicit single-payer default), logged as Resolved ISS-22.
+- **Landing page still a placeholder** — `design/ux-product-spec.md` §5's hero/entry
+  flow wasn't built this session; `/assess` works standalone via direct URL.
+- **New dev dependencies:** `jsdom`, `@testing-library/react`/`jest-dom`,
+  `@vitejs/plugin-react` (test-only), `lucide-react` (equipment-tile icon). New
+  `vitest.config.ts` (path aliases + jsdom environment) and `tests/setup.ts` (a
+  `localStorage`/`scrollIntoView` polyfill — see that file's own comment for why this
+  environment's jsdom needed one).
 
-**Repo hygiene, 2026-07-12 (unchanged, kept for continuity):** all stray git worktrees
-and fully-merged branches removed; `npm test` corrected to 65/65 (now 109/109 after
-this session's golden-scenario additions — see below); `ISSUES.md`/`DIRECTORY.md`
-brought current.
-
-**Open product idea, not built:** an onboarding-flow concept (hero page → "Start
-Assessment" CTA → equipment/bed-count pre-step → wizard) is already designed into
-`design/ux-product-spec.md` and `app/forms/wizard-state.md` — this is now a Phase 6
-build target, not an open question.
-
-**Nothing open going into Phase 6.** `ISSUES.md`'s Open section is empty — every
-finding from both audits (including the ISS-16 renumbering from the merge
-reconciliation above) is Accepted or Resolved.
+**Next: Phase 7 (results dashboard and charts)** — the gauge, metric cards, break-even/
+cash-flow charts, risk callouts, narrative summary, and the Advanced settings pane,
+against `design/dashboard-mockup.svg`. `/results` already shows real numbers from the
+same pipeline Phase 7 will build the visual layer on top of.
 
 ---
 
@@ -84,6 +93,72 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-13 — Phase 6 (wizard UI implementation) built: reducer, canonical pipeline, full wizard, 161 tests
+**What changed:** Jay confirmed Phases 1-5 were genuinely ready to build against (this
+session's own verification: 109/109 tests, clean build, on `origin/main`) and said
+"let's build." Built the whole of Phase 6 as one continuous flow (`CONVENTIONS.md`
+§7 — no parallelizing a single stateful flow), in a worktree, committing progressively.
+1. **`formulas/computeAssessment.ts` (new)** — the canonical wizard-inputs-to-result
+   pipeline `wizard-state.md` §4 requires ("there is exactly one"). No formula for this
+   composition existed before this session (`formulas/sensitivity.ts` is a separate,
+   simpler annual-only grid-search tool for the actionable-insight engine, not this).
+   Every composition decision (which cash-flow basis feeds NPV/IRR vs. the
+   working-capital metric, how financing/maintenance/break-even compose) was derived
+   by reading `tests/scenarios/`'s 4 golden scenarios line by line and matching them
+   exactly, not invented — `tests/formulas/computeAssessment.test.ts` proves the new
+   pipeline reproduces every golden number. New `formulas/workingCapitalPeak.ts` for
+   the peak-working-capital-need metric SPEC.md §14.2's dashboard warning needs.
+2. **The wizard itself** — `app/forms/` (reducer, field schema expanded from
+   `content/inputs-metadata.json`'s templates using `wizard-state.md` §7.1's final
+   payer/ramp suffixes, validation, `localStorage` persistence per §7's full
+   contract including the multi-tab conflict banner and write-failure handling),
+   `app/advanced/` (all 6 Advanced Mode groups), `app/components/` (field controls,
+   preview strip, step nav with the audit-F7 disabled-Next-focus behavior), and
+   `app/(assessment)/` (a Next.js route group so `/assess/*` and `/results` share one
+   `WizardProvider` despite not being nested in the URL) — pre-step, 3 Basic Mode
+   steps, and a minimal but real `/results` page (full dashboard is Phase 7).
+3. **One real bug found and fixed mid-build, not by either prior audit:**
+   `payerMixSharePct`'s `required: true` had no sourced default and sat inside the
+   collapsed Advanced panel — same failure class as the already-resolved
+   `targetIrr`/F1 issue, would have blocked every Basic-Mode-only user at Step 3.
+   Fixed the same way (auto-filled implicit default). Logged as Resolved ISS-22.
+4. **Six items flagged to `ISSUES.md`'s Open section (ISS-17 through ISS-21, ISS-23)**
+   rather than silently decided: the realization%/claim-deduction% combination rule (no
+   golden test covers it), Lease financing's unbounded term (no `leaseTenureMonths`
+   field exists), utilization ramp-up and the per-year maintenance override being
+   collected but not yet consumed by the pipeline, incomplete edge-case test coverage
+   against the letter of Phase 6's DoD, and the slider touch-target audit ask not being
+   achievable with a native `<input type="range">`.
+5. **Verification:** 161 tests (109 pre-existing + 52 new, including 2 React Testing
+   Library component tests added specifically to cover interactive behavior this
+   session's environment couldn't test in an actual browser — no working Chrome
+   extension connection this session, see ISS-21), `npm run build` and `npx tsc
+   --noEmit` both clean. Also fixed along the way: `vitest.config.ts` needed a jsdom
+   `url` option plus a `localStorage`/`scrollIntoView` polyfill (`tests/setup.ts`) —
+   this environment's jsdom left `window.localStorage` undefined for reasons unrelated
+   to product code (verified against a raw `new JSDOM()` outside vitest, which works
+   fine); a real browser always has working `localStorage`.
+6. **Housekeeping:** `equipment-images/` copied into `public/equipment-images/` (static
+   export requires `public/` for served assets; the repo-root folder stays canonical
+   for sourcing/licensing). `content/tooltip-copy.md` gained a generated
+   machine-readable sibling (`tooltip-copy.generated.json`, via new
+   `scripts/generateTooltipCopy.mjs`) since no runtime markdown-parsing story existed
+   yet. Old flat `app/results/README.md` moved into the new route group location.
+**Files touched:** extensive — `formulas/computeAssessment.ts` and
+`formulas/workingCapitalPeak.ts` (new); all of `app/forms/`, `app/advanced/`,
+`app/components/`, `app/(assessment)/` (new); `public/` (new); `scripts/` (new);
+`content/tooltip-copy.generated.json` (new); `tests/formulas/computeAssessment*.test.ts`
+and all of `tests/wizard/` (new); `vitest.config.ts`, `tests/setup.ts` (new);
+`package.json`/`package-lock.json` (new dev deps); `ISSUES.md` (ISS-17 through ISS-23),
+`agent-build-plan.md` (Phase 6 checkboxes, 2 marked partial with reasons, 1 unmet with
+a reason), `DIRECTORY.md` (full Phase 6 section rewrite), `HANDOFF.md` (this entry).
+**What's next:** Phase 7 (results dashboard and charts) — build the visual layer
+(gauge, metric cards, break-even/cash-flow charts, risk callouts, narrative summary,
+Advanced settings pane) on top of the same `computeAssessment.ts` pipeline `/results`
+already uses. A manual browser click-through of Phase 6 (ISS-21) is recommended before
+or alongside that work. ISS-19's ramp-up/per-year-maintenance pipeline gaps are natural
+Phase 9 (sensitivity) companions.
 
 ### 2026-07-13 — Pre-build audit run, all 13 findings fixed, then reconciled against a parallel UI-assurance audit session at merge time
 **What changed:** Jay asked to run `$capexiq-prebuild-assurance` (audit-only), then —
@@ -201,101 +276,8 @@ checklist every session has to clear first.
 Open section is empty; every finding from both this audit and PR #13's is Accepted or
 Resolved.
 
-### 2026-07-12 — Ran `$capexiq-ui-assurance` planning audit against Phases 4-5; all nine findings resolved before Phase 6
-**What changed:** Jay asked to run the newly-added UI assurance skill against Phases
-4-5 as a planning audit (no runtime yet, so pure doc/spec review), then implement
-every fix the audit could make on its own judgment, and for anything requiring a real
-product decision: draft options, get an independent second opinion from a stronger
-model first (Opus, used as an "advisor" layer), then bring simplified options to Jay
-as the final decision-maker — a three-layer process (Claude's judgment → advisor
-model → Jay) Jay specified explicitly for this session.
-1. **Audit produced 9 evidence-backed findings**, one P0 and four P1s, none of them
-   requiring any change to the Signal visual design — full report given in the
-   conversation this session came from (not persisted as a separate file, per this
-   project's "don't duplicate content" rule; `agent-build-plan.md`'s Phase 4/5 DoD
-   sections and `ISSUES.md` now carry the durable record instead).
-2. **Seven findings fixed directly**, no product decision needed: F2 (no accessible
-   data-table equivalent for charts — added to Phase 7's "Do" list), F3 (no
-   `prefers-reduced-motion` handling for the micro-interaction spec — `ux-product-
-   spec.md` §10), F4 (slider thumb below WCAG 2.5.8's touch-target minimum — added to
-   Phase 6's "Do" list, visual size unchanged, only the hit-target padded), F6 (no
-   focus-management rule for step change/route-guard redirect/draft restore-or-
-   discard/inline tooltip expansion — new `wizard-state.md` §6.5), F7 (a disabled
-   "Next" gave no clue which field was blocking it — `wizard-state.md` §2, now moves
-   focus to the first invalid field on click), F8 (payer-mix group-sum errors weren't
-   programmatically wired to the individual sliders — `wizard-state.md` §2, `aria-
-   describedby`), F9 (no Indian number-formatting rule despite the explicit India-first
-   premise — new `ux-product-spec.md` §10.5, `Intl.NumberFormat('en-IN')`, lakh/crore
-   grouping, `-₹` for negatives, full-figure-in-exports rule).
-3. **Two findings were genuine judgment calls, resolved with Jay directly after an
-   Opus advisor pass:**
-   - **F1/ISS-14 — `targetIrr` (Group F) was `required: true` with no sourced default,
-     sitting inside the Advanced Mode panel that's collapsed by default.** Per
-     `wizard-state.md` §2's own step-gate rule, this meant a Basic-Mode-only user
-     could never reach `/results` without opening a panel they don't know exists and
-     entering a number that, per two research passes, doesn't publicly exist anywhere
-     for Indian hospitals — directly contradicting the product's Basic/Advanced
-     premise. **Resolved:** auto-fill `targetIrr` with a computed `discountRate +
-     400bps` heuristic (the midpoint of the range `common-assumptions.json` already
-     suggested for exactly this case), shown with the same "Typical" tag every sourced
-     default uses and a tooltip explicit that it's a suggestion, not research — the
-     Investment Outlook score itself never consumed this field directly
-     (`financial-model-spec.md` §1.6 uses `discountRate` as the hurdle), so nothing
-     about the scoring model changed. Jay chose this over (a) the same auto-fill plus
-     an extra one-click confirmation step on the results page, and (b) leaving it
-     required-but-deferred to a prompt on `/results` instead of the wizard step.
-   - **F5/ISS-15 — no multi-tab or shared-device behavior was defined for the wizard's
-     `localStorage` draft.** Two tabs open on the same draft would each independently
-     debounce-save to the same key with no cross-tab awareness — last save silently
-     wins, the other tab's edits vanish with no warning; also nothing disclosed that
-     the draft (hospital name, bed count, cost figures) persists indefinitely on a
-     possibly-shared device. **Resolved:** a `storage`-event conflict banner ("updated
-     in another tab — reload to see the latest version") plus explicit shared-device
-     copy next to the existing "Start over" control. Jay chose this over (a) full
-     real-time cross-tab sync via `BroadcastChannel` (both Claude and the Opus advisor
-     flagged this as disproportionate engineering for a single-user v1 tool with no
-     other client-side sync surface), and (b) a text-only warning with no actual
-     conflict detection (flagged as too easy to miss to prevent real data loss).
-4. **Bonus doc-drift catch, found while investigating F1:** `agent-build-plan.md`
-   Phase 7 and `design/ux-product-spec.md` §6 both incorrectly grouped Discount Rate
-   with Target IRR as "no sourced default, must visibly prompt" — Discount Rate
-   actually has a real one (`typical: 12.5%`, Medium confidence, S22/S23, already in
-   `common-assumptions.json`). Corrected in both places, plus the same stale pairing
-   in `SPEC.md` §18.3 and §23.4, and `content/benchmark-notes.md`'s "why some fields
-   show no default" example (swapped its Target-IRR example for inflation rate, which
-   genuinely is still left blank, and added the Target-IRR heuristic exception
-   underneath).
-**Files touched:** `design/ux-product-spec.md`, `app/forms/wizard-state.md`,
-`agent-build-plan.md`, `content/inputs-metadata.json`,
-`equipment-data/common-assumptions.json`, `SPEC.md` (§18.3, §23.4),
-`financial-model-spec.md` (§1.6), `content/benchmark-notes.md`, `ISSUES.md` (ISS-14,
-ISS-15 added, both Resolved), `HANDOFF.md` (this entry + Current State). No `/app`,
-`/formulas`, or equipment-specific `equipment-data/*.json` files touched — this was a
-planning/spec-layer pass, consistent with Phase 6 not having started yet.
-**What's next:** Phase 6 (wizard UI implementation) — pure build from here, against a
-now-audited Phase 4/5 spec set. No open planning items remain blocking it.
-
-### 2026-07-13 — Added project-local pre-build assurance skill
-**What changed:** Created `.claude/skills/capexiq-prebuild-assurance/` after the UI
-audit and its fixes were completed. The skill combines the remaining pre-build audit
-surfaces into one disciplined pass: input/schema/formula/output traceability,
-independently calculated golden scenarios, conditional model invariants, explicit
-unit/time-basis checks, canonical-result consumption, browser-storage trust and
-privacy, DOM/filename injection, spreadsheet/Word/ZIP export threats, dependencies,
-and Cloudflare/static-host security controls. It distinguishes confirmed defects from
-specification gaps, test gaps, future implementation gates, and accepted risks; it
-does not edit files during the audit. Detailed matrices live in three progressive
-references, with primary-source provenance in a fourth.
-
-**Sources:** CapexIQ's current specs/contracts; OWASP HTML5/XSS/CSP/third-party-script
-and spreadsheet-formula-injection guidance; official Next.js static-export and
-Cloudflare Pages header documentation.
-
-**Files touched:** `.claude/skills/capexiq-prebuild-assurance/` (new), `DIRECTORY.md`,
-`HANDOFF.md`.
-
-**What's next:** Run `$capexiq-prebuild-assurance` in audit-only mode, review and
-accept/reject its evidence-backed findings, then consolidate accepted checklist edits
-into `agent-build-plan.md` before Phase 6.
+See `handoff-archive/2026-Q3.md` for entries before 2026-07-13's pre-build-audit-fixes
+entry above (including the `$capexiq-ui-assurance` audit and the creation of the
+`capexiq-prebuild-assurance` skill).
 
 See handoff-archive/2026-Q3.md for entries before 2026-07-13.

@@ -12,9 +12,116 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
-*(Nothing open as of 2026-07-13 — every tracked issue is either accepted or resolved.
-Check back here first before assuming that stays true; add a new entry the moment you
-spot a real problem.)*
+Six items opened 2026-07-13 during Phase 6 (wizard UI) implementation — flagged
+proactively rather than silently decided, per this project's own discipline. All core
+functionality works (109 pre-existing + 52 new tests all pass, `npm run build` and
+`npx tsc --noEmit` both clean) — these are judgment calls, deferred scope, or
+verification/coverage gaps against the letter of Phase 6's Definition of Done, not
+broken functionality. See ISS-21/ISS-23 specifically for where the DoD's "every edge
+case has a test" and the UI assurance audit's slider touch-target ask aren't 100% met.
+
+### ISS-17 — Realization % / claim-deduction % combination is an engineering interpretation, not a verified contract
+**Area:** formulas / financial model
+**Status:** open
+**What:** `content/tooltip-copy.md` keeps "Realization % by payer type" and "Claim
+deduction / disallowance % by payer type" as two separately-estimated Advanced Mode
+inputs ("kept separate... so the two effects aren't conflated"), but
+`formulas/realization.ts`'s `realizedRevenuePerUse()` only accepts one
+`realizationPercentage` per payer — there's no golden scenario test exercising claim
+deduction to confirm how the two should combine. `app/forms/resolvePayerMix.ts`
+implements `effectiveRealization = realization% × (1 − claimDeduction% / 100)` (two
+independent multiplicative haircuts), documented inline, but this is Claude's
+engineering judgment, not something traced to a spec or test. **Ask:** confirm this
+composition is what was intended, or correct it.
+
+### ISS-18 — Lease acquisition mode has no bounded term; rental applied for the full useful-life horizon
+**Area:** formulas / financial model
+**Status:** open
+**What:** `content/inputs-metadata.json`'s Group C has no `leaseTenureMonths` field
+(unlike Loan's `loanTenureMonths`), and no golden scenario test covers Lease at all.
+`app/forms/toAssessmentInputs.ts` applies `leaseRentalPerMonth × 12` as an annual
+financing cost for every year of `usefulLifeYears`, by analogy with SPEC.md §14/§19's
+"EMI / lease payment" parity language, since a lease has no payoff date the way a loan
+does. Not verified against any spec text or test — a real financial-modeling question
+(should a lease term be a separate field, capped at less than the full useful life?)
+that wasn't settled before this pass. **Ask:** confirm this assumption or add a
+`leaseTenureMonths` field.
+
+### ISS-19 — Advanced Mode Group B (utilization ramp-up) and Group E's per-year maintenance override are collected but not yet consumed by the canonical pipeline
+**Area:** formulas / wizard
+**Status:** open
+**What:** `formulas/computeAssessment.ts` assumes flat mature usage from day one — the
+4 ramp-up percentages (Month 1-3/4-6/7-12/Year 2+) and `expectedMatureUtilization` are
+captured in wizard state and persisted, but no formula reads them yet. Similarly,
+`maintenanceCostByYearPct`'s per-year stepped override (the field's own
+`content/inputs-metadata.json` note calls it "an optional stepped-schedule override of
+basic.amcCmcCostPostWarranty") is collected and resizes correctly with
+`usefulLifeYears` (wizard-state.md §5), but `toAssessmentInputs.ts` still always builds
+the schedule from the 4-parameter `warrantyYears`/`cmcYears`/`cmcAnnualCost`/
+`amcAnnualCost` shape, ignoring any per-year entries. Both match this project's
+existing pattern of collecting a field ahead of the formula that will consume it (e.g.
+`inflationRate`, `priceEscalationPct`) — not silently broken, just not load-bearing
+yet. **Next step:** a ramp-aware and stepped-schedule-aware revision of
+`computeAssessment.ts`, likely alongside Phase 7 or Phase 9's sensitivity work.
+
+### ISS-20 — Slider keyboard input shares the pointer-drag debounce instead of firing immediately
+**Area:** UI / accessibility polish
+**Status:** open
+**What:** `app/components/SliderField.tsx` debounces the reducer dispatch ~120ms on
+every `input` event to avoid firing dozens of recalculations during a fast drag
+(wizard-state.md §5) — but §5 also specifies keyboard arrow-key presses should
+recalculate immediately, no debounce, since a single keypress isn't a rapid-fire drag.
+The current implementation can't yet distinguish a keyboard `input` event from a
+pointer-drag `input` event without extra plumbing, so both share the same debounce. A
+barely-perceptible (~120ms) delay, not a correctness issue — flagged for a follow-up
+pass rather than fixed now.
+
+### ISS-21 — No interactive browser QA performed for Phase 6 (environment limitation)
+**Area:** verification
+**Status:** open
+**What:** This session's Claude Code environment had no working Chrome extension
+connection (`claude-in-chrome` reported "browser connection is not working"), so no
+actual click-through of the wizard, visual/layout check, or confirmation that the
+route guard, focus management, or the multi-tab conflict banner behave correctly in a
+real browser was possible. Mitigated, not eliminated: verified via the full automated
+test suite (161 tests: 109 pre-existing + 52 new, covering the reducer, validation,
+persistence, and canonical pipeline against golden scenarios), a plain HTTP fetch of
+every route confirming a 200 status/correct `<h1>`/no error markers, and — added after
+first drafting this entry, specifically to close part of this gap —
+`tests/wizard/components.test.tsx`, two React Testing Library tests exercising real
+DOM events against the actual rendered components: the "Typical" tag correctly
+disappearing on first edit, and clicking a disabled "Next" moving real DOM focus to the
+first invalid field (audit F7) rather than navigating. Still not covered: multi-step
+navigation between real routes, the route guard's redirect, the live-region
+announcements, and anything visual (layout, contrast, responsive behavior).
+**Recommend:** a manual click-through pass (`npm run dev`, walk the full pre-step →
+Investment → Usage → Costs → Results flow at least once) before treating Phase 6 as
+fully signed off. Also not exhaustively covered by tests: every single edge-case bullet
+`wizard-state.md` enumerates (agent-build-plan.md Phase 6's Definition of Done asks for
+"every Phase-5-enumerated edge case has a named, passing test") — the reducer's core
+transitions, validation, financing modes, and 2 interactive behaviors are tested (161
+tests total), but slider drag-start/in-progress/end timing, the exact focus-move-to-h1
+behavior on Next/Back, the multi-tab conflict banner actually firing end-to-end, and
+"Start over"'s double-click-to-confirm flow are implemented but not individually
+unit-tested. Same root cause as the browser-QA gap above — flagging rather than
+claiming the DoD bullet is 100% met.
+
+### ISS-23 — Slider touch target doesn't meet the audit's full ask (native `<input type="range">` limitation)
+**Area:** UI / accessibility
+**Status:** open
+**What:** `agent-build-plan.md` Phase 6's "Do" list (UI assurance audit F4) asks for the
+visible 18-20px thumb (SPEC.md §25.5) to have a separate, transparent ≥24×24 CSS px
+touch target, since an author-styled thumb doesn't get WCAG 2.5.8's user-agent-size
+exception. `app/components/SliderField.tsx`'s slider is a native `<input
+type="range">`; CSS padding was added around the track, but a native range input
+doesn't expose a way to grow the *thumb's* own hit area independent of its rendered
+size across browsers — the padding only enlarges the row's general clickable area, not
+specifically the thumb. Meeting F4's literal ask requires a custom-built slider (a
+positioned div thumb over a hidden native input, or a fully custom pointer-handling
+component), which is a materially bigger build than Phase 6 scoped. **Recommend:**
+either accept native range-input touch sizing (most mobile browsers apply their own
+minimum touch target to range thumbs already) or scope a custom slider component as
+follow-up work, ideally alongside Phase 7's chart/interaction work.
 
 ---
 
@@ -164,6 +271,25 @@ is a placeholder only, safe to replace once real product screenshots exist.
 ---
 
 ## Resolved
+
+### ISS-22 — Payer-mix group's `required: true` fields had no default, same class of bug as the resolved targetIrr issue (F1) — found and fixed during Phase 6
+**Area:** wizard / data
+**What was flagged:** Found while implementing the Phase 6 wizard reducer, not by
+either prior audit. `content/inputs-metadata.json`'s `payerMixSharePct` (Advanced Group
+A) is `required: true` per payer type with a group-sum-to-100% constraint, and — like
+`targetIrr` before its F1 fix — has no sourced default and sits inside the collapsed
+Advanced panel. Read literally, `wizard-state.md` §2's step-gate rule ("every
+`required: true` field on that step... valid") would have blocked every Basic-Mode-only
+user from ever reaching `/results`, since the 5 payer shares would sit at `null` forever
+unless the user opened Advanced Mode and filled them in by hand.
+**Fix:** applied the same pattern as F1's resolution — `app/forms/initialState.ts`
+auto-fills an implicit single-payer default (100% private cash, 100% realization, 0
+collection delay, matching SPEC.md §14.3's "Basic Mode calculates first-pass billed
+revenue") at state initialization, so the group-sum constraint is satisfied by default
+and the gate needs no special case. `app/forms/resolvePayerMix.ts` always reads from
+this state (no `advancedOpen`-conditional branching) since it's correct in both modes.
+**Files touched:** `app/forms/initialState.ts`, `app/forms/resolvePayerMix.ts`, see also
+`tests/wizard/wizardReducer.test.ts`'s "payer mix defaults" test.
 
 ### ISS-16 — Basic Mode's blended AMC/CMC default-source formula, confirmed by Jay
 **Area:** data / product

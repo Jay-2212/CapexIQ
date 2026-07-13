@@ -13,3 +13,8 @@ every file, no placeholders:
 - `inputs-metadata.json` — UI/control schema only (control type, slider bounds,
   validation rules, `tooltipKey` pointer into `tooltip-copy.md`) — **zero numeric
   defaults**, by design, see ISSUES.md ISS-9/ISS-4
+- `tooltip-copy.generated.json` — added Phase 6 (2026-07-13). A machine-readable parse
+  of `tooltip-copy.md`'s 7-slot entries, keyed by the same string as `tooltipKey`,
+  consumed by `app/forms/tooltipCopy.ts` at runtime. `tooltip-copy.md` stays the
+  authoritative, human-edited source — re-run `node scripts/generateTooltipCopy.mjs`
+  any time it changes; the generated file is not hand-edited.
