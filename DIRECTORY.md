@@ -52,8 +52,8 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │   ├── page.tsx                  landing page (design/ux-product-spec.md §5) —
 │   │                              header, hero, how-it-works, personas, footer
 │   ├── methodology/page.tsx      Methodology page (§5.3) — renders report-templates/
-│   │                              methodology.md + formula-appendix.md; functional,
-│   │                              not bespoke-designed (ISS-24)
+│   │                              methodology.md + formula-appendix.md as a two-column
+│   │                              docs layout with a sticky table of contents (ISS-24)
 │   ├── globals.css               imports design/tokens.css + all Phase 6 component CSS
 │   ├── (assessment)/             route group sharing one WizardProvider across
 │   │   │                          /assess/* and /results (route groups don't affect
@@ -297,8 +297,9 @@ passes), a fully implemented and tested formula engine, complete content/copy, a
 finished design system + UX spec, the wizard state-transition doc, the wizard UI
 itself — the pre-step, 3-step Basic Mode wizard, and Advanced Mode panel — and, as of
 the first manual browser QA session (2026-07-13), the landing page (`app/page.tsx`)
-and a minimal Methodology page (`app/methodology/page.tsx`). All of it is real,
-working code with 175 passing tests (`npm test`), a clean `npm run build`, and a clean
+and a Methodology page (`app/methodology/page.tsx`, given a full design pass in a
+same-day follow-up session — see `ISSUES.md` ISS-24). All of it is real,
+working code with 183 passing tests (`npm test`), a clean `npm run build`, and a clean
 `npx tsc --noEmit`. Specifically remaining:
 
 - **Phase 7 — Results dashboard and charts.** `/results` currently shows real numbers

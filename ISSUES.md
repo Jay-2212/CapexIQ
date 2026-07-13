@@ -12,39 +12,7 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
-### ISS-24 — Methodology page is unstyled/functional-only, not a designed page
-**Area:** UI / design
-**What was flagged:** 2026-07-13, first manual browser QA pass of Phase 6 (this
-session Jay explicitly asked for, using `/chrome` + Opus advisor). `design/
-ux-product-spec.md` §5.3 calls for a separate Methodology page linked from the
-landing page's header/footer; it didn't exist at all going into this session (the
-landing page itself didn't exist either — see the Change Log entry below). Built as
-part of the same session, at `app/methodology/page.tsx`, but deliberately scoped
-narrow: it renders `report-templates/methodology.md` and `formula-appendix.md`
-through a small dependency-free markdown-to-JSX renderer
-(`app/methodology/renderSimpleMarkdown.tsx`), styled with plain prose CSS
-(`.methodology-page*` in `app/globals.css`) — readable, but not a bespoke-designed
-page the way the landing page and wizard are. Jay's own ask this session was "build
-the hero page," not this one; a real design pass on this page is future work.
-**Not urgent:** the page is fully functional and on-brand (uses the same design
-tokens), just visually plain compared to the rest of the product.
-
-### ISS-25 — Required-field errors show immediately on a completely untouched page load — spec-intended, but worth Jay revisiting
-**Area:** UX / validation
-**What was flagged:** 2026-07-13, same manual QA pass. On a fresh `/assess` load
-with no draft, required fields (e.g. Hospital bed size, City/tier) show a red border
-and red error text before the user has touched anything. Confirmed via `app/forms/
-wizard-state.md` §2 this is **spec-intended, not a bug**: "Validate on every change,
-not on blur or submit... an invalid value shows its `errorMessage` immediately... No
-'you'll find out when you hit Next.'" An empty required field is, by that rule, an
-invalid value from the first render.
-**Why still logged:** it's a defensible design choice (immediate feedback, no
-surprise validation later) but also a real deviation from the more common "don't
-red-flag a field before the user has interacted with it" convention, and Jay asked
-to flag rather than silently accept or silently change it. Revisit if it reads as
-unpolished/alarming in real user testing.
-**Status:** deliberately not changed this session — flagged for Jay to decide later,
-not an engineering task in the meantime.
+(empty)
 
 ---
 
@@ -194,6 +162,85 @@ is a placeholder only, safe to replace once real product screenshots exist.
 ---
 
 ## Resolved
+
+### ISS-25 — Required-field errors showed immediately on a completely untouched page load
+**Area:** UX / validation
+**What was flagged:** 2026-07-13, first manual browser QA pass of Phase 6. On a fresh
+`/assess` load with no draft, required fields (e.g. Hospital bed size, City/tier)
+showed a red border and red error text before the user had touched anything.
+Confirmed spec-intended per `app/forms/wizard-state.md` §2 at the time ("Validate on
+every change... shows immediately... no 'you'll find out when you hit Next'") but
+flagged for Jay to reconsider rather than silently accepted or silently changed.
+**Resolution (2026-07-13, follow-up session, advisor-checked before implementation):**
+kept validation *truth* exactly as before — still computed live, on every change, with
+zero debounce, and still the sole thing driving the step-gate/route guard — but split
+off *display* from truth. A field's red error now only surfaces once that field has
+been **revealed**: either the user has edited it (the existing `touched` map, same one
+that drives the "Typical" pill, §6), or the user clicked "Next" while the containing
+step was incomplete (a new, deliberately separate `attemptedSteps` map — writing this
+to `touched` instead, as first drafted, would have incorrectly cleared the "Typical"
+pill on every still-default, still-valid field on the same step; the advisor caught
+this before implementation). A blocked "Next" now reveals every blocked field on that
+step at once (previously only the one field that received focus), which is a strict
+improvement over the prior F7 behavior, not just a reveal-timing change. A field's
+"step," for gating purposes, is resolved via a new static path→step lookup
+(`wizardValidation.ts`'s `stepForFieldPath`) rather than `state.currentStep` — the
+latter is only synced by `RouteGuard`'s effect on route change and isn't reliable
+before that effect runs (the same race class ISS-26 already fixed once for hydration).
+`app/forms/wizard-state.md` §2 rewritten to describe the reveal rule precisely instead
+of contradicting the code. 8 new/updated tests across
+`tests/wizard/{wizardReducer,wizardValidation,components}.test.tsx`, including a
+regression test that a blocked "Next" doesn't clear a sibling field's "Typical" pill.
+Verified live in the browser: no red on a fresh load, both blockers appear together on
+a blocked "Next," and the "Typical" pill on `acquisitionMode` survives that click.
+**Regression caught by the advisor before this was called done:** the pre-step
+(`app/(assessment)/assess/page.tsx`) predates `StepNav`'s extraction and had its own
+inline `Button` using the native `disabled` attribute instead of `StepNav`'s
+`aria-disabled` + focus-jump pattern — so a blocked "Next: Investment" there fired no
+`onClick` at all. Combined with the reveal-gating above, the pre-step's own required
+fields (Hospital bed size, City/tier — the exact fields ISS-25 was originally reported
+against) would have shown no red *ever* until individually touched, with a dead
+button giving no hint why. Fixed by giving the pre-step's Next button the same
+`goNext` logic `StepNav` uses (dispatch `ATTEMPT_STEP` for `"preStep"`, focus the
+first invalid field) — `stepForFieldPath` already resolved `"preStep"` correctly, only
+the dispatch trigger was missing. New component test, verified live in the browser.
+**Files touched:** `app/forms/wizardTypes.ts`, `app/forms/wizardReducer.ts`,
+`app/forms/initialState.ts`, `app/forms/useFieldController.ts`,
+`app/forms/wizardValidation.ts`, `app/components/StepNav.tsx`,
+`app/advanced/GroupA.tsx`, `app/forms/wizard-state.md`,
+`app/(assessment)/assess/page.tsx`.
+
+### ISS-24 — Methodology page was unstyled/functional-only, not a designed page
+**Area:** UI / design
+**What was flagged:** 2026-07-13, same manual QA pass. `app/methodology/page.tsx`
+rendered `report-templates/methodology.md`/`formula-appendix.md` through a small
+markdown-to-JSX renderer with plain prose CSS — readable, on-brand tokens, but no
+bespoke layout, unlike the landing page and wizard.
+**Resolution (2026-07-13, follow-up session):** before restyling, read both source
+docs in full rather than assuming the renderer's own "doesn't handle lists/tables/
+links" caveat was benign — it wasn't fully benign: neither doc actually uses lists,
+tables, or links (confirmed directly), but both use extensive single-backtick inline
+code spans (`` `formulas/revenue.ts` `` style, 93 lines combined) that
+`renderSimpleMarkdown`'s `renderInline` didn't handle at all, rendering literal stray
+backtick characters around plain text — a real, visible defect, not just a missing
+style. Fixed `app/methodology/renderSimpleMarkdown.tsx`: `renderInline` now handles
+`` `code` `` alongside `**bold**`, and every heading gets a slugified `id` (via a new
+`idPrefix` argument, namespaced per source doc to avoid collisions since both docs
+share one page) plus a new `extractHeadings`/`nestHeadings` pair so the page can build
+a table of contents from the exact same heading set. Rebuilt `app/methodology/
+page.tsx` as a two-column documentation layout: a sticky in-page table of contents
+(grouped "Methodology" / "Formula Appendix", with formula-appendix's h3 subsections
+nested under their h2 parent) next to the rendered content, reusing the landing
+page's own header/footer for visual consistency. Fixed an incidental a11y issue found
+while doing this: the old version let each source doc's own leading `# Title` line
+render as a second/third page-level `<h1>`; the page now strips that line
+(`splitTitle`) and supplies its own single `<h1>`, with the appendix's own title
+demoted to an `<h2>` section header. No new marketing copy introduced — the ToC
+labels are the docs' own section titles, per §5.3's "no sales language" rule; no
+gradients/glassmorphism per §1.3. Collapses to a single column below 900px (the
+existing 640px breakpoint is too narrow for a sensible two-column split).
+**Files touched:** `app/methodology/renderSimpleMarkdown.tsx`, `app/methodology/
+page.tsx`, `app/globals.css`.
 
 ### ISS-26 — First manual browser QA of Phase 6: 3 real bugs found and fixed, landing page built
 **Area:** UI / state management / new feature

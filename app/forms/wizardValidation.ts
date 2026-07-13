@@ -98,6 +98,25 @@ const STEP_FIELD_PATHS: Record<Exclude<WizardStep, "results">, string[]> = {
 
 export { STEP_FIELD_PATHS };
 
+/** ISS-25: which step a field's error-reveal gate (touched || attempted[step])
+ *  should check. Deliberately NOT derived from `state.currentStep` — that's only
+ *  synced by RouteGuard's effect on route change, which lags render by one commit
+ *  (the same class of race ISS-26 fixed for hydration) and is unset entirely in any
+ *  test/context that renders a field without RouteGuard mounted. A field's step is a
+ *  static fact about the field, not something that should depend on which route
+ *  happens to be active when it renders.
+ *  `preStep.*`/`basic.*` are exhaustively covered by STEP_FIELD_PATHS (5 and 15
+ *  fields respectively, matching PreStepFields/BasicFields exactly) — every
+ *  `advanced.*` path not explicitly listed there still belongs to "costs", since
+ *  AdvancedPanel (all of Groups A-F) only ever mounts on the costs step page. */
+export function stepForFieldPath(path: string): Exclude<WizardStep, "results"> | null {
+  for (const step of Object.keys(STEP_FIELD_PATHS) as Exclude<WizardStep, "results">[]) {
+    if (STEP_FIELD_PATHS[step].includes(path)) return step;
+  }
+  if (path.startsWith("advanced.")) return "costs";
+  return null;
+}
+
 /** The first invalid/missing required field on a step, in field order — used both by
  *  the step-gate and by the disabled-"Next" focus behavior (wizard-state.md §2, audit
  *  F7): clicking a disabled Next moves focus here. */

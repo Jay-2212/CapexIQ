@@ -110,6 +110,14 @@ export interface AdvancedFields {
  *  same dotted path used elsewhere (see fieldPath.ts). */
 export type TouchedFieldMap = Record<string, boolean>;
 
+/** True once the user has clicked "Next" while a given step was incomplete —
+ *  reveals every blocked field's error on that step at once (wizard-state.md §2's
+ *  Next-click reveal, ISS-25). Deliberately separate from TouchedFieldMap: writing
+ *  to `touched` for this would incorrectly clear the "Typical" pill (§6) on every
+ *  still-default, still-valid field on the step. Ephemeral UI state, reset on
+ *  RESTORE_DRAFT/START_OVER like hasHydrated/transitionInFlight. */
+export type AttemptedStepMap = Partial<Record<Exclude<WizardStep, "results">, boolean>>;
+
 export interface WizardState {
   schemaVersion: 1;
   savedAt: string | null;
@@ -122,6 +130,11 @@ export interface WizardState {
    *  the untouched/edited visual states (ux-product-spec.md §6). Defaults (once
    *  applied) are NOT in this map, so they render muted until first edited. */
   touched: TouchedFieldMap;
+  /** See AttemptedStepMap doc comment. Drives error-display reveal only — never
+   *  validation truth (isStepComplete/firstInvalidFieldOnStep/RouteGuard don't read
+   *  this; they must keep working identically whether or not the user has clicked
+   *  Next yet). */
+  attemptedSteps: AttemptedStepMap;
   /** True for the single step-advance/step-submission in flight — the idempotency
    *  guard from wizard-state.md §9. */
   transitionInFlight: boolean;

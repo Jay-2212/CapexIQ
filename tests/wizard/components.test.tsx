@@ -10,6 +10,7 @@ import { WizardProvider, useWizard } from "../../app/forms/WizardContext";
 import { NumberField } from "../../app/components/NumberField";
 import { SliderField } from "../../app/components/SliderField";
 import { StepNav } from "../../app/components/StepNav";
+import PreStepPage from "../../app/(assessment)/assess/page";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
@@ -44,7 +45,7 @@ describe("NumberField — the 'Typical' tag (ux-product-spec.md §6)", () => {
 });
 
 describe("SliderField — never shows a fake value for a genuinely unset required field", () => {
-  it("displays the paired number input empty (not def.min) when MRI's billedTariffPerUse has no sourced default, and required-error stays visible", () => {
+  it("displays the paired number input empty (not def.min) when MRI's billedTariffPerUse has no sourced default; the required-error stays suppressed until touched (ISS-25), then tracks the value", () => {
     render(
       <WizardProvider>
         <SelectMri />
@@ -58,10 +59,16 @@ describe("SliderField — never shows a fake value for a genuinely unset require
     // show empty, not silently display def.min (500) as if it were a real answer.
     const exactValueInput = screen.getByLabelText(/exact value/i);
     expect(exactValueInput).toHaveValue(null);
-    // The field is still correctly flagged required/invalid underneath.
+    // ISS-25: the field is invalid underneath (required, empty) but nothing has
+    // touched it yet on this fresh render — no red state before interaction.
+    expect(screen.queryByText(/Enter a billed amount between/)).not.toBeInTheDocument();
+
+    // Touching the field (entering a still-out-of-range value) marks it touched and
+    // reveals the error.
+    fireEvent.change(exactValueInput, { target: { value: "0" } });
     expect(screen.getByText(/Enter a billed amount between/)).toBeInTheDocument();
 
-    // Typing a real value clears the fake-empty state and the error together.
+    // Typing a real value clears the error.
     fireEvent.change(exactValueInput, { target: { value: "1500" } });
     expect(exactValueInput).toHaveValue(1500);
     expect(screen.queryByText(/Enter a billed amount between/)).not.toBeInTheDocument();
@@ -81,9 +88,82 @@ describe("StepNav — disabled-\"Next\" moves focus to the first invalid field (
     const nextButton = screen.getByRole("button", { name: "Next" });
     expect(nextButton).toHaveAttribute("aria-disabled", "true");
 
+    // ISS-25: on a fresh, untouched render, neither field shows red yet.
+    expect(screen.queryByText(/Enter the equipment.s purchase cost/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Enter installation.civil cost/)).not.toBeInTheDocument();
+
     fireEvent.click(nextButton);
 
     const purchaseCostInput = screen.getByLabelText(/Purchase cost/);
     expect(purchaseCostInput).toHaveFocus();
+    // A blocked Next reveals every blocked field on the step at once, not just the
+    // one focus lands on.
+    expect(screen.getByText(/Enter the equipment.s purchase cost/)).toBeInTheDocument();
+    expect(screen.getByText(/Enter installation.civil cost/)).toBeInTheDocument();
+  });
+});
+
+describe("PreStepPage — blocked \"Next: Investment\" reveals its own required fields too (ISS-25 follow-up)", () => {
+  it("has no red on a fresh load, and clicking Next while incomplete reveals both missing required fields with focus on the first", () => {
+    render(
+      <WizardProvider>
+        <PreStepPage />
+      </WizardProvider>
+    );
+
+    fireEvent.click(screen.getByText("MRI"));
+
+    // ISS-25: fresh, untouched render — no red yet, even though both fields are
+    // genuinely empty/required underneath.
+    expect(
+      screen.queryByText(/Enter your hospital.s bed count/)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Select the city tier closest to your hospital/)
+    ).not.toBeInTheDocument();
+
+    const nextButton = screen.getByRole("button", { name: "Next: Investment" });
+    expect(nextButton).toHaveAttribute("aria-disabled", "true");
+
+    fireEvent.click(nextButton);
+
+    const bedSizeInput = screen.getByLabelText(/Hospital bed size/);
+    expect(bedSizeInput).toHaveFocus();
+    expect(screen.getByText(/Enter your hospital.s bed count/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Select the city tier closest to your hospital/)
+    ).toBeInTheDocument();
+  });
+});
+
+describe("ISS-25 — red validation state is gated by touch/attempt, not shown on a fresh load", () => {
+  it("shows no error on an untouched required field, even though it's genuinely invalid underneath", () => {
+    render(
+      <WizardProvider>
+        <NumberField path="basic.purchaseCost" />
+      </WizardProvider>
+    );
+
+    expect(screen.queryByText(/Enter the equipment.s purchase cost/)).not.toBeInTheDocument();
+  });
+
+  it("a blocked Next does not clear the 'Typical' pill on a still-default, still-valid field on the same step", () => {
+    render(
+      <WizardProvider>
+        <SelectMri />
+        <NumberField path="basic.warrantyYears" />
+        <NumberField path="basic.purchaseCost" />
+        <StepNav step="investment" complete={false} backHref={null} nextHref="/assess/usage" />
+      </WizardProvider>
+    );
+
+    fireEvent.click(screen.getByText("select mri"));
+    expect(screen.getByText("Typical")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+
+    // ATTEMPT_STEP reveals purchaseCost's error but must not have written to
+    // `touched` — warrantyYears' Typical pill must survive.
+    expect(screen.getByText("Typical")).toBeInTheDocument();
   });
 });

@@ -13,7 +13,15 @@ import { FieldRenderer } from "../components/FieldRenderer";
 export function GroupA() {
   const { state } = useWizard();
   const groupErrorId = useId();
-  const groupError = payerMixGroupError(state);
+  // ISS-25: same reveal-gating as any other field — don't show the group-sum error
+  // until the user has actually touched one of this group's own share sliders, or
+  // attempted to advance past this step while it was incomplete.
+  const groupTouched = PAYER_TYPES.some(
+    (payer) => state.touched[`advanced.A.payerMixSharePct.${payer.suffix}`] === true
+  );
+  const groupAttempted = state.attemptedSteps.costs === true;
+  const groupError =
+    groupTouched || groupAttempted ? payerMixGroupError(state) : null;
 
   return (
     <fieldset className="advanced-group">

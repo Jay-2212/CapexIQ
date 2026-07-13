@@ -11,22 +11,52 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-07-13, first manual browser QA session)*
+*(Last updated: 2026-07-13, Phase 6 "part 2" follow-up session — ISS-24/ISS-25 resolved)*
 
-**Phase 6 (wizard UI implementation) is built, browser-QA'd for the first time, and
-every issue found — in planning or in this session's live QA — is resolved.** `/app`
-has a real, working landing page, pre-step + 3-step Basic Mode wizard + Advanced Mode
-panel + a minimal `/results` page + a Methodology page, all wired to a single
-canonical calculation pipeline. Planning was already doubly audited before the
-implementation session started (`$capexiq-ui-assurance` + `$capexiq-prebuild-
-assurance`, both merged 2026-07-12).
+**Phase 6 (wizard UI implementation) is built, browser-QA'd, and every issue anyone
+has flagged against it — in planning, in the first live-QA session, or in this
+follow-up session — is now resolved.** `/app` has a real, working landing page,
+pre-step + 3-step Basic Mode wizard + Advanced Mode panel + a minimal `/results` page
++ a fully-designed Methodology page, all wired to a single canonical calculation
+pipeline. Planning was already doubly audited before the implementation session
+started (`$capexiq-ui-assurance` + `$capexiq-prebuild-assurance`, both merged
+2026-07-12).
 
-- **First interactive browser QA of Phase 6, this session** — `claude-in-chrome` was
-  disconnected for both prior Phase 6 sessions (see `ISSUES.md` ISS-21); this session
-  it worked, and Jay asked for a full manual visual/interaction pass plus an Opus
-  advisor sanity-check on every finding before fixing anything. Found and fixed 3 real
-  bugs, and built the previously-missing landing page — see `ISSUES.md` ISS-26 for the
-  full detail, not duplicated here:
+- **This session closed the two items the prior session's live-QA pass had
+  deliberately left open** (ISS-24, ISS-25) rather than silently deciding or silently
+  fixing them — both went through an Opus advisor pass before implementation, per
+  Jay's standing instruction. See `ISSUES.md`'s Resolved section for full reasoning;
+  summarized:
+  1. **ISS-25 — red validation state no longer shows before any interaction.**
+     Validation *truth* is unchanged (still live, zero debounce, still the only thing
+     driving the step-gate/route guard) but *display* is now gated: a field's error
+     only appears once it's been touched (edited) or the user has clicked "Next" on
+     its (incomplete) step — the latter via a new, deliberately separate
+     `attemptedSteps` map, kept apart from the existing `touched` map specifically so
+     it can't clear a sibling field's "Typical" pill (the advisor caught this on the
+     first draft, which would have written the reveal into `touched` directly). A
+     blocked "Next" now reveals *every* blocked field on the step at once, a strict
+     improvement over the original F7 behavior. `wizard-state.md` §2 rewritten to
+     match — it previously said the opposite ("shows immediately... no you'll find
+     out when you hit Next").
+  2. **ISS-24 — Methodology page redesigned as a two-column documentation layout.**
+     A sticky in-page table of contents (built from the same two source docs' own
+     headings) next to the rendered content, reusing the landing page's header/
+     footer. Along the way, found and fixed a real (not just cosmetic) renderer
+     defect: `renderSimpleMarkdown`'s inline handler had no support for single-
+     backtick code spans, which both source docs use 93 times combined — they were
+     rendering as literal stray backticks around plain text, not just unstyled.
+  Both verified live in the browser (dev server + `claude-in-chrome`), not just by
+  the added test coverage: fresh `/assess` load shows no red anywhere, a blocked
+  "Next" reveals every blocker while leaving a sibling field's "Typical" pill intact,
+  and the Methodology page's ToC anchors/nesting/inline code all render correctly.
+
+- **First interactive browser QA of Phase 6, prior session (2026-07-13)** —
+  `claude-in-chrome` was disconnected for both earlier Phase 6 sessions (see
+  `ISSUES.md` ISS-21); that session it worked, and Jay asked for a full manual visual/
+  interaction pass plus an Opus advisor sanity-check on every finding before fixing
+  anything. Found and fixed 3 real bugs, and built the previously-missing landing
+  page — see `ISSUES.md` ISS-26 for the full detail, not duplicated here:
   1. `app/globals.css` had zero CSS for most component class families actually used
      (pre-step, results, Advanced panel, banners, step-nav, start-over) — the pre-step
      rendered raw multi-thousand-pixel equipment images, `/results` was an unstyled
@@ -42,11 +72,6 @@ assurance`, both merged 2026-07-12).
      the cracks between phases (no phase's "Do" list explicitly included it, see
      `agent-build-plan.md`'s Phase 6 entry, now corrected). Root `/` had shown the
      original pre-Phase-6 scaffold placeholder text until this fix.
-  Two items flagged to `ISSUES.md` Open rather than silently decided or silently
-  fixed: ISS-24 (Methodology page is functional but visually plain, not a designed
-  page — deliberately out of scope this session) and ISS-25 (required-field errors
-  showing immediately on an untouched page load — confirmed spec-intended per
-  `wizard-state.md` §2, but flagged for Jay to reconsider, not changed).
 
 - **Canonical pipeline (`formulas/computeAssessment.ts`):** the single
   wizard-inputs-to-full-result derivation `wizard-state.md` §4 requires. Composition
@@ -54,9 +79,10 @@ assurance`, both merged 2026-07-12).
   metric, Basic Mode's flat blended maintenance rate vs. Advanced Mode's
   `cmcYears`-plus-sourced-rate schedule, financing-mode cash-flow treatment) is copied
   exactly from `tests/scenarios/`'s independently-hand-derived golden scenarios (A-D).
-  This follow-up session added two previously-missing pieces the pipeline now
-  consumes: a month-by-month utilization ramp-up (ISS-19) and a bounded Lease tenure
-  with buyout, mirroring Loan (ISS-18, Jay's decision after an Opus advisor pass).
+  The earlier of the two prior sessions added two previously-missing pieces the
+  pipeline now consumes: a month-by-month utilization ramp-up (ISS-19) and a bounded
+  Lease tenure with buyout, mirroring Loan (ISS-18, Jay's decision after an Opus
+  advisor pass).
 - **Full wizard**, `app/(assessment)/` (a Next.js route group sharing one
   `WizardProvider` across `/assess/*` and `/results`): pre-step (equipment tiles + bed
   size/city tier), Investment/Usage & Revenue/Operating Costs steps, the Advanced Mode
@@ -65,28 +91,27 @@ assurance`, both merged 2026-07-12).
   banner, write-failure handling), the route guard, focus management, and "Start
   over." `app/forms/` holds the reducer/schema/validation/persistence logic;
   `app/advanced/` and `app/components/` hold the UI.
-- **Verification:** 175 tests pass (173 going into this session + 2 new regression
-  tests for this session's RouteGuard and SliderField fixes), `npm run build` and
-  `npx tsc --noEmit` both clean. **Interactive browser QA has now actually happened**
-  — this session's `claude-in-chrome` connection worked, closing the gap `ISSUES.md`
-  ISS-21 tracked across the two prior sessions where it didn't.
-- **All six items this session's own predecessor logged to `ISSUES.md` are now
-  Resolved (ISS-17 through ISS-21, ISS-23)** — using the triage Jay asked for
-  ("/advisor" mode): fix directly where the issue turned out to be mechanical (ISS-19,
-  ISS-20, and most of ISS-21/ISS-23 once actually investigated), run genuine judgment
-  calls past an Opus advisor first (ISS-17, ISS-18, ISS-23), and only bring to Jay the
-  one call the advisor itself flagged as a real product decision (ISS-18's lease
-  archetype — Jay chose lease-to-own with a bounded tenure). See `ISSUES.md`'s Resolved
-  section for each entry's full reasoning.
-- **Landing page and Methodology page now built** (this session — see the bullet list
-  above) — `/` and `/methodology` are real routes, sitting outside the `(assessment)`
-  route group's shared `WizardProvider` (they don't need wizard state).
+- **Verification:** 183 tests pass (175 going into this session + 8 new/updated for
+  ISS-25's touch/attempt gating — reducer, validation, and component-level), `npm run
+  build` and `npx tsc --noEmit` both clean. **Interactive browser QA has now happened
+  twice** — once in the prior session (closing `ISSUES.md` ISS-21's original gap) and
+  again this session for both ISS-24 and ISS-25's fixes specifically.
+- **Every item ever logged to `ISSUES.md` is now Resolved** (ISS-17 through ISS-26) —
+  using the triage Jay asked for ("/advisor" mode): fix directly where the issue
+  turned out to be mechanical, run genuine judgment calls past an Opus advisor first
+  (ISS-17, ISS-18, ISS-23, ISS-24, ISS-25), and only bring to Jay the one call the
+  advisor itself flagged as a real product decision (ISS-18's lease archetype — Jay
+  chose lease-to-own with a bounded tenure). `ISSUES.md`'s Open section is empty.
+- **Landing page and Methodology page are both real, fully-designed routes** — `/`
+  (built in the prior session) and `/methodology` (given its own design pass this
+  session — see above), sitting outside the `(assessment)` route group's shared
+  `WizardProvider` (they don't need wizard state).
 - **New dev dependencies (implementation session):** `jsdom`,
   `@testing-library/react`/`jest-dom`, `@vitejs/plugin-react` (test-only),
   `lucide-react` (equipment-tile icon). `vitest.config.ts` (path aliases + jsdom
   environment) and `tests/setup.ts` (a `localStorage`/`scrollIntoView` polyfill, plus
-  an `afterEach(cleanup)` added this follow-up session once a multi-render test file
-  exposed that it was missing).
+  an `afterEach(cleanup)` added in a prior follow-up session once a multi-render test
+  file exposed that it was missing).
 
 **Next: Phase 7 (results dashboard and charts)** — the gauge, metric cards, break-even/
 cash-flow charts, risk callouts, narrative summary, and the Advanced settings pane,
@@ -123,6 +148,60 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-13 — Phase 6 "part 2": ISS-25's eager-validation reveal fixed, ISS-24's Methodology page redesigned
+**What changed:** Jay asked to close the two items the prior session's live-QA pass
+had deliberately left open rather than silently deciding: ISS-25 (red validation
+state showing before any user interaction) and ISS-24 (Methodology page functional
+but visually plain). Both went through an Opus advisor pass before implementation.
+1. **ISS-25.** Validation *truth* (is a value actually invalid right now) is
+   unchanged — still computed live, zero debounce, still the sole thing driving the
+   step-gate/route guard. What changed is *display*: a field's error now only shows
+   once the field is touched (edited — the pre-existing `touched` map, also used for
+   the "Typical" pill) or the containing step has been attempted (a new, deliberately
+   separate `attemptedSteps` map). The advisor caught a real flaw in the first draft
+   before it was written: reusing `touched` for the Next-click reveal, or writing to
+   it on blur, would have cleared the "Typical" pill on every still-default,
+   still-valid field on the same step. A blocked "Next" now reveals every blocked
+   field on its step at once (`StepNav.tsx` dispatches a new `ATTEMPT_STEP` action),
+   a strict improvement over the prior audit-F7 behavior of only focusing the first
+   one. A field's step, for gating, is resolved via a new static path→step lookup
+   (`wizardValidation.ts`'s `stepForFieldPath`) rather than `state.currentStep` —
+   the latter is only synced by `RouteGuard`'s effect on route change and isn't
+   reliable before that effect runs, which a standalone component test surfaced
+   directly (the same race class ISS-26 already fixed once for hydration).
+   `wizard-state.md` §2 rewritten — it previously documented the opposite behavior.
+   **A second advisor pass, before this was called done, caught a real regression:**
+   the pre-step (`app/(assessment)/assess/page.tsx`) predates `StepNav`'s extraction
+   and used the native `disabled` attribute on its own inline Button instead of
+   `StepNav`'s `aria-disabled`-plus-focus-jump pattern, so a blocked "Next:
+   Investment" there fired nothing — combined with the new reveal-gating, the
+   pre-step's own required fields (Hospital bed size, City/tier, the exact fields
+   ISS-25 was originally reported against) would have shown no red *ever* until
+   individually touched. Fixed by giving it the same `goNext` logic. 8 new/updated
+   tests total. Verified live in the browser: no red on a fresh `/assess` load, both
+   blockers appear together on a blocked "Next" on every step including the pre-step,
+   and a sibling field's "Typical" pill survives that click.
+2. **ISS-24.** Read both source docs in full before touching CSS, since the
+   renderer's own "doesn't handle lists/tables/links" caveat needed verifying, not
+   assuming — neither doc uses those, but both use single-backtick inline code spans
+   heavily (93 lines combined) that the renderer didn't handle at all, rendering
+   literal stray backticks — a real defect, not just missing style. Fixed
+   `renderSimpleMarkdown.tsx`: inline code-span support, slugified heading `id`s (via
+   a new `idPrefix`, namespaced per doc), and `extractHeadings`/`nestHeadings` for a
+   table of contents. Rebuilt `app/methodology/page.tsx` as a two-column
+   documentation layout — sticky ToC next to the content, reusing the landing page's
+   header/footer — and fixed an incidental a11y issue (each source doc's own leading
+   `# Title` line was rendering as a second/third page-level `<h1>`; the page now
+   supplies one `<h1>` and demotes the appendix's title to `<h2>`). No new marketing
+   copy; collapses to one column below 900px.
+**Files touched:** `app/forms/wizardTypes.ts`, `wizardReducer.ts`, `initialState.ts`,
+`useFieldController.ts`, `wizardValidation.ts`, `wizard-state.md`,
+`app/components/StepNav.tsx`, `app/advanced/GroupA.tsx`, `app/methodology/
+renderSimpleMarkdown.tsx`, `app/methodology/page.tsx`, `app/globals.css`, plus test
+files in `tests/wizard/`. 183 tests pass (up from 175), `npm run build`/`npx tsc
+--noEmit` both clean. `ISSUES.md` ISS-24/ISS-25 moved to Resolved.
+**See also:** `ISSUES.md`'s Resolved section for each entry's full reasoning.
 
 ### 2026-07-13 — First manual browser QA of Phase 6: 3 bugs fixed, landing page + Methodology page built (ISS-26, ISS-24, ISS-25)
 **What changed:** Jay asked to run the dev server and manually/visually inspect the
@@ -261,71 +340,7 @@ build` both clean. **Still recommend:** a manual `npm run dev` click-through onc
 working browser connection is available — nothing visual/layout, and no real
 multi-tab session, has been exercised yet.
 
-### 2026-07-13 — Phase 6 (wizard UI implementation) built: reducer, canonical pipeline, full wizard, 161 tests
-**What changed:** Jay confirmed Phases 1-5 were genuinely ready to build against (this
-session's own verification: 109/109 tests, clean build, on `origin/main`) and said
-"let's build." Built the whole of Phase 6 as one continuous flow (`CONVENTIONS.md`
-§7 — no parallelizing a single stateful flow), in a worktree, committing progressively.
-1. **`formulas/computeAssessment.ts` (new)** — the canonical wizard-inputs-to-result
-   pipeline `wizard-state.md` §4 requires ("there is exactly one"). No formula for this
-   composition existed before this session (`formulas/sensitivity.ts` is a separate,
-   simpler annual-only grid-search tool for the actionable-insight engine, not this).
-   Every composition decision (which cash-flow basis feeds NPV/IRR vs. the
-   working-capital metric, how financing/maintenance/break-even compose) was derived
-   by reading `tests/scenarios/`'s 4 golden scenarios line by line and matching them
-   exactly, not invented — `tests/formulas/computeAssessment.test.ts` proves the new
-   pipeline reproduces every golden number. New `formulas/workingCapitalPeak.ts` for
-   the peak-working-capital-need metric SPEC.md §14.2's dashboard warning needs.
-2. **The wizard itself** — `app/forms/` (reducer, field schema expanded from
-   `content/inputs-metadata.json`'s templates using `wizard-state.md` §7.1's final
-   payer/ramp suffixes, validation, `localStorage` persistence per §7's full
-   contract including the multi-tab conflict banner and write-failure handling),
-   `app/advanced/` (all 6 Advanced Mode groups), `app/components/` (field controls,
-   preview strip, step nav with the audit-F7 disabled-Next-focus behavior), and
-   `app/(assessment)/` (a Next.js route group so `/assess/*` and `/results` share one
-   `WizardProvider` despite not being nested in the URL) — pre-step, 3 Basic Mode
-   steps, and a minimal but real `/results` page (full dashboard is Phase 7).
-3. **One real bug found and fixed mid-build, not by either prior audit:**
-   `payerMixSharePct`'s `required: true` had no sourced default and sat inside the
-   collapsed Advanced panel — same failure class as the already-resolved
-   `targetIrr`/F1 issue, would have blocked every Basic-Mode-only user at Step 3.
-   Fixed the same way (auto-filled implicit default). Logged as Resolved ISS-22.
-4. **Six items flagged to `ISSUES.md`'s Open section (ISS-17 through ISS-21, ISS-23)**
-   rather than silently decided: the realization%/claim-deduction% combination rule (no
-   golden test covers it), Lease financing's unbounded term (no `leaseTenureMonths`
-   field exists), utilization ramp-up and the per-year maintenance override being
-   collected but not yet consumed by the pipeline, incomplete edge-case test coverage
-   against the letter of Phase 6's DoD, and the slider touch-target audit ask not being
-   achievable with a native `<input type="range">`.
-5. **Verification:** 161 tests (109 pre-existing + 52 new, including 2 React Testing
-   Library component tests added specifically to cover interactive behavior this
-   session's environment couldn't test in an actual browser — no working Chrome
-   extension connection this session, see ISS-21), `npm run build` and `npx tsc
-   --noEmit` both clean. Also fixed along the way: `vitest.config.ts` needed a jsdom
-   `url` option plus a `localStorage`/`scrollIntoView` polyfill (`tests/setup.ts`) —
-   this environment's jsdom left `window.localStorage` undefined for reasons unrelated
-   to product code (verified against a raw `new JSDOM()` outside vitest, which works
-   fine); a real browser always has working `localStorage`.
-6. **Housekeeping:** `equipment-images/` copied into `public/equipment-images/` (static
-   export requires `public/` for served assets; the repo-root folder stays canonical
-   for sourcing/licensing). `content/tooltip-copy.md` gained a generated
-   machine-readable sibling (`tooltip-copy.generated.json`, via new
-   `scripts/generateTooltipCopy.mjs`) since no runtime markdown-parsing story existed
-   yet. Old flat `app/results/README.md` moved into the new route group location.
-**Files touched:** extensive — `formulas/computeAssessment.ts` and
-`formulas/workingCapitalPeak.ts` (new); all of `app/forms/`, `app/advanced/`,
-`app/components/`, `app/(assessment)/` (new); `public/` (new); `scripts/` (new);
-`content/tooltip-copy.generated.json` (new); `tests/formulas/computeAssessment*.test.ts`
-and all of `tests/wizard/` (new); `vitest.config.ts`, `tests/setup.ts` (new);
-`package.json`/`package-lock.json` (new dev deps); `ISSUES.md` (ISS-17 through ISS-23),
-`agent-build-plan.md` (Phase 6 checkboxes, 2 marked partial with reasons, 1 unmet with
-a reason), `DIRECTORY.md` (full Phase 6 section rewrite), `HANDOFF.md` (this entry).
-**What's next:** Phase 7 (results dashboard and charts) — build the visual layer
-(gauge, metric cards, break-even/cash-flow charts, risk callouts, narrative summary,
-Advanced settings pane) on top of the same `computeAssessment.ts` pipeline `/results`
-already uses. A manual browser click-through of Phase 6 (ISS-21) is recommended before
-or alongside that work. ISS-19's ramp-up/per-year-maintenance pipeline gaps are natural
-Phase 9 (sensitivity) companions.
-
-See `handoff-archive/2026-Q3.md` for entries before 2026-07-13's Phase 6 (wizard UI
-implementation) entry above.
+See `handoff-archive/2026-Q3.md` for entries before 2026-07-13's Phase 6 follow-up
+(all 6 issues opened by the implementation session resolved) entry above — including
+the original Phase 6 (wizard UI implementation) build entry, archived this session
+per this doc's own ~150-line archive rule.

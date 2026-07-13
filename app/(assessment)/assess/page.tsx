@@ -11,7 +11,7 @@ import { NumberField } from "../../components/NumberField";
 import { SelectField } from "../../components/SelectField";
 import { TextField } from "../../components/TextField";
 import { Button } from "../../components/Button";
-import { isStepComplete } from "../../forms/wizardValidation";
+import { firstInvalidFieldOnStep, isStepComplete } from "../../forms/wizardValidation";
 import type { EquipmentCategory } from "../../forms/wizardTypes";
 
 const EQUIPMENT_TILES: { category: EquipmentCategory; image: string | null }[] = [
@@ -27,6 +27,24 @@ export default function PreStepPage() {
   const { state, dispatch } = useWizard();
   const router = useRouter();
   const complete = isStepComplete("preStep", state);
+
+  // ISS-25: mirrors StepNav.goNext exactly (audit F7's disabled-"Next"
+  // discoverability, plus the ATTEMPT_STEP reveal) — this page predates StepNav's
+  // extraction and had its own inline Button/native-disabled instead, which meant a
+  // blocked Next here gave no clue what was missing and (once error display became
+  // touch/attempt-gated) would otherwise never reveal these fields' errors at all.
+  const goNext = () => {
+    if (!complete) {
+      dispatch({ type: "ATTEMPT_STEP", step: "preStep" });
+      const invalidPath = firstInvalidFieldOnStep("preStep", state);
+      const element = invalidPath ? document.getElementById(invalidPath) : null;
+      element?.focus();
+      element?.scrollIntoView({ block: "center" });
+      return;
+    }
+    dispatch({ type: "BEGIN_TRANSITION" });
+    router.push("/assess/investment");
+  };
 
   return (
     <div className="assess-page">
@@ -63,14 +81,7 @@ export default function PreStepPage() {
       <SelectField path="preStep.hospitalType" />
       <TextField path="preStep.equipmentNameModel" />
 
-      <Button
-        variant="primary"
-        disabled={!complete}
-        onClick={() => {
-          dispatch({ type: "BEGIN_TRANSITION" });
-          router.push("/assess/investment");
-        }}
-      >
+      <Button variant="primary" aria-disabled={!complete} onClick={goNext}>
         Next: Investment
       </Button>
     </div>
