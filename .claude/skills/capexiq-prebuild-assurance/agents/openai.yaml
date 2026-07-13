@@ -1,0 +1,4 @@
+interface:
+  display_name: "CapexIQ Pre-Build Assurance"
+  short_description: "Audit model contracts and browser security before Phase 6"
+  default_prompt: "Use $capexiq-prebuild-assurance to audit CapexIQ before Phase 6. Report findings only and produce a consolidated build-plan change list."
