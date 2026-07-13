@@ -20,8 +20,14 @@ const DRAG_DEBOUNCE_MS = 120;
 export function SliderField({ path }: { path: string }) {
   const field = useFieldController(path);
   const def = getFieldDefinition(path);
-  const [localValue, setLocalValue] = useState<number>(
-    typeof field.value === "number" ? field.value : (def.min ?? 0)
+  // null means "genuinely unset" (required field with no sourced default) — kept
+  // distinct from a real number throughout, rather than masking it as `def.min`.
+  // The range thumb still needs a numeric position to render at, so it falls back to
+  // `def.min` for display only (see the `value={localValue ?? def.min ?? 0}` below);
+  // that fallback is never written into `localValue`/reducer state via commit/flush,
+  // so an unset field can't be mistaken for a deliberate `def.min` answer.
+  const [localValue, setLocalValue] = useState<number | null>(
+    typeof field.value === "number" ? field.value : null
   );
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isKeyboardInteraction = useRef(false);
@@ -38,7 +44,7 @@ export function SliderField({ path }: { path: string }) {
   ]);
 
   useEffect(() => {
-    if (typeof field.value === "number") setLocalValue(field.value);
+    setLocalValue(typeof field.value === "number" ? field.value : null);
   }, [field.value]);
 
   const commit = (value: number, immediate: boolean) => {
@@ -74,7 +80,7 @@ export function SliderField({ path }: { path: string }) {
             min={def.min}
             max={def.max}
             step={def.sliderStep ?? 1}
-            value={localValue}
+            value={localValue ?? def.min ?? 0}
             aria-describedby={describedBy || undefined}
             aria-invalid={field.error !== null}
             onKeyDown={(event) => {
@@ -97,11 +103,11 @@ export function SliderField({ path }: { path: string }) {
             min={def.min}
             max={def.max}
             step={def.decimalPlaces ? 1 / 10 ** def.decimalPlaces : (def.sliderStep ?? 1)}
-            value={localValue}
+            value={localValue ?? ""}
             aria-label={`${field.label}, exact value`}
             onChange={(event) => {
               const raw = event.target.value;
-              const numeric = raw === "" ? (def.min ?? 0) : Number(raw);
+              const numeric = raw === "" ? null : Number(raw);
               setLocalValue(numeric);
               field.setValue(numeric);
             }}

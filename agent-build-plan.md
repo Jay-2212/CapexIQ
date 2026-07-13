@@ -467,6 +467,15 @@ opinion):**
 
 **Goal:** Build `app/forms/`, `app/advanced/`, and the step-navigation shell in
 `app/components/`, implementing exactly what Phase 5's `wizard-state.md` specifies.
+**Also built here, added 2026-07-13 (first manual browser QA session):** the landing
+page (`app/page.tsx`) and a minimal Methodology page (`app/methodology/page.tsx`),
+per `design/ux-product-spec.md` §5/§5.3 — the entry flow these depend on was
+finalized back in Phase 5, but no phase's own "Do" list ever explicitly named
+building the landing page itself, so it went unbuilt through the rest of Phase 6
+until this session caught root `/` still showing the pre-Phase-6 scaffold
+placeholder. Retroactively scoped into this phase rather than treated as a new
+phase, since it's pure UI work with no new formula/schema dependencies. See
+`ISSUES.md` ISS-26 and `HANDOFF.md`'s matching Change Log entry for the full detail.
 **Depends on:** Phase 5 (the doc must exist first), Phase 4 (`content/inputs-metadata.json`
 and `design/ux-product-spec.md`), Phase 2 (forms need real formulas to preview live
 results against, per Phase 4-G's live-recalculation contract).
@@ -542,10 +551,25 @@ about.
 - [x] The pre-step or an early wizard screen shows the localStorage privacy disclosure
       copy from `content/field-explanations.md` (added 2026-07-13, PBA-8) near the
       "Start over" control. `app/(assessment)/layout.tsx`'s header, exact wording.
+- [x] **Landing page and Methodology page (added 2026-07-13, first manual browser QA
+      session):** `app/page.tsx` — header, hero, "how it works," "who it's for,"
+      "what's in the tool," footer, per `design/ux-product-spec.md` §5 — and
+      `app/methodology/page.tsx` rendering `report-templates/methodology.md`/
+      `formula-appendix.md` (§5.3). The Methodology page is functional but not
+      bespoke-designed — see `ISSUES.md` ISS-24 for that follow-up.
+- [x] **First interactive browser QA of Phase 6 (added 2026-07-13), closing ISS-21's
+      "no browser QA possible" gap:** found and fixed 3 real bugs — `app/globals.css`
+      missing CSS for most component class families (pre-step/results/Advanced-panel/
+      banners/step-nav all rendered unstyled), a `RouteGuard`-vs-`useWizardPersistence`
+      mount-order race that bounced every hard reload/deep-link back to the pre-step,
+      and `SliderField` masking a genuinely-unset required field's value as `def.min`.
+      See `ISSUES.md` ISS-26 for full detail.
 **Definition of Done:** every Phase-5-enumerated edge case has a named, passing test —
-**not fully met**; core transitions/validation/2 interactive behaviors are tested (161
+**not fully met**; core transitions/validation/2 interactive behaviors are tested (175
 tests, build/typecheck both clean), but see `ISSUES.md` ISS-21/ISS-23 for the specific
-gaps against the letter of this bullet.
+gaps against the letter of this bullet. **Manual browser QA has now happened** (see
+above) — the DoD's remaining gap is test-coverage completeness against every §5/§6/§7
+edge case, not "was this ever run in a real browser."
 
 ---
 

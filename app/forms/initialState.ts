@@ -125,6 +125,7 @@ export function emptyWizardState(): WizardState {
     touched: {},
     transitionInFlight: false,
     restoredDraftSavedAt: null,
+    hasHydrated: false,
   };
 }
 

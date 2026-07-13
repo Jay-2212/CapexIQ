@@ -49,7 +49,9 @@ export default function PreStepPage() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={tile.image} alt="" className="equipment-tile__image" />
             ) : (
-              <Puzzle aria-hidden="true" className="equipment-tile__icon" />
+              <div className="equipment-tile__icon">
+                <Puzzle aria-hidden="true" size={40} />
+              </div>
             )}
             <span>{tile.category}</span>
           </button>

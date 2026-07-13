@@ -25,6 +25,13 @@ export function RouteGuard() {
   const hasAnnouncedDraftRestore = useRef(false);
 
   useEffect(() => {
+    // Skip until useWizardPersistence's mount-load effect has resolved (restored a
+    // draft or confirmed there isn't one). Without this gate, this effect runs on
+    // its first commit against the still-default emptyWizardState() — before that
+    // sibling effect's dispatch lands — and wrongly redirects every deep link/reload
+    // back to the pre-step, since nothing looks complete yet.
+    if (!state.hasHydrated) return;
+
     const requestedStep = stepForPath(pathname);
     if (!requestedStep) return;
 
@@ -45,7 +52,7 @@ export function RouteGuard() {
     const heading = document.querySelector<HTMLElement>("h1[tabindex='-1']");
     heading?.focus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [pathname, state.hasHydrated]);
 
   useEffect(() => {
     if (state.restoredDraftSavedAt && !hasAnnouncedDraftRestore.current) {

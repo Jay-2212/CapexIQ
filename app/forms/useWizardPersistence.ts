@@ -40,12 +40,16 @@ export function useWizardPersistence(
   const [conflictBannerVisible, setConflictBannerVisible] = useState(false);
   const [writeFailureNoticeVisible, setWriteFailureNoticeVisible] = useState(false);
 
-  // Load once on mount.
+  // Load once on mount. Always dispatches — RESTORE_DRAFT if a draft exists,
+  // MARK_HYDRATED otherwise — so RouteGuard (which gates on state.hasHydrated) has a
+  // signal to wait for either way, rather than only on the "draft exists" branch.
   useEffect(() => {
     const draft = readDraftFromStorage();
     if (draft) {
       lastLoadedSavedAt.current = draft.savedAt;
       dispatch({ type: "RESTORE_DRAFT", state: draft.state, savedAt: draft.savedAt });
+    } else {
+      dispatch({ type: "MARK_HYDRATED" });
     }
     hasLoaded.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps

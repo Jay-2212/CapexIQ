@@ -128,4 +128,8 @@ export interface WizardState {
   /** Set once on mount if a draft was restored, cleared after the announcement is
    *  read — wizard-state.md §6.5. */
   restoredDraftSavedAt: string | null;
+  /** False until useWizardPersistence's mount-load effect has run once (whether or
+   *  not a draft existed to restore). RouteGuard must not evaluate step-completeness
+   *  before this flips true, or it redirects on the pre-restore blank state. */
+  hasHydrated: boolean;
 }

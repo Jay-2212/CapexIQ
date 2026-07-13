@@ -12,10 +12,39 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
-*(Nothing open as of 2026-07-13 (post Phase 6 follow-up session) — every issue opened
-during Phase 6's own implementation session was fixed the same day. Check back here
-first before assuming that stays true; add a new entry the moment you spot a real
-problem.)*
+### ISS-24 — Methodology page is unstyled/functional-only, not a designed page
+**Area:** UI / design
+**What was flagged:** 2026-07-13, first manual browser QA pass of Phase 6 (this
+session Jay explicitly asked for, using `/chrome` + Opus advisor). `design/
+ux-product-spec.md` §5.3 calls for a separate Methodology page linked from the
+landing page's header/footer; it didn't exist at all going into this session (the
+landing page itself didn't exist either — see the Change Log entry below). Built as
+part of the same session, at `app/methodology/page.tsx`, but deliberately scoped
+narrow: it renders `report-templates/methodology.md` and `formula-appendix.md`
+through a small dependency-free markdown-to-JSX renderer
+(`app/methodology/renderSimpleMarkdown.tsx`), styled with plain prose CSS
+(`.methodology-page*` in `app/globals.css`) — readable, but not a bespoke-designed
+page the way the landing page and wizard are. Jay's own ask this session was "build
+the hero page," not this one; a real design pass on this page is future work.
+**Not urgent:** the page is fully functional and on-brand (uses the same design
+tokens), just visually plain compared to the rest of the product.
+
+### ISS-25 — Required-field errors show immediately on a completely untouched page load — spec-intended, but worth Jay revisiting
+**Area:** UX / validation
+**What was flagged:** 2026-07-13, same manual QA pass. On a fresh `/assess` load
+with no draft, required fields (e.g. Hospital bed size, City/tier) show a red border
+and red error text before the user has touched anything. Confirmed via `app/forms/
+wizard-state.md` §2 this is **spec-intended, not a bug**: "Validate on every change,
+not on blur or submit... an invalid value shows its `errorMessage` immediately... No
+'you'll find out when you hit Next.'" An empty required field is, by that rule, an
+invalid value from the first render.
+**Why still logged:** it's a defensible design choice (immediate feedback, no
+surprise validation later) but also a real deviation from the more common "don't
+red-flag a field before the user has interacted with it" convention, and Jay asked
+to flag rather than silently accept or silently change it. Revisit if it reads as
+unpolished/alarming in real user testing.
+**Status:** deliberately not changed this session — flagged for Jay to decide later,
+not an engineering task in the meantime.
 
 ---
 
@@ -165,6 +194,64 @@ is a placeholder only, safe to replace once real product screenshots exist.
 ---
 
 ## Resolved
+
+### ISS-26 — First manual browser QA of Phase 6: 3 real bugs found and fixed, landing page built
+**Area:** UI / state management / new feature
+**What happened:** 2026-07-13, Jay asked for the first interactive browser QA pass of
+Phase 6 (the prior implementation session had no working `claude-in-chrome`
+connection — see ISS-21). Found and fixed, with an Opus advisor pass sanity-checking
+both the diagnosis and the fix approach before implementation:
+1. **`app/globals.css` had zero CSS for most component class families** actually
+   used in markup — `assess-page`, `assessment-header*`, `equipment-tile*`,
+   `advanced-panel*`, `advanced-group*`, `banner*`, `maintenance-schedule*`,
+   `payer-row*`, `results-*`, `step-nav`, `start-over` all rendered unstyled (the
+   pre-step's equipment images rendered at raw multi-thousand-pixel resolution, the
+   `/results` page was a flat unstyled text list). Fixed by writing the missing CSS,
+   token-based, matching the existing "Signal" theme conventions — no new visual
+   language invented. Also fixed a related, only-found-while-doing-this bug: the
+   `.equipment-tile__icon`/`.landing-how__icon` pattern of `aspect-ratio` + `padding`
+   applied directly to a raw Lucide `<svg>` icon rendered the icon completely
+   invisible (a replaced-element sizing quirk); fixed by wrapping icons in a
+   flex-centered container `<div>` instead and sizing the icon itself via its own
+   `size` prop.
+2. **A hard reload/deep-link to any wizard step always bounced the user back to the
+   pre-step**, silently resetting `currentStep` (though the underlying answers
+   survived in `localStorage`). Root cause: `app/forms/RouteGuard.tsx`'s
+   pathname-effect ran on first mount against the still-default
+   `emptyWizardState()`, before `app/forms/useWizardPersistence.ts`'s mount-load
+   effect's `RESTORE_DRAFT` dispatch had landed — a child-effect-before-parent-effect
+   race. Fixed with a `state.hasHydrated` gate: a new `MARK_HYDRATED` action fires
+   from the persistence hook's load effect on every mount (draft-found or
+   draft-absent), and `RouteGuard` skips its redirect logic entirely until that flag
+   is true. Regression test added in `tests/wizard/routeGuardAndPersistence.test.tsx`.
+3. **`app/components/SliderField.tsx` showed a fake value for genuinely-unset
+   required fields** — e.g. MRI's `basic.billedTariffPerUse` has no sourced default,
+   so the real value is `null`, but the slider and its paired number input both
+   displayed `def.min` (500) as though answered, while the field was still flagged
+   invalid underneath. Fixed by tracking `localValue: number | null` end to end: the
+   number input shows empty when null, the range thumb still gets a visual position
+   from `def.min` without that fake value ever being written to state, and clearing
+   the number input now sets the field back to `null` (previously snapped back to
+   `def.min`). Regression test added in `tests/wizard/components.test.tsx`.
+4. **Built the landing page** (`app/page.tsx`) per `design/ux-product-spec.md` §5 —
+   header, hero, "how it works," "who it's for," a "what's in the tool" section, and
+   a footer — plus a minimal Methodology page (`app/methodology/page.tsx`, see
+   ISS-24) so the footer/header link isn't dead. This had fallen through the cracks
+   between phases: no phase's "Do" checklist in `agent-build-plan.md` explicitly
+   listed it, even though the entry flow was finalized back in Phase 5. Root `/` had
+   shown the original pre-Phase-6 scaffold placeholder text until this fix.
+**Files touched:** `app/globals.css`, `app/forms/wizardTypes.ts`, `app/forms/
+initialState.ts`, `app/forms/wizardReducer.ts`, `app/forms/useWizardPersistence.ts`,
+`app/forms/RouteGuard.tsx`, `app/components/SliderField.tsx`, `app/(assessment)/
+assess/page.tsx`, `app/page.tsx` (new), `app/methodology/page.tsx` (new),
+`app/methodology/renderSimpleMarkdown.tsx` (new), `public/people-personas/*`,
+`public/design/hero-background.svg`, `public/README.md`, plus new/updated tests in
+`tests/wizard/routeGuardAndPersistence.test.tsx` and `tests/wizard/components.test.tsx`
+(175 passing, up from 173 — 2 new regression tests, plus 1 existing test updated to
+mount `useWizardPersistence` alongside `RouteGuard` so hydration actually completes,
+matching real app composition). `npx tsc --noEmit` and `npm run build` both clean.
+**See also:** ISS-24 (Methodology page's own design polish, deferred) and ISS-25
+(the eager-validation question, flagged for Jay, not changed).
 
 ### ISS-17 — Realization % / claim-deduction % combination is an engineering interpretation, not a verified contract
 **Area:** formulas / financial model

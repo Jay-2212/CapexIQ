@@ -45,11 +45,15 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │                                              audit for whole-model/schema
 │                                              correctness plus browser/privacy/
 │                                              export/deployment security
-├── app/                          Next.js App Router UI. Landing page still a
-│   │                              placeholder (Phase 7-ish); the wizard (Phase 6,
-│   │                              2026-07-13) is REAL and built:
+├── app/                          Next.js App Router UI. Landing page, Methodology
+│   │                              page, and the full wizard (Phase 6, real code as
+│   │                              of 2026-07-13) are all REAL and built:
 │   ├── layout.tsx                root route, not nested — subdomain, not a path
-│   ├── page.tsx                  placeholder landing page, not the real hero yet
+│   ├── page.tsx                  landing page (design/ux-product-spec.md §5) —
+│   │                              header, hero, how-it-works, personas, footer
+│   ├── methodology/page.tsx      Methodology page (§5.3) — renders report-templates/
+│   │                              methodology.md + formula-appendix.md; functional,
+│   │                              not bespoke-designed (ISS-24)
 │   ├── globals.css               imports design/tokens.css + all Phase 6 component CSS
 │   ├── (assessment)/             route group sharing one WizardProvider across
 │   │   │                          /assess/* and /results (route groups don't affect
@@ -69,8 +73,9 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │   ├── advanced/                 the Advanced Mode panel + its 6 groups (A-F) — built
 │   ├── components/               shared field controls, buttons, preview strip — built
 │   └── charts/README.md          break-even / cash-flow charts — still empty, Phase 7
-├── public/                       Next.js static-export assets (equipment-images/ copy
-│   └── README.md                  for the pre-step tiles) — see its own README for why
+├── public/                       Next.js static-export assets (equipment-images/,
+│   │                              people-personas/, design/hero-background.svg copies)
+│   └── README.md                  for the pre-step tiles/landing page — see its own README for why
 ├── formulas/                     15 calculation modules, ALL REAL — implemented,
 │                                 reviewed, and tested (Phase 2 + Phase 6). See below.
 ├── equipment-data/                mri/ct/cath-lab/dialysis/ultrasound/custom.json —
@@ -289,16 +294,13 @@ accessibility note).
 
 Phases 1-6 of `agent-build-plan.md` are complete: real equipment data (five research
 passes), a fully implemented and tested formula engine, complete content/copy, a
-finished design system + UX spec, the wizard state-transition doc, and now the wizard
-UI itself — the pre-step, 3-step Basic Mode wizard, and Advanced Mode panel are real,
-working code with 161 passing tests (`npm test`), a clean `npm run build`, and a clean
-`npx tsc --noEmit`. The landing page (`app/page.tsx`) is still a placeholder — the real
-hero/hero-CTA/entry-flow described in `design/ux-product-spec.md` §5 hasn't been built
-(the pre-step it links to has, at `/assess`). Specifically remaining:
+finished design system + UX spec, the wizard state-transition doc, the wizard UI
+itself — the pre-step, 3-step Basic Mode wizard, and Advanced Mode panel — and, as of
+the first manual browser QA session (2026-07-13), the landing page (`app/page.tsx`)
+and a minimal Methodology page (`app/methodology/page.tsx`). All of it is real,
+working code with 175 passing tests (`npm test`), a clean `npm run build`, and a clean
+`npx tsc --noEmit`. Specifically remaining:
 
-- **Landing page.** Hero, "How it works," "Who it's for," Methodology link — `design/
-  ux-product-spec.md` §5 has the full spec. Not built; `/assess` works standalone via
-  direct URL in the meantime.
 - **Phase 7 — Results dashboard and charts.** `/results` currently shows real numbers
   (Investment Outlook score/band, NPV/IRR/payback/ROI/EAC) in a plain list — no gauge,
   metric cards, break-even/cash-flow charts, risk callouts, or narrative summary yet.

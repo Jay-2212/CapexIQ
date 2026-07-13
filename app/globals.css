@@ -348,7 +348,610 @@ select:focus-visible,
 }
 
 .preview-strip__stale-note,
-.preview-strip__risk-note {
+.preview-strip__risk-note,
+.preview-strip__placeholder {
   font-size: var(--text-xs);
   color: var(--text-secondary);
+}
+
+/* ---- Assessment shell (app/(assessment)/layout.tsx) ---- */
+
+.assessment-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.assessment-header__privacy-note {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.assessment-main {
+  padding: var(--space-6) var(--space-5);
+}
+
+.start-over {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.start-over:hover {
+  color: var(--text-primary);
+}
+
+/* ---- Banners (cross-tab conflict / write-failure notices) ---- */
+
+.banner {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-5);
+}
+
+.banner--info {
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral);
+}
+
+.banner--warning {
+  background: var(--status-caution-bg);
+  color: var(--status-caution);
+}
+
+.banner button {
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* ---- Assess page shell (pre-step + Basic Mode step pages + results) ---- */
+
+.assess-page {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.assess-page h1 {
+  font-size: var(--text-2xl);
+  margin: 0 0 var(--space-5);
+}
+
+.progress-stepper__label {
+  white-space: nowrap;
+}
+
+/* ---- Equipment tile grid (pre-step) ---- */
+
+.equipment-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.equipment-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: border-color 150ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .equipment-tile {
+    transition-duration: 0ms;
+  }
+}
+
+.equipment-tile:hover {
+  border-color: var(--accent-interactive);
+}
+
+.equipment-tile[data-selected="true"] {
+  border-color: var(--accent-interactive);
+  border-width: 2px;
+  background: var(--accent-interactive-bg);
+}
+
+.equipment-tile__image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.equipment-tile__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  color: var(--text-muted);
+}
+
+/* ---- Advanced Mode panel ---- */
+
+.advanced-panel {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.advanced-panel__banner {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-4);
+}
+
+.advanced-panel__toggle {
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--accent-interactive);
+  background: var(--accent-interactive-bg);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+}
+
+.advanced-panel__toggle:hover {
+  background: var(--border-subtle);
+}
+
+.advanced-panel__groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-top: var(--space-5);
+}
+
+.advanced-group {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+
+.advanced-group legend {
+  font-size: var(--text-md);
+  font-weight: 600;
+  padding: 0 var(--space-2);
+}
+
+.advanced-group__hint {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.payer-row {
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.payer-row:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.payer-row__label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin: 0 0 var(--space-2);
+}
+
+/* ---- Maintenance schedule (Group E year-by-year override) ---- */
+
+.maintenance-schedule__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.maintenance-schedule__year {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.maintenance-schedule__year input {
+  font: inherit;
+  font-size: var(--text-base);
+  padding: var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  width: 100%;
+}
+
+/* ---- Step nav (Back / Next) ---- */
+
+.step-nav {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+/* ---- Results page ---- */
+
+.results-summary {
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-6);
+  background: var(--status-neutral-bg);
+}
+
+.results-summary[data-band="Strong"] {
+  background: var(--status-strong-bg);
+}
+
+.results-summary[data-band="Moderate"] {
+  background: var(--status-neutral-bg);
+}
+
+.results-summary[data-band="Caution"] {
+  background: var(--status-caution-bg);
+}
+
+.results-summary[data-band="Weak"] {
+  background: var(--status-risk-bg);
+}
+
+.results-summary h2 {
+  font-size: var(--text-xl);
+  margin: 0 0 var(--space-2);
+}
+
+.results-summary p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.results-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4);
+  margin: 0 0 var(--space-6);
+}
+
+.results-metric-grid > div {
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.results-metric-grid dt {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-1);
+}
+
+.results-metric-grid dd {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  margin: 0;
+}
+
+.results-note {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ---- Landing page (design/ux-product-spec.md §5) ---- */
+
+.landing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.landing-header__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.landing-header__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.landing-header__nav a:not(.button) {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.landing-header__nav a:not(.button):hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.landing-hero {
+  padding: var(--space-8) var(--space-6);
+  max-width: 720px;
+  background-image: url("/design/hero-background.svg");
+  background-size: cover;
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+
+.landing-hero h1 {
+  font-size: var(--text-3xl);
+  line-height: 1.15;
+  margin: 0 0 var(--space-4);
+  max-width: 14ch;
+}
+
+.landing-hero p {
+  font-size: var(--text-md);
+  color: var(--text-secondary);
+  max-width: 56ch;
+  margin: 0 0 var(--space-5);
+}
+
+.landing-how,
+.landing-personas,
+.landing-depth {
+  padding: var(--space-7) var(--space-6);
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.landing-how h2,
+.landing-personas h2,
+.landing-depth h2 {
+  font-size: var(--text-2xl);
+  margin: 0 0 var(--space-6);
+}
+
+.landing-how__steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-6);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.landing-how__steps h3 {
+  font-size: var(--text-lg);
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.landing-how__steps p {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.landing-how__image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.landing-how__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  color: var(--accent-interactive);
+  background: var(--accent-interactive-bg);
+  border-radius: var(--radius-md);
+}
+
+.landing-personas__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-5);
+}
+
+.landing-personas__card {
+  text-align: center;
+}
+
+.landing-personas__card p {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: var(--space-2) 0 0;
+}
+
+.landing-personas__image {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin: 0 auto;
+  display: block;
+}
+
+.landing-depth ul {
+  padding-left: var(--space-5);
+  margin: 0 0 var(--space-5);
+}
+
+.landing-depth li {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.landing-depth__note {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.landing-footer {
+  padding: var(--space-6);
+  border-top: 1px solid var(--border-subtle);
+  text-align: center;
+}
+
+.landing-footer__links {
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-2);
+}
+
+.landing-footer__links a {
+  color: var(--text-secondary);
+}
+
+.landing-footer__disclaimer {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  max-width: 56ch;
+  margin: 0 auto;
+}
+
+/* ---- Methodology page (design/ux-product-spec.md §5.3) ---- */
+
+.methodology-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5);
+}
+
+.methodology-page__back {
+  margin: 0 0 var(--space-5);
+  font-size: var(--text-sm);
+}
+
+.methodology-page__content h1 {
+  font-size: var(--text-2xl);
+  margin: var(--space-6) 0 var(--space-4);
+}
+
+.methodology-page__content h2 {
+  font-size: var(--text-xl);
+  margin: var(--space-6) 0 var(--space-3);
+}
+
+.methodology-page__content h3 {
+  font-size: var(--text-lg);
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+.methodology-page__content p {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.methodology-page__content pre {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  overflow-x: auto;
+  font-size: var(--text-sm);
+}
+
+.methodology-page__content code {
+  font-family: var(--font-mono);
+}
+
+.methodology-page__content hr {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: var(--space-7) 0;
+}
+
+/* ---- Small-viewport layout ---- */
+
+@media (max-width: 640px) {
+  .assessment-header {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .assessment-main {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .assess-page h1 {
+    font-size: var(--text-xl);
+  }
+
+  .progress-stepper {
+    gap: var(--space-3);
+  }
+
+  .progress-stepper__label {
+    display: none;
+  }
+
+  .field-shell__input,
+  .field-shell__select,
+  .slider-field,
+  .preview-strip {
+    max-width: 100%;
+  }
+
+  .step-nav {
+    flex-direction: column-reverse;
+  }
+
+  .step-nav .button {
+    width: 100%;
+  }
+
+  .landing-header {
+    padding: var(--space-4);
+  }
+
+  .landing-header__nav {
+    gap: var(--space-3);
+  }
+
+  .landing-hero,
+  .landing-how,
+  .landing-personas,
+  .landing-depth {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .landing-hero h1 {
+    font-size: var(--text-2xl);
+    max-width: 100%;
+  }
+
+  .methodology-page {
+    padding: var(--space-5) var(--space-4);
+  }
 }

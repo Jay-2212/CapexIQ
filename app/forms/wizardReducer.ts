@@ -19,6 +19,7 @@ export type WizardAction =
   | { type: "GO_TO_STEP"; step: WizardStep }
   | { type: "RESTORE_DRAFT"; state: WizardState; savedAt: string }
   | { type: "ACKNOWLEDGE_RESTORED_DRAFT" }
+  | { type: "MARK_HYDRATED" }
   | { type: "START_OVER" }
   | { type: "SET_MAINTENANCE_SCHEDULE_YEAR"; yearIndex: number; value: number | null };
 
@@ -81,15 +82,24 @@ export function wizardReducer(
     }
 
     case "RESTORE_DRAFT": {
-      return { ...action.state, restoredDraftSavedAt: action.savedAt };
+      // Force true regardless of what the persisted draft itself contains — a
+      // restored draft is by definition post-hydration, and older drafts saved
+      // before this field existed would otherwise carry `undefined` in here.
+      return { ...action.state, restoredDraftSavedAt: action.savedAt, hasHydrated: true };
     }
 
     case "ACKNOWLEDGE_RESTORED_DRAFT": {
       return { ...state, restoredDraftSavedAt: null };
     }
 
+    case "MARK_HYDRATED": {
+      return { ...state, hasHydrated: true };
+    }
+
     case "START_OVER": {
-      return emptyWizardState();
+      // Client-side reset, not a reload — there's no localStorage draft left to wait
+      // on (clearDraft() already ran), so RouteGuard must not block on hydration again.
+      return { ...emptyWizardState(), hasHydrated: true };
     }
 
     case "SET_MAINTENANCE_SCHEDULE_YEAR": {

@@ -8,6 +8,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import { WizardProvider, useWizard } from "../../app/forms/WizardContext";
 import { NumberField } from "../../app/components/NumberField";
+import { SliderField } from "../../app/components/SliderField";
 import { StepNav } from "../../app/components/StepNav";
 
 vi.mock("next/navigation", () => ({
@@ -39,6 +40,31 @@ describe("NumberField — the 'Typical' tag (ux-product-spec.md §6)", () => {
 
     fireEvent.change(screen.getByLabelText(/Warranty period/), { target: { value: "6" } });
     expect(screen.queryByText("Typical")).not.toBeInTheDocument();
+  });
+});
+
+describe("SliderField — never shows a fake value for a genuinely unset required field", () => {
+  it("displays the paired number input empty (not def.min) when MRI's billedTariffPerUse has no sourced default, and required-error stays visible", () => {
+    render(
+      <WizardProvider>
+        <SelectMri />
+        <SliderField path="basic.billedTariffPerUse" />
+      </WizardProvider>
+    );
+
+    fireEvent.click(screen.getByText("select mri"));
+
+    // Real value is null (no sourced default) — the exact-value number input must
+    // show empty, not silently display def.min (500) as if it were a real answer.
+    const exactValueInput = screen.getByLabelText(/exact value/i);
+    expect(exactValueInput).toHaveValue(null);
+    // The field is still correctly flagged required/invalid underneath.
+    expect(screen.getByText(/Enter a billed amount between/)).toBeInTheDocument();
+
+    // Typing a real value clears the fake-empty state and the error together.
+    fireEvent.change(exactValueInput, { target: { value: "1500" } });
+    expect(exactValueInput).toHaveValue(1500);
+    expect(screen.queryByText(/Enter a billed amount between/)).not.toBeInTheDocument();
   });
 });
 
