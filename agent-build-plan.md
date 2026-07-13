@@ -504,6 +504,26 @@ about.
       `aria-describedby` to that shared message's id whenever the group is in
       violation, so a screen-reader user tabbing through the sliders individually is
       told about the group-level problem too.
+- [ ] **Prerequisite, before wiring the canonical pipeline (added 2026-07-13,
+      capexiq-prebuild-assurance PBA-10):** the golden end-to-end scenario suite in
+      `tests/scenarios/` (see `tests/scenarios/README.md` for the current set and what's
+      still logged as follow-up) must exist and pass before dashboard/preview-strip code
+      is built against the pipeline — these are independently-hand-derived regression
+      scenarios, distinct from Phase 9's user-facing scenario-comparison feature.
+- [ ] **Canonical NPV/IRR/working-capital calculations must use the full DSO-extended
+      `cashReceivedByMonth()` array, never a truncated original-horizon slice** (added
+      2026-07-13, PBA-3) — see `SPEC.md` §14.4 and `report-templates/formula-appendix.md`
+      §1.4 for the full contract. Add a test asserting cash conservation holds even when
+      the DSO tail extends past `usefulLifeYears`.
+- [ ] **No formula-output value that can be `Infinity` (`paybackPeriod`,
+      `paybackPeriodFromCashFlows`) may be passed to `JSON.stringify` anywhere in the
+      pipeline** (added 2026-07-13, PBA-7) — `JSON.stringify(Infinity)` silently becomes
+      `"null"`, colliding with `discountedPaybackPeriod`'s genuine `null` sentinel. See
+      `report-templates/formula-appendix.md` §4.6 for the full contract and why the two
+      sentinels are deliberately different, not to be unified.
+- [ ] The pre-step or an early wizard screen shows the localStorage privacy disclosure
+      copy from `content/field-explanations.md` (added 2026-07-13, PBA-8) near the
+      "Start over" control.
 **Definition of Done:** every Phase-5-enumerated edge case has a named, passing test.
 
 ---
@@ -662,8 +682,29 @@ this one), do a final manual pass **on the actual deployed site**, not just loca
 - [ ] Mobile viewport pass — the wizard is the highest-risk surface for this, and
       specifically confirm tooltips work via tap (per Phase 4-E) and sliders are usable
       by touch drag.
+- [ ] **Security/response-header pass (added 2026-07-13, capexiq-prebuild-assurance
+      PBA-9 — this whole bullet was previously missing from Phase 10 entirely, so
+      nothing forced anyone to actually check headers before calling go-live QA done):**
+      create a Cloudflare Pages `_headers` file (or equivalent dashboard config) and
+      fetch the live site's actual response headers, confirming:
+      - a `Content-Security-Policy` tailored to the app's real script/style/font/
+        image/connect needs (built from the actual Phase 7/8 dependency list — chart
+        library, export libraries — not written blind ahead of time);
+      - `frame-ancestors` (or an equivalent legacy `X-Frame-Options`) for clickjacking
+        protection;
+      - `X-Content-Type-Options: nosniff`;
+      - a deliberate `Referrer-Policy` (not the browser default);
+      - a least-privilege `Permissions-Policy`;
+      - HTTPS/HSTS enforced at the domain level;
+      - a sane cache policy distinguishing HTML (short/no-cache) from hashed static
+        assets (long-cache, immutable);
+      - no production source maps exposed (check `/_next/` for `.map` files after a
+        production build).
+      Verify by fetching headers directly (e.g. `curl -I`), not by console silence —
+      a missing header doesn't throw a console error.
 **Definition of Done:** the edge-case list has been exercised on the real deployed URL,
-not just asserted by unit tests.
+not just asserted by unit tests, and the security/response-header pass above shows a
+deliberately configured policy, not host defaults.
 
 ---
 

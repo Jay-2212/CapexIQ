@@ -939,6 +939,35 @@ Accounting / billed view
 Cash-flow view
 ```
 
+### 14.4 Cash-flow horizon contract (added 2026-07-13, capexiq-prebuild-assurance PBA-3)
+
+`formulas/dso.ts`'s `cashReceivedByMonth()` returns a series **longer** than the input
+revenue series it's given — extended by the largest payer's collection delay, in
+months, because a delayed collection can land after the last month of the projection
+that generated it. This is deliberate and must be preserved end to end:
+
+- **Every consumer that sums or discounts cash flows (NPV, IRR, the annual cash-flow
+  summary, the working-capital-gap metric) must use the full DSO-extended series, never
+  truncate it to the original projection-horizon length before summing.** Over the full
+  extended series, total cash received always equals total realized revenue exactly
+  (cash conservation — nothing is ever actually lost, only delayed). Truncating to a
+  fixed horizon before summing silently drops the tail and makes a temporary collection
+  delay look like a permanent, unresolved revenue loss.
+- **Collections may land after `usefulLifeYears`** if DSO requires it, and that's
+  correct, not a bug — the cash was earned by revenue generated during the equipment's
+  life; refusing to collect it past an arbitrary horizon would fabricate a loss.
+- **The only legitimate revenue write-off is a separate, explicitly modeled bad-debt /
+  ultimate-collection-rate parameter** (e.g., a payer type whose realization or
+  collection percentage is deliberately below 100%) — never an artifact of where the
+  projection table happens to end. A fixed-length display table (e.g., an Excel annual
+  summary capped at `usefulLifeYears` rows) may show the *display* truncated, with any
+  still-in-transit collections rolled into a "collections in transit" footer line, but
+  the underlying NPV/IRR/working-capital math must never be computed from the truncated
+  view.
+
+See `report-templates/formula-appendix.md` §1.4 for the formula-level statement of the
+same rule.
+
 ---
 
 ## 15. PM-JAY, Insurance, TPA, and NABH Considerations

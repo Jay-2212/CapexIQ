@@ -273,16 +273,17 @@ Every wizard field is pre-filled with its default/typical value where one exists
 | Untouched (still showing the default) | `--text-secondary`, regular weight | A small "Typical" tag/pill next to the field, using `--accent-interactive-bg` background and `--accent-interactive` text — reuses existing tokens, no new color |
 | Edited (user has typed or dragged) | `--text-primary`, normal input styling | Tag removed |
 
-This gets the low-friction benefit of a pre-filled field (most users accept most
-defaults) without the risk of a default being mistaken for a value the user actually
 entered — the muted styling and tag make the field's state legible at a glance.
 
-**Correction (2026-07-12, UI assurance audit) — this paragraph previously grouped
-discount rate and target IRR together as both having "no sourced default," which was
-wrong for discount rate.** Discount rate has a real sourced default (`typical: 12.5%`,
-Medium confidence, `equipment-data/common-assumptions.json`) and is pre-filled exactly
-like any other sourced field, above. **Target IRR is the one field with no sourced
-benchmark** (confirmed unresearchable, `Unavailable` per `common-assumptions.json`) —
+**Correction (2026-07-12/13) — this paragraph previously grouped discount rate and
+target IRR together as both having "no sourced default," which was wrong for discount
+rate; found independently by two parallel audits (`capexiq-ui-assurance`'s F1 and
+`capexiq-prebuild-assurance`'s PBA-6) run the same week, the same false-"unresearched"
+-claim failure class ISS-9 already caught once in a different file.** Discount rate has
+a real sourced default (`typical: 12.5%`, Medium confidence, S22/S23,
+`equipment-data/common-assumptions.json`) and is pre-filled exactly like any other
+sourced field, above. **Target IRR is the one field with no sourced benchmark**
+(confirmed unresearchable, `Unavailable` per `common-assumptions.json`) —
 **resolved (audit F1, Jay's decision):** rather than showing empty and blocking the
 Basic-Mode step gate (see `agent-build-plan.md` Phase 5's F1 note), it is auto-filled
 with a computed heuristic (`discountRate + 400bps`) using the exact same "Typical" tag
@@ -294,6 +295,17 @@ authoritative, and no field's default is ever silently presented as sourced when
 isn't — target IRR's tag and tooltip make its provisional nature explicit, and this is
 the *only* field in the product using a computed (rather than directly sourced) value
 as its "Typical" default.
+
+**This pattern isn't unique to target IRR (capexiq-prebuild-assurance PBA-6 addendum):**
+`purchase cost` has no typical value at all for MRI/CT/Ultrasound, and `usage per
+day`/`billed tariff (typical)`/`launch delay (typical)` are null for several equipment
+types too (`equipment-data/<type>.json` — see each file's own confidence notes). Unlike
+target IRR, none of these has a defensible computed heuristic (there's no
+"discountRate + Xbps"-style proxy for a purchase price), so they don't get the
+auto-fill treatment above — they stay genuinely empty with the same visible-prompt
+styling (not a blank that looks authoritative), and `required: true` correctly gates
+progression on the user actually entering them, since there is nothing to protect
+Basic Mode from here except real data.
 
 ---
 

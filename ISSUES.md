@@ -12,7 +12,7 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
-*(Nothing open as of 2026-07-12 — every tracked issue is either accepted or resolved.
+*(Nothing open as of 2026-07-13 — every tracked issue is either accepted or resolved.
 Check back here first before assuming that stays true; add a new entry the moment you
 spot a real problem.)*
 
@@ -165,6 +165,28 @@ is a placeholder only, safe to replace once real product screenshots exist.
 
 ## Resolved
 
+### ISS-16 — Basic Mode's blended AMC/CMC default-source formula, confirmed by Jay
+**Area:** data / product
+**What was flagged:** `capexiq-prebuild-assurance`'s pre-build audit (2026-07-13,
+finding PBA-4) found `content/inputs-metadata.json`'s Basic Mode `amcCmcCostPostWarranty`
+field had no `cmcYears` wizard input anywhere and an ambiguous blended default. Fixed
+same session: Basic Mode now explicitly collapses the CMC-then-AMC schedule into one
+flat rate for the whole post-warranty period; a new `cmcYears` Advanced Group E field
+was added so the underlying `maintenanceScheduleForYears()` formula parameter is no
+longer orphaned. One piece was left open pending Jay's confirmation: which formula
+populates Basic Mode's default rate, since CMC is typically pricier than AMC and
+defaulting from AMC alone would systematically understate early post-warranty cost.
+**Resolution (2026-07-13):** Jay confirmed **Option A (duration-weighted blend)**:
+`(cmcYears × cmcAnnualCostPercentage.typical + (usefulLifeYears − warrantyYears −
+cmcYears) × amcAnnualCostPercentage.typical) ÷ (usefulLifeYears − warrantyYears)` — the
+honest central estimate, over a CMC-only conservative default or an AMC-only
+optimism-biased one. `content/inputs-metadata.json`'s `PROVISIONAL` language removed.
+**Numbering note:** originally logged as ISS-14 in the session that found it, before
+discovering (at merge time) that ISS-14 and ISS-15 below had already been assigned by
+a parallel `capexiq-ui-assurance` audit session — renumbered to ISS-16 to avoid
+colliding with already-published issue numbers, not because anything about the
+finding itself changed.
+
 ### ISS-15 — No multi-tab or shared-device behavior defined for the wizard's localStorage draft
 **Area:** design / product
 **What was flagged:** the 2026-07-12 `$capexiq-ui-assurance` planning audit (finding
@@ -173,7 +195,10 @@ no defined behavior for two tabs open on the same draft at once — each tab
 independently debounce-saves to the same key, so the last tab to save silently wins
 and the other tab's edits vanish with no warning. Also unaddressed: nothing disclosed
 to the user that a draft (hospital name, bed count, cost figures) persists
-indefinitely in the browser on a possibly-shared device.
+indefinitely in the browser on a possibly-shared device. A second, independent audit
+(`capexiq-prebuild-assurance` PBA-13, 2026-07-13) found the same section also didn't
+cover the write itself failing (quota/private-mode) — folded into the same
+`wizard-state.md` §7.3 fix, see that section for the full three-part resolution.
 **Resolution (2026-07-12, Jay's decision, informed by an independent Opus advisor
 opinion):** a two-part fix, chosen over a full real-time cross-tab sync
 (`BroadcastChannel` — rejected as disproportionate engineering for a single-user v1
@@ -195,7 +220,11 @@ valid), this meant a Basic-Mode-only user — the hospital-administrator persona
 product is explicitly built to serve, not just the CFO — could never reach `/results`
 without manually opening a panel they don't know exists and entering a number that,
 by this project's own research, doesn't publicly exist anywhere for Indian hospitals.
-Directly contradicted the product's central Basic/Advanced value proposition.
+Directly contradicted the product's central Basic/Advanced value proposition. A
+second, independent audit (`capexiq-prebuild-assurance` PBA-5, 2026-07-13) found the
+exact same defect from a different angle (traceability/schema review rather than
+accessibility review) and converged on the same root-cause diagnosis, sanity-checking
+that this is real.
 **Resolution (2026-07-12, Jay's decision, informed by an independent Opus advisor
 opinion):** rather than fabricating a benchmark or leaving the field blocking, the
 wizard auto-fills `targetIrr` with a computed heuristic (`discountRate + 400bps`,

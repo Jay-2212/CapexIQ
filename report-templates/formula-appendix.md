@@ -54,6 +54,13 @@ splits across several future collection months rather than landing all at once. 
 output series extends past the input series by the largest payer's collection delay,
 in months.
 
+**Consuming this series (added 2026-07-13, PBA-3):** always sum/discount the full
+extended series when computing NPV, IRR, the annual cash-flow summary, or the
+working-capital gap — never truncate it to the original projection-horizon length
+first. Cash is conserved over the full series (total received = total realized
+revenue); truncating drops the tail and turns a temporary collection delay into what
+looks like a permanent loss. See `SPEC.md` §14.4 for the full contract.
+
 ---
 
 ## 2. Costs
@@ -205,6 +212,29 @@ of every future cash flow. Returns `null` (not `Infinity`) if cumulative discoun
 cash flow never reaches the initial investment — the Investment Outlook score (§5.1.2)
 treats `null` the same way it treats a ratio of 1.0 or more: a Speed to Payback score
 of 0.
+
+**On the `Infinity`/`null` split (added 2026-07-13, capexiq-prebuild-assurance PBA-7):**
+§4.4/§4.5's `Infinity` and §4.6's `null` are two *different, deliberate* sentinels for
+"never pays back," not an inconsistency to unify. `Infinity` is required by
+`formulas/actionableInsight.ts`'s subtraction-based comparison
+(`baselinePaybackYears − scenarioPaybackYears`) — `Infinity` propagates correctly
+through that arithmetic (a scenario that still never pays back correctly fails the
+materiality gate); if this were `null` instead, `null` coerces to `0` in JavaScript
+arithmetic and would silently produce a wrong, false-positive "improvement." `null` is
+required by `investmentOutlookScore.ts`'s explicit `=== null` branch. **Do not unify
+these into one sentinel** — that was considered and rejected specifically because of
+the `actionableInsight.ts` dependency above.
+
+What *is* a real hazard: `JSON.stringify(Infinity)` silently produces the string
+`"null"` — indistinguishable from `discountedPaybackPeriod`'s genuine `null`, or any
+other explicit "unavailable" marker, if either payback value is ever serialized (a
+scenario fixture, a future export intermediate format, anything touching
+`localStorage` — though per this project's browser-storage rules, calculated results
+should never be persisted there in the first place). Any future serialization
+boundary must encode `Infinity` as an explicit, distinct marker (e.g., a string
+`"never"` or a `neverPaysBack: true` flag) before calling `JSON.stringify` — never
+rely on `JSON.stringify`'s default behavior for a value that can be `Infinity`. See
+`agent-build-plan.md` Phase 6/8 for the corresponding checklist item.
 
 ### 4.7 EAC (Equivalent Annual Cost)
 `formulas/eac.ts` — `equivalentAnnualCost()`

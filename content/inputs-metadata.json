@@ -243,7 +243,8 @@
       "decimalPlaces": 1,
       "allowNegative": false,
       "required": true,
-      "defaultSource": "equipment-data/<type>.json#amcAnnualCostPercentage / #cmcAnnualCostPercentage",
+      "resolvedNote": "capexiq-prebuild-assurance PBA-4, 2026-07-13 (confirmed by Jay 2026-07-13, ISS-16 resolved -- originally logged as ISS-14, renumbered at merge time to avoid colliding with the parallel capexiq-ui-assurance audit's own ISS-14/ISS-15): Basic Mode deliberately collapses formulas/maintenance.ts's CMC-then-AMC schedule into one flat rate applied for the entire post-warranty period (cmcYears is treated as 0 in the Basic-mode formula call) -- Advanced Group E's new cmcYears field plus the existing maintenanceCostByYearPct per-year array are the only way to model the true stepped warranty→CMC→AMC cliff.",
+      "defaultSource": "A duration-weighted blend, not AMC-only or CMC-only, since CMC is typically pricier and an AMC-only default would systematically understate cost: blendedRate = (cmcYears × equipment-data/<type>.json#cmcAnnualCostPercentage.typical + (usefulLifeYears − warrantyYears − cmcYears) × #amcAnnualCostPercentage.typical) ÷ (usefulLifeYears − warrantyYears)",
       "errorMessage": "Enter a value between 0% and 20% of purchase cost.",
       "tooltipKey": "AMC / CMC cost after warranty"
     },
@@ -545,6 +546,20 @@
 
     "E_maintenanceAndLifecycleCost": {
       "_group": "SPEC.md §11.1 E — Maintenance and lifecycle cost",
+      "cmcYears": {
+        "label": "CMC coverage period after warranty",
+        "note": "Added 2026-07-13 (capexiq-prebuild-assurance PBA-4) -- formulas/maintenance.ts's maintenanceScheduleForYears() requires this as a parameter distinct from warrantyYears (years covered by warranty) and totalYears (useful life): it's how many years of CMC (comprehensive, parts+labor) coverage follow the warranty before AMC (labor-only) coverage begins. Previously had no wizard field anywhere. Basic Mode does not collect this -- it treats the whole post-warranty period as one flat rate (basic.amcCmcCostPostWarranty); this field only matters if maintenanceCostByYearPct isn't used to override the schedule directly.",
+        "controlType": "input",
+        "type": "integer-count",
+        "unit": "years",
+        "min": 0,
+        "max": 15,
+        "allowNegative": false,
+        "required": false,
+        "defaultSource": "equipment-data/<type>.json#cmcYears",
+        "errorMessage": "Enter a CMC coverage period between 0 and 15 years.",
+        "tooltipKey": "CMC coverage period after warranty"
+      },
       "maintenanceCostByYearPct": {
         "label": "AMC / CMC cost by year",
         "template": "Repeats per year of useful life (see advanced.F.usefulLifeYears); optional stepped-schedule override of basic.amcCmcCostPostWarranty.",
@@ -621,6 +636,7 @@
         "decimalPlaces": 2,
         "allowNegative": false,
         "required": true,
+        "resolvedNote": "Independently flagged twice, 2026-07-12/13, by two parallel audits (capexiq-ui-assurance's F1/ISS-14 and capexiq-prebuild-assurance's PBA-5) -- both found required:true with no sourced default would block Basic-Mode users. Resolved per the ui-assurance audit's fix (Jay's decision, Opus-advisor-reviewed): auto-fill rather than loosen the requirement.",
         "defaultSource": "Computed heuristic (audit F1, resolved 2026-07-12, Jay's decision): discountRate + 400bps, auto-filled and shown with the standard 'Typical' tag (design/ux-product-spec.md §6) — never left blank. Not a researched benchmark; equipment-data/common-assumptions.json#targetIrr stays 'Unavailable' as the honest research status, this is a UI-level suggested-starting-point heuristic (already documented there and in financial-model-spec.md §1.6) applied so Basic Mode never blocks on an unresearchable field. User can override in Advanced Mode; not consumed by the Investment Outlook score itself (financial-model-spec.md §1.6 uses discountRate as the hurdle).",
         "errorMessage": "Enter a target IRR between 0% and 50%.",
         "tooltipKey": "Target IRR / hurdle rate"

@@ -49,11 +49,13 @@
     }
   },
   "cmcYears": {
-    "value": 5,
+    "low": 5,
+    "typical": 5,
+    "high": 5,
     "unit": "years",
     "confidence": "Medium",
     "sourceId": "S46",
-    "note": "5-year CMC for the RO plant following the warranty period. See data-requirements.md §18.4."
+    "note": "5-year CMC for the RO plant following the warranty period. See data-requirements.md §18.4. Normalized to {low,typical,high} 2026-07-13 (PBA-1) -- a single reported figure, not a real range, so low=typical=high."
   },
   "amcAnnualCostPercentage": {
     "low": 2,

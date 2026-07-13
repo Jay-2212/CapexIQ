@@ -1,5 +1,5 @@
 {
-  "_status": "placeholder - not real data, see equipment-data/README.txt and ISSUES.md ISS-3",
+  "_status": "placeholder - not real data, see equipment-data/README.txt and ISSUES.md ISS-3. Reshaped 2026-07-13 (capexiq-prebuild-assurance PBA-2) so every field matches the same nested-object schema used by mri/ct/cath-lab/dialysis/ultrasound.json -- previously several fields here were bare `null` instead of a `{value/low/typical/high, unit, confidence, sourceId}` object, which would throw a TypeError the first time generic tooltip/default-population code (built against the other 5 files) reads Custom equipment's data. Every value stays null (Custom equipment has no researchable benchmark by definition); only the shape changed. Also removed `financingNorms` and `typicalUtilization.workingDaysPerMonth`, which ISS-13 (resolved 2026-07-11) already removed from the other 5 equipment files as dead schema duplicating common-assumptions.json -- this file was the one ISS-13's own cleanup didn't reach.",
   "equipmentType": "custom",
   "purchaseCost": {
     "low": null,
@@ -9,20 +9,61 @@
     "confidence": null,
     "sourceId": null
   },
-  "usefulLifeYears": null,
-  "salvageValuePercentage": null,
-  "installationAndAncillaryCostPercentage": null,
-  "warrantyYears": null,
-  "cmcYears": null,
-  "amcAnnualCostPercentage": null,
+  "usefulLifeYears": {
+    "value": null,
+    "unit": "years",
+    "confidence": null,
+    "sourceId": null
+  },
+  "salvageValuePercentage": {
+    "value": null,
+    "unit": "percent",
+    "confidence": null,
+    "sourceId": null
+  },
+  "installationAndAncillaryCostPercentage": {
+    "low": null,
+    "typical": null,
+    "high": null,
+    "unit": "percent of equipment cost",
+    "confidence": null,
+    "sourceId": null
+  },
+  "warrantyYears": {
+    "low": null,
+    "typical": null,
+    "high": null,
+    "unit": "years",
+    "confidence": null,
+    "sourceId": null
+  },
+  "cmcYears": {
+    "low": null,
+    "typical": null,
+    "high": null,
+    "unit": "years",
+    "confidence": null,
+    "sourceId": null
+  },
+  "amcAnnualCostPercentage": {
+    "low": null,
+    "typical": null,
+    "high": null,
+    "unit": "percent of equipment cost per year",
+    "confidence": null,
+    "sourceId": null
+  },
+  "cmcAnnualCostPercentage": {
+    "low": null,
+    "typical": null,
+    "high": null,
+    "unit": "percent of equipment cost per year",
+    "confidence": null,
+    "sourceId": null
+  },
   "typicalUtilization": {
     "usagePerDay": null,
-    "workingDaysPerMonth": null,
     "rampUpMonths": null
-  },
-  "financingNorms": {
-    "typicalLoanTenureYears": null,
-    "typicalInterestRateRange": null
   },
   "billedTariffPerUse": {
     "low": null,
@@ -33,7 +74,9 @@
     "sourceId": null
   },
   "launchDelayMonths": {
-    "value": null,
+    "low": null,
+    "typical": null,
+    "high": null,
     "unit": "months",
     "confidence": null,
     "sourceId": null

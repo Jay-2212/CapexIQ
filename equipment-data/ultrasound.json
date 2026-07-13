@@ -33,18 +33,22 @@
     "note": "No tender or study gives a stated percentage. A buying-guide site notes ultrasound site prep is light (power outlets, network, storage) vs. heavy imaging-equipment civil work -- this range is an inference from that description, not a measured figure. See data-requirements.md §18.3."
   },
   "warrantyYears": {
-    "value": 5,
+    "low": 5,
+    "typical": 5,
+    "high": 5,
     "unit": "years",
     "confidence": "Medium",
     "sourceId": "S47",
-    "note": "AIIMS Patna tender: 5-year comprehensive warranty + 5yr CMC. Single tender, no corroborating source found -- kept at Medium confidence (not High) despite being the only figure available, per this doc's own confidence rules (High requires multiple sources to agree). See data-requirements.md §18.1."
+    "note": "AIIMS Patna tender: 5-year comprehensive warranty + 5yr CMC. Single tender, no corroborating source found -- kept at Medium confidence (not High) despite being the only figure available, per this doc's own confidence rules (High requires multiple sources to agree). See data-requirements.md §18.1. Normalized to {low,typical,high} 2026-07-13 (PBA-1) -- a single reported figure, not a real range, so low=typical=high."
   },
   "cmcYears": {
-    "value": 5,
+    "low": 5,
+    "typical": 5,
+    "high": 5,
     "unit": "years",
     "confidence": "Medium",
     "sourceId": "S47",
-    "note": "Follows the 5-year warranty in the AIIMS Patna tender. See data-requirements.md §18.4."
+    "note": "Follows the 5-year warranty in the AIIMS Patna tender. See data-requirements.md §18.4. Normalized to {low,typical,high} 2026-07-13 (PBA-1) -- a single reported figure, not a real range, so low=typical=high."
   },
   "amcAnnualCostPercentage": {
     "low": 2,

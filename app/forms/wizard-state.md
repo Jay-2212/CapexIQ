@@ -376,23 +376,28 @@ truncate/extend rule.
   browser dialogs" convention — a simple inline confirmation state on the link
   itself, "Click again to confirm," not a modal) before actually clearing.
 
-### 7.3 Multi-tab behavior and shared-device disclosure (resolved — UI assurance audit F5, 2026-07-12, Jay's decision)
+### 7.3 Multi-tab behavior, shared-device disclosure, and storage-write failure
 
-Not addressed above: what happens if the same draft is open in two tabs at once (easy
-to trigger accidentally — a middle-click, a mobile "open in new tab"). As written,
+Merges two independent audits' findings on the same gap: `capexiq-ui-assurance`'s F5
+(2026-07-12, resolved by Jay with an Opus-advisor review) covered multi-tab conflict
+and shared-device disclosure; `capexiq-prebuild-assurance`'s PBA-13 (2026-07-13) found
+the same section didn't cover the write itself failing. Not addressed before either
+audit: what happens if the same draft is open in two tabs at once (easy to trigger
+accidentally — a middle-click, a mobile "open in new tab"). As originally written,
 each tab's reducer independently debounce-saves to the same `capexiq.wizardDraft.v1`
 key with no cross-tab awareness — the tab that saves last silently wins, and the
 other tab's edits vanish on its own next save or reload with no warning. This is a
 real way to lose real data on exactly the shared hospital workstation this feature
 exists to protect. Also unaddressed: nothing tells the user this draft — hospital
 name, bed count, cost figures — sits in the browser's storage indefinitely on a
-possibly-shared device until "Start over" is clicked.
+possibly-shared device until "Start over" is clicked; and nothing defined what happens
+if the write itself throws.
 
-**Resolved, two-part fix (chosen over a full live-sync alternative — real-time
-cross-tab sync via `BroadcastChannel` was considered and rejected as disproportionate
-engineering for a single-user, single-assessment tool with no other client-side sync
-surface anywhere; also rejected: doing nothing beyond a text warning, since a note
-that's easy to miss doesn't actually stop silent data loss):**
+**Resolved, three-part fix (a full live-sync alternative — real-time cross-tab sync
+via `BroadcastChannel` — was considered and rejected as disproportionate engineering
+for a single-user, single-assessment tool with no other client-side sync surface
+anywhere; also rejected: doing nothing beyond a text warning, since a note that's easy
+to miss doesn't actually stop silent data loss):**
 
 1. **Conflict warning:** every `/assess/*` and `/results` route listens for the
    browser's native `storage` event on `capexiq.wizardDraft.v1`. If another tab writes
@@ -405,7 +410,20 @@ that's easy to miss doesn't actually stop silent data loss):**
    (§7.2) — *"Your progress is saved in this browser only."* — plus "Start over"
    itself already serves as the one-click clear-draft control this needed; no second
    affordance required, just the added copy making its purpose (and the data's
-   persistence) explicit.
+   persistence) explicit. `content/field-explanations.md`'s longer privacy-note draft
+   should be reconciled to this exact wording, not kept as a second live copy.
+3. **`localStorage.setItem` failure (quota exceeded, or Safari private-browsing mode,
+   which throws on every call, not just over quota) — not covered by the two points
+   above, since a conflict banner and a disclosure note both assume the write itself
+   succeeds:** wrap every write in try/catch. On failure, the wizard continues working
+   normally from in-memory reducer state for the rest of the session (nothing about
+   data entry or calculation depends on the write succeeding) — only the "your draft
+   is saved" safety net is lost. Show a single, low-weight inline notice the first
+   time a write fails in a session, next to the same disclosure copy from point 2:
+   *"Your progress isn't being saved automatically in this browser — you can still
+   finish and export, but a refresh will lose it."* Don't repeat the notice on
+   subsequent failed writes in the same session. No browser dialog, per this
+   project's own convention.
 
 ---
 

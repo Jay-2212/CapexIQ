@@ -33,18 +33,22 @@
     "note": "NEIGRIHMS tenders require a minimum 10% of product cost allocated to installation/commissioning/testing; a Borooah Cancer Institute MRI tender sets the minimum at 30%. These are tender-mandated bid-allocation floors, not measured actual average spend -- see data-requirements.md §18.3."
   },
   "warrantyYears": {
-    "value": 5,
+    "low": 5,
+    "typical": 5,
+    "high": 5,
     "unit": "years",
     "confidence": "High",
     "sourceId": "S37,S38",
-    "note": "Two independent government tenders (Shirdi Saibaba Sansthan Trust 3T MRI; NEIGRIHMS 1.5T MRI) both specify 5-year comprehensive warranty. See data-requirements.md §18.1."
+    "note": "Two independent government tenders (Shirdi Saibaba Sansthan Trust 3T MRI; NEIGRIHMS 1.5T MRI) both specify 5-year comprehensive warranty. See data-requirements.md §18.1. Normalized to {low,typical,high} 2026-07-13 (capexiq-prebuild-assurance PBA-1) for cross-equipment schema consistency -- a single reported figure, not a real range, so low=typical=high."
   },
   "cmcYears": {
-    "value": 5,
+    "low": 5,
+    "typical": 5,
+    "high": 5,
     "unit": "years",
     "confidence": "Medium",
     "sourceId": "S38",
-    "note": "Follows the 5-year warranty in the NEIGRIHMS tender. See data-requirements.md §18.4."
+    "note": "Follows the 5-year warranty in the NEIGRIHMS tender. See data-requirements.md §18.4. Normalized to {low,typical,high} 2026-07-13 (PBA-1) -- a single reported figure, not a real range, so low=typical=high."
   },
   "amcAnnualCostPercentage": {
     "low": 2,

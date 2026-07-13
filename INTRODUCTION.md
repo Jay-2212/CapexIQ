@@ -25,22 +25,35 @@ index at the top so you can jump to the section you need.
 
 ---
 
-## Reading order (do this before doing anything else)
+## Reading order
 
-1. **INTRODUCTION.md** — this file. What the project is, and the rules below.
-2. **HANDOFF.md** — where things currently stand, and what the last agent did.
-3. **DIRECTORY.md** — the map of the codebase: what exists, where, and what it's for.
-4. **ISSUES.md** — open problems/gaps being tracked. Check before assuming something's
-   fine; add to it the moment you spot something wrong, even if you don't fix it now.
-5. **CONVENTIONS.md** — how code gets written here (file/dependency/testing rules).
+Only two files are a hard mandate, every session, no exceptions:
+
+1. **INTRODUCTION.md** — this file. Read it once, in full, before doing anything else.
+2. **CONVENTIONS.md** — how code gets written here (file/dependency/testing rules).
    Read this before writing or editing any code — not optional, not just for style.
-6. **agent-build-plan.md** — the phase you're actually working on, its dependencies,
-   and its Definition of Done. Check which phase is next before starting new code.
-7. **SPEC.md** — the full product spec, only when you need the detail behind a decision.
 
-You don't need to read SPEC.md front-to-back. Use its index. You *do* need to read
-HANDOFF.md, DIRECTORY.md, ISSUES.md, and CONVENTIONS.md every time — they're short by
-design.
+**HANDOFF.md** sits in between: *updating* it before you finish a session is
+mandatory (see Rule 1 below — skipping this is the one thing that actually breaks
+this system). *Reading* it isn't a hard mandate the way INTRODUCTION.md/CONVENTIONS.md
+are, but it's genuinely the fastest way to find out what's actually done vs. assumed,
+so read it unless you already know exactly what you're doing and why.
+
+Everything else below is a **reference map, not a checklist** — consult the one you
+actually need for the task in front of you, not all of them, every session, whether
+the task touches them or not. This project is meant to be agent-friendly and
+context-efficient (`CONVENTIONS.md`'s own motto); burning context reading files a
+given task doesn't touch works against that.
+
+- **DIRECTORY.md** — the map of the codebase: what exists, where, and what it's for.
+  Open it when you need to find something, not as a front-to-back read.
+- **ISSUES.md** — open problems/gaps being tracked. Worth a look before assuming
+  something's fine; add to it the moment you spot something wrong, even if you don't
+  fix it now.
+- **agent-build-plan.md** — the phased build plan. Check it when you need to know
+  which phase is next, or a phase's Definition of Done.
+- **SPEC.md** — the full product spec, has its own index at the top. Use it when you
+  need the detail behind a specific decision, not front-to-back.
 
 ---
 
@@ -94,4 +107,7 @@ next and why.
 
 ---
 
-That's the whole briefing. Go read HANDOFF.md next.
+That's the whole briefing. Check HANDOFF.md's Current State next if you want to know
+exactly where things stand — or jump straight into whatever the task in front of you
+actually needs. The rest of the docs above are there to help when you need them, not a
+checklist to clear before you're allowed to start.
