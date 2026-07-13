@@ -12,9 +12,39 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
-*(Nothing open as of 2026-07-13 — every tracked issue is either accepted or resolved.
-Check back here first before assuming that stays true; add a new entry the moment you
-spot a real problem.)*
+### ISS-24 — Methodology page is unstyled/functional-only, not a designed page
+**Area:** UI / design
+**What was flagged:** 2026-07-13, first manual browser QA pass of Phase 6 (this
+session Jay explicitly asked for, using `/chrome` + Opus advisor). `design/
+ux-product-spec.md` §5.3 calls for a separate Methodology page linked from the
+landing page's header/footer; it didn't exist at all going into this session (the
+landing page itself didn't exist either — see the Change Log entry below). Built as
+part of the same session, at `app/methodology/page.tsx`, but deliberately scoped
+narrow: it renders `report-templates/methodology.md` and `formula-appendix.md`
+through a small dependency-free markdown-to-JSX renderer
+(`app/methodology/renderSimpleMarkdown.tsx`), styled with plain prose CSS
+(`.methodology-page*` in `app/globals.css`) — readable, but not a bespoke-designed
+page the way the landing page and wizard are. Jay's own ask this session was "build
+the hero page," not this one; a real design pass on this page is future work.
+**Not urgent:** the page is fully functional and on-brand (uses the same design
+tokens), just visually plain compared to the rest of the product.
+
+### ISS-25 — Required-field errors show immediately on a completely untouched page load — spec-intended, but worth Jay revisiting
+**Area:** UX / validation
+**What was flagged:** 2026-07-13, same manual QA pass. On a fresh `/assess` load
+with no draft, required fields (e.g. Hospital bed size, City/tier) show a red border
+and red error text before the user has touched anything. Confirmed via `app/forms/
+wizard-state.md` §2 this is **spec-intended, not a bug**: "Validate on every change,
+not on blur or submit... an invalid value shows its `errorMessage` immediately... No
+'you'll find out when you hit Next.'" An empty required field is, by that rule, an
+invalid value from the first render.
+**Why still logged:** it's a defensible design choice (immediate feedback, no
+surprise validation later) but also a real deviation from the more common "don't
+red-flag a field before the user has interacted with it" convention, and Jay asked
+to flag rather than silently accept or silently change it. Revisit if it reads as
+unpolished/alarming in real user testing.
+**Status:** deliberately not changed this session — flagged for Jay to decide later,
+not an engineering task in the meantime.
 
 ---
 
@@ -164,6 +194,209 @@ is a placeholder only, safe to replace once real product screenshots exist.
 ---
 
 ## Resolved
+
+### ISS-26 — First manual browser QA of Phase 6: 3 real bugs found and fixed, landing page built
+**Area:** UI / state management / new feature
+**What happened:** 2026-07-13, Jay asked for the first interactive browser QA pass of
+Phase 6 (the prior implementation session had no working `claude-in-chrome`
+connection — see ISS-21). Found and fixed, with an Opus advisor pass sanity-checking
+both the diagnosis and the fix approach before implementation:
+1. **`app/globals.css` had zero CSS for most component class families** actually
+   used in markup — `assess-page`, `assessment-header*`, `equipment-tile*`,
+   `advanced-panel*`, `advanced-group*`, `banner*`, `maintenance-schedule*`,
+   `payer-row*`, `results-*`, `step-nav`, `start-over` all rendered unstyled (the
+   pre-step's equipment images rendered at raw multi-thousand-pixel resolution, the
+   `/results` page was a flat unstyled text list). Fixed by writing the missing CSS,
+   token-based, matching the existing "Signal" theme conventions — no new visual
+   language invented. Also fixed a related, only-found-while-doing-this bug: the
+   `.equipment-tile__icon`/`.landing-how__icon` pattern of `aspect-ratio` + `padding`
+   applied directly to a raw Lucide `<svg>` icon rendered the icon completely
+   invisible (a replaced-element sizing quirk); fixed by wrapping icons in a
+   flex-centered container `<div>` instead and sizing the icon itself via its own
+   `size` prop.
+2. **A hard reload/deep-link to any wizard step always bounced the user back to the
+   pre-step**, silently resetting `currentStep` (though the underlying answers
+   survived in `localStorage`). Root cause: `app/forms/RouteGuard.tsx`'s
+   pathname-effect ran on first mount against the still-default
+   `emptyWizardState()`, before `app/forms/useWizardPersistence.ts`'s mount-load
+   effect's `RESTORE_DRAFT` dispatch had landed — a child-effect-before-parent-effect
+   race. Fixed with a `state.hasHydrated` gate: a new `MARK_HYDRATED` action fires
+   from the persistence hook's load effect on every mount (draft-found or
+   draft-absent), and `RouteGuard` skips its redirect logic entirely until that flag
+   is true. Regression test added in `tests/wizard/routeGuardAndPersistence.test.tsx`.
+3. **`app/components/SliderField.tsx` showed a fake value for genuinely-unset
+   required fields** — e.g. MRI's `basic.billedTariffPerUse` has no sourced default,
+   so the real value is `null`, but the slider and its paired number input both
+   displayed `def.min` (500) as though answered, while the field was still flagged
+   invalid underneath. Fixed by tracking `localValue: number | null` end to end: the
+   number input shows empty when null, the range thumb still gets a visual position
+   from `def.min` without that fake value ever being written to state, and clearing
+   the number input now sets the field back to `null` (previously snapped back to
+   `def.min`). Regression test added in `tests/wizard/components.test.tsx`.
+4. **Built the landing page** (`app/page.tsx`) per `design/ux-product-spec.md` §5 —
+   header, hero, "how it works," "who it's for," a "what's in the tool" section, and
+   a footer — plus a minimal Methodology page (`app/methodology/page.tsx`, see
+   ISS-24) so the footer/header link isn't dead. This had fallen through the cracks
+   between phases: no phase's "Do" checklist in `agent-build-plan.md` explicitly
+   listed it, even though the entry flow was finalized back in Phase 5. Root `/` had
+   shown the original pre-Phase-6 scaffold placeholder text until this fix.
+**Files touched:** `app/globals.css`, `app/forms/wizardTypes.ts`, `app/forms/
+initialState.ts`, `app/forms/wizardReducer.ts`, `app/forms/useWizardPersistence.ts`,
+`app/forms/RouteGuard.tsx`, `app/components/SliderField.tsx`, `app/(assessment)/
+assess/page.tsx`, `app/page.tsx` (new), `app/methodology/page.tsx` (new),
+`app/methodology/renderSimpleMarkdown.tsx` (new), `public/people-personas/*`,
+`public/design/hero-background.svg`, `public/README.md`, plus new/updated tests in
+`tests/wizard/routeGuardAndPersistence.test.tsx` and `tests/wizard/components.test.tsx`
+(175 passing, up from 173 — 2 new regression tests, plus 1 existing test updated to
+mount `useWizardPersistence` alongside `RouteGuard` so hydration actually completes,
+matching real app composition). `npx tsc --noEmit` and `npm run build` both clean.
+**See also:** ISS-24 (Methodology page's own design polish, deferred) and ISS-25
+(the eager-validation question, flagged for Jay, not changed).
+
+### ISS-17 — Realization % / claim-deduction % combination is an engineering interpretation, not a verified contract
+**Area:** formulas / financial model
+**What was flagged:** `content/tooltip-copy.md` kept "Realization % by payer type" and
+"Claim deduction / disallowance % by payer type" as two separately-estimated Advanced
+Mode inputs ("kept separate... so the two effects aren't conflated"), but
+`app/forms/resolvePayerMix.ts`'s `effectiveRealization = realization% × (1 −
+claimDeduction% / 100)` composition was Claude's engineering judgment, not something
+traced to a spec or test.
+**Resolution (2026-07-13, Opus advisor pass, no product decision needed):** the
+multiplicative composition is correct and standard for healthcare revenue-cycle
+modeling — billed tariff is reduced by claim deduction (the formally rejected portion)
+first, then realization % applies to what survives (collection shortfall on the
+*approved* amount), i.e. two sequential, non-overlapping haircuts, not a double-count.
+The advisor did find a real defect, though: `tooltip-copy.md`'s "Realization %"
+definition said "share of billed tariff actually collected" — if taken literally, that
+already includes the deduction loss, so multiplying by `(1 − claimDeduction%)` again
+would double-count. Fixed by correcting the tooltip copy to define realization %
+against the post-deduction/approved amount instead of billed tariff directly — the
+formula itself needed no change. See `content/tooltip-copy.md`'s "Realization %" and
+"Claim deduction" entries and `app/forms/resolvePayerMix.ts`'s updated comment.
+
+### ISS-18 — Lease acquisition mode had no bounded term; rental applied for the full useful-life horizon
+**Area:** formulas / financial model
+**What was flagged:** `app/forms/toAssessmentInputs.ts` applied `leaseRentalPerMonth ×
+12` as an annual financing cost for every year of `usefulLifeYears`, with no
+`leaseTenureMonths` field (unlike Loan's `loanTenureMonths`) — a lease never stopped
+costing, unlike a loan, which pays off.
+**Resolution (2026-07-13):** an Opus advisor pass concluded this was a real
+comparison-distorting bug, not an acceptable simplification — it systematically
+understates Lease's attractiveness relative to Loan in the financing-mode comparison
+this tool exists to support. Jay confirmed the advisor's recommended fix (a three-way
+choice presented via `AskUserQuestion`): added a `leaseTenureMonths` field (mirrors
+`loanTenureMonths`) — after this many months the rental stops and the equipment is
+modeled as owned outright for the rest of `usefulLifeYears` (a finance/capital-lease
+treatment), making Lease and Loan directly comparable over the same ownership horizon.
+`formulas/computeAssessment.ts`'s `AssessmentFinancing`'s lease variant now carries
+`tenureMonths` just like loan, and `financingCostForYear()` no longer special-cases
+lease at all — both branches now share the same tenure-capping logic. See
+`content/inputs-metadata.json#leaseTenureMonths`, `content/tooltip-copy.md`, `SPEC.md`
+§11.1 C, `app/advanced/GroupC.tsx`, and `tests/wizard/toAssessmentInputs.test.ts`'s
+updated Lease test.
+
+### ISS-19 — Advanced Mode Group B (utilization ramp-up) and Group E's per-year maintenance override were collected but not consumed by the canonical pipeline
+**Area:** formulas / wizard
+**What was flagged:** `formulas/computeAssessment.ts` assumed flat mature usage from
+day one — the 4 ramp-up percentages (Month 1-3/4-6/7-12/Year 2+) and
+`expectedMatureUtilization` were captured in wizard state and persisted, but no formula
+read them; similarly `maintenanceCostByYearPct`'s per-year stepped override was
+collected but `toAssessmentInputs.ts` always built the schedule from the 4-parameter
+warranty/CMC/AMC shape, ignoring it.
+**Resolution (2026-07-13):** on inspection, both fields' own schema documentation
+(`content/inputs-metadata.json`: ramp is "% of mature utilization"; the override is
+"% of purchase cost" per year) fully specified the intended behavior — no product
+judgment call was actually needed, just implementation. `formulas/computeAssessment.ts`
+now builds a month-by-month utilization series (ramp fractions applied per SPEC.md
+§13.2's literal month ranges, defaulting to 1 — i.e. unramped — when
+`utilizationRamp` is omitted) that feeds both the per-year cash flows and the existing
+monthly working-capital calc from one source of truth, and applies
+`maintenance.costByYearPct` as a per-year override on top of the warranty/CMC/AMC
+schedule wherever a year has a non-null entry. `app/forms/toAssessmentInputs.ts` wires
+Advanced Group B into this only once every one of the 4 ramp periods is filled in (a
+partially-filled ramp isn't a meaningful schedule) and lets `expectedMatureUtilization`
+supersede `basic.usagePerDay` as the ramp's 100% baseline once Advanced Mode is open,
+per that field's own `defaultSource` note. Fully backward compatible — every existing
+golden-scenario test passed unchanged, since omitting `utilizationRamp`/
+`costByYearPct` degenerates to the exact pre-existing flat behavior. New coverage:
+`tests/formulas/computeAssessment.rampAndMaintenanceOverride.test.ts` and new cases in
+`tests/wizard/toAssessmentInputs.test.ts`.
+
+### ISS-20 — Slider keyboard input shared the pointer-drag debounce instead of firing immediately
+**Area:** UI / accessibility polish
+**What was flagged:** `app/components/SliderField.tsx` debounced the reducer dispatch
+~120ms on every `input` event to smooth pointer drags, but wizard-state.md §5 also
+specifies keyboard arrow-key presses should recalculate immediately — the
+implementation couldn't distinguish a keyboard-sourced `input` event from a
+pointer-drag one.
+**Resolution (2026-07-13):** added a `keydown` listener that flags navigation keys
+(arrows, Home/End, Page Up/Down) via a ref; the `input` handler checks and consumes
+that flag to dispatch immediately for keyboard interactions while pointer drags still
+debounce as before. See `app/components/SliderField.tsx`.
+
+### ISS-21 — No interactive browser QA performed for Phase 6 (environment limitation)
+**Area:** verification
+**What was flagged:** No working Chrome extension connection was available during
+Phase 6's own implementation session, so no real click-through, visual/layout check, or
+confirmation that the route guard, focus management, or multi-tab conflict banner
+behave correctly in an actual browser was possible.
+**Follow-up (2026-07-13):** re-checked at the start of this session via the
+`claude-in-chrome` skill — the browser connection is still not working in this
+environment, so a real click-through remains blocked, same root cause as before, not a
+one-off. Narrowed what's testable without one: added
+`tests/wizard/routeGuardAndPersistence.test.tsx`, exercising the route guard's actual
+redirect (`router.replace` call when landing directly on an incomplete step's URL) and
+the cross-tab conflict banner actually firing on a real jsdom `StorageEvent` — both
+previously named as untested in this same entry. Also fixed a latent test-infra gap
+found while writing these: `tests/setup.ts` had no `afterEach(cleanup)`, so
+multi-render test files could see stale DOM from a previous test bleed into the next
+one (harmless while every file rendered only one component, a real bug once a file
+needs more than one `render()` call). **Still open, and still requires a human or a
+working browser-automation session, not further jsdom coverage:** anything visual
+(layout, contrast, responsive behavior), a real multi-tab browser session, and slider
+drag-timing/exact focus-transition behavior during live pointer interaction.
+**Recommend:** a manual click-through pass (`npm run dev`, walk the full pre-step →
+Investment → Usage → Costs → Results flow at least once, ideally on a phone-width
+viewport too) before treating Phase 6 as fully signed off end-to-end.
+
+### ISS-23 — Slider touch target doesn't meet the audit's full ask (native `<input type="range">` limitation)
+**Area:** UI / accessibility
+**What was flagged:** UI assurance audit F4 asked for the visible 18-20px thumb
+(SPEC.md §25.5) to have a separate, transparent ≥24×24 CSS px touch target, since an
+author-styled thumb doesn't get WCAG 2.5.8's user-agent-size exception. A native
+`<input type="range">` doesn't expose a way to grow the *thumb's* own hit area
+independent of its rendered size across browsers.
+**Resolution (2026-07-13, Opus advisor pass):** confirmed this is a legitimate,
+already-met conformance path, not a gap — WCAG 2.5.8 has an explicit "Equivalent"
+exception for a *different control on the same page* that does meet 24×24, and every
+slider in this product is already paired with a same-range, same-precision numeric
+text input (native text inputs comfortably exceed 24×24). A fully custom-built slider
+(considered and rejected, per the advisor) would trade a conformant native control for
+a hand-rolled one at real risk of a subtler accessibility regression (keyboard
+semantics, `aria-valuenow`, pointer capture) for no conformance gain over the exception
+already in place. The existing row-padding mitigation (`app/globals.css`'s
+`.slider-field__range`, added before this session) stays as a cheap, non-conformance-
+claiming mis-tap reducer. Comment in `app/globals.css` updated to record the actual
+conformance basis instead of describing this as unresolved.
+
+### ISS-22 — Payer-mix group's `required: true` fields had no default, same class of bug as the resolved targetIrr issue (F1) — found and fixed during Phase 6
+**Area:** wizard / data
+**What was flagged:** Found while implementing the Phase 6 wizard reducer, not by
+either prior audit. `content/inputs-metadata.json`'s `payerMixSharePct` (Advanced Group
+A) is `required: true` per payer type with a group-sum-to-100% constraint, and — like
+`targetIrr` before its F1 fix — has no sourced default and sits inside the collapsed
+Advanced panel. Read literally, `wizard-state.md` §2's step-gate rule ("every
+`required: true` field on that step... valid") would have blocked every Basic-Mode-only
+user from ever reaching `/results`, since the 5 payer shares would sit at `null` forever
+unless the user opened Advanced Mode and filled them in by hand.
+**Fix:** applied the same pattern as F1's resolution — `app/forms/initialState.ts`
+auto-fills an implicit single-payer default (100% private cash, 100% realization, 0
+collection delay, matching SPEC.md §14.3's "Basic Mode calculates first-pass billed
+revenue") at state initialization, so the group-sum constraint is satisfied by default
+and the gate needs no special case. `app/forms/resolvePayerMix.ts` always reads from
+this state (no `advancedOpen`-conditional branching) since it's correct in both modes.
+**Files touched:** `app/forms/initialState.ts`, `app/forms/resolvePayerMix.ts`, see also
+`tests/wizard/wizardReducer.test.ts`'s "payer mix defaults" test.
 
 ### ISS-16 — Basic Mode's blended AMC/CMC default-source formula, confirmed by Jay
 **Area:** data / product

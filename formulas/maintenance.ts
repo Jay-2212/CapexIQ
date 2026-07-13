@@ -2,7 +2,7 @@
 
 export interface MaintenanceScheduleEntry {
   yearNumber: number;
-  coverageType: "warranty" | "cmc" | "amc" | "none";
+  coverageType: "warranty" | "cmc" | "amc" | "none" | "override";
   annualCost: number;
 }
 

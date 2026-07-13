@@ -231,22 +231,22 @@ equipment's data file at render time.
 - **Why it matters:** Some payers (e.g. government scheme) are billed differently than private cash for the same procedure.
 
 #### Realization % by payer type
-- **Definition:** The share of that payer's billed tariff you actually expect to collect.
+- **Definition:** Of the amount a claim survives claim deduction/disallowance (see below), the share you actually expect to collect — e.g. slower TPA settlement, minor short-payments, or write-offs on the approved portion. **Not** a share of billed tariff directly; claim deduction is applied first, realization second (`effective collection = billed tariff × (1 − claim deduction%) × realization%`), so the two haircuts multiply rather than overlap (ISS-17).
 - **Direction:** Higher is better.
 - **Default/typical value:** No centralized benchmark — payer-contract and collections-history specific.
 - **Confidence:** Unavailable — a genuinely open data gap (`ISSUES.md` ISS-4).
 - **Source note:** N/A.
-- **How to estimate:** Use your own historical collections data by payer type if available.
-- **Why it matters:** Directly scales realized revenue down from billed revenue.
+- **How to estimate:** Use your own historical collections data by payer type, on the *approved* (post-deduction) amount, if available.
+- **Why it matters:** Scales realized revenue down from the claim-deduction-adjusted amount.
 
 #### Claim deduction / disallowance % by payer type
-- **Definition:** The share of insurance/TPA claims typically disallowed on review.
+- **Definition:** The share of billed tariff typically disallowed/rejected on claim review, before realization is applied.
 - **Direction:** Lower is better.
 - **Default/typical value:** No benchmark.
 - **Confidence:** Unavailable.
 - **Source note:** N/A.
 - **How to estimate:** Use your own claims-history disallowance rate if available.
-- **Why it matters:** Kept separate from realization % so the two effects aren't conflated.
+- **Why it matters:** Kept separate from realization % so the two effects — formal claim rejection vs. collection shortfall on what's approved — aren't conflated (see realization %'s definition above for how they combine).
 
 #### Collection delay / DSO by payer type
 - **Definition:** How long, on average, it takes to receive cash from this payer type after billing.
@@ -332,6 +332,15 @@ equipment's data file at render time.
 - **Source note:** N/A.
 - **How to estimate:** Use your actual lease quotation.
 - **Why it matters:** Replaces EMI in the cash-flow-after-financing calculation.
+
+#### Lease tenure (if lease mode)
+- **Definition:** How many months the lease rental is paid before the equipment is modeled as owned outright for the rest of its useful life (ISS-18) — mirrors Loan tenure.
+- **Direction:** Context-dependent — reflects your actual lease agreement, not a lever to optimize.
+- **Default/typical value:** No centralized benchmark — lessor-specific.
+- **Confidence:** Unavailable.
+- **Source note:** N/A.
+- **How to estimate:** Use your actual lease agreement's term.
+- **Why it matters:** Without a bounded tenure, a lease would be charged for the equipment's entire useful life while a loan payoff eventually stops — understating Lease relative to Loan in the financing-mode comparison.
 
 ### D. Launch delay and pre-opening cost
 

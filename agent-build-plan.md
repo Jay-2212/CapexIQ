@@ -467,6 +467,15 @@ opinion):**
 
 **Goal:** Build `app/forms/`, `app/advanced/`, and the step-navigation shell in
 `app/components/`, implementing exactly what Phase 5's `wizard-state.md` specifies.
+**Also built here, added 2026-07-13 (first manual browser QA session):** the landing
+page (`app/page.tsx`) and a minimal Methodology page (`app/methodology/page.tsx`),
+per `design/ux-product-spec.md` §5/§5.3 — the entry flow these depend on was
+finalized back in Phase 5, but no phase's own "Do" list ever explicitly named
+building the landing page itself, so it went unbuilt through the rest of Phase 6
+until this session caught root `/` still showing the pre-Phase-6 scaffold
+placeholder. Retroactively scoped into this phase rather than treated as a new
+phase, since it's pure UI work with no new formula/schema dependencies. See
+`ISSUES.md` ISS-26 and `HANDOFF.md`'s matching Change Log entry for the full detail.
 **Depends on:** Phase 5 (the doc must exist first), Phase 4 (`content/inputs-metadata.json`
 and `design/ux-product-spec.md`), Phase 2 (forms need real formulas to preview live
 results against, per Phase 4-G's live-recalculation contract).
@@ -474,57 +483,93 @@ results against, per Phase 4-G's live-recalculation contract).
 agents editing it at once is exactly the coordination failure `CONVENTIONS.md` §7 warns
 about.
 **Do:**
-- [ ] One `useReducer` (or equivalent single state container) for all wizard state — no
+- [x] One `useReducer` (or equivalent single state container) for all wizard state — no
       parallel `useState` calls for the same data scattered across step components.
-- [ ] Every field's control type, numeric bounds, and error copy come from
+      `app/forms/wizardReducer.ts`.
+- [x] Every field's control type, numeric bounds, and error copy come from
       `content/inputs-metadata.json` (Phase 4) — no ad hoc validation logic duplicated
       inside a component; if a field needs a rule that file doesn't have, add it there
-      first, don't hardcode it in the component.
-- [ ] The Basic → Advanced panel implements Phase 4-F exactly: collapsed by default,
+      first, don't hardcode it in the component. `app/forms/fieldSchema.ts`.
+- [x] The Basic → Advanced panel implements Phase 4-F exactly: collapsed by default,
       preview banner always visible above the toggle, entered Advanced values persist
-      across collapse/expand.
-- [ ] Slider components pair a draggable slider with a synced numeric text input
+      across collapse/expand. `app/advanced/AdvancedPanel.tsx`.
+- [x] Slider components pair a draggable slider with a synced numeric text input
       (either can drive the value, they stay in sync) — a slider alone isn't precise
       enough for financial figures a CFO will scrutinize; it's an input aid, not a
-      replacement for a typed number.
-- [ ] A test file that runs every transition in `wizard-state.md`'s table, with test
+      replacement for a typed number. `app/components/SliderField.tsx`.
+- [~] A test file that runs every transition in `wizard-state.md`'s table, with test
       names matching the plain-language scenario (e.g. `"back button after a validation
-      error does not clear other steps"`).
-- [ ] Every edge case bullet from Phase 5 has a corresponding passing test — this is the
-      concrete, checkable fix for "stop button didn't stop, resume didn't work."
+      error does not clear other steps"`). **Partially done** — `tests/wizard/
+      wizardReducer.test.ts`/`wizardValidation.test.ts`/`components.test.tsx` cover the
+      core reducer transitions, validation, and 2 interactive behaviors (161 tests
+      total), but not every single §5/§6/§7 timing/focus/multi-tab bullet has its own
+      dedicated test. See `ISSUES.md` ISS-21.
+- [~] Every edge case bullet from Phase 5 has a corresponding passing test — this is the
+      concrete, checkable fix for "stop button didn't stop, resume didn't work." Same
+      caveat as above — see `ISSUES.md` ISS-21.
 - [ ] **Slider touch target (added — UI assurance audit F4, 2026-07-12):** SPEC.md
       §25.5's 18-20px visible thumb is an author-styled control, not the browser's
       native rendering, so it doesn't get WCAG 2.5.8's user-agent-size exception. Keep
       the visible diameter exactly as specced, but give the actual hit-target a
       transparent ≥24×24 CSS px touch area centered on the thumb (a standard native-
       range-input styling technique) — no visual change, only the tappable area grows.
-- [ ] **Group-constraint `aria-describedby` wiring (added — UI assurance audit F8,
+      **Not achieved as specced** — `app/components/SliderField.tsx` uses a native
+      `<input type="range">`, which doesn't expose a way to grow the thumb's own hit
+      area independent of its rendered size. See `ISSUES.md` ISS-23.
+- [x] **Group-constraint `aria-describedby` wiring (added — UI assurance audit F8,
       2026-07-12):** `wizard-state.md` §2's payer-mix group-sum error is one message
       anchored to the group heading — wire each of the 5 payer-mix sliders'
       `aria-describedby` to that shared message's id whenever the group is in
       violation, so a screen-reader user tabbing through the sliders individually is
-      told about the group-level problem too.
-- [ ] **Prerequisite, before wiring the canonical pipeline (added 2026-07-13,
+      told about the group-level problem too. `app/advanced/GroupA.tsx`.
+- [x] **Prerequisite, before wiring the canonical pipeline (added 2026-07-13,
       capexiq-prebuild-assurance PBA-10):** the golden end-to-end scenario suite in
       `tests/scenarios/` (see `tests/scenarios/README.md` for the current set and what's
       still logged as follow-up) must exist and pass before dashboard/preview-strip code
       is built against the pipeline — these are independently-hand-derived regression
       scenarios, distinct from Phase 9's user-facing scenario-comparison feature.
-- [ ] **Canonical NPV/IRR/working-capital calculations must use the full DSO-extended
+      Already merged (PR #14); `formulas/computeAssessment.ts` validated against it
+      exactly (`tests/formulas/computeAssessment.test.ts`).
+- [x] **Canonical NPV/IRR/working-capital calculations must use the full DSO-extended
       `cashReceivedByMonth()` array, never a truncated original-horizon slice** (added
       2026-07-13, PBA-3) — see `SPEC.md` §14.4 and `report-templates/formula-appendix.md`
-      §1.4 for the full contract. Add a test asserting cash conservation holds even when
-      the DSO tail extends past `usefulLifeYears`.
-- [ ] **No formula-output value that can be `Infinity` (`paybackPeriod`,
+      §1.4 for the full contract. `formulas/workingCapitalPeak.ts` always uses the full
+      extended array; golden scenario B's own truncation-hazard test
+      (`tests/scenarios/financed-payer-mix-dso.test.ts`) already regression-guards the
+      underlying formulas. Headline NPV/IRR use the accrual (realized-revenue) annual
+      series, matching golden scenario B's own worked NPV/IRR computation exactly — the
+      DSO-extended array feeds the separate working-capital-gap metric only, per that
+      scenario's own structure.
+- [x] **No formula-output value that can be `Infinity` (`paybackPeriod`,
       `paybackPeriodFromCashFlows`) may be passed to `JSON.stringify` anywhere in the
       pipeline** (added 2026-07-13, PBA-7) — `JSON.stringify(Infinity)` silently becomes
       `"null"`, colliding with `discountedPaybackPeriod`'s genuine `null` sentinel. See
       `report-templates/formula-appendix.md` §4.6 for the full contract and why the two
-      sentinels are deliberately different, not to be unified.
-- [ ] The pre-step or an early wizard screen shows the localStorage privacy disclosure
+      sentinels are deliberately different, not to be unified. Satisfied by
+      construction — the wizard only ever `JSON.stringify`s the raw `WizardState`
+      draft (`app/forms/draftStorage.ts`), never a computed `AssessmentResult`.
+- [x] The pre-step or an early wizard screen shows the localStorage privacy disclosure
       copy from `content/field-explanations.md` (added 2026-07-13, PBA-8) near the
-      "Start over" control.
-**Definition of Done:** every Phase-5-enumerated edge case has a named, passing test.
+      "Start over" control. `app/(assessment)/layout.tsx`'s header, exact wording.
+- [x] **Landing page and Methodology page (added 2026-07-13, first manual browser QA
+      session):** `app/page.tsx` — header, hero, "how it works," "who it's for,"
+      "what's in the tool," footer, per `design/ux-product-spec.md` §5 — and
+      `app/methodology/page.tsx` rendering `report-templates/methodology.md`/
+      `formula-appendix.md` (§5.3). The Methodology page is functional but not
+      bespoke-designed — see `ISSUES.md` ISS-24 for that follow-up.
+- [x] **First interactive browser QA of Phase 6 (added 2026-07-13), closing ISS-21's
+      "no browser QA possible" gap:** found and fixed 3 real bugs — `app/globals.css`
+      missing CSS for most component class families (pre-step/results/Advanced-panel/
+      banners/step-nav all rendered unstyled), a `RouteGuard`-vs-`useWizardPersistence`
+      mount-order race that bounced every hard reload/deep-link back to the pre-step,
+      and `SliderField` masking a genuinely-unset required field's value as `def.min`.
+      See `ISSUES.md` ISS-26 for full detail.
+**Definition of Done:** every Phase-5-enumerated edge case has a named, passing test —
+**not fully met**; core transitions/validation/2 interactive behaviors are tested (175
+tests, build/typecheck both clean), but see `ISSUES.md` ISS-21/ISS-23 for the specific
+gaps against the letter of this bullet. **Manual browser QA has now happened** (see
+above) — the DoD's remaining gap is test-coverage completeness against every §5/§6/§7
+edge case, not "was this ever run in a real browser."
 
 ---
 

@@ -1,0 +1,497 @@
+{
+  "Equipment category": {
+    "definition": "Which equipment type you're evaluating (MRI, CT, Cath Lab, Dialysis, Ultrasound, Custom).",
+    "direction": "Context-dependent — determines every other default, not itself a \"higher/lower is better\" value.",
+    "defaultValue": "No default; required first selection.",
+    "confidence": "N/A.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Select the type matching your actual purchase.",
+    "whyItMatters": "Drives every benchmark default shown elsewhere in the tool."
+  },
+  "Equipment name / model (optional)": {
+    "definition": "A free-text label for your own reference in the exported report.",
+    "direction": "N/A — doesn't affect any calculation.",
+    "defaultValue": "Blank.",
+    "confidence": "N/A.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Enter your vendor's model name if you want it on the report.",
+    "whyItMatters": "Cosmetic only; helps you tell exported reports apart later."
+  },
+  "Hospital bed size": {
+    "definition": "Your hospital's total bed count.",
+    "direction": "Context-dependent — used as a lookup key for scale-dependent benchmarks, not a value with a \"better\" direction.",
+    "defaultValue": "No default; required input (`data-requirements.md` §19).",
+    "confidence": "N/A (your own hospital's fact, not a benchmark).",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your hospital's registered/licensed bed count.",
+    "whyItMatters": "A 50-bed and a 500-bed hospital see different typical utilization and vendor pricing; this is what lets the tool distinguish them."
+  },
+  "City / tier": {
+    "definition": "Which city or city-tier (Tier 1/2/3) the hospital is in.",
+    "direction": "Context-dependent.",
+    "defaultValue": "No default; required input.",
+    "confidence": "N/A (your own hospital's fact).",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Select your actual city or nearest tier classification.",
+    "whyItMatters": "Feeds city-tier-dependent benchmarks (utilization, tariff) where research supports the breakdown."
+  },
+  "Purchase cost": {
+    "definition": "The equipment's upfront price, before installation.",
+    "direction": "Lower is better — reduces upfront capital, shortens payback, improves NPV/IRR.",
+    "defaultValue": "See the selected equipment's `equipment-data/<type>.json#purchaseCost` — a wide range (configuration and brand vary enormously).",
+    "confidence": "Varies by equipment type — see the data file.",
+    "sourceNote": "`equipment-data/<type>.json`.",
+    "howToEstimate": "Use an actual vendor quotation wherever possible; benchmark ranges here are directional only.",
+    "whyItMatters": "The base of your initial investment and of depreciation."
+  },
+  "Installation / civil cost": {
+    "definition": "One-time site preparation, civil work, and commissioning cost on top of the equipment's sticker price.",
+    "direction": "Lower is better.",
+    "defaultValue": "Often expressed as a % of purchase cost — see `equipment-data/<type>.json#installationAndAncillaryCostPercentage`.",
+    "confidence": "Varies by equipment type — mostly Medium/Low, tender-mandated bid-allocation floors rather than measured actual spend.",
+    "sourceNote": "`equipment-data/<type>.json`.",
+    "howToEstimate": "Check whether your vendor's turnkey quote already includes this before entering it separately — double-counting here is a common mistake.",
+    "whyItMatters": "Adds directly to initial investment alongside purchase cost."
+  },
+  "Expected months before revenue starts": {
+    "definition": "The gap between paying for the equipment and it seeing its first patient.",
+    "direction": "Lower is better — shorter delay means less pre-operative interest and an earlier start to revenue.",
+    "defaultValue": "See `equipment-data/<type>.json#launchDelayMonths`.",
+    "confidence": "Varies by equipment type; Dialysis/Ultrasound are Low confidence (informal/adjacent sources only).",
+    "sourceNote": "`equipment-data/<type>.json`.",
+    "howToEstimate": "Sum your own civil work, installation, licensing, and training timelines if you have them — see the Advanced Mode launch-delay breakdown for the individual components.",
+    "whyItMatters": "Longer delays mean more pre-operative interest accrues (if financed) before revenue offsets it."
+  },
+  "Expected usage per day": {
+    "definition": "Scans/sessions/procedures per average working day.",
+    "direction": "Higher is better, up to realistic capacity — the single largest lever on revenue and on clearing break-even.",
+    "defaultValue": "See `equipment-data/<type>.json#typicalUtilization`.",
+    "confidence": "Varies by equipment type; several are Medium or single-study-sourced — check the specific figure's confidence before relying on it.",
+    "sourceNote": "`equipment-data/<type>.json`.",
+    "howToEstimate": "Prefer your own market/referral estimate over the benchmark if you have one; this is one of the weaker-researched fields overall.",
+    "whyItMatters": "Drives both revenue and whether you clear break-even usage per day."
+  },
+  "Average billed revenue per use": {
+    "definition": "The full invoiced/sticker price per scan or procedure, before payer deductions.",
+    "direction": "Higher is better, within what the local market will bear.",
+    "defaultValue": "See `equipment-data/<type>.json#billedTariffPerUse`.",
+    "confidence": "Varies by equipment type and rate tier (NABH vs. non-NABH) — see the data file.",
+    "sourceNote": "`equipment-data/<type>.json`.",
+    "howToEstimate": "Use your own tariff sheet; government-scheme rates (CGHS/PM-JAY) shown as benchmarks are a reimbursement floor, not your private cash tariff.",
+    "whyItMatters": "The starting point for both billed and (after realization %) realized revenue."
+  },
+  "Working days per month": {
+    "definition": "How many days per month the machine actually runs.",
+    "direction": "Higher is better, within realistic operating limits.",
+    "defaultValue": "25 days/month, flat across all equipment types.",
+    "confidence": "This is a modeling convention, not a researched benchmark — not calendar-accurate (doesn't vary 26/28/26 by month).",
+    "sourceNote": "`equipment-data/common-assumptions.json#workingDaysPerMonth`.",
+    "howToEstimate": "Adjust if your facility has unusual closure patterns (e.g. more or fewer weekly closures than typical).",
+    "whyItMatters": "A direct multiplier on both monthly revenue and monthly variable cost."
+  },
+  "Consumable cost per use": {
+    "definition": "Per-use cost of contrast agent, dialyzer, gel, drapes, or whatever consumable applies to this equipment type.",
+    "direction": "Lower is better.",
+    "defaultValue": "No centralized benchmark yet — vendor/consumable-contract dependent.",
+    "confidence": "Unavailable — enter your own figure.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your actual consumable supply contract or recent invoices.",
+    "whyItMatters": "Part of variable cost per use, which sets your contribution margin per scan."
+  },
+  "Professional / reporting fee per use": {
+    "definition": "The doctor's own fee for performing or reporting the procedure.",
+    "direction": "Lower is better (from a margin perspective) but is a real, necessary cost, not one to minimize by omission.",
+    "defaultValue": "No centralized benchmark yet — varies widely by specialty and market.",
+    "confidence": "Unavailable — enter your own figure.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your actual radiologist/cardiologist/sonologist fee arrangement.",
+    "whyItMatters": "Kept in Basic Mode deliberately, not buried in Advanced Mode — omitting it can make break-even look falsely optimistic. Distinct from a separate referral/commission arrangement, which this tool doesn't model (`ISSUES.md` ISS-11)."
+  },
+  "Other variable cost per use": {
+    "definition": "Any remaining per-use cost not captured by consumables or the professional fee.",
+    "direction": "Lower is better.",
+    "defaultValue": "No benchmark — hospital-specific.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Include anything else that scales directly with volume.",
+    "whyItMatters": "Completes variable cost per use."
+  },
+  "Staff cost per month": {
+    "definition": "Fixed monthly salary cost for staff dedicated to running this equipment.",
+    "direction": "Lower is better.",
+    "defaultValue": "No centralized benchmark — staffing model dependent.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your actual technician/support staffing cost for this equipment.",
+    "whyItMatters": "Part of fixed operating cost, independent of volume."
+  },
+  "Electricity / utility cost per month": {
+    "definition": "Fixed monthly utility cost attributable to running the equipment.",
+    "direction": "Lower is better.",
+    "defaultValue": "No centralized benchmark.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "High-draw equipment (MRI especially) can make this non-trivial — check your actual utility allocation if metered separately.",
+    "whyItMatters": "Part of fixed operating cost."
+  },
+  "Other fixed operating cost per month": {
+    "definition": "Any other fixed monthly cost not captured above (e.g. facility overhead allocation).",
+    "direction": "Lower is better.",
+    "defaultValue": "No benchmark.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Include any remaining fixed allocation specific to this equipment.",
+    "whyItMatters": "Completes fixed operating cost."
+  },
+  "Warranty period": {
+    "definition": "Years after installation during which the manufacturer covers repairs/parts at no extra cost.",
+    "direction": "Higher is better — delays when AMC/CMC cost begins.",
+    "defaultValue": "See `equipment-data/<type>.json#warrantyYears`.",
+    "confidence": "Varies by equipment type; MRI is High (two independent government tenders), Ultrasound is Medium (single tender).",
+    "sourceNote": "`equipment-data/<type>.json`.",
+    "howToEstimate": "Use your actual vendor contract's warranty term.",
+    "whyItMatters": "Determines when the maintenance cliff (warranty → CMC/AMC) hits your cash flow."
+  },
+  "AMC / CMC cost after warranty": {
+    "definition": "Annual maintenance cost once warranty ends (see the glossary for AMC vs. CMC). Basic Mode applies this as one flat rate for the entire post-warranty period — it doesn't distinguish the pricier CMC years from the cheaper AMC years that follow; open Advanced Mode's \"CMC coverage period after warranty\" and per-year override if you want that precision.",
+    "direction": "Lower is better.",
+    "defaultValue": "A blend of `equipment-data/<type>.json#cmcAnnualCostPercentage` and `#amcAnnualCostPercentage` — see that field's `defaultSource` note in `content/inputs-metadata.json` for the exact formula.",
+    "confidence": "Mixed — AMC figures are a generic proxy across all 5 equipment types (Medium); MRI's CMC has an open, unresolved contradiction between a generic tender ceiling and one hospital's much lower observed cost (`ISSUES.md` ISS-12) — shown as a flagged range, not averaged.",
+    "sourceNote": "`equipment-data/<type>.json`; see `content/benchmark-notes.md` §4 on why some figures show as a flagged range rather than one number.",
+    "howToEstimate": "Use your actual AMC/CMC quote if you have one — this is one of the more contract-specific figures, and generic benchmarks are weak evidence for your particular deal.",
+    "whyItMatters": "The single largest driver of the post-warranty cost cliff."
+  },
+  "Acquisition mode (cash / loan / lease)": {
+    "definition": "How you're financing the purchase.",
+    "direction": "Context-dependent — no universal \"better\" direction; changes which other fields apply.",
+    "defaultValue": "Cash (no financing fields required).",
+    "confidence": "N/A.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Select based on your actual planned financing; opens the full Advanced Mode Financing group if loan or lease.",
+    "whyItMatters": "Determines whether EMI/lease payments, and the Financing Resilience score component, apply at all."
+  },
+  "A. Revenue realization and payer mix": {
+    "definition": "",
+    "direction": "",
+    "defaultValue": "",
+    "confidence": "",
+    "sourceNote": "",
+    "howToEstimate": "",
+    "whyItMatters": ""
+  },
+  "Payer mix shares (private cash / insurance-TPA / corporate credit / PM-JAY-government / other)": {
+    "definition": "Your patient volume split across payer types.",
+    "direction": "Context-dependent — shifting mix toward higher-realization payers improves revenue, but mix itself reflects your actual patient base, not a lever to optimize in isolation.",
+    "defaultValue": "No default; should sum to 100%, linked as connected sliders.",
+    "confidence": "N/A (your own hospital's data).",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your own historical payer-mix breakdown.",
+    "whyItMatters": "Feeds directly into realized revenue and DSO."
+  },
+  "Billed tariff by payer type": {
+    "definition": "The billed rate for this payer type, if it differs from the standard tariff.",
+    "direction": "Higher is better, within contractual/scheme limits.",
+    "defaultValue": "No default — payer-contract specific.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your actual payer contract or scheme rate card.",
+    "whyItMatters": "Some payers (e.g. government scheme) are billed differently than private cash for the same procedure."
+  },
+  "Realization % by payer type": {
+    "definition": "The share of that payer's billed tariff you actually expect to collect.",
+    "direction": "Higher is better.",
+    "defaultValue": "No centralized benchmark — payer-contract and collections-history specific.",
+    "confidence": "Unavailable — a genuinely open data gap (`ISSUES.md` ISS-4).",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your own historical collections data by payer type if available.",
+    "whyItMatters": "Directly scales realized revenue down from billed revenue."
+  },
+  "Claim deduction / disallowance % by payer type": {
+    "definition": "The share of insurance/TPA claims typically disallowed on review.",
+    "direction": "Lower is better.",
+    "defaultValue": "No benchmark.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your own claims-history disallowance rate if available.",
+    "whyItMatters": "Kept separate from realization % so the two effects aren't conflated."
+  },
+  "Collection delay / DSO by payer type": {
+    "definition": "How long, on average, it takes to receive cash from this payer type after billing.",
+    "direction": "Lower is better — shorter DSO reduces the working capital gap.",
+    "defaultValue": "No centralized benchmark — a genuinely open data gap (`ISSUES.md` ISS-4).",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your own accounts-receivable aging by payer type if available.",
+    "whyItMatters": "Determines the size and duration of the working capital gap."
+  },
+  "B. Utilization ramp-up": {
+    "definition": "",
+    "direction": "",
+    "defaultValue": "",
+    "confidence": "",
+    "sourceNote": "",
+    "howToEstimate": "",
+    "whyItMatters": ""
+  },
+  "Month 1-3 / 4-6 / 7-12 / Year 2+ utilization %": {
+    "definition": "What % of eventual mature utilization the equipment runs at during each early period.",
+    "direction": "Higher is better, within realistic ramp-up expectations.",
+    "defaultValue": "No centralized benchmark.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your own or comparable-launch ramp-up experience; modeling a ramp-up (rather than assuming full usage from month one) avoids overly optimistic early-year projections.",
+    "whyItMatters": "Shifts early cash flow lower, which can materially affect payback and working capital needs."
+  },
+  "Expected mature utilization": {
+    "definition": "Steady-state usage per day once ramp-up is complete.",
+    "direction": "Higher is better.",
+    "defaultValue": "Same source as Basic Mode's \"expected usage per day.\"",
+    "confidence": "See that field's confidence.",
+    "sourceNote": "`equipment-data/<type>.json`.",
+    "howToEstimate": "Same as Basic Mode's usage-per-day field.",
+    "whyItMatters": "The ceiling the ramp-up percentages above are applied against."
+  },
+  "C. Financing": {
+    "definition": "",
+    "direction": "",
+    "defaultValue": "",
+    "confidence": "",
+    "sourceNote": "",
+    "howToEstimate": "",
+    "whyItMatters": ""
+  },
+  "Down payment": {
+    "definition": "Upfront cash portion paid if financing via loan.",
+    "direction": "Higher down payment lowers EMI but increases upfront cash needed — context-dependent trade-off, not one-directional.",
+    "defaultValue": "No benchmark — lender/negotiation specific.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your actual loan terms.",
+    "whyItMatters": "Reduces the financed loan amount, and therefore EMI."
+  },
+  "Interest rate": {
+    "definition": "The annual loan interest rate.",
+    "direction": "Lower is better.",
+    "defaultValue": "8-15% range referenced in research.",
+    "confidence": "Low-Medium.",
+    "sourceNote": "`data-requirements.md`.",
+    "howToEstimate": "Prefer your own lender's actual quote over this range.",
+    "whyItMatters": "Directly drives EMI size and total interest paid."
+  },
+  "Loan tenure": {
+    "definition": "How many months the loan is repaid over.",
+    "direction": "Context-dependent — longer tenure lowers EMI but increases total interest paid.",
+    "defaultValue": "No centralized benchmark — lender-specific.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your actual loan terms.",
+    "whyItMatters": "A direct input to the EMI formula."
+  },
+  "Processing charges": {
+    "definition": "One-time lender fee, typically a % of loan amount.",
+    "direction": "Lower is better.",
+    "defaultValue": "No benchmark.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your actual lender's fee schedule.",
+    "whyItMatters": "Adds to upfront cost alongside purchase and installation."
+  },
+  "EMI start month / Moratorium period": {
+    "definition": "When repayment begins, and any grace period before it does.",
+    "direction": "A longer moratorium delays cash outflow but may accrue interest in the meantime — context-dependent.",
+    "defaultValue": "No benchmark — loan-specific.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your actual loan sanction terms.",
+    "whyItMatters": "Common for equipment with a launch delay before revenue starts; shifts when EMI first hits cash flow."
+  },
+  "Lease rental (if lease mode)": {
+    "definition": "The periodic lease payment, used instead of EMI when acquisition mode is lease.",
+    "direction": "Lower is better.",
+    "defaultValue": "No centralized benchmark — lessor-specific.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your actual lease quotation.",
+    "whyItMatters": "Replaces EMI in the cash-flow-after-financing calculation."
+  },
+  "D. Launch delay and pre-opening cost": {
+    "definition": "",
+    "direction": "",
+    "defaultValue": "",
+    "confidence": "",
+    "sourceNote": "",
+    "howToEstimate": "",
+    "whyItMatters": ""
+  },
+  "Civil work / installation / licensing-approval / training-commissioning duration": {
+    "definition": "The individual components that sum to Basic Mode's \"expected months before revenue starts.\"",
+    "direction": "Lower is better for each.",
+    "defaultValue": "No per-component centralized benchmark; the combined figure is in `equipment-data/<type>.json#launchDelayMonths`.",
+    "confidence": "See the combined figure's confidence in the data file.",
+    "sourceNote": "`equipment-data/<type>.json`.",
+    "howToEstimate": "Break down your own timeline by phase if you want to see which one is driving your total delay.",
+    "whyItMatters": "Identifies which phase to focus on shortening."
+  },
+  "Pre-opening fixed costs": {
+    "definition": "Costs incurred before revenue starts (e.g. staff hired ahead of go-live, pre-launch marketing).",
+    "direction": "Lower is better.",
+    "defaultValue": "No benchmark.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Include any pre-revenue spend not already part of purchase or installation cost.",
+    "whyItMatters": "Adds to the effective initial investment beyond equipment and installation."
+  },
+  "Working capital buffer": {
+    "definition": "Cash set aside to cover the gap between launch and the point collections cover operating costs on their own.",
+    "direction": "Higher provides more safety margin but ties up more cash — context-dependent.",
+    "defaultValue": "No benchmark; derived from the working capital gap calculation (§B above).",
+    "confidence": "N/A — a planning figure, not a researched benchmark.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Size against the calculated working capital gap for your scenario.",
+    "whyItMatters": "Protects against a cash crunch in the early operating period."
+  },
+  "E. Maintenance and lifecycle cost": {
+    "definition": "",
+    "direction": "",
+    "defaultValue": "",
+    "confidence": "",
+    "sourceNote": "",
+    "howToEstimate": "",
+    "whyItMatters": ""
+  },
+  "CMC coverage period after warranty": {
+    "definition": "How many years of CMC (comprehensive, parts-and-labor) coverage follow the warranty, before AMC (labor-only) coverage begins. Added 2026-07-13 (`capexiq-prebuild-assurance` PBA-4) — the underlying formula always needed this; it had no wizard field before.",
+    "direction": "Context-dependent — a longer CMC period is a cost (higher rate) but usually means better coverage; there's no universal \"better\" direction.",
+    "defaultValue": "See `equipment-data/<type>.json#cmcYears`.",
+    "confidence": "Varies by equipment type — see each equipment file's own note.",
+    "sourceNote": "`equipment-data/<type>.json`.",
+    "howToEstimate": "Use your actual vendor contract's CMC term.",
+    "whyItMatters": "Only affects the result if you're using the per-year \"AMC / CMC cost by year\" override below — Basic Mode's single blended rate doesn't need this field at all."
+  },
+  "AMC / CMC cost by year": {
+    "definition": "Year-by-year maintenance cost detail, instead of one blended post-warranty figure.",
+    "direction": "Lower is better.",
+    "defaultValue": "See Basic Mode's AMC/CMC field; this is the same source broken out by year if your contract has a stepped schedule.",
+    "confidence": "Same as the blended figure.",
+    "sourceNote": "`equipment-data/<type>.json`.",
+    "howToEstimate": "Use your vendor's actual year-by-year schedule if it isn't flat.",
+    "whyItMatters": "Useful when a contract escalates rather than staying constant."
+  },
+  "Maintenance inflation": {
+    "definition": "Annual escalation rate applied to AMC/CMC cost over the equipment's life.",
+    "direction": "Lower is better.",
+    "defaultValue": "No benchmark.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your vendor contract's escalation clause if one exists.",
+    "whyItMatters": "Compounds maintenance cost growth over a multi-year projection."
+  },
+  "Major replacement cost (optional)": {
+    "definition": "A one-time cost for a known major component replacement (e.g. an MRI coil or tube) expected partway through useful life.",
+    "direction": "Lower is better.",
+    "defaultValue": "No centralized benchmark.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use vendor guidance on expected component life if known.",
+    "whyItMatters": "Can materially affect multi-year total cost of ownership if omitted."
+  },
+  "Downtime assumption (optional, later)": {
+    "definition": "Reserved for a future version to model expected revenue loss from downtime.",
+    "direction": "N/A — not yet part of the core model.",
+    "defaultValue": "N/A.",
+    "confidence": "N/A.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "N/A.",
+    "whyItMatters": "Not currently used in any calculation."
+  },
+  "F. Financial model assumptions": {
+    "definition": "",
+    "direction": "",
+    "defaultValue": "",
+    "confidence": "",
+    "sourceNote": "",
+    "howToEstimate": "",
+    "whyItMatters": ""
+  },
+  "Discount rate": {
+    "definition": "The rate used to discount future cash flows to present value (cost of capital).",
+    "direction": "Lower discount rate raises calculated NPV; higher lowers it — not itself a value to \"improve,\" but a cost-of-capital input.",
+    "defaultValue": "12.5% typical (11.1-14.1% range).",
+    "confidence": "Medium — proxy from listed Indian hospital-chain WACC, not project-specific.",
+    "sourceNote": "`equipment-data/common-assumptions.json`; `data-requirements.md` §17.1.",
+    "howToEstimate": "Confirm against your own hospital's actual cost of capital where known.",
+    "whyItMatters": "Used in NPV, discounted payback, and the Investment Outlook score's Return Strength component."
+  },
+  "Target IRR / hurdle rate": {
+    "definition": "The minimum return required before an investment is considered acceptable.",
+    "direction": "N/A — a threshold you set, not a calculated output.",
+    "defaultValue": "No reliable Indian benchmark exists; suggested starting point is discount rate + 300-500bps.",
+    "confidence": "Unavailable (confirmed unresearchable after two research passes).",
+    "sourceNote": "`data-requirements.md` §17.2.",
+    "howToEstimate": "Use your own institution's hurdle-rate policy if one exists.",
+    "whyItMatters": "A comparison bar for IRR; not itself consumed by the Investment Outlook score, which uses discount rate as the hurdle instead."
+  },
+  "Inflation rate": {
+    "definition": "A general inflation assumption, distinct from equipment-specific maintenance inflation.",
+    "direction": "Lower is generally more favorable to real returns.",
+    "defaultValue": "No benchmark.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use a standard macro inflation assumption if the model calls for one elsewhere.",
+    "whyItMatters": "Distinct from maintenance-specific escalation; not yet consumed by a specific formula in this version."
+  },
+  "Useful life": {
+    "definition": "The depreciation period, per the Companies Act Schedule II for most diagnostic equipment.",
+    "direction": "N/A — a regulatory/accounting fact, not a lever.",
+    "defaultValue": "13 years (MRI/CT/Ultrasound) or 15 years (Cath Lab/Dialysis).",
+    "confidence": "High (Companies Act Schedule II, source S8).",
+    "sourceNote": "`equipment-data/<type>.json`; `data-requirements.md` §12.4/§14.",
+    "howToEstimate": "Use the sourced figure unless your own accounting policy differs.",
+    "whyItMatters": "The denominator in depreciation, EAC, and the Investment Outlook score's Speed to Payback ratio."
+  },
+  "Salvage value": {
+    "definition": "Assumed residual value at end of useful life, as a % of original cost.",
+    "direction": "Higher salvage value lowers annual depreciation.",
+    "defaultValue": "5% of original cost, all equipment types (Companies Act Schedule II).",
+    "confidence": "Medium-High — well-established in practice, but not independently re-verified against primary Schedule II text this pass.",
+    "sourceNote": "`equipment-data/<type>.json`; `data-requirements.md` §18.2.",
+    "howToEstimate": "Use the sourced figure unless you have a specific reason to expect a different residual value.",
+    "whyItMatters": "Reduces the depreciable base in the straight-line depreciation formula."
+  },
+  "Depreciation method": {
+    "definition": "Currently straight-line only.",
+    "direction": "N/A.",
+    "defaultValue": "Straight-line (fixed for v1).",
+    "confidence": "N/A.",
+    "sourceNote": "SPEC.md §17.",
+    "howToEstimate": "N/A — no alternative method available yet.",
+    "whyItMatters": "Reserved for a future version that might support accelerated methods."
+  },
+  "Tax assumptions (optional)": {
+    "definition": "Reserved for a future version; not yet part of the core financial model.",
+    "direction": "N/A.",
+    "defaultValue": "N/A.",
+    "confidence": "N/A.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "N/A.",
+    "whyItMatters": "Not currently used in any calculation."
+  },
+  "Price escalation / Cost escalation": {
+    "definition": "Annual growth rate assumptions applied to billed tariff and operating costs respectively, for multi-year projections.",
+    "direction": "Higher price escalation improves revenue growth; higher cost escalation worsens margin — opposite directions on the same lever type.",
+    "defaultValue": "No benchmark.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your own historical tariff/cost growth if available.",
+    "whyItMatters": "Affects multi-year projections beyond Year 1; distinct from the automatic actionable-insight engine's own tariff-increase testing (`financial-model-spec.md` §4)."
+  },
+  "Scenario assumptions": {
+    "definition": "The set of overrides (utilization, realization %, financing type, and similar) defining a named alternative scenario in sensitivity analysis.",
+    "direction": "N/A — a modeling tool, not a value with its own direction.",
+    "defaultValue": "N/A.",
+    "confidence": "N/A.",
+    "sourceNote": "SPEC.md §28.",
+    "howToEstimate": "Choose realistic downside/upside variants of your own baseline assumptions.",
+    "whyItMatters": "Lets you see how exposed the result is to any one assumption being wrong."
+  }
+}
