@@ -123,6 +123,7 @@ export function emptyWizardState(): WizardState {
       },
     },
     touched: {},
+    attemptedSteps: {},
     transitionInFlight: false,
     restoredDraftSavedAt: null,
     hasHydrated: false,

@@ -21,7 +21,8 @@ export type WizardAction =
   | { type: "ACKNOWLEDGE_RESTORED_DRAFT" }
   | { type: "MARK_HYDRATED" }
   | { type: "START_OVER" }
-  | { type: "SET_MAINTENANCE_SCHEDULE_YEAR"; yearIndex: number; value: number | null };
+  | { type: "SET_MAINTENANCE_SCHEDULE_YEAR"; yearIndex: number; value: number | null }
+  | { type: "ATTEMPT_STEP"; step: Exclude<WizardStep, "results"> };
 
 function resizeMaintenanceArray(
   state: WizardState,
@@ -85,7 +86,15 @@ export function wizardReducer(
       // Force true regardless of what the persisted draft itself contains — a
       // restored draft is by definition post-hydration, and older drafts saved
       // before this field existed would otherwise carry `undefined` in here.
-      return { ...action.state, restoredDraftSavedAt: action.savedAt, hasHydrated: true };
+      // attemptedSteps is forced back to `{}` for the same reason ISS-25's reveal
+      // state is ephemeral session UI, not something a restored draft should carry
+      // forward (and older drafts predate the field entirely).
+      return {
+        ...action.state,
+        attemptedSteps: {},
+        restoredDraftSavedAt: action.savedAt,
+        hasHydrated: true,
+      };
     }
 
     case "ACKNOWLEDGE_RESTORED_DRAFT": {
@@ -100,6 +109,18 @@ export function wizardReducer(
       // Client-side reset, not a reload — there's no localStorage draft left to wait
       // on (clearDraft() already ran), so RouteGuard must not block on hydration again.
       return { ...emptyWizardState(), hasHydrated: true };
+    }
+
+    case "ATTEMPT_STEP": {
+      // ISS-25: reveals every blocked field's error on this step at once (the
+      // disabled-"Next" discoverability behavior, wizard-state.md §2/audit F7) without
+      // touching `touched` — that would incorrectly clear the "Typical" pill (§6) on
+      // every still-default, still-valid field on the step.
+      if (state.attemptedSteps[action.step]) return state;
+      return {
+        ...state,
+        attemptedSteps: { ...state.attemptedSteps, [action.step]: true },
+      };
     }
 
     case "SET_MAINTENANCE_SCHEDULE_YEAR": {

@@ -8,6 +8,7 @@ import {
   isResultStateFresh,
   isStepComplete,
   payerMixGroupError,
+  stepForFieldPath,
   validateFieldValue,
 } from "../../app/forms/wizardValidation";
 import { getFieldDefinition } from "../../app/forms/fieldSchema";
@@ -30,6 +31,22 @@ function completeMri() {
   set("basic.electricityCostPerMonth", 20000);
   return state;
 }
+
+describe("stepForFieldPath — ISS-25's static field-to-step lookup (deliberately not state.currentStep)", () => {
+  it("resolves preStep and basic.* fields via STEP_FIELD_PATHS", () => {
+    expect(stepForFieldPath("preStep.hospitalBedSize")).toBe("preStep");
+    expect(stepForFieldPath("basic.purchaseCost")).toBe("investment");
+    expect(stepForFieldPath("basic.usagePerDay")).toBe("usage");
+    expect(stepForFieldPath("basic.staffCostPerMonth")).toBe("costs");
+  });
+
+  it("falls back to 'costs' for any advanced.* field not explicitly listed, since AdvancedPanel only mounts there", () => {
+    // advanced.B.expectedMatureUtilization isn't one of STEP_FIELD_PATHS' required-
+    // gating fields, but still lives inside the Advanced panel on the costs step.
+    expect(stepForFieldPath("advanced.B.expectedMatureUtilization")).toBe("costs");
+    expect(stepForFieldPath("advanced.F.discountRate")).toBe("costs");
+  });
+});
 
 describe("isFieldRequired — requiredIf cross-step conditional (wizard-state.md §1.2)", () => {
   it("downPayment is not required for a Cash purchase", () => {

@@ -33,6 +33,10 @@ export function StepNav({
 
   const goNext = () => {
     if (!complete) {
+      // ISS-25: reveal every blocked field's error on this step, not just the one
+      // focus lands on — the user asked "why can't I proceed," not "what's the very
+      // first thing."
+      dispatch({ type: "ATTEMPT_STEP", step });
       const invalidPath = firstInvalidFieldOnStep(step, state);
       const element = invalidPath ? document.getElementById(invalidPath) : null;
       element?.focus();

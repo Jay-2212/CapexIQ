@@ -155,6 +155,27 @@ describe("idempotent step submission (wizard-state.md §9)", () => {
   });
 });
 
+describe("ATTEMPT_STEP (wizard-state.md §2's Next-click reveal, ISS-25)", () => {
+  it("marks the given step attempted without touching `touched` (must not clear the Typical pill)", () => {
+    const state = wizardReducer(emptyWizardState(), {
+      type: "ATTEMPT_STEP",
+      step: "investment",
+    });
+    expect(state.attemptedSteps.investment).toBe(true);
+    expect(state.attemptedSteps.usage).toBeUndefined();
+    expect(state.touched).toEqual({});
+  });
+
+  it("is idempotent — a second ATTEMPT_STEP for an already-attempted step is a no-op", () => {
+    const once = wizardReducer(emptyWizardState(), {
+      type: "ATTEMPT_STEP",
+      step: "investment",
+    });
+    const twice = wizardReducer(once, { type: "ATTEMPT_STEP", step: "investment" });
+    expect(twice).toBe(once);
+  });
+});
+
 describe("RESTORE_DRAFT / ACKNOWLEDGE_RESTORED_DRAFT (wizard-state.md §6.5, §7.2)", () => {
   it("restores the given state and records the announcement timestamp", () => {
     const draftState = wizardReducer(emptyWizardState(), {
@@ -169,6 +190,19 @@ describe("RESTORE_DRAFT / ACKNOWLEDGE_RESTORED_DRAFT (wizard-state.md §6.5, §7
     });
     expect(state.basic.purchaseCost).toBe(2);
     expect(state.restoredDraftSavedAt).toBe("2026-07-13T00:00:00.000Z");
+  });
+
+  it("resets attemptedSteps on restore — ISS-25's reveal state is ephemeral session UI, not part of a saved draft", () => {
+    const attemptedDraft = wizardReducer(emptyWizardState(), {
+      type: "ATTEMPT_STEP",
+      step: "investment",
+    });
+    const state = wizardReducer(emptyWizardState(), {
+      type: "RESTORE_DRAFT",
+      state: attemptedDraft,
+      savedAt: "2026-07-13T00:00:00.000Z",
+    });
+    expect(state.attemptedSteps).toEqual({});
   });
 
   it("acknowledging clears the restored-draft flag without touching other state", () => {

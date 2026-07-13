@@ -555,8 +555,10 @@ about.
       session):** `app/page.tsx` — header, hero, "how it works," "who it's for,"
       "what's in the tool," footer, per `design/ux-product-spec.md` §5 — and
       `app/methodology/page.tsx` rendering `report-templates/methodology.md`/
-      `formula-appendix.md` (§5.3). The Methodology page is functional but not
-      bespoke-designed — see `ISSUES.md` ISS-24 for that follow-up.
+      `formula-appendix.md` (§5.3). **Methodology page given a full design pass
+      (2026-07-13, follow-up session)** — a two-column documentation layout with a
+      sticky in-page table of contents, reusing the landing page's header/footer; see
+      `ISSUES.md` ISS-24 (Resolved) for full detail.
 - [x] **First interactive browser QA of Phase 6 (added 2026-07-13), closing ISS-21's
       "no browser QA possible" gap:** found and fixed 3 real bugs — `app/globals.css`
       missing CSS for most component class families (pre-step/results/Advanced-panel/
@@ -564,8 +566,15 @@ about.
       mount-order race that bounced every hard reload/deep-link back to the pre-step,
       and `SliderField` masking a genuinely-unset required field's value as `def.min`.
       See `ISSUES.md` ISS-26 for full detail.
+- [x] **Validation display gated by touch/attempt, not shown before interaction (added
+      2026-07-13, follow-up session):** `wizard-state.md` §2 revised — validation
+      *truth* is still always computed live with zero debounce and still solely
+      drives the step-gate/route guard, but a field's red error only *displays* once
+      the user has touched that field or attempted to advance past its (incomplete)
+      step. See `ISSUES.md` ISS-25 (Resolved) for full detail, including why this
+      needed a separate `attemptedSteps` map rather than reusing `touched`.
 **Definition of Done:** every Phase-5-enumerated edge case has a named, passing test —
-**not fully met**; core transitions/validation/2 interactive behaviors are tested (175
+**not fully met**; core transitions/validation/2 interactive behaviors are tested (183
 tests, build/typecheck both clean), but see `ISSUES.md` ISS-21/ISS-23 for the specific
 gaps against the letter of this bullet. **Manual browser QA has now happened** (see
 above) — the DoD's remaining gap is test-coverage completeness against every §5/§6/§7

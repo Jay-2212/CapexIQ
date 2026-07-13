@@ -839,41 +839,97 @@ select:focus-visible,
   margin: 0 auto;
 }
 
-/* ---- Methodology page (design/ux-product-spec.md §5.3) ---- */
+/* ---- Methodology page (design/ux-product-spec.md §5.3, ISS-24) ----
+   A reference/documentation-styled page, not a marketing surface (§5.1's "no sales
+   language" rule extends here): a sticky in-page table of contents next to the two
+   source docs (report-templates/methodology.md, formula-appendix.md), same tokens and
+   header/footer as the landing page. */
 
-.methodology-page {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: var(--space-6) var(--space-5);
+.methodology-page__intro {
+  padding: var(--space-6) var(--space-6) 0;
 }
 
-.methodology-page__back {
-  margin: 0 0 var(--space-5);
+.methodology-page__intro h1 {
+  font-size: var(--text-2xl);
+  margin: 0;
+}
+
+.methodology-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 720px);
+  justify-content: center;
+  gap: var(--space-7);
+  padding: var(--space-6);
+}
+
+.methodology-toc {
+  position: sticky;
+  top: var(--space-5);
+  align-self: start;
+  max-height: calc(100vh - var(--space-6));
+  overflow-y: auto;
   font-size: var(--text-sm);
 }
 
-.methodology-page__content h1 {
-  font-size: var(--text-2xl);
-  margin: var(--space-6) 0 var(--space-4);
+.methodology-toc__group + .methodology-toc__group {
+  margin-top: var(--space-4);
 }
 
-.methodology-page__content h2 {
+.methodology-toc__group-label {
+  display: block;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  margin-bottom: var(--space-2);
+}
+
+.methodology-toc__group-label:hover {
+  text-decoration: underline;
+}
+
+.methodology-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.methodology-toc li {
+  margin: var(--space-1) 0;
+}
+
+.methodology-toc ul ul {
+  padding-left: var(--space-3);
+}
+
+.methodology-toc a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.methodology-toc a:hover {
+  color: var(--accent-interactive);
+  text-decoration: underline;
+}
+
+.methodology-content h2 {
   font-size: var(--text-xl);
-  margin: var(--space-6) 0 var(--space-3);
+  margin: var(--space-7) 0 var(--space-3);
+  scroll-margin-top: var(--space-4);
 }
 
-.methodology-page__content h3 {
+.methodology-content h3 {
   font-size: var(--text-lg);
   margin: var(--space-5) 0 var(--space-2);
+  scroll-margin-top: var(--space-4);
 }
 
-.methodology-page__content p {
+.methodology-content p {
   font-size: var(--text-base);
   color: var(--text-secondary);
   line-height: 1.6;
 }
 
-.methodology-page__content pre {
+.methodology-content pre {
   background: var(--bg-secondary);
   border-radius: var(--radius-sm);
   padding: var(--space-4);
@@ -881,14 +937,41 @@ select:focus-visible,
   font-size: var(--text-sm);
 }
 
-.methodology-page__content code {
+.methodology-content code {
   font-family: var(--font-mono);
 }
 
-.methodology-page__content hr {
+.methodology-content p code {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.9em;
+}
+
+.methodology-content hr {
   border: none;
   border-top: 1px solid var(--border-subtle);
   margin: var(--space-7) 0;
+}
+
+/* The two-column layout needs more room than the general small-viewport breakpoint
+   below gives it — a tablet-width single column reads better than a squeezed ToC. */
+@media (max-width: 900px) {
+  .methodology-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .methodology-toc {
+    position: static;
+    max-height: none;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-4);
+  }
+
+  .methodology-toc ul ul {
+    padding-left: var(--space-4);
+  }
 }
 
 /* ---- Small-viewport layout ---- */
@@ -951,7 +1034,11 @@ select:focus-visible,
     max-width: 100%;
   }
 
-  .methodology-page {
+  .methodology-page__intro {
+    padding: var(--space-5) var(--space-4) 0;
+  }
+
+  .methodology-layout {
     padding: var(--space-5) var(--space-4);
   }
 }

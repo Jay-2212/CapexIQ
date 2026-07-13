@@ -117,12 +117,32 @@ that (`CONVENTIONS.md` §3's single-source-of-truth rule, extended from formulas
 input metadata by `agent-build-plan.md` Phase 4). What this doc adds is the **timing**
 of validation, which `inputs-metadata.json` doesn't cover:
 
-- **Validate on every change, not on blur or submit.** Consistent with Phase 4-G's
-  "no debounce on typed fields" — an invalid value shows its `errorMessage` immediately
-  under the field, in `--text-xs`, `--status-risk` color, the moment it becomes invalid
-  (empty required field, out-of-bounds number, payer-mix group not summing to 100%,
-  etc.), and clears the instant it becomes valid again. No "you'll find out when you
-  hit Next."
+- **Validate on every change, not on blur or submit — but only *display* the error
+  once the field has been revealed (ISS-25, revised 2026-07-13).** Validation truth
+  (is this value actually invalid right now) is always computed live, on every change,
+  and always drives the step-gate and route guard below — that part is unchanged and
+  still has zero debounce, consistent with Phase 4-G's "no debounce on typed fields."
+  What changed is *when a computed invalid state is shown as red*: a field's
+  `errorMessage` (in `--text-xs`, `--status-risk` color) is suppressed until that field
+  is **revealed**, which happens the moment either is true:
+  1. **Touched** — the user has edited that specific field (`wizardTypes.ts`'s
+     `TouchedFieldMap`, the same map that drives the "Typical" tag, §6). The instant a
+     field is touched, its error tracks live exactly as before (shows the moment it's
+     invalid, clears the moment it's valid — no debounce, no re-hiding once revealed).
+  2. **Attempted** — the user clicked (or keyboard-activated) "Next" while the
+     containing step was incomplete (`AttemptedStepMap`, a separate, deliberately
+     ephemeral per-step flag — see the Disabled-"Next" bullet below). This reveals
+     every blocked field on that step at once, not just the one that gets focus.
+  A completely fresh, untouched page load therefore shows **no red anywhere**, even
+  though every empty required field is already invalid underneath — this is the fix
+  for the original defect (red state before any interaction). `AttemptedStepMap` is
+  never written to `touched`, and vice versa: marking a step attempted must not clear
+  any field's "Typical" pill, since an untouched, still-default, still-valid field on
+  the same step has nothing wrong with it — it's simply now visible alongside whatever
+  actually is invalid. **Group constraints** (below) use the same two-trigger rule,
+  keyed off whether any field in the group has been touched, or the step attempted.
+  `app/forms/useFieldController.ts` is the single place this gating logic lives (per
+  `CONVENTIONS.md` §3) — no field component re-derives it.
 - **Step-level "can I proceed" gate:** a step's "Next" button is enabled only when every
   `required: true` field on that step (and every `requiredIf`-triggered field, e.g.
   Group C financing fields when `acquisitionMode` ≠ Cash) is both filled and valid.
@@ -139,13 +159,17 @@ of validation, which `inputs-metadata.json` doesn't cover:
   sourced field, and a Basic-only user reaches `/results` without ever knowing the
   panel exists. See `equipment-data/common-assumptions.json#targetIrr` and
   `content/inputs-metadata.json#targetIrr` for the full mechanism.
-- **Disabled-"Next" discoverability (added — UI assurance audit F7, 2026-07-12):** a
-  disabled "Next" gives no clue *which* field is still blocking it, which is real
-  friction on Step 3's 8-field form. Clicking (or activating via keyboard) a disabled
-  "Next" moves focus to the first invalid/missing required field on the step and shows
-  its existing `errorMessage` from `content/inputs-metadata.json` (no new copy needed)
-  — the same behavior a native HTML form's `reportValidity()` gives for free, made
-  explicit here since this is a custom-built wizard, not a native `<form>` submit.
+- **Disabled-"Next" discoverability (added — UI assurance audit F7, 2026-07-12; revised
+  2026-07-13, ISS-25):** a disabled "Next" gives no clue *which* field is still
+  blocking it, which is real friction on Step 3's 8-field form. Clicking (or
+  activating via keyboard) a disabled "Next" moves focus to the first invalid/missing
+  required field on the step (unchanged from the original F7 fix) **and dispatches
+  `ATTEMPT_STEP` for that step**, which reveals *every* blocked field's existing
+  `errorMessage` from `content/inputs-metadata.json` at once (no new copy needed) —
+  not just the one that gets focus. This is the mechanism that answers "why can't I
+  proceed," a step up from the original F7 fix's "here's the first thing." Same
+  native-`reportValidity()`-equivalent intent as before, made explicit since this is a
+  custom-built wizard, not a native `<form>` submit.
 - **Group constraints** (e.g. `payerMixSharePct`'s "5 payer shares must sum to 100%")
   are evaluated across the whole group, not per-field — showing one error message
   anchored to the group heading, not duplicated on all 5 sliders. **Programmatic
