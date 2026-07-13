@@ -155,12 +155,18 @@ select:focus-visible,
 .slider-field__range {
   flex: 1;
   accent-color: var(--accent-interactive);
-  /* This padding only enlarges the row's own clickable area, NOT the native
-     ::-webkit/-moz thumb's touch target — a native <input type="range"> doesn't
-     expose a way to grow the thumb's hit area independent of its visible size
-     across browsers. UI assurance audit F4's full ask (WCAG 2.5.8's >=24x24 CSS px
-     target) needs a custom-built thumb element, not attempted in Phase 6 — see
-     ISSUES.md ISS-23. */
+  /* ISS-23, resolved 2026-07-13 (Opus advisor pass): this padding enlarges the row's
+     own clickable area as a cheap mis-tap mitigation — it does NOT grow the native
+     ::-webkit/-moz thumb's own hit area, which no CSS can do independent of its
+     visible size across browsers. That's fine: 2.5.8's actual conformance path here
+     is the Equivalent-control exception, not this padding — every slider is paired
+     with a same-page numeric input (.slider-field__number below) covering the exact
+     same value range at native text-input size (well over 24x24 CSS px), which is a
+     textbook "different control on the same page that meets the target size"
+     Equivalent. A fully custom-built slider thumb was considered and rejected: it
+     would trade a conformant native control for a hand-rolled one at real risk of a
+     subtler a11y regression (keyboard semantics, aria-valuenow, pointer capture),
+     for no conformance gain over the exception already in place. */
   padding: 10px 0;
 }
 

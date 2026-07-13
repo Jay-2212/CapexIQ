@@ -665,6 +665,7 @@ Processing charges
 EMI start month
 Moratorium period, if any
 Lease rental, if lease mode is selected
+Lease tenure, if lease mode is selected
 ```
 
 #### D. Launch delay and pre-opening cost

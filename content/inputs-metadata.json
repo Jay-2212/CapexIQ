@@ -463,6 +463,20 @@
         "requiredIf": "acquisitionMode = Lease",
         "errorMessage": "Lease rental can't be negative.",
         "tooltipKey": "Lease rental (if lease mode)"
+      },
+      "leaseTenureMonths": {
+        "label": "Lease tenure",
+        "note": "Added 2026-07-13 (ISS-18, Jay's decision after an Opus advisor pass): mirrors loanTenureMonths — after this many months, the lease payment stops and the equipment is modeled as owned outright for the rest of usefulLifeYears (finance/capital-lease treatment), rather than the rental running for the entire useful-life horizon.",
+        "controlType": "input",
+        "type": "integer-count",
+        "unit": "months",
+        "min": 1,
+        "max": 240,
+        "allowNegative": false,
+        "required": false,
+        "requiredIf": "acquisitionMode = Lease",
+        "errorMessage": "Enter a lease tenure between 1 and 240 months.",
+        "tooltipKey": "Lease tenure (if lease mode)"
       }
     },
 

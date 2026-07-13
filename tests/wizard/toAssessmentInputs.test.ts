@@ -2,9 +2,8 @@
 // to get right silently wrong, since it's a direct translation of user-entered
 // financial figures into the pipeline. Cash/Loan verified against golden scenarios
 // A/B already (tests/formulas/computeAssessment.test.ts); this file covers Lease
-// (no golden test exists for it — see toAssessmentInputs.ts's own comment on the
-// leaseRentalPerMonth-for-the-full-horizon assumption) and the Basic/Advanced
-// maintenance-path switch (PBA-4).
+// (no golden test exists for it — see leaseTenureMonths coverage below, ISS-18) and
+// the Basic/Advanced maintenance-path switch (PBA-4).
 
 import { describe, expect, it } from "vitest";
 import { wizardReducer } from "../../app/forms/wizardReducer";
@@ -74,7 +73,7 @@ describe("toAssessmentInputs — financing mode mapping", () => {
     );
   });
 
-  it("Lease: monthly rental applied as an annual cost across the full useful-life horizon (documented assumption — no leaseTenureMonths field exists in the schema)", () => {
+  it("Lease: monthly rental applied for leaseTenureMonths, then stops — equipment treated as owned for the rest of the useful-life horizon (ISS-18)", () => {
     let state = baseMriState();
     state = wizardReducer(state, {
       type: "SET_FIELD",
@@ -86,17 +85,89 @@ describe("toAssessmentInputs — financing mode mapping", () => {
       path: "advanced.C.leaseRentalPerMonth",
       value: 50000,
     });
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: "advanced.C.leaseTenureMonths",
+      value: 60,
+    });
 
     const inputs = toAssessmentInputs(state);
-    expect(inputs.financing).toEqual({ type: "lease", rentalPerMonth: 50000 });
+    expect(inputs.financing).toEqual({ type: "lease", rentalPerMonth: 50000, tenureMonths: 60 });
     const result = computeAssessment(inputs);
     expect(result.monthlyEmiOrLease).toBe(50000);
-    const lastYearIndex = result.annualNetCashFlowsAfterFinancing.length - 1;
-    // Unlike a loan (which pays off), the lease deduction applies to every year,
-    // including the last year of the useful-life horizon.
-    expect(result.annualNetCashFlowsAfterFinancing[lastYearIndex]).toBe(
-      result.annualNetCashFlowsBeforeFinancing[lastYearIndex] - 50000 * 12
+    // Years 1-5 (60 months) pay the rental, exactly like a loan of the same tenure.
+    expect(result.annualNetCashFlowsAfterFinancing[4]).toBe(
+      result.annualNetCashFlowsBeforeFinancing[4] - 50000 * 12
     );
+    // Once the lease tenure ends, the rental stops entirely — the equipment is
+    // modeled as owned outright for the rest of usefulLifeYears (MRI's is 13 years,
+    // so year 13/index 12 exists and should carry zero financing cost).
+    const lastYearIndex = result.annualNetCashFlowsAfterFinancing.length - 1;
+    expect(lastYearIndex).toBeGreaterThan(4);
+    expect(result.annualNetCashFlowsAfterFinancing[lastYearIndex]).toBe(
+      result.annualNetCashFlowsBeforeFinancing[lastYearIndex]
+    );
+  });
+});
+
+describe("toAssessmentInputs — utilization ramp-up wiring (ISS-19)", () => {
+  it("Basic Mode (advancedOpen false) never applies a ramp, even if Group B were somehow populated", () => {
+    const state = baseMriState();
+    const inputs = toAssessmentInputs(state);
+    expect(inputs.utilizationRamp).toBeUndefined();
+  });
+
+  it("Advanced Mode with only some ramp periods filled in stays unramped (a partial schedule isn't applied)", () => {
+    let state = baseMriState();
+    state = wizardReducer(state, { type: "TOGGLE_ADVANCED" });
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: "advanced.B.utilizationRampPct.month1to3",
+      value: 20,
+    });
+    const inputs = toAssessmentInputs(state);
+    expect(inputs.utilizationRamp).toBeUndefined();
+  });
+
+  it("Advanced Mode with every ramp period filled in applies the full schedule", () => {
+    let state = baseMriState();
+    state = wizardReducer(state, { type: "TOGGLE_ADVANCED" });
+    for (const [suffix, value] of [
+      ["month1to3", 20],
+      ["month4to6", 50],
+      ["month7to12", 80],
+      ["year2Plus", 100],
+    ] as const) {
+      state = wizardReducer(state, {
+        type: "SET_FIELD",
+        path: `advanced.B.utilizationRampPct.${suffix}`,
+        value,
+      });
+    }
+    const inputs = toAssessmentInputs(state);
+    expect(inputs.utilizationRamp).toEqual({
+      month1to3Pct: 20,
+      month4to6Pct: 50,
+      month7to12Pct: 80,
+      year2PlusPct: 100,
+    });
+  });
+
+  it("Advanced Mode's expectedMatureUtilization, once user-edited, supersedes basic.usagePerDay as the ramp baseline", () => {
+    let state = baseMriState();
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: "basic.usagePerDay",
+      value: 10,
+    });
+    state = wizardReducer(state, { type: "TOGGLE_ADVANCED" });
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: "advanced.B.expectedMatureUtilization",
+      value: 6,
+    });
+    const inputs = toAssessmentInputs(state);
+    expect(inputs.usagePerDay).toBe(6);
   });
 });
 

@@ -45,13 +45,38 @@ export type AssessmentFinancing =
       interestRate: number;
       tenureMonths: number;
     }
-  | { type: "lease"; rentalPerMonth: number };
+  | {
+      type: "lease";
+      rentalPerMonth: number;
+      /** ISS-18 (Jay's decision, 2026-07-13, after an Opus advisor pass): after this
+       *  many months the rental stops and the equipment is treated as owned outright
+       *  for the rest of usefulLifeYears — a finance/capital-lease model, mirroring
+       *  loan's tenureMonths so Lease and Loan are directly comparable over the same
+       *  ownership horizon, rather than the rental running for the entire useful life. */
+      tenureMonths: number;
+    };
 
 export interface AssessmentMaintenance {
   warrantyYears: number;
   cmcYears: number;
   cmcAnnualCost: number;
   amcAnnualCost: number;
+  /** Optional per-year override (ISS-19) — index i is year i+1's cost as % of
+   *  purchaseCost, applied instead of the warranty/cmc/amc schedule for that year
+   *  when non-null. Missing/shorter-than-usefulLifeYears arrays are fine; unset
+   *  indices simply keep the computed warranty/cmc/amc schedule. */
+  costByYearPct?: (number | null)[];
+}
+
+/** Advanced Group B (SPEC.md §11.1 B / §13.2) — utilization ramp-up, each percentage
+ *  is "% of mature utilization" (AssessmentInputs.usagePerDay). Optional (ISS-19):
+ *  omitted entirely means flat mature usage from month 1, i.e. every consumer below
+ *  degenerates to its pre-ramp behavior. */
+export interface UtilizationRampUp {
+  month1to3Pct: number;
+  month4to6Pct: number;
+  month7to12Pct: number;
+  year2PlusPct: number;
 }
 
 export interface AssessmentInputs {
@@ -67,6 +92,7 @@ export interface AssessmentInputs {
   usefulLifeYears: number;
   discountRate: number;
   salvageValuePercentage: number;
+  utilizationRamp?: UtilizationRampUp;
 }
 
 export interface AssessmentResult {
@@ -102,7 +128,6 @@ function financingCostForYear(
   yearIndex: number
 ): number {
   if (financing.type === "cash") return 0;
-  if (financing.type === "lease") return monthlyPayment * 12;
 
   const remainingMonths = Math.max(
     0,
@@ -159,15 +184,59 @@ export function computeAssessment(
     breakEven = null;
   }
 
-  const maintenanceSchedule = maintenanceScheduleForYears(
+  const baseMaintenanceSchedule = maintenanceScheduleForYears(
     inputs.maintenance.warrantyYears,
     inputs.maintenance.cmcYears,
     inputs.maintenance.cmcAnnualCost,
     inputs.maintenance.amcAnnualCost,
     inputs.usefulLifeYears
   );
+  const maintenanceSchedule: MaintenanceScheduleEntry[] = baseMaintenanceSchedule.map(
+    (entry, yearIndex) => {
+      const overridePct = inputs.maintenance.costByYearPct?.[yearIndex];
+      if (overridePct === null || overridePct === undefined) return entry;
+      return {
+        yearNumber: entry.yearNumber,
+        coverageType: "override",
+        annualCost: (overridePct / 100) * inputs.purchaseCost,
+      };
+    }
+  );
+
+  // ISS-19: month-by-month utilization ramp (SPEC.md §13.2). Building the monthly
+  // series first (rather than approximating an annual weighted average) lets both the
+  // per-year cash flows below and the existing monthly working-capital calc share one
+  // source of truth. Without inputs.utilizationRamp, every fraction is 1 and every
+  // consumer below is byte-for-byte identical to the pre-ramp flat computation.
+  const utilizationFractionForMonth = (monthIndex: number): number => {
+    const ramp = inputs.utilizationRamp;
+    if (!ramp) return 1;
+    const monthNumber = monthIndex + 1;
+    if (monthNumber <= 3) return ramp.month1to3Pct / 100;
+    if (monthNumber <= 6) return ramp.month4to6Pct / 100;
+    if (monthNumber <= 12) return ramp.month7to12Pct / 100;
+    return ramp.year2PlusPct / 100;
+  };
+  const totalMonths = inputs.usefulLifeYears * 12;
+  const monthlyRealizedSeries = Array.from({ length: totalMonths }, (_, monthIndex) =>
+    monthlyRealized * utilizationFractionForMonth(monthIndex)
+  );
+  const monthlyVariableCostSeries = Array.from({ length: totalMonths }, (_, monthIndex) =>
+    (annualVariableCost / 12) * utilizationFractionForMonth(monthIndex)
+  );
+  const sumMonthsInYear = (series: number[], yearIndex: number) =>
+    series
+      .slice(yearIndex * 12, yearIndex * 12 + 12)
+      .reduce((total, value) => total + value, 0);
+  const annualOperatingSurplusByYear = Array.from(
+    { length: inputs.usefulLifeYears },
+    (_, yearIndex) =>
+      sumMonthsInYear(monthlyRealizedSeries, yearIndex) -
+      sumMonthsInYear(monthlyVariableCostSeries, yearIndex) -
+      annualFixedCost
+  );
   const annualNetCashFlowsBeforeFinancing = maintenanceSchedule.map(
-    (entry) => annualOperatingSurplus - entry.annualCost
+    (entry, yearIndex) => annualOperatingSurplusByYear[yearIndex] - entry.annualCost
   );
 
   const monthlyPayment =
@@ -195,11 +264,10 @@ export function computeAssessment(
   }
 
   const annualCostsByYear = maintenanceSchedule.map(
-    (entry) => annualVariableCost + annualFixedCost + entry.annualCost
-  );
-  const monthlyRealizedSeries = Array.from(
-    { length: inputs.usefulLifeYears * 12 },
-    () => monthlyRealized
+    (entry, yearIndex) =>
+      sumMonthsInYear(monthlyVariableCostSeries, yearIndex) +
+      annualFixedCost +
+      entry.annualCost
   );
   const collectionProfiles = inputs.payerMix.map((payer) => ({
     payerName: payer.payerName,

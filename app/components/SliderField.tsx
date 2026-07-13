@@ -6,10 +6,10 @@
 // reducer dispatch (which drives the live preview recalculation) is debounced
 // ~120ms during drag and flushed immediately on release or blur. The paired numeric
 // input always dispatches immediately, no debounce, per §5's "plain typed-field
-// rule." Simplification, noted for a future pass: keyboard arrow-key presses on the
-// slider thumb currently share the same ~120ms debounce as pointer drag rather than
-// their own zero-debounce path — a minor, barely perceptible delay, not a
-// correctness issue (see HANDOFF.md's Phase 6 entry).
+// rule." Keyboard arrow/Home/End/Page presses on the slider thumb also dispatch
+// immediately (ISS-20) — only pointer-drag input events are debounced, tracked via
+// a keydown flag since a native range input's `input` event doesn't distinguish
+// its source.
 
 import { useEffect, useRef, useState } from "react";
 import { useFieldController, getFieldDefinition } from "../forms/useFieldController";
@@ -24,6 +24,18 @@ export function SliderField({ path }: { path: string }) {
     typeof field.value === "number" ? field.value : (def.min ?? 0)
   );
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isKeyboardInteraction = useRef(false);
+
+  const KEYS_THAT_CHANGE_VALUE = new Set([
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowUp",
+    "ArrowDown",
+    "PageUp",
+    "PageDown",
+    "Home",
+    "End",
+  ]);
 
   useEffect(() => {
     if (typeof field.value === "number") setLocalValue(field.value);
@@ -65,7 +77,16 @@ export function SliderField({ path }: { path: string }) {
             value={localValue}
             aria-describedby={describedBy || undefined}
             aria-invalid={field.error !== null}
-            onInput={(event) => commit(Number(event.currentTarget.value), false)}
+            onKeyDown={(event) => {
+              if (KEYS_THAT_CHANGE_VALUE.has(event.key)) {
+                isKeyboardInteraction.current = true;
+              }
+            }}
+            onInput={(event) => {
+              const immediate = isKeyboardInteraction.current;
+              isKeyboardInteraction.current = false;
+              commit(Number(event.currentTarget.value), immediate);
+            }}
             onPointerUp={flush}
             onTouchEnd={flush}
             onBlur={flush}

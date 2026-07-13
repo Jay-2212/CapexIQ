@@ -64,6 +64,7 @@ export interface AdvancedGroupC {
   emiStartMonth: number | null;
   moratoriumPeriodMonths: number | null;
   leaseRentalPerMonth: number | null;
+  leaseTenureMonths: number | null;
 }
 
 export interface AdvancedGroupD {

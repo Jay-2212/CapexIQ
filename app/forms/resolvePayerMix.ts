@@ -6,15 +6,16 @@
 // ever been opened, so this function never branches on advancedOpen — one code path,
 // same as every other field.
 //
-// Realization/claim-deduction combination rule (flagged for Jay's confirmation — see
-// HANDOFF.md 2026-07-13 Phase 6 entry): content/tooltip-copy.md keeps "realization %"
-// and "claim deduction / disallowance %" as two separately-estimated user inputs "so
-// the two effects aren't conflated," but formulas/realization.ts's actual
-// realizedRevenuePerUse() only accepts one realizationPercentage per payer. No golden
-// scenario test exercises claim deduction, so this composition is an engineering
-// interpretation, not a verified contract: effective realization = realization% x
-// (1 - claimDeduction% / 100), i.e. two independent multiplicative haircuts on the
-// billed tariff.
+// Realization/claim-deduction combination rule (ISS-17, resolved 2026-07-13 — Opus
+// advisor pass, no product decision needed): this is a standard healthcare
+// revenue-cycle waterfall, not an arbitrary interpretation — billed tariff is first
+// reduced by claim deduction/disallowance (the formally rejected portion), then
+// realization % is applied to what's left (collection shortfall on the approved
+// amount). effectiveRealization = realizationPct x (1 - claimDeductionPct / 100) is
+// therefore two sequential, non-overlapping haircuts, not a double-count — see
+// content/tooltip-copy.md's "Realization % by payer type" entry, corrected in the same
+// pass to define realization % against the post-deduction amount (it previously said
+// "billed tariff", which would make this formula double-count).
 
 import { PAYER_TYPES } from "./payerAndRampKeys";
 import type { AssessmentPayer } from "@/formulas/computeAssessment";

@@ -8,6 +8,7 @@
 // try/catch and round-trip behavior.
 
 import { afterEach } from "vitest";
+import { cleanup } from "@testing-library/react";
 
 class MemoryStorage implements Storage {
   private store = new Map<string, string>();
@@ -52,4 +53,9 @@ if (typeof Element !== "undefined" && !Element.prototype.scrollIntoView) {
 
 afterEach(() => {
   window.localStorage?.clear();
+  // No render() call in this suite was unmounting between tests (React Testing
+  // Library's auto-cleanup needs an explicit afterEach under vitest, unlike Jest) —
+  // harmless while every test file rendered only one component per file, but a real
+  // bug once a file needs more than one render() (see routeGuardAndPersistence.test.tsx).
+  cleanup();
 });

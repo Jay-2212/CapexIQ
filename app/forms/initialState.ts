@@ -95,6 +95,7 @@ export function emptyWizardState(): WizardState {
         emiStartMonth: null,
         moratoriumPeriodMonths: null,
         leaseRentalPerMonth: null,
+        leaseTenureMonths: null,
       },
       D: {
         civilWorkDurationMonths: null,

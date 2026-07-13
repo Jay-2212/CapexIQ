@@ -1,10 +1,11 @@
 "use client";
 
 // Group C — Financing (SPEC.md §11.1 C). requiredIf fields (downPayment,
-// loanInterestRate, loanTenureMonths, leaseRentalPerMonth) read acquisitionMode from
-// /assess/investment's state regardless of which step set it (wizard-state.md §1.2's
-// cross-step conditional requiredness) — useFieldController already resolves this via
-// isFieldRequired(), so this component doesn't special-case it.
+// loanInterestRate, loanTenureMonths, leaseRentalPerMonth, leaseTenureMonths) read
+// acquisitionMode from /assess/investment's state regardless of which step set it
+// (wizard-state.md §1.2's cross-step conditional requiredness) — useFieldController
+// already resolves this via isFieldRequired(), so this component doesn't special-case
+// it.
 
 import { useWizard } from "../forms/WizardContext";
 import { FieldRenderer } from "../components/FieldRenderer";
@@ -32,7 +33,12 @@ export function GroupC() {
           <FieldRenderer path="advanced.C.moratoriumPeriodMonths" />
         </>
       )}
-      {mode === "Lease" && <FieldRenderer path="advanced.C.leaseRentalPerMonth" />}
+      {mode === "Lease" && (
+        <>
+          <FieldRenderer path="advanced.C.leaseRentalPerMonth" />
+          <FieldRenderer path="advanced.C.leaseTenureMonths" />
+        </>
+      )}
     </fieldset>
   );
 }

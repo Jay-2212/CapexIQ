@@ -5,9 +5,10 @@
 // (see app/forms/wizardValidation.ts's isResultStateFresh) — this function assumes
 // non-null inputs and does not itself guard against missing data.
 
-import type { AssessmentInputs } from "@/formulas/computeAssessment";
+import type { AssessmentInputs, UtilizationRampUp } from "@/formulas/computeAssessment";
 import { resolvePayerMix } from "./resolvePayerMix";
 import { equipmentDefaults } from "./equipmentDefaults";
+import { RAMP_PERIODS } from "./payerAndRampKeys";
 import type { WizardState } from "./wizardTypes";
 
 const CRORE = 10_000_000;
@@ -50,13 +51,44 @@ export function toAssessmentInputs(state: WizardState): AssessmentInputs {
           tenureMonths: advanced.C.loanTenureMonths ?? 1,
         }
       : basic.acquisitionMode === "Lease"
-        ? { type: "lease", rentalPerMonth: advanced.C.leaseRentalPerMonth ?? 0 }
+        ? {
+            type: "lease",
+            rentalPerMonth: advanced.C.leaseRentalPerMonth ?? 0,
+            tenureMonths: advanced.C.leaseTenureMonths ?? 1,
+          }
         : { type: "cash" };
+
+  // ISS-19: Advanced Group B's expectedMatureUtilization defaults to basic.usagePerDay
+  // (content/inputs-metadata.json's own defaultSource note) but is independently
+  // editable once Advanced Mode is open — once a user has deliberately entered a
+  // separate mature-utilization figure there, that supersedes the Basic Mode number
+  // as the ramp's 100% baseline. Basic-Mode-only users are unaffected (advancedOpen
+  // false), matching every other Basic/Advanced precedence rule in this pipeline.
+  const usagePerDay =
+    (state.advancedOpen ? advanced.B.expectedMatureUtilization : null) ??
+    basic.usagePerDay ??
+    0;
+
+  // Ramp only applies once every period has a user-entered value — a partially-filled
+  // ramp isn't a meaningful schedule, and Basic Mode never populates any of these, so
+  // this correctly stays undefined (flat mature usage) for the common case.
+  const rampPct = advanced.B.utilizationRampPct;
+  const hasFullRamp = RAMP_PERIODS.every(
+    (period) => rampPct[period.suffix] !== null && rampPct[period.suffix] !== undefined
+  );
+  const utilizationRamp: UtilizationRampUp | undefined = hasFullRamp
+    ? {
+        month1to3Pct: rampPct.month1to3 ?? 0,
+        month4to6Pct: rampPct.month4to6 ?? 0,
+        month7to12Pct: rampPct.month7to12 ?? 0,
+        year2PlusPct: rampPct.year2Plus ?? 0,
+      }
+    : undefined;
 
   return {
     purchaseCost,
     installationCost,
-    usagePerDay: basic.usagePerDay ?? 0,
+    usagePerDay,
     workingDaysPerMonth: basic.workingDaysPerMonth ?? 25,
     payerMix: resolvePayerMix(state),
     variableCostPerUse:
@@ -68,9 +100,16 @@ export function toAssessmentInputs(state: WizardState): AssessmentInputs {
       (basic.electricityCostPerMonth ?? 0) +
       (basic.otherFixedCostPerMonth ?? 0),
     financing,
-    maintenance: { warrantyYears, cmcYears, cmcAnnualCost, amcAnnualCost },
+    maintenance: {
+      warrantyYears,
+      cmcYears,
+      cmcAnnualCost,
+      amcAnnualCost,
+      costByYearPct: advanced.E.maintenanceCostByYearPct,
+    },
     usefulLifeYears,
     discountRate: advanced.F.discountRate ?? 12.5,
     salvageValuePercentage: advanced.F.salvageValuePercentage ?? 0,
+    utilizationRamp,
   };
 }

@@ -91,6 +91,7 @@ const STEP_FIELD_PATHS: Record<Exclude<WizardStep, "results">, string[]> = {
     "advanced.C.loanInterestRate",
     "advanced.C.loanTenureMonths",
     "advanced.C.leaseRentalPerMonth",
+    "advanced.C.leaseTenureMonths",
     ...PAYER_TYPES.map((p) => `advanced.A.payerMixSharePct.${p.suffix}`),
   ],
 };

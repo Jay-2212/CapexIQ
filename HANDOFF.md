@@ -11,52 +11,54 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-07-13)*
+*(Last updated: 2026-07-13, follow-up session)*
 
-**Phase 6 (wizard UI implementation) is built.** `/app` now has a real, working
-pre-step + 3-step Basic Mode wizard + Advanced Mode panel + a minimal `/results` page,
-all wired to a single canonical calculation pipeline. Planning was already doubly
-audited before this session started (`$capexiq-ui-assurance` + `$capexiq-prebuild-
-assurance`, both merged 2026-07-12); this session is the first real product code.
+**Phase 6 (wizard UI implementation) is built, and every issue it opened is now
+resolved.** `/app` has a real, working pre-step + 3-step Basic Mode wizard + Advanced
+Mode panel + a minimal `/results` page, all wired to a single canonical calculation
+pipeline. Planning was already doubly audited before the implementation session
+started (`$capexiq-ui-assurance` + `$capexiq-prebuild-assurance`, both merged
+2026-07-12).
 
-- **Canonical pipeline (`formulas/computeAssessment.ts`, new):** the single
+- **Canonical pipeline (`formulas/computeAssessment.ts`):** the single
   wizard-inputs-to-full-result derivation `wizard-state.md` §4 requires. Composition
   order (accrual-basis NPV/IRR, DSO-extended array feeding a separate working-capital
   metric, Basic Mode's flat blended maintenance rate vs. Advanced Mode's
-  `cmcYears`-plus-sourced-rate schedule, financing-mode cash-flow treatment) is not
-  guessed — it's copied exactly from `tests/scenarios/`'s independently-hand-derived
-  golden scenarios (A-D), and a new test file (`tests/formulas/computeAssessment.test.ts`)
-  reproduces every one of those golden numbers.
+  `cmcYears`-plus-sourced-rate schedule, financing-mode cash-flow treatment) is copied
+  exactly from `tests/scenarios/`'s independently-hand-derived golden scenarios (A-D).
+  This follow-up session added two previously-missing pieces the pipeline now
+  consumes: a month-by-month utilization ramp-up (ISS-19) and a bounded Lease tenure
+  with buyout, mirroring Loan (ISS-18, Jay's decision after an Opus advisor pass).
 - **Full wizard**, `app/(assessment)/` (a Next.js route group sharing one
   `WizardProvider` across `/assess/*` and `/results`): pre-step (equipment tiles + bed
   size/city tier), Investment/Usage & Revenue/Operating Costs steps, the Advanced Mode
-  panel (all 6 groups A-F), a live preview strip, `localStorage` draft persistence
-  (debounce, multi-tab conflict banner, write-failure handling), the route guard, focus
-  management, and "Start over." `app/forms/` holds the reducer/schema/validation/
-  persistence logic; `app/advanced/` and `app/components/` hold the UI.
-- **Verification:** 161 tests pass (109 pre-existing + 52 new — reducer transitions,
-  validation, financing-mode mapping, persistence, and 2 React Testing Library
-  component tests), `npm run build` and `npx tsc --noEmit` both clean. **No interactive
-  browser QA was possible this session** (no working Chrome extension connection) — see
-  `ISSUES.md` ISS-21 for exactly what that leaves unverified and a recommended manual
-  pass.
-- **Six items logged to `ISSUES.md`'s Open section (ISS-17 through ISS-21, ISS-23)** —
-  judgment calls (a realization/claim-deduction composition rule, a Lease-financing
-  assumption with no bounded term), deferred scope (utilization ramp-up and the
-  per-year maintenance override are collected but not yet consumed by the pipeline),
-  and verification/coverage gaps (not every wizard-state.md edge case has its own test;
-  the slider touch-target audit ask isn't achievable with a native range input) —
-  flagged proactively, none block Phase 6's core functionality. **One bug found and
-  fixed the same session:** `payerMixSharePct`'s `required: true` had no default,
-  same class of issue as the already-resolved `targetIrr`/F1 bug — fixed with the same
-  pattern (auto-filled implicit single-payer default), logged as Resolved ISS-22.
+  panel (all 6 groups A-F, now including Group C's new `leaseTenureMonths`), a live
+  preview strip, `localStorage` draft persistence (debounce, multi-tab conflict
+  banner, write-failure handling), the route guard, focus management, and "Start
+  over." `app/forms/` holds the reducer/schema/validation/persistence logic;
+  `app/advanced/` and `app/components/` hold the UI.
+- **Verification:** 173 tests pass (161 from the implementation session + 12 new this
+  follow-up — ramp-up/maintenance-override coverage, Lease-tenure coverage, and two
+  jsdom-level tests for the route guard's redirect and the cross-tab conflict banner
+  actually firing), `npm run build` and `npx tsc --noEmit` both clean. **Interactive
+  browser QA is still not possible** — `claude-in-chrome` remains disconnected in this
+  environment, re-checked this session, not a one-off (see `ISSUES.md` ISS-21).
+- **All six items this session's own predecessor logged to `ISSUES.md` are now
+  Resolved (ISS-17 through ISS-21, ISS-23)** — using the triage Jay asked for
+  ("/advisor" mode): fix directly where the issue turned out to be mechanical (ISS-19,
+  ISS-20, and most of ISS-21/ISS-23 once actually investigated), run genuine judgment
+  calls past an Opus advisor first (ISS-17, ISS-18, ISS-23), and only bring to Jay the
+  one call the advisor itself flagged as a real product decision (ISS-18's lease
+  archetype — Jay chose lease-to-own with a bounded tenure). See `ISSUES.md`'s Resolved
+  section for each entry's full reasoning.
 - **Landing page still a placeholder** — `design/ux-product-spec.md` §5's hero/entry
   flow wasn't built this session; `/assess` works standalone via direct URL.
-- **New dev dependencies:** `jsdom`, `@testing-library/react`/`jest-dom`,
-  `@vitejs/plugin-react` (test-only), `lucide-react` (equipment-tile icon). New
-  `vitest.config.ts` (path aliases + jsdom environment) and `tests/setup.ts` (a
-  `localStorage`/`scrollIntoView` polyfill — see that file's own comment for why this
-  environment's jsdom needed one).
+- **New dev dependencies (implementation session):** `jsdom`,
+  `@testing-library/react`/`jest-dom`, `@vitejs/plugin-react` (test-only),
+  `lucide-react` (equipment-tile icon). `vitest.config.ts` (path aliases + jsdom
+  environment) and `tests/setup.ts` (a `localStorage`/`scrollIntoView` polyfill, plus
+  an `afterEach(cleanup)` added this follow-up session once a multi-render test file
+  exposed that it was missing).
 
 **Next: Phase 7 (results dashboard and charts)** — the gauge, metric cards, break-even/
 cash-flow charts, risk callouts, narrative summary, and the Advanced settings pane,
@@ -93,6 +95,51 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-13 — Phase 6 follow-up: all 6 issues opened by the implementation session resolved (ISS-17 to ISS-21, ISS-23)
+**What changed:** Jay asked to work through everything ISS-17-ISS-23 flagged, using a
+three-layer triage: fix directly where possible, consult an Opus advisor for genuine
+judgment calls, only bring to Jay what the advisor itself said needed his input.
+1. **ISS-20 (small, fixed directly):** `SliderField.tsx` now distinguishes a keyboard
+   arrow/Home/End/Page key press from a pointer drag (a `keydown`-set ref checked by
+   the `input` handler) and dispatches immediately for the former, keeping the ~120ms
+   debounce only for drags.
+2. **ISS-19 (small once investigated, fixed directly):** turned out to be fully
+   specified by its own schema notes, not an open modeling question — implemented a
+   month-by-month utilization ramp in `computeAssessment.ts` (feeding both per-year
+   cash flows and the existing monthly working-capital calc from one series) and a
+   per-year `maintenanceCostByYearPct` override on the warranty/CMC/AMC schedule.
+   `toAssessmentInputs.ts` only applies the ramp once all 4 periods are filled in, and
+   lets Advanced Mode's `expectedMatureUtilization` supersede `basic.usagePerDay` as
+   the ramp baseline once opened. Fully backward-compatible — every pre-existing
+   golden-scenario test passed unchanged. New: `tests/formulas/
+   computeAssessment.rampAndMaintenanceOverride.test.ts` + wizard-wiring tests.
+3. **ISS-17, ISS-18, ISS-23 (genuine judgment calls, sent to an Opus advisor):** the
+   advisor confirmed ISS-17's realization×claim-deduction multiplication is the
+   correct revenue-cycle waterfall (only the tooltip copy needed correcting, to stop
+   defining realization % against billed tariff instead of the post-deduction amount)
+   and confirmed ISS-23's paired-numeric-input pattern already satisfies WCAG 2.5.8's
+   Equivalent-control exception (rejected building a custom slider — not worth the
+   regression risk for no conformance gain). Both fixed directly on the advisor's
+   say-so. ISS-18 (Lease's unbounded rental) the advisor flagged as a real bug that
+   needed Jay's sign-off on which lease archetype to model — asked via
+   `AskUserQuestion` with the advisor's recommendation marked; Jay confirmed
+   lease-to-own with a bounded `leaseTenureMonths` (mirrors Loan's `tenureMonths`),
+   implemented in `computeAssessment.ts` (both financing branches now share one
+   tenure-capping code path), `toAssessmentInputs.ts`, `content/inputs-metadata.json`,
+   `SPEC.md`, `content/tooltip-copy.md`, and `app/advanced/GroupC.tsx`.
+4. **ISS-21 (re-attempted, narrowed but not closed):** `claude-in-chrome` is still
+   disconnected in this environment (re-verified via the skill, not assumed stale) —
+   real browser QA remains blocked. Added `tests/wizard/routeGuardAndPersistence.test.tsx`
+   to close two of the specific gaps that entry named: the route guard's redirect and
+   the cross-tab conflict banner actually firing, both via jsdom `StorageEvent`/router
+   mocks. Found and fixed a latent test-infra bug while writing these — `tests/
+   setup.ts` had no `afterEach(cleanup)`, so a multi-render test file leaked DOM
+   between tests (silent until this session's second test in one file).
+**Verification:** 173/173 tests pass (161 + 12 new), `npx tsc --noEmit` and `npm run
+build` both clean. **Still recommend:** a manual `npm run dev` click-through once a
+working browser connection is available — nothing visual/layout, and no real
+multi-tab session, has been exercised yet.
 
 ### 2026-07-13 — Phase 6 (wizard UI implementation) built: reducer, canonical pipeline, full wizard, 161 tests
 **What changed:** Jay confirmed Phases 1-5 were genuinely ready to build against (this
