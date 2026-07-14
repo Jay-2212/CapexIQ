@@ -80,7 +80,12 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │   │   │                          formatting.ts (Indian currency incl. compact Lakh/
 │   │   │                          Crore form), RiskCallout.tsx, and
 │   │   │                          ResultsQuickSettings.tsx (Phase 7 — collapsed
-│   │   │                          Discount Rate / Target IRR / financing-rate pane)
+│   │   │                          Discount Rate / Target IRR / financing-rate pane),
+│   │   │                          plus Phase 9's SensitivityStrip.tsx (usage/
+│   │   │                          realization sliders, canonical computeAssessment),
+│   │   │                          ScenarioComparisonTable.tsx (SPEC §28 user-named
+│   │   │                          scenario comparison), and ActionableInsightCard.tsx
+│   │   │                          (financial-model-spec.md §4 price-increase insight)
 │   └── charts/                   BreakEvenBar.tsx, CashFlowChart.tsx (Phase 7) — see
 │                                  its own README.md
 ├── public/                       Next.js static-export assets (equipment-images/,
@@ -203,7 +208,7 @@ than duplicating it.
 | `roi.ts` | Return on investment; also `cumulativeCashFlowSeries` (**new, Phase 7** — the running investment-position-by-year the Results cash-flow chart plots, never re-derived in the component) |
 | `maintenance.ts` | AMC/CMC annual cost |
 | `launchDelay.ts` | Simple monthly pre-operative interest during launch delay |
-| `sensitivity.ts` | Scenario-level sensitivity grid, needs every other formula to run end to end |
+| `sensitivity.ts` | Scenario-level sensitivity grid (`runScenario`); **Phase 9** added `deriveScenarioAssumptions()`, bridging canonical `AssessmentInputs`/`AssessmentResult` into this file's `ScenarioAssumptions` shape for the actionable insight and the sensitivity strip's tariff context |
 | `investmentOutlookScore.ts` | The 0-100 Investment Outlook score — 4 weighted sub-scores per `financial-model-spec.md` §1 |
 | `eac.ts` | Equivalent Annual Cost |
 | `discountedPayback.ts` | Discounted payback period |
@@ -328,16 +333,23 @@ remaining:
 - **Phase 8 — Exports. Built 2026-07-14.** `exports/*.ts` generate real Excel (live
   embedded formulas, verified via a HyperFormula test oracle plus an actual LibreOffice
   headless recalculation — SPEC.md §29.5), Word, and ZIP files from the same
-  `AssessmentInputs`/`AssessmentResult` the dashboard renders. Chart images deferred
-  (data tables stand in). This phase also surfaced a flat-billed/ramped-realized
-  revenue asymmetry, resolved same-day per Jay's decision — see `ISSUES.md` ISS-29.
-- **Phase 9 — Scenario comparison / sensitivity UI, plus 3 pipeline gaps from Phase 6.**
-  `formulas/sensitivity.ts` is implemented and tested; there's no UI surfacing it yet.
-  `tests/scenarios/` holds golden end-to-end regression tests (2026-07-13), not the
-  scenario-comparison UI itself. Also see `ISSUES.md` ISS-19: utilization ramp-up and
-  the per-year maintenance schedule override are collected in wizard state but not yet
-  consumed by `computeAssessment.ts` — likely Phase 9 work, since sensitivity/ramp
-  modeling are closely related.
+  `AssessmentInputs`/`AssessmentResult` the dashboard renders. Chart images still
+  deferred (data tables stand in) — LibreOffice is now available so the original
+  verification blocker is gone, but building the images themselves remains an open
+  fast-follow as of the Phase 9 session too. This phase also surfaced a flat-billed/
+  ramped-realized revenue asymmetry, resolved same-day per Jay's decision — see
+  `ISSUES.md` ISS-29.
+- **Phase 9 — Scenario comparison / sensitivity UI. Built 2026-07-14.**
+  `app/components/ScenarioComparisonTable.tsx` (SPEC §28 user-named scenarios only —
+  no invented Conservative/Optimistic deltas), `SensitivityStrip.tsx` (usage/
+  realization sliders, runs the canonical `computeAssessment()` rather than the
+  lighter `runScenario`, so it never disagrees with the dashboard headline above it),
+  and `ActionableInsightCard.tsx` (financial-model-spec.md §4, reusing
+  `formulas/actionableInsight.ts` which turned out to already exist from Phase 2/3).
+  `tests/scenarios/` holds golden end-to-end regression tests (2026-07-13), unrelated
+  to this UI. ISS-19's utilization ramp-up and per-year maintenance override are
+  already consumed by `computeAssessment.ts` (resolved in earlier phases) — not a
+  Phase 9 gap.
 - **Phase 10 — Deploy and go-live QA.** The site is live at `capexiq.jaybharti.me`
   (Cloudflare Pages), but that's serving the current skeleton (landing page still a
   placeholder), not a finished product — real go-live QA happens once Phases 7-9 land.

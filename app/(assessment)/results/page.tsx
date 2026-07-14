@@ -13,6 +13,9 @@ import { CashFlowChart } from "../../charts/CashFlowChart";
 import { RiskCallout } from "../../components/RiskCallout";
 import { ResultsQuickSettings } from "../../components/ResultsQuickSettings";
 import { ExportPanel } from "../../components/ExportPanel";
+import { SensitivityStrip } from "../../components/SensitivityStrip";
+import { ScenarioComparisonTable } from "../../components/ScenarioComparisonTable";
+import { ActionableInsightCard } from "../../components/ActionableInsightCard";
 
 const DRIVER_LABELS: Record<string, string> = {
   returnStrength: "the return relative to your cost of capital",
@@ -36,6 +39,7 @@ export default function ResultsPage() {
     result.initialInvestment,
     result.annualNetCashFlowsAfterFinancing
   );
+  const assessmentInputs = toAssessmentInputs(state);
 
   return (
     <div className="assess-page assess-page--results">
@@ -94,6 +98,8 @@ export default function ResultsPage() {
         </article>
       </section>
 
+      <SensitivityStrip inputs={assessmentInputs} />
+
       <RiskCallout
         outlook={outlook}
         usagePerDay={usagePerDay}
@@ -102,10 +108,14 @@ export default function ResultsPage() {
         workingCapitalPeakGapMonth={result.workingCapitalPeakGapMonth}
       />
 
+      <ActionableInsightCard inputs={assessmentInputs} result={result} />
+
       <ResultsQuickSettings />
 
+      <ScenarioComparisonTable inputs={assessmentInputs} />
+
       <ExportPanel
-        inputs={toAssessmentInputs(state)}
+        inputs={assessmentInputs}
         result={result}
         hospitalName={hospital}
         equipmentCategory={equipment}

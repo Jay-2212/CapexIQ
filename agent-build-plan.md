@@ -775,14 +775,21 @@ live-formula decision).
       (MRI scenario, `Apex Test Hospital`): all three downloads produced correctly
       MIME-typed, non-trivial-sized blobs (39KB xlsx / 11KB docx / 51KB zip) with zero
       console errors.
-- [ ] **Chart images (Excel "Charts" tab, Word §8) — deferred, not built this phase.**
-      Scoped out 2026-07-14 alongside the harder live-formula requirement, which is the
-      phase's actual DoD; no headless Excel/LibreOffice is available in this
-      environment to verify a rasterized image round-trips correctly, so an
+- [ ] **Chart images (Excel "Charts" tab, Word §8) — still deferred, not built.**
+      Scoped out 2026-07-14 alongside the harder live-formula requirement, which was
+      that phase's actual DoD; at the time no headless Excel/LibreOffice was available
+      in this environment to verify a rasterized image round-trips correctly, so an
       unverifiable image felt like the wrong tradeoff against the formula-correctness
-      work. Both `report-templates/excel-sheet-structure.md` Tab 6 and
-      `word-report-template.md` §8 carry this as an explicit note (a data table stands
-      in for now), not a silent gap. Flagged as a fast-follow.
+      work. **Update 2026-07-14 (Phase 9 session):** LibreOffice is now installed and
+      was in fact used later that same day to headlessly recalculate a real generated
+      `.xlsx` (see this file's Phase 8 DoD note and `HANDOFF.md`'s matching Change Log
+      entry) — the original blocker is gone. Still not built this session either,
+      since Jay explicitly scoped this session to Phase 9 plus carrying this note
+      forward rather than building the charts now. Both
+      `report-templates/excel-sheet-structure.md` Tab 6 and `word-report-template.md`
+      §8 still carry this as an explicit note (a data table stands in for now), not a
+      silent gap. Remains a fast-follow — next session can build and LibreOffice-verify
+      it directly, no more blocker to note first.
 **Definition of Done:** an exported Excel file, opened in Excel/Sheets, shows real
 formulas (not pasted values) in every downstream cell, each one traceable back to the
 Assumptions sheet — verify this by actually opening the file and clicking cells, not by
@@ -860,37 +867,80 @@ calls for to compare scenarios side by side.
 
 SPEC.md §28 only describes *discrete* named-scenario comparison (a table); it never
 describes a *continuous*, slider-driven sensitivity view, even though "Sensitivity
-chart" is named as an output in §11.2/§27. These are two different features — build
-both, don't conflate them:
-- [ ] Discrete scenario comparison (SPEC.md §28, already spec'd): a table comparing
-      named scenarios (Conservative/Base/Optimistic, or user-named — "MRI Option A" vs.
-      "MRI Option B").
-- [ ] Continuous sensitivity view (implied but never UX-spec'd): pick the 1-2 highest-
-      leverage drivers (usage/day, realization %) and let the user drag a slider to see
-      NPV/IRR/payback update live in a small comparison strip next to the main chart —
-      reuses Phase 4-G's live-recalculation contract and `formulas/sensitivity.ts`'s
-      existing `runScenario` stub.
-- [ ] **Automatic actionable insights** (added 2026-07-07, approved by Jay — see
+chart" is named as an output in §11.2/§27. These are two different features — built
+both, not conflated:
+- [x] **Discrete scenario comparison (SPEC.md §28), built 2026-07-14 —
+      `app/components/ScenarioComparisonTable.tsx`.** Deliberately implements only
+      SPEC §28.1's *user-named* scenario option, not an auto Conservative/Base/
+      Optimistic preset: there is no researched or Jay-approved definition anywhere in
+      `data-requirements.md`/`financial-model-spec.md` for what "Conservative" or
+      "Optimistic" mean numerically, and inventing a delta (e.g. "usage −10%") would be
+      exactly the unsourced product constant CLAUDE.md's escalation rule reserves for
+      Jay. "Conservative"/"Base case"/"Optimistic" remain available as `<datalist>`
+      name suggestions — the numbers a scenario compares are always user-entered.
+      Overridable fields are Capex (purchase cost), billed tariff per use, and usage
+      per day — Capex specifically so the table stays distinct from the sensitivity
+      strip below (SPEC's own "comparing vendor quotes" use case needs a price axis
+      the strip doesn't have). Every scenario, including the Base row, runs through
+      the same `computeAssessment()` (via the new `formulas/assessmentOverrides.ts`
+      helper) as everywhere else — no second calculation path — and renders every
+      SPEC §28.2 column (Capex, monthly billed/realized revenue, monthly operating
+      surplus, cash flow after EMI, payback, ROI, NPV, IRR, break-even usage, working
+      capital gap, risk level). Scenarios are ephemeral `useState`, not wizard state —
+      never dispatched through the reducer, lost on reload by design (a what-if, not
+      an input).
+- [x] **Continuous sensitivity view, built 2026-07-14 —
+      `app/components/SensitivityStrip.tsx`.** Drags usage/day and realization %
+      (bounds sourced from `content/inputs-metadata.json`, not invented) and shows a
+      live NPV/IRR/payback strip next to the main charts. **Deviates from this
+      section's original text on purpose:** runs the full canonical
+      `computeAssessment()`, not `runScenario` — `runScenario` has no utilization
+      ramp, per-year maintenance schedule, or payer-mix granularity, so at the
+      slider's resting position it would show different NPV/IRR/payback than the
+      dashboard headline directly above it (worse the more Advanced-mode detail is in
+      use). Using the canonical engine actually honors Phase 4-G's live-recalculation
+      contract, which this section's own text also invokes — the two instructions were
+      in tension and this resolves toward the one that keeps the numbers honest.
+      Local-state overrides only (via `formulas/assessmentOverrides.ts`), never
+      dispatched through the wizard reducer, so dragging can never mutate or persist
+      the user's real assessment (unlike `ResultsQuickSettings`, which intentionally
+      does dispatch).
+- [x] **Automatic actionable insights** (added 2026-07-07, approved by Jay — see
       `financial-model-spec.md` §4): a passive, threshold-gated price-increase
       suggestion, distinct from the two user-driven features above — the user never
-      requests this, it either appears or it doesn't. Implement exactly per
-      `financial-model-spec.md` §4: a grid of test tariff increases (2/5/8/10/15% of
-      current `billedTariffPerUse`) × test start years (Year 1/2/3, capped at
+      requests this, it either appears or it doesn't. Implements `financial-model-
+      spec.md` §4 exactly: a grid of test tariff increases (2/5/8/10/15% of current
+      `billedTariffPerUse`) × test start years (Year 1/2/3, capped at
       `floor(usefulLifeYears / 2)`), re-running the payback formula for each
       combination; a materiality gate (only surface if payback improves by ≥6 months);
       a "cheapest win" selection rule (smallest qualifying price increase, earliest
-      qualifying start year); and a null case (show nothing if no combination clears the
-      gate — this is the expected, common result, not an empty state to fill in). Reuses
-      `formulas/sensitivity.ts`'s `runScenario`, does not need a new formula file.
-      Because the underlying formulas are pure and cheap, this runs silently as part of
-      the same live-recalculation pass Phase 4-G already does — no separate loading
-      state, no user-visible "extra calculation."
+      qualifying start year); and a null case (show nothing if no combination clears
+      the gate — this is the expected, common result, not an empty state to fill in).
+      **Found already implemented** (`formulas/actionableInsight.ts` +
+      `tests/formulas/actionableInsight.test.ts`) from a Phase 2/3-era session, ahead
+      of this phase actually wiring it up — reused as-is rather than reimplemented
+      once its tests confirmed it matches §4 exactly. This phase's actual new work was
+      `formulas/sensitivity.ts`'s `deriveScenarioAssumptions()` (bridges the canonical
+      `AssessmentInputs`/`AssessmentResult` pair into the `ScenarioAssumptions` shape
+      `actionablePriceIncreaseInsight` needs — never invents its own baseline) and
+      `app/components/ActionableInsightCard.tsx` (the presentation layer, renders
+      nothing on `null`). Runs silently as part of the same live-recalculation pass
+      Phase 4-G already does — no separate loading state.
 
 **Definition of Done:** running the same scenario twice with identical inputs produces
 identical output (determinism check) — sensitivity/scenario code is the most likely
 place for an accidental hidden-state bug to hide. The automatic-insight grid search must
 pass the same determinism check (same inputs → same insight, or the same `null`, every
-time).
+time). **Status 2026-07-14:** all three built, 265 tests passing (up from 250), clean
+`tsc --noEmit`, clean static-export `npm run build`, live-verified in a real browser via
+`claude-in-chrome` (MRI scenario: sensitivity slider's resting NPV/IRR/payback matched
+the dashboard headline exactly, confirming the `computeAssessment`-not-`runScenario`
+fidelity decision above; scenario table added/edited/removed correctly across every
+column; mobile viewport at 390×844 checked, no overflow). No qualifying actionable
+insight appeared for that particular scenario (already-fast 1.9yr payback) — correct,
+expected `null` behavior, not exercised further this session. Determinism is exercised
+by the existing `actionableInsight.test.ts` "same messy-number suggestion on repeated
+runs" case; not independently re-tested here since the formula itself didn't change.
 
 ---
 
