@@ -11,8 +11,8 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-07-14, Phase 8 exports built + verified; Phase 7's chart-tooltip
-gap closed)*
+*(Last updated: 2026-07-14, Phase 8 exports built + verified, ISS-29 resolved, IRR
+spot-checked against real LibreOffice; Phase 7's chart-tooltip gap closed)*
 
 **The warm-beige "calm clinical intelligence" redesign and Phase 7's results dashboard
 depth are both implemented and verified live.** The canonical calculation pipeline and
@@ -112,34 +112,40 @@ open item:**
   before they shipped (an unquoted space-containing sheet-name reference, and a
   missing upper-bound guard on a DSO cash-received lookup that produced `#NUM!` past
   the useful-life horizon). See `agent-build-plan.md` Phase 8's DoD status for the
-  full verification writeup, including the one thing this session genuinely could not
-  do (open the file in real Excel/LibreOffice — neither is installed here).
-- **One engine-level question surfaced, not resolved:** `computeAssessment.ts` ramps
-  realized revenue/variable cost by the utilization ramp but never ramps billed
+  full verification writeup. **Follow-up (2026-07-14):** LibreOffice is now installed
+  in this environment and was used to actually recalculate a real generated `.xlsx`
+  headlessly (`soffice --convert-to xlsx` with `OOXMLRecalcMode` forced to always-
+  recalculate, since exceljs writes formulas with no cached values and LibreOffice
+  doesn't recalc xlsx on load by default) — its IRR cell matched
+  `computeAssessment()`'s own IRR to ~13 significant digits, independently confirming
+  the HyperFormula oracle's result.
+- **ISS-29 (billed/realized ramp asymmetry) resolved:** `computeAssessment.ts` ramped
+  realized revenue/variable cost by the utilization ramp but never ramped billed
   revenue — an existing asymmetry this phase's monthly-series work made externally
-  visible for the first time. Flagged as `ISSUES.md` ISS-29 for Jay's product
-  decision, not silently "fixed" inside the export layer.
+  visible for the first time. Jay's decision (2026-07-14, after an advisor pass over
+  three options): ramp billed revenue too, in `formulas/monthlySeries.ts` and
+  `exports/workbookPlan.ts` only — `computeAssessment.ts`'s own flat headline
+  `roiBilled`/`roiRealized`/`annualOperatingSurplus` fields are untouched (they already
+  used flat, unramped figures for both revenue views). See `ISSUES.md` ISS-29.
 - **Chart images (Excel "Charts" tab, Word §8) are deferred, not built** — flagged
   explicitly in both `report-templates/excel-sheet-structure.md` and
-  `word-report-template.md`, a data table stands in for now. No headless Excel/
-  LibreOffice is available in this environment to verify a rasterized image round-
-  trips correctly, so this was judged the wrong tradeoff against the harder live-
-  formula verification work.
-- Verification: 239 tests (up from 203; monthlySeries/workbookPlan/excel-generator/
-  word-generator/zip-generator/chart-tooltip tests all new), clean `tsc --noEmit`,
-  clean static-export `npm run build` (confirmed via build output that exceljs/docx/
-  jszip stay in lazy chunks — `/results` grew ~1KB, not the ~1MB+ eager-bundling would
-  add).
+  `word-report-template.md`, a data table stands in for now. Now that LibreOffice is
+  available, verifying a rasterized image round-trips correctly is unblocked but still
+  not done this session — remains a fast-follow.
+- Verification: 249 tests (up from 203 at Phase 8's start; monthlySeries/workbookPlan/
+  excel-generator/word-generator/zip-generator/chart-tooltip tests all new, plus the
+  ISS-29 fix's updated ramp assertions), clean `tsc --noEmit`, clean static-export
+  `npm run build` (confirmed via build output that exceljs/docx/jszip stay in lazy
+  chunks — `/results` grew ~1KB, not the ~1MB+ eager-bundling would add).
 
 **Next:** a visual QA pass across the other equipment types and a Strong/Weak outcome
 (only MRI at Caution/Moderate has been live-tested) remains Phase 7's one open item.
-Phase 8's remaining fast-follow is chart images. Phase 9 (sensitivity/scenario
-comparison) hasn't been started. `ISSUES.md` ISS-29 (billed/realized ramp asymmetry)
-needs Jay's decision. A dedicated real-user copy pass and the Dark-Reader-free device
-QA pass noted above remain open. Do not return Advanced Mode to a six-group continuous
-scroll, expose internal field/formula identifiers in public UI, or fix the stale
-live-deploy issue without checking with Jay first (it may be intentional, e.g.
-mid-migration).
+Phase 8's remaining fast-follow is chart images (now unblocked by LibreOffice being
+available, but not yet built). Phase 9 (sensitivity/scenario comparison) hasn't been
+started. A dedicated real-user copy pass and the Dark-Reader-free device QA pass noted
+above remain open. Do not return Advanced Mode to a six-group continuous scroll,
+expose internal field/formula identifiers in public UI, or fix the stale live-deploy
+issue without checking with Jay first (it may be intentional, e.g. mid-migration).
 
 ---
 
@@ -171,6 +177,33 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-14 — Phase 8 follow-up: ISS-29 resolved, LibreOffice IRR spot-check
+**What changed:** Jay asked to resolve the two items Phase 8 left open (see the entry
+below): the flat-billed/ramped-realized asymmetry (ISS-29) and the un-verified-against-
+real-Excel IRR cell.
+1. **LibreOffice installed and actually used.** The prior session had no headless
+   Excel/LibreOffice available; this session installed LibreOffice via Homebrew. A
+   first `soffice --headless` attempt hung indefinitely (macOS `AppleSystemPolicy`
+   blocking the process — not a slow first-launch); after Jay approved a permission
+   prompt, a retry succeeded. Generated a real `.xlsx` for the financed+ramped+multi-
+   payer-DSO golden scenario and forced a real recalculation (`OOXMLRecalcMode` set to
+   always-recalculate in a scratch profile, since exceljs writes formulas with no
+   cached values and LibreOffice doesn't recalc xlsx on load by default). LibreOffice's
+   own IRR cell (`19.0812674185733%`) matched `computeAssessment()`'s own IRR
+   (`19.081267418573276%`) to ~13 significant digits — independent confirmation beyond
+   the existing HyperFormula oracle test.
+2. **ISS-29 resolved** — advisor pass weighed three options (ramp billed to match
+   realized; ramp everywhere including headline ROI; leave flat and document). Jay
+   chose ramping billed revenue to match realized, reusing the existing ramp curve.
+   Fixed in `formulas/monthlySeries.ts` and `exports/workbookPlan.ts`'s Monthly-sheet
+   billed-revenue formula only; `computeAssessment.ts`'s flat headline
+   `roiBilled`/`roiRealized`/`annualOperatingSurplus` fields are untouched by design —
+   confirmed before the fix that `Annual Summary`'s billed column already just `SUM()`s
+   the Monthly sheet (no separate headline recomputation to reconcile). Updated
+   `tests/formulas/monthlySeries.test.ts`, `report-templates/excel-sheet-structure.md`.
+   See `ISSUES.md` ISS-29 (moved to Resolved).
+3. **Verification:** full suite 249/249 passing, clean `tsc --noEmit`.
 
 ### 2026-07-14 — Phase 8 exports built (Excel/Word/ZIP), Phase 7's chart-tooltip gap closed
 **What changed:** Jay asked for Phase 8 (Excel/Word/ZIP exports) to be fully built,

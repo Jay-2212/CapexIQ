@@ -12,30 +12,6 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
-### ISS-29 — `computeAssessment.ts` ramps realized revenue and variable cost by `utilizationRamp`, but never ramps billed revenue — asymmetry surfaced by Phase 8, not yet decided
-**Area:** formulas / product decision
-**What was found:** 2026-07-14, while building the Phase 8 Excel/Word exports' monthly
-breakdown (`formulas/monthlySeries.ts`). `computeAssessment.ts` applies Advanced Group
-B's month-1-through-year-2+ utilization ramp to `monthlyRealizedSeries` and
-`monthlyVariableCostSeries` (both used in the annual cash-flow build), but
-`monthlyBilledRevenue`/`roiBilled` are a flat, unramped scalar — usage/day × weighted
-billed tariff × working days, computed once, with no month-by-month ramp fraction
-applied anywhere. This means a hospital with a slow ramp-up sees its *realized*
-revenue depressed in early months (correctly) but its *billed* revenue/ROI-billed view
-unaffected by the same ramp — an inconsistency between the two revenue views that
-predates this session but was only surfaced now, because Phase 8 needed a true
-monthly series for the Excel export and this is the first place the discrepancy
-becomes externally visible (a monthly Billed Revenue column that's flat every month
-next to a Realized Revenue column that visibly ramps, in the same workbook).
-**Not fixed this session:** deliberately not "fixed" by ramping billed revenue inside
-the new export code — that would invent a second, export-only version of billed
-revenue that disagrees with what `roiBilled`/the dashboard already shows for the same
-inputs, trading one inconsistency for a worse one. `formulas/monthlySeries.ts` and
-`report-templates/excel-sheet-structure.md` are both explicit that the monthly billed
-figure is flat, faithfully matching the existing engine. Whether billed revenue
-*should* ramp too is a product/methodology question for Jay, not an export-layer
-implementation detail.
-
 ### ISS-28 — Live deploy (`capexiq.jaybharti.me`) is badly stale
 **Area:** deployment
 **What was found:** 2026-07-13, during Phase 7 browser QA. The live Cloudflare Pages
@@ -198,6 +174,29 @@ is a placeholder only, safe to replace once real product screenshots exist.
 ---
 
 ## Resolved
+
+### ISS-29 — `computeAssessment.ts` ramped realized revenue and variable cost by `utilizationRamp` but never ramped billed revenue
+**Resolved:** 2026-07-14. Surfaced during Phase 8's Excel export monthly-breakdown work
+(`formulas/monthlySeries.ts`): realized revenue/variable cost ramped month to month
+under Advanced Group B's utilization ramp, but billed revenue was a flat, unramped
+scalar — a monthly Billed Revenue column that never moved next to a Realized Revenue
+column that visibly did, in the same workbook. Jay's decision, after an advisor pass
+weighing three options (ramp billed to match realized; ramp everywhere including the
+dashboard headline ROI figures; leave flat and just document it): **ramp billed
+revenue the same way realized revenue already is.** Both figures are usagePerDay-
+driven, differing only in per-use rate, so a volume ramp affects both identically —
+you can't bill for a procedure you didn't perform. Fixed in `formulas/monthlySeries.ts`
+(`monthlyBilledRevenue` now applies the same `utilizationFractionForMonth()` curve) and
+`exports/workbookPlan.ts`'s Monthly-sheet Billed Revenue formula; reuses the existing
+ramp fractions, no new numbers invented. Deliberately **not** touched:
+`computeAssessment.ts`'s headline `monthlyBilledRevenue`/`roiBilled` fields stay flat,
+exactly mirroring how `monthlyRealizedRevenue`/`roiRealized`/`annualOperatingSurplus`
+already use flat, unramped annual figures too — those headline dashboard numbers are
+unaffected. Verified: `tests/formulas/monthlySeries.test.ts` now asserts billed revenue
+ramps identically to realized revenue; a HyperFormula-oracle spot-check plus (this
+session) an actual LibreOffice headless recalculation of the Excel workbook both
+confirmed the IRR cell to ~13 significant digits against `computeAssessment()`'s own
+IRR, independent of this fix.
 
 ### Phase 7 build + reconciliation of two divergent design efforts
 **Resolved:** 2026-07-13. Jay's local `main` checkout had a large uncommitted diff (the

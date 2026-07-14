@@ -844,10 +844,11 @@ route, documented here rather than let the two be confused:**
   (`tests/exports/zip-generator.test.ts`). All three downloads were also live-verified
   in a real browser against a real MRI scenario (see the Do-list `ExportPanel.tsx`
   bullet above) — correctly MIME-typed, non-trivial-sized blobs, zero console errors.
-- **Not done this phase, tracked as open:** chart images (see the Do-list note above)
-  and `ISSUES.md` ISS-29 (the flat-billed/ramped-realized asymmetry this phase's own
-  monthly-series work surfaced, needing Jay's product decision, not an export-layer
-  fix).
+- **Not done this phase:** chart images (see the Do-list note above) remain deferred.
+  `ISSUES.md` ISS-29 (the flat-billed/ramped-realized asymmetry this phase's own
+  monthly-series work surfaced) was **resolved same-day** in a follow-up session —
+  Jay decided to ramp billed revenue to match realized; see `HANDOFF.md`'s 2026-07-14
+  "Phase 8 follow-up" change-log entry and `ISSUES.md`'s Resolved section.
 
 ---
 

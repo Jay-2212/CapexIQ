@@ -208,7 +208,7 @@ than duplicating it.
 | `eac.ts` | Equivalent Annual Cost |
 | `discountedPayback.ts` | Discounted payback period |
 | `actionableInsight.ts` | The automatic "cheapest win" tariff/timing suggestion engine |
-| `monthlySeries.ts` | **New, Phase 8** — month-by-month billed/realized revenue, costs, EMI/lease, and cash-received (extracted from `computeAssessment.ts`'s own internal logic, byte-identical refactor), feeding the Excel export's Monthly tab. Billed revenue is deliberately flat/unramped, matching the engine's existing (flagged, see `ISSUES.md` ISS-29) behavior. |
+| `monthlySeries.ts` | **New, Phase 8** — month-by-month billed/realized revenue, costs, EMI/lease, and cash-received (extracted from `computeAssessment.ts`'s own internal logic, byte-identical refactor), feeding the Excel export's Monthly tab. Billed revenue ramps by the same utilization curve as realized revenue (ISS-29, resolved 2026-07-14) — `computeAssessment.ts`'s own flat headline `monthlyBilledRevenue`/`roiBilled` are unaffected. |
 | `computeAssessment.ts` | **New, Phase 6.** The canonical wizard-inputs → full-result pipeline — the single derivation `app/forms/wizard-state.md` §4 requires; validated against `tests/scenarios/`'s golden numbers |
 | `workingCapitalPeak.ts` | **New, Phase 6.** Peak working-capital gap across a DSO-extended horizon (SPEC.md §14.2's dashboard-warning framing) |
 
@@ -326,11 +326,11 @@ remaining:
   Advanced settings pane (`discountRate`/`targetIrr`/`loanInterestRate` quick-tweak,
   wizard-state.md §1.2) — not built.
 - **Phase 8 — Exports. Built 2026-07-14.** `exports/*.ts` generate real Excel (live
-  embedded formulas, verified via a HyperFormula test oracle — SPEC.md §29.5), Word,
-  and ZIP files from the same `AssessmentInputs`/`AssessmentResult` the dashboard
-  renders. Chart images deferred (data tables stand in); see `ISSUES.md` ISS-29 for
-  one engine-level question this phase surfaced but didn't resolve (flat billed vs.
-  ramped realized revenue).
+  embedded formulas, verified via a HyperFormula test oracle plus an actual LibreOffice
+  headless recalculation — SPEC.md §29.5), Word, and ZIP files from the same
+  `AssessmentInputs`/`AssessmentResult` the dashboard renders. Chart images deferred
+  (data tables stand in). This phase also surfaced a flat-billed/ramped-realized
+  revenue asymmetry, resolved same-day per Jay's decision — see `ISSUES.md` ISS-29.
 - **Phase 9 — Scenario comparison / sensitivity UI, plus 3 pipeline gaps from Phase 6.**
   `formulas/sensitivity.ts` is implemented and tested; there's no UI surfacing it yet.
   `tests/scenarios/` holds golden end-to-end regression tests (2026-07-13), not the

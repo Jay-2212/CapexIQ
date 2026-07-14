@@ -208,6 +208,14 @@ describe("workbookPlan — golden scenario B (financed, ramped, multi-payer DSO)
     }
   });
 
+  it("Monthly sheet's Billed revenue column ramps the same way as Realized revenue (ISS-29)", () => {
+    const month1Billed = evaluated.get("Monthly", "C2") as number; // month 1, ramp 50%
+    const matureBilled = evaluated.get("Monthly", "C26") as number; // month 25, year 2+, ramp 100%
+    expect(month1Billed).toBeCloseTo(matureBilled * 0.5, 2);
+    expect(month1Billed).toBeCloseTo(monthly.monthlyBilledRevenue[0], 2);
+    expect(matureBilled).toBeCloseTo(monthly.monthlyBilledRevenue[24], 2);
+  });
+
   it("cash-received-total formula cells sum (across the full DSO-extended horizon) to total realized revenue — cash conservation, matching formulas/dso.ts", () => {
     const totalMonths = inputs.usefulLifeYears * 12;
     const monthlySheetRows = monthly.monthlyCashReceived.length;

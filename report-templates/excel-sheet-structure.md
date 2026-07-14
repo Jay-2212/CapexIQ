@@ -26,16 +26,17 @@ formulas divide by 100 explicitly, exactly matching every `/formulas` file's own
 convention. This avoids a second, Excel-only unit convention a formula author could
 silently get backwards.
 
-**Known engine-level asymmetry, surfaced here rather than papered over (found during
-Phase 8, 2026-07-13):** `formulas/computeAssessment.ts` ramps *realized* revenue and
-variable cost by `inputs.utilizationRamp` (Advanced Group B) but never ramps *billed*
-revenue (`monthlyBilledRevenue`/`roiBilled` are flat-rate, usage-per-day scaled
-figures with no ramp applied). The Monthly sheet below is faithful to this: its
-Billed Revenue column is flat every month; only Realized Revenue and Variable Cost
-vary month to month under a ramp. This may or may not be intentional product
-behavior — it's flagged to Jay as a question about the *engine*, not something the
-export layer silently "fixes" by inventing a ramped billed series that would then
-disagree with the dashboard's own `roiBilled`. See `ISSUES.md`.
+**Billed/realized ramp symmetry (ISS-29, resolved 2026-07-14):** Phase 8 originally
+surfaced an asymmetry where `formulas/computeAssessment.ts` ramped *realized* revenue
+and variable cost by `inputs.utilizationRamp` (Advanced Group B) but never ramped
+*billed* revenue. Jay's decision: ramp billed revenue too, reusing the same ramp
+curve — both figures are usagePerDay-driven and differ only in per-use rate, so a
+volume ramp affects both identically. The Monthly sheet's Billed Revenue column below
+now varies month to month under the ramp exactly like Realized Revenue and Variable
+Cost do. This is contained to `formulas/monthlySeries.ts`/this Excel export — the
+dashboard's headline `roiBilled`/`roiRealized`/`annualOperatingSurplus` in
+`computeAssessment.ts` already use flat, unramped annual figures for *both* revenue
+views and are unchanged by this fix. See `ISSUES.md`.
 
 ---
 
@@ -129,8 +130,8 @@ formulas instead of values). Columns, all formulas:
 |---|---|
 | Month # | `=ROW()-<header row>` |
 | Year # | `=ROUNDUP([Month #]/12,0)` |
-| Billed revenue | `=UsagePerDay*BilledPerUseWeighted*WorkingDaysPerMonth` — **flat**, no ramp (see the asymmetry note above) |
 | Ramp % | `=IF([Month #]<=3,RampMonth1to3Pct,IF([Month #]<=6,RampMonth4to6Pct,IF([Month #]<=12,RampMonth7to12Pct,RampYear2PlusPct)))/100` |
+| Billed revenue | `=UsagePerDay*BilledPerUseWeighted*WorkingDaysPerMonth*[Ramp %]` — ramped the same as Realized revenue (ISS-29) |
 | Realized revenue | `=UsagePerDay*RealizedPerUse*WorkingDaysPerMonth*[Ramp %]` |
 | Variable cost | `=UsagePerDay*VariableCostPerUse*WorkingDaysPerMonth*[Ramp %]` |
 | Fixed cost | `=FixedCostPerMonth` |

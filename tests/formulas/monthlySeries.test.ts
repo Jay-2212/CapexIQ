@@ -120,7 +120,7 @@ describe("buildMonthlySeries — financed (loan) scenario", () => {
   });
 });
 
-describe("buildMonthlySeries — utilization ramp is applied to realized revenue and variable cost, never to billed revenue", () => {
+describe("buildMonthlySeries — utilization ramp is applied to billed revenue, realized revenue, and variable cost alike (ISS-29)", () => {
   const inputs: AssessmentInputs = {
     purchaseCost: 1_000_000,
     installationCost: 0,
@@ -157,8 +157,14 @@ describe("buildMonthlySeries — utilization ramp is applied to realized revenue
     expect(monthly.monthlyVariableCost[0]).toBeCloseTo(matureVariable * 0.5, 4);
   });
 
-  it("does not ramp billed revenue — every month is identical regardless of ramp stage", () => {
-    const distinctValues = new Set(monthly.monthlyBilledRevenue.map((v) => v.toFixed(2)));
-    expect(distinctValues.size).toBe(1);
+  it("ramps month 1 billed revenue to 50% of mature, same curve as realized revenue", () => {
+    const matureBilled = monthly.monthlyBilledRevenue[24]; // year 3, fully ramped
+    expect(monthly.monthlyBilledRevenue[0]).toBeCloseTo(matureBilled * 0.5, 4);
+    expect(monthly.monthlyBilledRevenue[3]).toBeCloseTo(matureBilled * 0.75, 4); // months 4-6
+    expect(monthly.monthlyBilledRevenue[6]).toBeCloseTo(matureBilled * 0.9, 4); // months 7-12
+  });
+
+  it("computeAssessment's own (flat, unramped) monthlyBilledRevenue headline field is unaffected by the ramp — it already equals the mature, fully-ramped-up figure", () => {
+    expect(result.monthlyBilledRevenue).toBeCloseTo(monthly.monthlyBilledRevenue[24], 6);
   });
 });

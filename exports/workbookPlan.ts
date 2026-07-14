@@ -249,11 +249,14 @@ export function buildWorkbookPlan(
     if (monthNumber <= totalMonths) {
       const yearNumber = Math.ceil(monthNumber / 12);
       push(M, `${COL.year}${r}`, { value: yearNumber });
-      push(M, `${COL.billed}${r}`, {
-        formula: `${usagePerDayRef}*${billedPerUseWeightedRef}*${workingDaysRef}`,
-      });
       push(M, `${COL.ramp}${r}`, {
         formula: `IF(${COL.month}${r}<=3,${rampMonth1to3Ref},IF(${COL.month}${r}<=6,${rampMonth4to6Ref},IF(${COL.month}${r}<=12,${rampMonth7to12Ref},${rampYear2PlusRef})))/100`,
+      });
+      push(M, `${COL.billed}${r}`, {
+        // ISS-29 (Jay's decision, 2026-07-14): billed revenue ramps with the same
+        // utilization curve as realized revenue below — both are usagePerDay-driven,
+        // differing only in per-use rate, so a volume ramp affects both identically.
+        formula: `${usagePerDayRef}*${billedPerUseWeightedRef}*${workingDaysRef}*${COL.ramp}${r}`,
       });
       push(M, `${COL.realized}${r}`, {
         formula: `${usagePerDayRef}*${realizedPerUseRef}*${workingDaysRef}*${COL.ramp}${r}`,
@@ -413,7 +416,7 @@ export function buildWorkbookPlan(
   // --------------------------------------------------------------- Formula Notes ---
   const F = "Formula Notes";
   const notes: [string, string][] = [
-    ["Billed monthly revenue", "Usage per day x Average billed revenue per use x Working days per month"],
+    ["Billed monthly revenue", "Usage per day x Average billed revenue per use x Working days per month x Ramp % (same ramp as realized revenue)"],
     ["Realized revenue per use", "Volume-weighted average across payer types of (share % x tariff x realization %)"],
     ["Contribution per use", "Realized revenue per use - Variable cost per use"],
     ["Break-even usage per day", "Fixed monthly cost / Contribution per use / Working days per month"],

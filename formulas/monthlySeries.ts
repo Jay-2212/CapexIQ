@@ -8,13 +8,17 @@
 // calls, same arguments) rather than reimplementing any formula — no arithmetic here
 // has a second implementation anywhere else.
 //
-// **Billed revenue is deliberately flat, not ramped** — computeAssessment.ts's own
-// monthlyBilledRevenue/roiBilled never apply inputs.utilizationRamp to billed revenue
-// (only realized revenue and variable cost are ramped there). Ramping the monthly
-// billed series here would make its annual total disagree with the number the
-// dashboard/roiBilled actually shows — an asymmetry worth flagging to Jay at the
-// engine level (see report-templates/excel-sheet-structure.md's note), not something
-// this export-facing module gets to quietly "fix" by inventing a different series.
+// **Billed revenue is ramped the same way realized revenue is (Jay's decision,
+// 2026-07-14, ISS-29).** Both figures are usagePerDay-driven — they differ only in
+// which per-use rate is applied (gross tariff vs. realization-adjusted rate) — so a
+// utilization ramp that depresses actual procedure volume in early months depresses
+// both views identically; you can't bill for a procedure you didn't perform. This
+// reuses the existing utilizationFractionForMonth() curve (no new numbers invented)
+// and is contained entirely to this monthly series: computeAssessment.ts's headline
+// monthlyBilledRevenue/roiBilled fields are untouched and stay flat, exactly mirroring
+// how its headline monthlyRealizedRevenue/roiRealized/annualOperatingSurplus already
+// use the flat, unramped figures too — only the cash-flow-timing metrics (NPV/IRR/
+// discounted payback) and this monthly export series ever see the ramped numbers.
 
 import type { AssessmentInputs } from "./computeAssessment";
 import { billedMonthlyRevenue, monthlyRealizedRevenue } from "./revenue";
@@ -36,7 +40,8 @@ export function utilizationFractionForMonth(
 }
 
 export interface MonthlySeries {
-  /** Flat every month — computeAssessment.ts never ramps billed revenue either. */
+  /** Ramped by the same utilizationFractionForMonth() curve as realized revenue
+   *  (ISS-29, Jay's decision 2026-07-14) — flat only when there's no utilizationRamp. */
   monthlyBilledRevenue: number[];
   monthlyRealizedRevenue: number[];
   monthlyVariableCost: number[];
@@ -111,7 +116,9 @@ export function buildMonthlySeries(inputs: AssessmentInputs): MonthlySeries {
   const totalMonths = inputs.usefulLifeYears * 12;
   const ramp = inputs.utilizationRamp;
 
-  const monthlyBilledRevenue = Array.from({ length: totalMonths }, () => monthlyBilledFlat);
+  const monthlyBilledRevenue = Array.from({ length: totalMonths }, (_, monthIndex) =>
+    monthlyBilledFlat * utilizationFractionForMonth(ramp, monthIndex)
+  );
   const monthlyRealizedRevenue_ = Array.from({ length: totalMonths }, (_, monthIndex) =>
     monthlyRealizedFlat * utilizationFractionForMonth(ramp, monthIndex)
   );
