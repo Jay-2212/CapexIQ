@@ -4,6 +4,11 @@ import { irr } from "./irr";
 import { npv } from "./npv";
 import { monthlyRealizedRevenue } from "./revenue";
 import { paybackPeriodFromCashFlows, roi } from "./roi";
+import type { AssessmentInputs, AssessmentResult } from "./computeAssessment";
+import {
+  weightedAverageBilledTariff,
+  weightedAverageRealization,
+} from "./assessmentOverrides";
 
 export interface ScenarioAssumptions {
   usagePerDay: number;
@@ -80,5 +85,38 @@ export function runScenario(assumptions: ScenarioAssumptions): ScenarioResult {
     ),
     irr: scenarioIrr,
     annualNetCashFlows,
+  };
+}
+
+/** Derives a runScenario baseline from the canonical AssessmentInputs/AssessmentResult
+ *  pair — never invents its own assumptions, just reshapes already-computed canonical
+ *  values into ScenarioAssumptions' flatter shape. Used by both the continuous
+ *  sensitivity slider's tariff/payback context and the automatic actionable insight
+ *  (financial-model-spec.md §4), so the two features' "no tariff increase" baseline
+ *  agree with each other even though they're not compared against the dashboard's own
+ *  computeAssessment figures byte-for-byte (this simplified model has no utilization
+ *  ramp, per-year maintenance schedule, or payer-mix granularity — an accepted,
+ *  Jay-approved tradeoff for this passive/interactive-only surface, not a bug). */
+export function deriveScenarioAssumptions(
+  inputs: AssessmentInputs,
+  result: AssessmentResult
+): ScenarioAssumptions {
+  const annualRealizedRevenue = result.monthlyRealizedRevenue * 12;
+  const annualOperatingCost = annualRealizedRevenue - result.annualOperatingSurplus;
+  const annualFinancingCost = result.monthlyEmiOrLease
+    ? result.monthlyEmiOrLease * 12
+    : 0;
+
+  return {
+    usagePerDay: inputs.usagePerDay,
+    realizationPercentage: weightedAverageRealization(inputs),
+    financingType: inputs.financing.type,
+    billedTariffPerUse: weightedAverageBilledTariff(inputs),
+    workingDaysPerMonth: inputs.workingDaysPerMonth,
+    annualOperatingCost,
+    annualFinancingCost,
+    initialInvestment: result.initialInvestment,
+    discountRate: inputs.discountRate,
+    projectionYears: inputs.usefulLifeYears,
   };
 }

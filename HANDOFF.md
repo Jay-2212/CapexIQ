@@ -11,7 +11,8 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-07-14, Phase 8 exports built + verified, ISS-29 resolved, IRR
+*(Last updated: 2026-07-14, Phase 9 (scenario comparison / sensitivity / actionable
+insight) built + verified; Phase 8 exports built + verified, ISS-29 resolved, IRR
 spot-checked against real LibreOffice; Phase 7's chart-tooltip gap closed)*
 
 **The warm-beige "calm clinical intelligence" redesign and Phase 7's results dashboard
@@ -138,14 +139,73 @@ open item:**
   `npm run build` (confirmed via build output that exceljs/docx/jszip stay in lazy
   chunks — `/results` grew ~1KB, not the ~1MB+ eager-bundling would add).
 
-**Next:** a visual QA pass across the other equipment types and a Strong/Weak outcome
-(only MRI at Caution/Moderate has been live-tested) remains Phase 7's one open item.
-Phase 8's remaining fast-follow is chart images (now unblocked by LibreOffice being
-available, but not yet built). Phase 9 (sensitivity/scenario comparison) hasn't been
-started. A dedicated real-user copy pass and the Dark-Reader-free device QA pass noted
-above remain open. Do not return Advanced Mode to a six-group continuous scroll,
-expose internal field/formula identifiers in public UI, or fix the stale live-deploy
-issue without checking with Jay first (it may be intentional, e.g. mid-migration).
+**2026-07-14 (same day), separate session — Phase 9 (scenario comparison /
+sensitivity / actionable insight) built:**
+- **`app/components/ScenarioComparisonTable.tsx`** (SPEC.md §28): only the SPEC §28.1
+  *user-named* scenario option is implemented — no auto Conservative/Base/Optimistic
+  preset, since no researched or Jay-approved numeric definition of those terms exists
+  anywhere; inventing one would be exactly the unsourced product constant CLAUDE.md
+  reserves for Jay. The three names remain `<datalist>` suggestions only. Compares
+  Capex/billed tariff/usage-per-day overrides through the same `computeAssessment()`
+  everyone else uses (via new `formulas/assessmentOverrides.ts`), rendering every
+  SPEC §28.2 column. Ephemeral `useState`, not wizard state — lost on reload by design.
+- **`app/components/SensitivityStrip.tsx`** (the continuous, slider-driven view SPEC
+  §11.2/§27 name but never spec in detail): drags usage/day and realization %
+  (bounds from `content/inputs-metadata.json`) and shows a live NPV/IRR/payback strip.
+  Deliberately runs the full canonical `computeAssessment()`, **not** the lighter
+  `runScenario` `agent-build-plan.md`'s Phase 9 text originally pointed at — an Opus
+  advisor pass caught that `runScenario` has no utilization ramp/maintenance
+  schedule/payer-mix granularity, so at rest it would show different numbers than the
+  dashboard headline directly above it. Local-state only, never dispatched through
+  the wizard reducer (unlike `ResultsQuickSettings`), so it can never mutate the
+  user's real inputs.
+- **`app/components/ActionableInsightCard.tsx`** (financial-model-spec.md §4,
+  Jay-approved 2026-07-07): renders the passive price-increase suggestion or nothing.
+  **Found the underlying formula already built** — `formulas/actionableInsight.ts`
+  existed since a Phase 2/3-era session (commit `128a929`), fully implementing §4's
+  grid/gate/cheapest-win/null-case/rounding rules with its own passing tests, just
+  never wired to any UI. Reused as-is. This session's actual new formula work was
+  `formulas/sensitivity.ts`'s `deriveScenarioAssumptions()`, bridging the canonical
+  `AssessmentInputs`/`AssessmentResult` pair into the `ScenarioAssumptions` shape both
+  the strip and the insight card need, without inventing a baseline.
+- Live-verified in a real browser (`claude-in-chrome`, fresh MRI scenario, no Dark
+  Reader interference this time): sensitivity strip's resting NPV/IRR/payback matched
+  the dashboard headline exactly (₹8,17,36,626 / 52.4% / 1.9yr) — confirming the
+  `computeAssessment`-not-`runScenario` call; dragging usage to 49/day live-updated to
+  ₹22,84,48,931 / 116.3% / 0.9yr and Reset restored the baseline exactly; scenario
+  table added/edited (tariff ₹3,500→₹5,000 recomputed NPV/IRR/payback/every column
+  correctly)/renamed via the datalist/removed cleanly; mobile viewport (390×844)
+  checked, no overflow, controls stack correctly. No qualifying actionable insight
+  appeared for this particular scenario (already-fast 1.9yr payback) — correct,
+  expected `null`, not force-exercised further.
+- Verification: **265 tests** (up from 250 after `npm install` in a fresh worktree;
+  15 new — `assessmentOverrides`, `deriveScenarioAssumptions`,
+  `ActionableInsightCard`, `SensitivityStrip`, `ScenarioComparisonTable`), clean
+  `tsc --noEmit`, clean static-export `npm run build`.
+- **Chart images (Excel "Charts" tab, Word §8) remain deferred, not built this
+  session either** — Jay's own framing for this session ("Now unblocked by
+  LibreOffice being available, but not built this session; remains a fast-follow")
+  is accurate: LibreOffice is installed and was already used earlier the same day to
+  headlessly verify a real generated `.xlsx` (see this doc's Phase 8 entry above), so
+  the original blocker is gone, but building/verifying the actual chart images was
+  out of scope for this session, which was Phase 9. `report-templates/excel-sheet-
+  structure.md` Tab 6 and `word-report-template.md` §8 still carry the explicit
+  data-table-stands-in note. Next session can go straight to building and
+  LibreOffice-verifying it, no blocker to re-confirm first.
+
+**Next:** Phase 9 (sensitivity/scenario comparison/actionable insight) is now built —
+see this doc's entry above and `agent-build-plan.md`'s Phase 9 section. Two fast-follows
+remain open across Phases 7-8: a visual QA pass across the other equipment types and a
+Strong/Weak outcome (only MRI at Caution/Moderate, and this session's own fresh MRI
+Strong/100 run, have been live-tested — Weak/Caution on a non-MRI type is still
+untested), and chart images (Excel "Charts" tab, Word §8 — LibreOffice is available and
+already used once for formula verification, but the images themselves are still not
+built). Phase 10 (deploy/go-live QA) is next in the numbered sequence once those
+fast-follows are cleared or explicitly deferred further by Jay. A dedicated real-user
+copy pass and the Dark-Reader-free device QA pass noted above remain open. Do not return
+Advanced Mode to a six-group continuous scroll, expose internal field/formula
+identifiers in public UI, or fix the stale live-deploy issue without checking with Jay
+first (it may be intentional, e.g. mid-migration).
 
 ---
 
@@ -177,6 +237,53 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-07-14 — Phase 9 built: scenario comparison, sensitivity strip, actionable insight
+**What changed:** Jay asked to build Phase 9 and to carry forward the chart-images
+fast-follow note rather than build it this session.
+1. **`formulas/assessmentOverrides.ts` (new):** `applyAssessmentOverrides()` overrides
+   purchaseCost/usagePerDay/billedTariffPerUse/realizationPercentage on a canonical
+   `AssessmentInputs` (uniform across the payer mix for tariff/realization — neither
+   new UI exposes per-payer editing), plus `weightedAverageBilledTariff()`/
+   `weightedAverageRealization()` for baseline slider/table positions. Never a second
+   calculation path — every override still runs back through `computeAssessment()`.
+2. **`app/components/ScenarioComparisonTable.tsx` (new, SPEC.md §28):** only SPEC
+   §28.1's user-named scenario option is implemented, not an auto Conservative/Base/
+   Optimistic preset — no researched or Jay-approved numeric definition of those terms
+   exists, and inventing one would be exactly the unsourced product constant
+   CLAUDE.md's escalation rule reserves for Jay. Compares Capex/billed-tariff/usage
+   overrides, full SPEC §28.2 column set, ephemeral `useState`.
+3. **`app/components/SensitivityStrip.tsx` (new):** the continuous, slider-driven view
+   SPEC §11.2/§27 name but never spec in UI detail. An Opus advisor pass caught that
+   `agent-build-plan.md`'s Phase 9 text pointed at `runScenario` for this, which lacks
+   utilization ramp/maintenance-schedule/payer-mix granularity and would show numbers
+   diverging from the dashboard headline at rest — resolved toward the full canonical
+   `computeAssessment()` instead, honoring the same section's live-recalculation-
+   contract instruction. Local-state overrides only, never dispatched through the
+   wizard reducer.
+4. **`app/components/ActionableInsightCard.tsx` (new) + `formulas/sensitivity.ts`'s
+   `deriveScenarioAssumptions()` (new):** financial-model-spec.md §4's passive
+   price-increase suggestion. **Found `formulas/actionableInsight.ts` already fully
+   implemented** from a Phase 2/3-era session (commit `128a929`, predating this phase
+   by weeks) — its existing tests confirmed it matches §4's grid/gate/cheapest-win/
+   null-case/rounding rules exactly, so it was reused as-is rather than rewritten.
+   `deriveScenarioAssumptions()` bridges the canonical `AssessmentInputs`/
+   `AssessmentResult` pair into the `ScenarioAssumptions` shape both this card and the
+   sensitivity strip's tariff context need, without inventing a baseline.
+5. **Live-verified in a real browser** (fresh worktree, fresh MRI scenario, no Dark
+   Reader interference): sensitivity strip's resting NPV/IRR/payback matched the
+   dashboard headline exactly; dragging usage to 49/day live-recalculated correctly and
+   Reset restored the baseline; scenario table add/edit/rename-via-datalist/remove all
+   worked, every SPEC §28.2 column recomputed correctly on a tariff change; mobile
+   viewport (390×844) checked, no overflow. No qualifying actionable insight for this
+   particular (already-fast) scenario — correct `null` behavior.
+6. **Verification:** 265 tests (up from 250 after a fresh `npm install`), clean
+   `tsc --noEmit`, clean static-export `npm run build`.
+7. **Chart images (Excel "Charts" tab, Word §8) intentionally not built this
+   session** — Jay's own instruction was to carry the fast-follow note forward, not
+   build now. LibreOffice is available (installed the same day, used for Phase 8's IRR
+   spot-check above) so the original blocker is gone; building/verifying the images
+   themselves remains open for a future session.
 
 ### 2026-07-14 — Phase 8 follow-up: ISS-29 resolved, LibreOffice IRR spot-check
 **What changed:** Jay asked to resolve the two items Phase 8 left open (see the entry
@@ -262,118 +369,6 @@ export-panel CSS), `app/(assessment)/results/page.tsx`, `report-templates/
 `docx`, `jszip`, dev-only `hyperformula`), `tests/exports/*.test.ts` (new),
 `tests/formulas/monthlySeries.test.ts` (new), `tests/results/charts.test.tsx`
 (tooltip tests added), `agent-build-plan.md`, `ISSUES.md`, `DIRECTORY.md`.
-
-### 2026-07-13 — Phase 7 results dashboard built; reconciled two divergent uncommitted/merged design efforts first
-**What changed:** Jay asked for Phase 7 (results dashboard depth) plus a fix for a
-red-validation-before-touch bug he'd seen, following "the new design philosophy" —
-but the working tree's local `main` had a large uncommitted diff (the full warm-beige
-redesign: landing rebuild, hospital name, Lakh/Crore `CurrencyUnitField`, equipment
-imagery) that had never been committed, while `origin/main` was one commit ahead with
-an independently-authored, already-merged PR (#17, "Resolve ISS-24/ISS-25") that fixed
-the *same* validation-reveal bug and rebuilt Methodology, using different (and in the
-validation case, more robust — an exhaustive `STEP_FIELD_PATHS`-derived
-`stepForFieldPath` instead of a hand-listed one) code. These two lines of work touched
-11 of the same files and would have silently clobbered one or the other with a naive
-merge.
-1. **Reconciliation, not a coin flip:** stashed the uncommitted diff (`git stash push
-   -u`), entered a worktree from `origin/main` (so PR #17 was the base), applied the
-   stash with `git stash apply` (not `pop`, so the stash survived as a fallback), and
-   hand-resolved each of the 11 conflicted files individually — keeping
-   `origin/main`'s `ATTEMPT_STEP`/`stepForFieldPath`/Methodology-page implementations
-   (more robust, already tested, already shipped) while layering in the stash's actual
-   new scope (`hospitalName`, `currencyUnits`/`CurrencyUnit`, the beige landing
-   rebuild, `CurrencyUnitField.tsx`, equipment-image carry-forward motion) on top. The
-   stash's own duplicate `MARK_STEP_ATTEMPTED` action/dispatch sites were deleted in
-   favor of the surviving `ATTEMPT_STEP`. Confirmed byte-for-byte via `diff` that the
-   two independent validation-gating implementations were functionally identical
-   before choosing which to keep. 191 tests passed immediately after reconciliation,
-   before any Phase 7 code was written.
-2. **Phase 7 build** (`app/(assessment)/results/page.tsx` + four new presentational
-   components): break-even comparison bar and cumulative cash-flow bar chart (moved
-   into the pre-scaffolded `app/charts/` — see its README — rather than left in
-   `app/components/`, matching what `agent-build-plan.md`'s own Phase 7 goal line and
-   `SPEC.md` §27 already named that folder for), a sub-score-driven risk callout, and
-   a collapsed-by-default quick-settings panel (`app/components/ResultsQuickSettings.tsx`)
-   that is this phase's literal "Advanced settings pane" goal line — Discount Rate,
-   Target Hurdle IRR, and the active financing rate/rental, reusing `NumberField` so
-   edits dispatch through the one wizard reducer with no separate recompute wiring
-   (live-verified: dropping the discount rate from 12.5% to 8% moved the score from
-   45/"Caution" to 65/"Moderate" instantly). New pure formula `cumulativeCashFlowSeries`
-   in `formulas/roi.ts` (tested) — the chart never re-derives the series itself. New
-   `formatInrCompact` in `app/components/formatting.ts` (Lakh/Crore-compact axis
-   labels, tested) — this module's own header comment had flagged compact formatting
-   as "a Phase 7 concern," so this closes that instead of inventing an unrelated
-   pattern. `RiskCallout` reuses `investmentOutlookScore.ts`'s existing 55-point
-   "Moderate" band floor as its own flagging threshold rather than a new invented
-   cutoff. `design/dashboard-mockup.svg` was read for chart information architecture
-   only (per the Phase 7 design gate), never for its old white/slate styling.
-3. **One real bug found via live browser QA, not assumed away:** the cash-flow chart's
-   per-bar labels became illegible once tested against a realistic 13-year useful-life
-   scenario (the mockup only ever showed 6 years) — fixed by thinning labels to ~6
-   evenly-spaced ticks while still rendering every bar, full detail staying in the
-   chart's accessible `<table>`.
-4. **The red-validation-before-touch bug Jay asked to fix could not be reproduced**
-   anywhere after reconciliation — see Current State above for the full evidence
-   chain, including an extension-proof `data-invalid` DOM check. Also discovered
-   `capexiq.jaybharti.me` (the live deploy) is stale, serving the pre-Phase-6
-   scaffold — flagged for Jay, not fixed (out of scope, possibly intentional).
-5. **Dark Reader in the automation browser silently inverted every screenshot** taken
-   before this was noticed (confirmed via `data-darkreader-*` DOM attributes and
-   identical computed colors on two elements with different authored CSS variables).
-   Re-verified the actual palette and ran a real Phase 4-D contrast check using a
-   `<meta name="darkreader-lock">` injection (makes the extension release the page)
-   plus direct `getComputedStyle`/WCAG-ratio computation — found and fixed one real
-   contrast failure (chart year labels, 3.29:1 → 5.91:1 by switching
-   `--text-muted` to `--text-secondary`).
-**Verification:** 196 tests (191 immediately post-reconciliation + 5 new
-`RiskCallout` branch-coverage tests), `npx tsc --noEmit` clean, `npm run build`
-(static export) clean, manual browser QA at 1440px and 390px with Dark Reader locked
-for color accuracy, live WCAG contrast computation on every new chart/callout text
-element.
-6. **A `.next` build-cache trap, not a product bug:** running `npm run build`
-   (production) in the same directory as the already-running `npm run dev` server
-   corrupted the dev server's chunk cache — every `_next/static/chunks/*` request
-   started 503-ing, so the page kept rendering its last-good server HTML but React
-   never hydrated (clicks and typing silently did nothing, no console error). Traced
-   via `read_network_requests`, not assumed; fixed by killing the dev server, deleting
-   `.next`, and restarting. Worth remembering for any future session running both in
-   the same worktree.
-**Files touched:** `formulas/roi.ts` (`cumulativeCashFlowSeries`, new),
-`app/components/formatting.ts` (`formatInrCompact`, new),
-`app/charts/{BreakEvenBar,CashFlowChart}.tsx` (new), `app/charts/README.md`,
-`app/components/{RiskCallout,ResultsQuickSettings}.tsx` (new),
-`app/(assessment)/results/page.tsx`, `app/globals.css` (Phase 7 chart/callout/
-quick-settings CSS + one contrast fix), `tests/formulas/roi.test.ts`,
-`tests/wizard/formatting.test.ts` (new), `tests/results/{riskCallout.test.tsx,
-README.md}` (new); the full reconciliation touched
-`DIRECTORY.md`, `HANDOFF.md`, `ISSUES.md`, `agent-build-plan.md`,
-`app/(assessment)/assess/page.tsx`, `app/components/StepNav.tsx`, `app/forms/
-{useFieldController,wizardReducer,wizardTypes,wizardValidation}.ts`,
-`app/methodology/page.tsx`, `tests/wizard/components.test.tsx`, plus the stash's
-untouched-by-PR#17 files (landing rebuild, `CurrencyUnitField.tsx`, equipment/hospital
-profile motion, `content/inputs-metadata.json`, `design/ux-product-spec.md`,
-`public/README.md`, `vitest.config.ts`).
-
-### 2026-07-13 — Phase 7 handoff hardened against legacy-design drift
-**What changed:** Added a mandatory design gate directly to `agent-build-plan.md`
-Phase 7. Any agent must preserve the implemented warm-beige experience and extend the
-current Results foundation; `design/dashboard-mockup.svg` is explicitly limited to
-information architecture. Added desktop/mobile browser QA and public-copy requirements,
-forbade reviving the stopped Phase 7 worktree, and corrected DIRECTORY.md's stale
-description of the Results and Methodology foundations.
-
-### 2026-07-13 — Landing page hierarchy and responsive layout rebuilt
-**What changed:** Reworked `/` after a live visual pass found an oversized, heavily
-wrapped hero, cramped CTA/privacy details, excessive vertical dead space, and sections
-that did not feel like one system. Replaced the landing structure with a shorter
-decision-led hero, useful two-link CTA, browser/time notes, a compact model-coverage
-strip, three-step assessment story, clearer Basic/Advanced comparison, compact role
-cards, and a balanced final CTA. Moved all new landing-specific styling into
-`app/landing.css` and imported it from the root layout so assessment styling remains
-isolated. Manually verified desktop (1280px) and mobile (390px) in the in-app browser:
-no horizontal overflow, no runtime error overlay, and all landing content/assets
-rendered. Verified 31 test files / 175 tests, `npx tsc --noEmit`, and the static-export
-production build.
 
 
 See `handoff-archive/2026-Q3.md` for entries before 2026-07-13's Phase 7 results
