@@ -50,7 +50,8 @@ export function ExportPanel({
     setError(null);
     try {
       await run();
-    } catch {
+    } catch (err) {
+      console.error(`[ExportPanel] ${kind} export failed`, err);
       setError(`Could not generate the ${kind === "excel" ? "Excel model" : kind === "word" ? "Word proposal" : "ZIP package"}. Please try again.`);
     } finally {
       setPending(null);
