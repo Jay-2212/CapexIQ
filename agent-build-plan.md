@@ -636,12 +636,19 @@ live-recalculation behavior; Phase 4 is where that got decided).
       than literally re-deriving the 4-band Strong/Moderate/Caution/Weak palette per
       data point — the existing `results-hero[data-band]` coloring (untouched by this
       session) remains the one place the literal 4-band system applies.
-- [ ] Chart-level hover tooltips (a data point's exact value on hover) are a distinct,
+- [x] Chart-level hover tooltips (a data point's exact value on hover) are a distinct,
       simpler UI element from field-help tooltips (Phase 4-E's 7-slot structure) — don't
       conflate the two. A chart tooltip needs only value + series label + period.
-      **Not built 2026-07-13** — the cash-flow chart's accessible `<table>` and visible
-      per-bar labels cover the same values without hover, but a true hover tooltip is
-      still open.
+      **Built 2026-07-14** — `CashFlowChart`/`BreakEvenBar` bars are focusable/hoverable
+      marks showing a floating `.chart-tooltip` (exact `formatInr` value + series label
+      + period) on both mouse hover and keyboard focus, per `$dataviz`'s interaction
+      rules (mark is the hit target, same detail on focus as hover, values lead labels).
+      The existing accessible `<table>`/visible labels remain the non-hover path — the
+      tooltip enhances, never gates. Live-verified in a real browser (MRI scenario):
+      hovering the last cash-flow bar showed "₹16,80,50,000 / Year 13 · cumulative
+      position"; hovering the break-even fill/threshold showed "23.0 / day / Expected
+      usage" and "6.0 / day / Break-even threshold." 7 new tests in
+      `tests/results/charts.test.tsx`.
 - [x] Include an **Advanced settings pane** (accordion or drawer) allowing users to edit
       Discount Rate, Target Hurdle IRR, and Financing Interest Rate — using the same
       slider/recompute-trigger mechanism Phase 4-G defines, not a separately invented
@@ -702,9 +709,10 @@ equipment types (CT, Cath Lab, Dialysis, Ultrasound, Custom) remain untested liv
 at the unit level — `BreakEvenBar`'s unreachable-break-even branch and `CashFlowChart`
 on an all-negative (losing-investment) series are now both rendered and asserted on,
 which they weren't before — but a live-browser pass across equipment types and the
-Strong/Weak bands is still outstanding. Chart-level hover tooltips and that
-multi-equipment/multi-band visual QA pass are the two concrete items left for a
-follow-up session before Phase 7 can be called fully closed.
+Strong/Weak bands is still outstanding. **Chart-level hover tooltips were built
+2026-07-14** (see the Do-list bullet above); the multi-equipment/multi-band visual QA
+pass remains the one concrete item left for a follow-up session before Phase 7 can be
+called fully closed.
 
 ---
 
@@ -717,21 +725,130 @@ follow-up session before Phase 7 can be called fully closed.
 live-formula decision).
 **Parallelizable:** yes, alongside Phase 7.
 **Do:**
-- [ ] Write `report-templates/excel-sheet-structure.md` for real before writing
+- [x] Write `report-templates/excel-sheet-structure.md` for real before writing
       `excel-generator.ts` — it's currently a placeholder that just points back to
       SPEC.md §29. Define it tab-by-tab: which cells are user-editable inputs
       (Assumptions sheet) vs. which are live formulas (every other sheet), matching
       Phase 4-H's decision. Same "doc before code" pattern as Phase 5's
-      `wizard-state.md`.
-- [ ] Choose and wire up a formula-capable export library (e.g. `exceljs`) — per Phase
+      `wizard-state.md`. **Done 2026-07-14** — 7 tabs (Assumptions, Monthly, Annual
+      Summary, Break-even Analysis, Maintenance Schedule, Charts, Formula Notes),
+      direct-cell-address formulas (not Excel defined names — see the doc's own
+      rationale), and an explicit note on the flat-billed/ramped-realized asymmetry
+      (`ISSUES.md` ISS-29) rather than papering over it.
+- [x] Choose and wire up a formula-capable export library (e.g. `exceljs`) — per Phase
       4-H, a plain data-dump library isn't sufficient once formulas must be live and
-      embedded.
+      embedded. **Done 2026-07-14** — `exceljs` (Excel), `docx` (Word), `jszip` (ZIP),
+      all dynamically imported inside each download handler so the heavy libraries
+      never enter the initial page bundle (confirmed via `npm run build`: `/results`
+      grew ~1KB, not the ~1MB+ these libraries would add if bundled eagerly).
+- [x] **`formulas/monthlySeries.ts` (added 2026-07-14, prerequisite discovered mid-
+      phase):** `computeAssessment.ts` never returned a monthly breakdown, only annual
+      figures — SPEC.md §29.3's Excel model needs Monthly billed/realized revenue, cash
+      received, EMI, and net cash flow. Rather than reimplement that math a second time
+      inside the export layer, the existing inline ramp-fraction/monthly-array logic was
+      *extracted* from `computeAssessment.ts` into this new file (a byte-identical
+      refactor — all 203 pre-existing tests passed unchanged immediately after) and
+      extended with `monthlyCashReceived` (reusing `formulas/dso.ts`'s
+      `cashReceivedByMonth()`) and `monthlyEmiOrLease`. Billed revenue is deliberately
+      left flat/unramped, matching `computeAssessment.ts`'s own (surprising, now-
+      flagged) behavior — see `ISSUES.md` ISS-29.
+- [x] **`exports/workbookPlan.ts` (added 2026-07-14):** a pure, exceljs-independent
+      function producing every cell/formula as data, so the plan itself — not just the
+      shipped `.xlsx` — can be evaluated by a real formula engine in tests. Direct cell
+      references throughout (`Assumptions!$B$4`), not Excel defined names: a defined-
+      name resolution failure shows as a silent `#NAME?` across the workbook with
+      nothing in this headless pipeline able to catch it, whereas a direct reference
+      round-trips provably (see the DoD note below) and still lets Excel's own "trace
+      precedents" reach the Assumptions sheet.
+- [x] **`exports/excel-generator.ts`, `exports/word-generator.ts`,
+      `exports/zip-generator.ts` (added 2026-07-14):** thin writers consuming the plan
+      (Excel) or `AssessmentInputs`/`AssessmentResult`/`app/components/riskNotes.ts`
+      (Word, extracted from `RiskCallout.tsx` during this phase so both the dashboard
+      and the export share one risk-note derivation) directly — no formula or number is
+      ever re-derived in the export layer. `zip-generator.ts` bundles
+      `Financial Model.xlsx` + `Proposal Report.docx` per SPEC.md §29.2 (no
+      `Assumptions Summary.pdf` — SPEC marks that "optional later").
+- [x] **`app/components/ExportPanel.tsx` (added 2026-07-14):** the three SPEC.md
+      §29.1 buttons ("Download Excel Model" / "Download Word Proposal" / "Download ZIP
+      Package") on the Results page, each lazy-loading its generator on click and
+      triggering a browser download via `Blob`/anchor. Live-verified in a real browser
+      (MRI scenario, `Apex Test Hospital`): all three downloads produced correctly
+      MIME-typed, non-trivial-sized blobs (39KB xlsx / 11KB docx / 51KB zip) with zero
+      console errors.
+- [ ] **Chart images (Excel "Charts" tab, Word §8) — deferred, not built this phase.**
+      Scoped out 2026-07-14 alongside the harder live-formula requirement, which is the
+      phase's actual DoD; no headless Excel/LibreOffice is available in this
+      environment to verify a rasterized image round-trips correctly, so an
+      unverifiable image felt like the wrong tradeoff against the formula-correctness
+      work. Both `report-templates/excel-sheet-structure.md` Tab 6 and
+      `word-report-template.md` §8 carry this as an explicit note (a data table stands
+      in for now), not a silent gap. Flagged as a fast-follow.
 **Definition of Done:** an exported Excel file, opened in Excel/Sheets, shows real
 formulas (not pasted values) in every downstream cell, each one traceable back to the
 Assumptions sheet — verify this by actually opening the file and clicking cells, not by
 checking the numbers match. The Word/ZIP export must reflect the exact same numbers
 shown on the dashboard for the same inputs — verify this explicitly, side by side, not
 just "it exports without an error."
+
+**Status 2026-07-14 — the letter of "open in Excel and click cells" is honestly
+unmet; the substance of what that check is *for* is met by a different, verified
+route, documented here rather than let the two be confused:**
+- No Excel or LibreOffice is installed in this headless environment, so a literal
+  "open the file" pass could not happen. Asserting a formula *string* is present
+  (`cell.formula` round-trips through a real `exceljs` write/read —
+  `tests/exports/excel-generator.test.ts`, 4 tests) proves live formulas shipped, but
+  — flagged directly by an advisor review before this was built — does **not** prove
+  those formulas *evaluate to the right number*, which is the actual failure mode
+  this DoD clause exists to catch (a wrong cell reference is a plausible-but-wrong
+  formula string that a presence check passes clean).
+- The real oracle: `tests/exports/workbookPlan.test.ts` feeds the exact cell plan
+  `exports/excel-generator.ts` writes into **HyperFormula** (a real, independent
+  formula-evaluation engine — not a second implementation of `/formulas`'s math) and
+  asserts every formula cell's *evaluated result* — NPV, IRR, break-even usage/day,
+  every monthly and annual net-cash-flow cell, cumulative cash position, cash-received
+  totals — matches `computeAssessment()`/`buildMonthlySeries()`'s own numbers, across
+  **four** structurally different golden scenarios (simple cash purchase; financed +
+  ramped + multi-payer DSO; a per-year maintenance override, ISS-19; lease financing,
+  ISS-18's tenure-cutoff semantics). 23 tests, all passing. This oracle caught three
+  real bugs before they shipped: an unquoted space-containing sheet-name reference
+  (`#ERROR!` on every Break-even Analysis formula); a missing upper-bound guard on the
+  DSO cash-received `INDEX()` lookup (`#NUM!` on every "tail" row past the useful-life
+  horizon for a short-collection-delay payer); and — caught by an advisor review
+  specifically because neither of the first two golden scenarios exercised it — the
+  Excel model's maintenance-cost formulas silently ignoring `costByYearPct`, a real,
+  UI-reachable Advanced-mode override (`app/advanced/MaintenanceScheduleFields.tsx`)
+  that `computeAssessment.ts`/`monthlySeries.ts` both apply. That third one would have
+  meant the Excel export's headline NPV/IRR quietly disagreed with the dashboard for
+  any user who sets a per-year override — fixed by adding a "Maintenance overrides"
+  block to the Assumptions sheet and checking it first in both the Monthly and
+  Maintenance Schedule tabs' formulas (see `excel-sheet-structure.md`'s corrected Tab
+  1/2/5 notes). All three are exactly the class of formula-transcription bug a
+  presence-only check would have shipped silently.
+- **Recommendation for whoever next has GUI Excel or LibreOffice available:** open one
+  generated `Financial Model.xlsx`, click through a handful of downstream cells, and
+  confirm Excel's own precedent-tracing/recalculation agrees. That single manual pass
+  is the one piece of verification this session could not perform itself, and it's the
+  only thing standing between "very likely correct" and "confirmed correct." **Point
+  that check at the IRR cell specifically** — Excel's `IRR()` is guess-seeded and can
+  return `#NUM!` in cases where HyperFormula's own solver still converges (this
+  project's numbers run 66-80% IRR, an unusually high range), so it's the single
+  highest real-Excel-vs-HyperFormula divergence risk in this workbook. NPV/PMT/
+  SUMPRODUCT/INDEX/CEILING/ROUNDUP are far more likely to already agree.
+- Word/ZIP: verified by construction (every number comes from the same
+  `AssessmentInputs`/`AssessmentResult` object the Results page renders — never
+  re-derived — see `exports/word-generator.ts`'s header comment) and by 6 tests
+  (`tests/exports/word-generator.test.ts`) that unzip the generated `.docx` and check
+  `word/document.xml` directly for the exact NPV/IRR/payback figures
+  `computeAssessment()` produced, plus the verbatim disclaimer text. `zip-generator.ts`
+  verified by unzipping and checking both files round-trip byte-for-byte
+  (`tests/exports/zip-generator.test.ts`). All three downloads were also live-verified
+  in a real browser against a real MRI scenario (see the Do-list `ExportPanel.tsx`
+  bullet above) — correctly MIME-typed, non-trivial-sized blobs, zero console errors.
+- **Not done this phase:** chart images (see the Do-list note above) remain deferred.
+  `ISSUES.md` ISS-29 (the flat-billed/ramped-realized asymmetry this phase's own
+  monthly-series work surfaced) was **resolved same-day** in a follow-up session —
+  Jay decided to ramp billed revenue to match realized; see `HANDOFF.md`'s 2026-07-14
+  "Phase 8 follow-up" change-log entry and `ISSUES.md`'s Resolved section.
 
 ---
 

@@ -1264,23 +1264,40 @@ a { color: var(--accent-interactive); }
 .results-chart-card__heading h2 { margin:4px 0 0; font-size:17px; letter-spacing:-.01em; }
 
 .break-even-bar__track { position:relative; height:14px; border-radius:999px; background:var(--bg-tertiary); overflow:visible; }
-.break-even-bar__fill { height:100%; border-radius:999px; background:var(--accent-interactive); transition:width 300ms ease-out; }
+.break-even-bar__fill { height:100%; border-radius:999px; background:var(--accent-interactive); transition:width 300ms ease-out; cursor:pointer; }
+.break-even-bar__fill:hover, .break-even-bar__fill:focus-visible { filter:brightness(1.15); outline:none; }
 .break-even-bar[data-clears="false"] .break-even-bar__fill { background:var(--status-caution); }
-.break-even-bar__threshold { position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--text-primary); }
+.break-even-bar__threshold { position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--text-primary); cursor:pointer; }
 .break-even-bar__threshold::after { content:""; position:absolute; top:-4px; left:50%; transform:translateX(-50%); width:8px; height:8px; border-radius:50%; background:var(--text-primary); }
+.break-even-bar__threshold:focus-visible { outline:2px solid var(--accent-interactive); outline-offset:3px; }
 .break-even-bar__legend { display:flex; justify-content:space-between; gap:12px; margin-top:14px; font-size:13px; color:var(--text-secondary); }
 .break-even-bar__legend strong { font-family:var(--font-mono); color:var(--text-primary); }
 .break-even-bar--unreachable { padding:8px 0; }
 .break-even-bar--unreachable p { margin:0; color:var(--status-risk); font-size:14px; line-height:1.5; }
 
+.cash-flow-chart__plot-wrap { position:relative; }
 .cash-flow-chart__plot { display:block; width:100%; height:180px; overflow:visible; }
 .cash-flow-chart__zero-line { stroke:var(--border-default); stroke-width:0.5; vector-effect:non-scaling-stroke; }
 .cash-flow-chart__bar--positive { fill:var(--status-strong); }
 .cash-flow-chart__bar--negative { fill:var(--status-risk); }
+.cash-flow-chart__bar--positive,
+.cash-flow-chart__bar--negative { cursor:pointer; transition:filter 120ms ease-out; }
+.cash-flow-chart__bar--positive:hover, .cash-flow-chart__bar--positive:focus-visible,
+.cash-flow-chart__bar--negative:hover, .cash-flow-chart__bar--negative:focus-visible { filter:brightness(1.18); outline:none; }
 .cash-flow-chart__labels { display:grid; grid-template-columns:repeat(auto-fit, minmax(0, 1fr)); gap:6px; margin-top:12px; }
 .cash-flow-chart__label { display:flex; flex-direction:column; align-items:center; gap:3px; text-align:center; }
 .cash-flow-chart__label span { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-secondary); }
 .cash-flow-chart__label strong { font-family:var(--font-mono); font-size:11px; font-weight:600; color:var(--text-primary); }
+
+/* Chart-level hover/focus tooltip — distinct from the 7-slot wizard-field tooltip
+   (agent-build-plan.md Phase 7 leftover item): value + series + period only, shown
+   on hover and on keyboard focus alike, never gating a value only reachable this way
+   (the accessible <table> beside each chart already covers that). */
+.chart-tooltip { position:absolute; z-index:5; max-width:min(220px, 90vw); transform:translate(-50%, calc(-100% - 10px)); pointer-events:none; padding:8px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--text-primary); color:#fff; box-shadow:var(--shadow-modal); white-space:nowrap; opacity:0; transition:opacity 120ms ease-out; }
+.chart-tooltip[data-visible="true"] { opacity:1; }
+.chart-tooltip strong { display:block; font-family:var(--font-mono); font-size:13px; line-height:1.3; }
+.chart-tooltip span { display:block; margin-top:2px; font-size:11px; color:rgba(255,255,255,.72); }
+@media (prefers-reduced-motion:reduce) { .chart-tooltip { transition:none; } }
 
 .risk-callout { display:flex; gap:16px; margin-top:16px; padding:28px 30px; border-radius:22px; background:var(--status-caution-bg); border:1px solid #f0dcb4; }
 .risk-callout > svg { flex-shrink:0; margin-top:2px; color:var(--status-caution); }
@@ -1297,6 +1314,17 @@ a { color: var(--accent-interactive); }
 .results-quick-settings__fields { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:18px; }
 .results-quick-settings__fields .field-shell { margin:0; }
 .results-quick-settings__note { grid-column:1/-1; margin:0; color:var(--text-secondary); font-size:13px; }
+
+/* Phase 8 — export panel */
+.export-panel { margin-top:16px; padding:24px 26px; border:1px solid var(--border-subtle); border-radius:18px; background:rgba(255,253,247,.6); }
+.export-panel h2 { margin:6px 0 8px; font-size:17px; letter-spacing:-.01em; }
+.export-panel p { margin:0 0 16px; color:var(--text-secondary); font-size:13.5px; }
+.export-panel__actions { display:flex; flex-wrap:wrap; gap:10px; }
+.export-panel__actions .button { display:inline-flex; align-items:center; gap:8px; font-size:13.5px; }
+.export-panel__spinner { animation:export-spin 900ms linear infinite; }
+.export-panel__error { margin:12px 0 0; color:var(--status-risk); font-size:13px; }
+@keyframes export-spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion:reduce) { .export-panel__spinner { animation:none; } }
 
 .results-disclaimer { margin:18px 2px 0; font-size:11px; color:var(--text-muted); }
 

@@ -175,6 +175,29 @@ is a placeholder only, safe to replace once real product screenshots exist.
 
 ## Resolved
 
+### ISS-29 — `computeAssessment.ts` ramped realized revenue and variable cost by `utilizationRamp` but never ramped billed revenue
+**Resolved:** 2026-07-14. Surfaced during Phase 8's Excel export monthly-breakdown work
+(`formulas/monthlySeries.ts`): realized revenue/variable cost ramped month to month
+under Advanced Group B's utilization ramp, but billed revenue was a flat, unramped
+scalar — a monthly Billed Revenue column that never moved next to a Realized Revenue
+column that visibly did, in the same workbook. Jay's decision, after an advisor pass
+weighing three options (ramp billed to match realized; ramp everywhere including the
+dashboard headline ROI figures; leave flat and just document it): **ramp billed
+revenue the same way realized revenue already is.** Both figures are usagePerDay-
+driven, differing only in per-use rate, so a volume ramp affects both identically —
+you can't bill for a procedure you didn't perform. Fixed in `formulas/monthlySeries.ts`
+(`monthlyBilledRevenue` now applies the same `utilizationFractionForMonth()` curve) and
+`exports/workbookPlan.ts`'s Monthly-sheet Billed Revenue formula; reuses the existing
+ramp fractions, no new numbers invented. Deliberately **not** touched:
+`computeAssessment.ts`'s headline `monthlyBilledRevenue`/`roiBilled` fields stay flat,
+exactly mirroring how `monthlyRealizedRevenue`/`roiRealized`/`annualOperatingSurplus`
+already use flat, unramped annual figures too — those headline dashboard numbers are
+unaffected. Verified: `tests/formulas/monthlySeries.test.ts` now asserts billed revenue
+ramps identically to realized revenue; a HyperFormula-oracle spot-check plus (this
+session) an actual LibreOffice headless recalculation of the Excel workbook both
+confirmed the IRR cell to ~13 significant digits against `computeAssessment()`'s own
+IRR, independent of this fix.
+
 ### Phase 7 build + reconciliation of two divergent design efforts
 **Resolved:** 2026-07-13. Jay's local `main` checkout had a large uncommitted diff (the
 full warm-beige redesign) while `origin/main` was one commit ahead with an

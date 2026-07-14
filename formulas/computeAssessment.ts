@@ -26,6 +26,7 @@ import {
   InvestmentOutlookResult,
 } from "./investmentOutlookScore";
 import { peakWorkingCapitalGap } from "./workingCapitalPeak";
+import { utilizationFractionForMonth } from "./monthlySeries";
 
 export interface AssessmentPayer {
   payerName: string;
@@ -208,21 +209,12 @@ export function computeAssessment(
   // per-year cash flows below and the existing monthly working-capital calc share one
   // source of truth. Without inputs.utilizationRamp, every fraction is 1 and every
   // consumer below is byte-for-byte identical to the pre-ramp flat computation.
-  const utilizationFractionForMonth = (monthIndex: number): number => {
-    const ramp = inputs.utilizationRamp;
-    if (!ramp) return 1;
-    const monthNumber = monthIndex + 1;
-    if (monthNumber <= 3) return ramp.month1to3Pct / 100;
-    if (monthNumber <= 6) return ramp.month4to6Pct / 100;
-    if (monthNumber <= 12) return ramp.month7to12Pct / 100;
-    return ramp.year2PlusPct / 100;
-  };
   const totalMonths = inputs.usefulLifeYears * 12;
   const monthlyRealizedSeries = Array.from({ length: totalMonths }, (_, monthIndex) =>
-    monthlyRealized * utilizationFractionForMonth(monthIndex)
+    monthlyRealized * utilizationFractionForMonth(inputs.utilizationRamp, monthIndex)
   );
   const monthlyVariableCostSeries = Array.from({ length: totalMonths }, (_, monthIndex) =>
-    (annualVariableCost / 12) * utilizationFractionForMonth(monthIndex)
+    (annualVariableCost / 12) * utilizationFractionForMonth(inputs.utilizationRamp, monthIndex)
   );
   const sumMonthsInYear = (series: number[], yearIndex: number) =>
     series
