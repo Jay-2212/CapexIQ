@@ -33,7 +33,7 @@ export function CurrencyUnitField({
       isTypical={controller.isTypical}
       error={controller.error}
       tooltipKey={controller.tooltipKey}
-      renderControl={({ id, describedBy }) => (
+      renderControl={({ id, describedBy, required }) => (
         <div className="currency-unit-field">
           <span className="currency-unit-field__symbol" aria-hidden="true">₹</span>
           <input
@@ -46,6 +46,7 @@ export function CurrencyUnitField({
             inputMode="decimal"
             aria-describedby={describedBy || undefined}
             aria-invalid={controller.error !== null}
+            aria-required={required}
             onChange={(event) => {
               const raw = event.target.value;
               if (raw === "") return controller.setValue(null);

@@ -26,7 +26,7 @@ export function FieldShell({
   tooltipKey: string | null;
   unit?: string;
   children?: ReactNode;
-  renderControl: (props: { id: string; describedBy: string }) => ReactNode;
+  renderControl: (props: { id: string; describedBy: string; required: boolean }) => ReactNode;
 }) {
   // The dotted field path IS the DOM id — StepNav's disabled-"Next" focus behavior
   // (audit F7) looks fields up by this exact path, so it must be predictable rather
@@ -45,7 +45,7 @@ export function FieldShell({
         </label>
         {isTypical && <span className="field-shell__typical-tag">Typical</span>}
       </div>
-      {renderControl({ id: fieldId, describedBy })}
+      {renderControl({ id: fieldId, describedBy, required })}
       {children}
       {error && (
         <p id={errorId} role="alert" className="field-shell__error">

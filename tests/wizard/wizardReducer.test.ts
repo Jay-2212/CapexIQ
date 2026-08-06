@@ -134,7 +134,7 @@ describe("TOGGLE_ADVANCED", () => {
 
 describe("idempotent step submission (wizard-state.md §9)", () => {
   it("a second BEGIN_TRANSITION while one is already in flight is a no-op", () => {
-    let state = wizardReducer(emptyWizardState(), { type: "BEGIN_TRANSITION" });
+    const state = wizardReducer(emptyWizardState(), { type: "BEGIN_TRANSITION" });
     expect(state.transitionInFlight).toBe(true);
     const afterSecond = wizardReducer(state, { type: "BEGIN_TRANSITION" });
     expect(afterSecond).toBe(state); // same reference — proven no-op, not just equal value

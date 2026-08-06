@@ -105,6 +105,35 @@ describe("generateWordProposal", () => {
       generateWordProposal(inputs, result, { hospitalName: "Test Hospital", equipmentCategory: "MRI" })
     ).resolves.toBeInstanceOf(Uint8Array);
   });
+
+  it("flags the mature-utilization gap between headline ROI/revenue and ramp-aware NPV/IRR when a ramp is set", async () => {
+    const rampedInputs: AssessmentInputs = {
+      ...inputs,
+      utilizationRamp: { month1to3Pct: 40, month4to6Pct: 70, month7to12Pct: 90, year2PlusPct: 100 },
+    };
+    const result = computeAssessment(rampedInputs);
+    const buffer = await generateWordProposal(rampedInputs, result, {
+      hospitalName: "Test Hospital",
+      equipmentCategory: "MRI",
+    });
+    const xml = await extractDocumentXml(buffer);
+    // §5's "at mature utilization" phrasing is unconditional (present even without a
+    // ramp — see the next test), so asserting on it alone wouldn't actually cover the
+    // conditional §4 note; assert on §4's own distinct wording instead so this test
+    // fails if that conditional block is ever accidentally removed.
+    expect(xml).toMatch(/ROI figures above reflect mature/i);
+  });
+
+  it("says nothing about a utilization ramp when none was entered (no misleading note on a flat scenario)", async () => {
+    const result = computeAssessment(inputs);
+    const buffer = await generateWordProposal(inputs, result, {
+      hospitalName: "Test Hospital",
+      equipmentCategory: "MRI",
+    });
+    const xml = await extractDocumentXml(buffer);
+    expect(xml).not.toMatch(/ramp-up period entered for this assessment/i);
+    expect(xml).not.toMatch(/ROI figures above reflect mature/i);
+  });
 });
 
 function escapeXmlEntities(text: string): string {

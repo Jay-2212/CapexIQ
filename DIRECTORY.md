@@ -40,6 +40,12 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 ├── data-requirements.md          research brief + five completed research passes on
 │                                 real Indian healthcare-equipment data, see below
 ├── AGENTS.md                    <- thin pointer to INTRODUCTION.md (auto-discovered filename)
+├── .github/workflows/ci.yml     <- install/typecheck/lint/test/build/`git diff --check`
+│                                  on every push+PR to main (added 2026-08-06 — no CI
+│                                  existed before)
+├── eslint.config.mjs            <- flat ESLint config (next/core-web-vitals +
+│                                  next/typescript); `npm run lint` runs `eslint .`
+│                                  (added 2026-08-06 — see ISSUES.md ISS-32)
 ├── package.json / tsconfig.json / next.config.ts / .gitignore   <- Next.js + TS scaffold
 ├── .claude/skills/capexiq-ui-assurance/ <- project-local technical UI/UX audit
 │                                              skill for Claude Code; preserves the
@@ -119,13 +125,17 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │   ├── zip-generator.ts           bundles both via jszip
 │   └── README.md
 ├── tests/
-│   ├── formulas/                  19 files (17 from Phase 2 + 2 new canonical-pipeline
-│   │   │                          test files from Phase 6)
+│   ├── formulas/                  24 test files (see its own README.md for the current
+│   │   │                          count and per-phase history — don't trust a number
+│   │   │                          written here, it drifts)
 │   │   └── README.md
 │   ├── scenarios/                 5 golden end-to-end scenario files — independently-
 │   │                               derived regression coverage (2026-07-13,
 │   │                               capexiq-prebuild-assurance PBA-10), distinct from
 │   │                               Phase 9's scenario-comparison UI
+│   │   └── derivations/            standalone, no-import-from-/formulas re-derivation
+│   │                               scripts backing two of the five scenarios above
+│   │                               (added 2026-08-06, see its own README.md)
 │   └── wizard/                    reducer/validation/persistence/component tests for
 │                                   app/forms/ (Phase 6) — see its own README.md
 ├── equipment-images/             9 equipment/hero photos (JPG, hi-res, free stock)

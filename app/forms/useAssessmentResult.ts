@@ -24,7 +24,6 @@ export function useAssessmentResult(state: WizardState): AssessmentResultState {
   const freshResult = useMemo(() => {
     if (!fresh) return null;
     return computeAssessment(toAssessmentInputs(state));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fresh, state]);
 
   if (freshResult) {

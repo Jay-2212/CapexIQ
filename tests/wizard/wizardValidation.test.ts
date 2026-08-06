@@ -132,7 +132,7 @@ describe("isStepComplete / firstInvalidFieldOnStep", () => {
   });
 
   it("MRI's null billedTariffPerUse default correctly blocks Step 2 until hand-filled", () => {
-    let state = wizardReducer(emptyWizardState(), {
+    const state = wizardReducer(emptyWizardState(), {
       type: "SELECT_EQUIPMENT_CATEGORY",
       category: "MRI",
     });

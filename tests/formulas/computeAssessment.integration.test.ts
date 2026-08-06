@@ -43,7 +43,7 @@ describe("smoke: full wizard state -> pipeline", () => {
   });
 
   it("Custom equipment (zero benchmark data) still gates correctly and never throws", () => {
-    let state = wizardReducer(emptyWizardState(), { type: "SELECT_EQUIPMENT_CATEGORY", category: "Custom" });
+    const state = wizardReducer(emptyWizardState(), { type: "SELECT_EQUIPMENT_CATEGORY", category: "Custom" });
     expect(state.basic.purchaseCost).toBeNull();
     expect(isStepComplete("investment", state)).toBe(false);
   });

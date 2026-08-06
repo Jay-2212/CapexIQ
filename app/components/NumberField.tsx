@@ -16,7 +16,7 @@ export function NumberField({ path }: { path: string }) {
       error={field.error}
       tooltipKey={field.tooltipKey}
       unit={def.unit}
-      renderControl={({ id, describedBy }) => (
+      renderControl={({ id, describedBy, required }) => (
         <input
           id={id}
           type="number"
@@ -27,6 +27,7 @@ export function NumberField({ path }: { path: string }) {
           step={def.decimalPlaces ? 1 / 10 ** def.decimalPlaces : 1}
           aria-describedby={describedBy || undefined}
           aria-invalid={field.error !== null}
+          aria-required={required}
           onChange={(event) => {
             const raw = event.target.value;
             field.setValue(raw === "" ? null : Number(raw));

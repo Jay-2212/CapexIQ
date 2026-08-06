@@ -3,7 +3,8 @@
 // (1 year, per content/inputs-metadata.json's usefulLifeYears min:1), plus a
 // standalone negative-contribution-margin edge case (capexiq-prebuild-assurance
 // PBA-10). Expected values independently derived via a standalone Python script — see
-// /Users/jay/.claude/jobs/d6da810d/tmp/scenario_c.py.
+// tests/scenarios/derivations/scenario-c-derivation.py (no import from /formulas;
+// run it directly to reproduce every expected value below).
 //
 //   purchaseCost = INR 50,00,000, installationCost = INR 5,00,000
 //   usagePerDay = 2 (far below break-even), billedTariffPerUse = INR 1,000, realization 90%

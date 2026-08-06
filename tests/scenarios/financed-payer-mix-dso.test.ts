@@ -2,9 +2,13 @@
 // DSO, exercising the working-capital-gap / DSO-extended-array contract
 // (capexiq-prebuild-assurance PBA-3) and the three distinct ROI views (PBA-11).
 //
-// Expected values independently derived via a standalone Python script re-implementing
-// EMI/NPV/IRR/DSO cash-conservation from first principles, NOT from /formulas — see
-// /Users/jay/.claude/jobs/d6da810d/tmp/scenario_b.py for the full derivation.
+// Expected values are hand-derived — each `it()` below shows the exact arithmetic
+// inline (e.g. realizedPerUse = 0.5*6000 + 0.3*6000*0.85 + 0.2*4500*0.9 = 5,340) rather
+// than importing a black-box result, so the derivation is checkable directly from this
+// file. (An earlier version of this comment referenced an external Python script at a
+// local, non-repo path that no longer exists — removed rather than left dangling; see
+// tests/scenarios/derivations/README.md and scenario-a/-c-derivation.py for the fuller
+// standalone-script pattern used on two other golden scenarios.)
 //
 //   purchaseCost = INR 3,00,00,000, installationCost = INR 30,00,000 (MRI-like)
 //   Loan: 20% down payment, 11.5% p.a., 60-month tenure

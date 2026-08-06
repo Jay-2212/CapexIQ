@@ -15,7 +15,7 @@ export function TextField({ path }: { path: string }) {
       isTypical={field.isTypical}
       error={field.error}
       tooltipKey={field.tooltipKey}
-      renderControl={({ id, describedBy }) => (
+      renderControl={({ id, describedBy, required }) => (
         <input
           id={id}
           type="text"
@@ -24,6 +24,7 @@ export function TextField({ path }: { path: string }) {
           maxLength={def.maxLength}
           aria-describedby={describedBy || undefined}
           aria-invalid={field.error !== null}
+          aria-required={required}
           onChange={(event) => field.setValue(event.target.value)}
         />
       )}

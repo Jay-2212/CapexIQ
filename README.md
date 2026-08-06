@@ -96,19 +96,69 @@ npm ci
 npm run dev
 ```
 
-Useful checks:
+Useful checks — this is also the full local release-validation sequence
+(mirrored in `.github/workflows/ci.yml`, which runs on every push/PR to `main`):
 
 ```bash
-npm test
+npm ci
 npx tsc --noEmit
+npm run lint
+npm test
 npm run build
 git diff --check
 ```
 
 `npm run build` creates the static export configured by `next.config.ts`. The
-repository's `lint` script currently calls `next lint`; check the installed
-Next.js version before relying on it because that command has changed across
-Next.js releases.
+`lint` script runs `eslint .` against a flat `eslint.config.mjs`
+(`next/core-web-vitals` + `next/typescript`) — before this was added, the repo
+had no committed ESLint config and `next lint` fell back to an interactive
+setup prompt that could not run non-interactively or in CI (see `ISSUES.md`
+ISS-32).
+
+## Testing methodology
+
+- **Formula tests** (`tests/formulas/*.test.ts`): one file per `/formulas`
+  module. Most combine a clean round-number case, a realistic messy-number
+  case, and at least one edge case (zero, negative, or a boundary value) per
+  `CONVENTIONS.md` §5.
+- **Independent fixtures** (`tests/scenarios/`): five golden end-to-end
+  scenarios (simple cash purchase, financed + payer mix + DSO, non-viable/
+  minimum-horizon, Investment Outlook band boundaries, Custom equipment with
+  zero benchmark data) whose *expected values* were derived independently of
+  the TypeScript implementation, not copied from a run of the code under
+  test. Two of them (`simple-cash-purchase.test.ts`,
+  `non-viable-and-edge-cases.test.ts`) are backed by standalone Python
+  scripts in `tests/scenarios/derivations/` that re-implement NPV/IRR/EAC/
+  payback from first principles with no import from `/formulas` — run one
+  directly (`python3 tests/scenarios/derivations/scenario-a-derivation.py`)
+  to reproduce its expected values from scratch. The other three show their
+  arithmetic inline in each test's own comments. Plain per-function unit
+  tests (e.g. `tests/formulas/irr.test.ts`) are a second, complementary
+  layer — useful for regression coverage and edge cases, but not a
+  substitute for the independent scenarios when checking whether a formula
+  is *correct*, since a unit test's expected value can itself be a snapshot
+  of the implementation it's testing.
+- **Reconciliation/invariant tests** (e.g.
+  `tests/formulas/monthlySeries.test.ts`,
+  `tests/exports/workbookPlan.test.ts`): assert that two independently-
+  computed views of the same assessment agree — monthly series summed by
+  year against the annual pipeline, Excel formula-engine evaluation against
+  `computeAssessment()`'s own output, exported document numbers against the
+  dashboard's. This is the primary defense against the dashboard, charts,
+  and exports silently drifting apart (`CONVENTIONS.md` §3: one engine,
+  never a second calculation path).
+- **Known financial-model limitations:** see `ISSUES.md`'s Open/Accepted
+  sections — notably ISS-30 (launch delay is collected but not yet applied
+  to the projection) and ISS-31 (IRR is intentionally left undefined, not
+  auto-resolved, for cash flows with more than one valid root).
+- **Known export limitations:** Excel/Word chart *images* remain deferred
+  (data tables stand in — see `exports/workbookPlan.ts`'s Charts sheet and
+  Word §8); see `ISSUES.md` for the reasoning. When a utilization ramp is
+  set, the Word proposal and Excel Monthly tab both now say plainly that the
+  headline ROI/monthly-revenue figures are at mature (fully ramped-up)
+  utilization, while NPV/IRR/payback already account for the ramp-up period
+  — see `tests/exports/word-generator.test.ts` and
+  `tests/exports/workbookPlan.test.ts`'s Formula Notes assertions.
 
 ## Deployment
 

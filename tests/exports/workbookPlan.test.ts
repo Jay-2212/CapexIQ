@@ -377,3 +377,45 @@ describe("workbookPlan — golden scenario D (lease financing, ISS-18 tenure-cut
     }
   });
 });
+
+describe("workbookPlan — Formula Notes sheet documents the ramp-vs-dashboard relationship", () => {
+  const inputs: AssessmentInputs = {
+    purchaseCost: 2_000_000,
+    installationCost: 100_000,
+    usagePerDay: 10,
+    workingDaysPerMonth: 25,
+    payerMix: [
+      { payerName: "privateCash", shareOfVolume: 100, billedTariff: 800, realizationPercentage: 100, collectionDelayDays: 0 },
+      { payerName: "insuranceTpa", shareOfVolume: 0, billedTariff: 0, realizationPercentage: 100, collectionDelayDays: 0 },
+      { payerName: "corporateCredit", shareOfVolume: 0, billedTariff: 0, realizationPercentage: 100, collectionDelayDays: 0 },
+      { payerName: "pmJayGovt", shareOfVolume: 0, billedTariff: 0, realizationPercentage: 100, collectionDelayDays: 0 },
+      { payerName: "other", shareOfVolume: 0, billedTariff: 0, realizationPercentage: 100, collectionDelayDays: 0 },
+    ],
+    variableCostPerUse: 50,
+    fixedCostPerMonth: 45_000,
+    financing: { type: "cash" },
+    maintenance: { warrantyYears: 5, cmcYears: 2, cmcAnnualCost: 60_000, amcAnnualCost: 40_000 },
+    usefulLifeYears: 8,
+    discountRate: 12.5,
+    salvageValuePercentage: 5,
+  };
+  const result = computeAssessment(inputs);
+  const monthly = buildMonthlySeries(inputs);
+  const plan = buildWorkbookPlan(inputs, result, monthly);
+
+  it("includes a Formula Notes row explaining Monthly-tab figures ramp while the dashboard shows mature utilization", () => {
+    const notesCells = plan.cells.filter((c) => c.sheet === "Formula Notes");
+    const noteText = notesCells.map((c) => String(c.value ?? "")).join(" ");
+    expect(noteText).toMatch(/mature.{0,40}utilization/i);
+    expect(noteText).toMatch(/dashboard/i);
+  });
+
+  it("carries the cumulative cash position and break-even/expected-usage pair on the Charts sheet (deferred chart images fall back to this data)", () => {
+    const chartCells = plan.cells.filter((c) => c.sheet === "Charts");
+    const addresses = chartCells.map((c) => c.address);
+    expect(addresses).toContain("B1"); // cumulative cash position header
+    expect(addresses).toContain(`A${inputs.usefulLifeYears + 1}`); // last year's row
+    expect(chartCells.find((c) => c.address === "D1")?.value).toBe("Expected usage per day");
+    expect(chartCells.find((c) => c.address === "E1")?.value).toBe("Break-even usage per day");
+  });
+});

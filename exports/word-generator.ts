@@ -139,13 +139,29 @@ export async function generateWordProposal(
       ["Equivalent annual cost", formatInr(result.eac)],
       ["Investment Outlook", `${outlook.band} (${outlook.score}/100)`],
     ]),
+    ...(inputs.utilizationRamp
+      ? [
+          para(
+            "Note: the ROI figures above reflect mature (fully ramped-up) monthly utilization. NPV, IRR, and " +
+              "both payback figures already account for the slower utilization ramp-up entered for this " +
+              "assessment (see the Usage assumptions), so they will differ from a simple ROI-based projection " +
+              "during the ramp-up period — see the Monthly tab of the Excel export for the month-by-month figures."
+          ),
+        ]
+      : []),
 
     heading("5. Billed vs. realized revenue"),
     para(
-      `Billed revenue reflects the full tariff charged (${formatInr(result.monthlyBilledRevenue)}/month); realized ` +
-        `revenue (${formatInr(result.monthlyRealizedRevenue)}/month) nets out each payer type's realization % — ` +
-        `the portion actually collectible after claim deduction/disallowance. The gap between the two is the ` +
-        `payer-mix and realization assumption, not a cost — see the Methodology section for the full waterfall.`
+      `Billed revenue reflects the full tariff charged (${formatInr(result.monthlyBilledRevenue)}/month at mature ` +
+        `utilization); realized revenue (${formatInr(result.monthlyRealizedRevenue)}/month at mature utilization) ` +
+        `nets out each payer type's realization % — the portion actually collectible after claim deduction/` +
+        `disallowance. The gap between the two is the payer-mix and realization assumption, not a cost — see the ` +
+        `Methodology section for the full waterfall.` +
+        (inputs.utilizationRamp
+          ? " Both figures are shown at mature (fully ramped-up) utilization; actual monthly revenue is lower " +
+            "during the ramp-up period entered for this assessment — see the Excel export's Monthly tab for the " +
+            "month-by-month trajectory."
+          : "")
     ),
 
     heading("6. Cash flow and working capital"),

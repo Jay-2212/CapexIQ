@@ -12,6 +12,74 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
+### ISS-30 — "Expected months before revenue starts" (launch delay) is collected and validated, but never reaches the calculation pipeline
+**Area:** formulas / UI consistency
+**What was found:** 2026-08-06, during a QA/correctness pass. `basic.launchDelayMonths`
+is a real, required wizard field (`app/(assessment)/assess/investment/page.tsx`'s
+`SliderField`, validated by `app/forms/wizardValidation.ts`, defaulted per equipment
+type in `equipment-data/<type>.json`), and `formulas/launchDelay.ts`'s
+`preOperativeInterest()` is a fully implemented, independently-tested formula
+(SPEC.md §16). But `app/forms/toAssessmentInputs.ts` never reads
+`basic.launchDelayMonths` — `AssessmentInputs` has no field for it at all — so
+`computeAssessment()`'s NPV/IRR/payback/ROI are currently invariant to whatever value a
+user enters here. SPEC.md §16 also calls for revenue-start shifting and an "EMI starts
+before revenue" dashboard warning (§16.3), neither of which exist yet either. Pinned by
+`tests/wizard/toAssessmentInputs.test.ts`'s "launchDelayMonths" describe block, so a
+future partial wiring doesn't happen by accident without failing a test.
+**Not fixed this session:** wiring this in requires a methodology decision this
+project's `CLAUDE.md` reserves for Jay — specifically how the delay composes with the
+cash-flow timeline (does the useful-life horizon extend or truncate; does
+pre-operative interest capitalize into the initial investment or hit as a year-1 cost;
+does EMI start at disbursement or at revenue start per §16.3). Any of those choices
+changes NPV/IRR/payback for every assessment with a delay > 0 and would invalidate the
+existing golden scenarios in `tests/scenarios/` — not a QA-pass change. Confirmed with
+an Opus advisor pass before deciding to document-only rather than implement.
+**Interim fix (2026-08-06):** the field's tooltip copy (`content/tooltip-copy.md`,
+regenerated into `content/tooltip-copy.generated.json`) now says plainly that the
+figure is captured for planning but not yet applied to the projection, so the slider
+stops silently implying it does something it doesn't — task-level "no misleadingly
+authoritative language" requirement.
+**Next action:** when Jay is available, decide the composition rule above, then wire
+`preOperativeInterest()` into `computeAssessment.ts` and update the golden scenarios
+deliberately (not as a side effect of another change).
+
+### ISS-31 — `irr()` throws (rather than returning a root) for cash flows with more than one valid IRR
+**Area:** formulas
+**What was found:** 2026-08-06. Classic multiple-sign-change cash flows (e.g. a large
+cost after an early positive return — hand-verified textbook case: initial 4,000,
++25,000, then -25,000, with real roots at both 25% and 400%) have NPV the same sign at
+both ends of `irr.ts`'s [-99%, 1000%] bisection bracket, even though two valid roots
+exist inside it. The function throws — a defensible outcome (picking "the" IRR among
+several is a methodology call, not a bug) but the pre-existing error message ("no
+discount-rate sign change exists") implied no root existed at all, which is misleading
+for this case. Fixed the message wording only (now says a single IRR isn't
+well-defined and cash flows may have zero *or multiple* roots) — did not change which
+root, if any, gets returned. `computeAssessment.ts` already treats a thrown IRR as
+`null` either way, so no downstream behavior changed. Pinned by
+`tests/formulas/irr.test.ts`'s multiple-IRR test.
+**Status:** accepted as current behavior. Revisit only if Jay wants a specific
+tie-breaking rule (e.g. "smallest positive root") adopted deliberately.
+
+### ISS-33 — `formatPercent`/`formatNumber` use a plain ASCII hyphen for negatives; `formatInr`/`formatInrCompact` use the Unicode U+2212 minus sign
+**Area:** UI / formatting consistency
+**What was found:** 2026-08-06, while writing the first dedicated unit tests for
+`app/components/formatting.ts` (previously only `formatInrCompact` had a test file;
+`formatInr`/`formatNumber`/`formatPercent`/`formatYears` were untested). `formatInr`
+explicitly builds `−₹...` with a U+2212 minus sign per `design/ux-product-spec.md`
+§10.5's "leading minus sign for negatives" note; `formatNumber`/`formatPercent` instead
+rely on `Intl.NumberFormat`'s default, which renders a plain ASCII hyphen-minus (`-`).
+Visually near-identical in most fonts, but the two conventions differ in the same
+codebase — a percent figure (e.g. negative ROI) and a currency figure both shown
+negative on the same results page use two different minus glyphs.
+**Not fixed this session:** cosmetic, not a correctness bug, and touches every call
+site that renders a formatted percentage — out of scope for a QA/correctness pass.
+Pinned by `tests/wizard/formatting.test.ts`'s formatPercent negative-value test (which
+documents the current ASCII-hyphen behavior, not the "should" behavior) so the
+inconsistency doesn't silently drift further.
+**Next action:** if this is worth fixing, make `formatNumber` build its own sign the
+same way `formatInr` does (format the absolute value, prepend U+2212 for negatives)
+rather than trusting `Intl.NumberFormat`'s locale default.
+
 ### ISS-28 — Live deploy (`capexiq.jaybharti.me`) is badly stale
 **Area:** deployment
 **What was found:** 2026-07-13, during Phase 7 browser QA. The live Cloudflare Pages
@@ -134,6 +202,45 @@ CSS-stringify issue that doesn't reach the static-export production build).
 originally assessed.
 **Next action:** revisit the `postcss`/`next` half next time a `next@16` migration is
 independently warranted; don't force it just for this.
+**Update (2026-08-06):** adding `eslint`/`eslint-config-next` (see ISS-32, lint
+tooling) pulled in more transitive dependencies, surfacing `brace-expansion` (DoS) and
+`undici` (several disclosure/desync advisories) as new high-severity findings. Both
+fixed with a plain `npm audit fix` (non-breaking — confirmed via `npm audit fix
+--dry-run` first, then a full `npm test`/`tsc --noEmit` pass after). Two more remain,
+both requiring a breaking change and both declined for the same reason as the
+`postcss`/`next` pair above: `sharp`/`next` need `next@16`; `uuid` needs
+`exceljs@3.4.0`, a real downgrade of the library the Excel export depends on (would
+lose functionality — same "don't force a bad fix" call as this issue's original
+`next@9.3.3` finding). `npm audit` currently reports 5 vulnerabilities (2 moderate, 3
+high), all dev-tooling-path, none reaching the static-export production bundle. **Also
+note:** this same `npm audit fix` bumped `next` itself from 15.5.20 (this issue's
+original "already pinned to its latest 15.x release" figure above) to 15.5.22, a
+same-major patch update within `package.json`'s existing `^15.0.0` range — that 15.5.20
+figure above is from 2026-07-12 and is now stale; `eslint-config-next` was bumped to
+match (15.5.22) in the same session for consistency. The `postcss`/`next` vulnerability
+itself is unaffected (still requires `next@16`).
+
+### ISS-32 — `npm run lint` was non-functional (interactive `next lint` wizard, no committed ESLint config)
+**Area:** code / tooling
+**What was found:** 2026-08-06. This repo never had an `.eslintrc*` or
+`eslint.config.*` committed, so `next lint` (a deprecated command as of Next 15,
+removed in Next 16) fell into its first-run interactive "How would you like to
+configure ESLint?" prompt — unusable non-interactively, which meant `npm run lint` had
+never actually run to completion in CI or any scripted context.
+**Resolution:** added `eslint.config.mjs` (flat config, `next/core-web-vitals` +
+`next/typescript` via `FlatCompat`), pinned `eslint@^9`/`eslint-config-next@15.5.22`
+(matching the installed `next` version — see ISS-8's update note on why this is
+15.5.22, not the 15.5.20 this project was on before this session's `npm audit fix`) as
+devDependencies, and changed the `lint`
+script to `eslint .`. Fixed the 7 findings (7 errors, 3 warnings) the first clean run
+surfaced: two `react/no-unescaped-entities` (real, in `ResultsQuickSettings.tsx`/
+`RiskCallout.tsx`), one stale `eslint-disable` comment, two genuinely-unused variable
+bindings in `exports/workbookPlan.ts` (values were still written to their sheet cells
+via the enclosing function's side effect — only the local binding was dead), and three
+`prefer-const` fixes in test files where `state` was never reassigned. Added
+`.github/workflows/ci.yml` running install/typecheck/lint/test/build/`git diff
+--check` on every push and PR to `main` — this repo had no CI configured before this
+session.
 
 ### ISS-4 — Hospital-specific figures correctly stay user-entered, not a research gap to close
 **Area:** data

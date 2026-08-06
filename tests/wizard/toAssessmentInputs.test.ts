@@ -190,3 +190,36 @@ describe("toAssessmentInputs — Basic vs Advanced maintenance path (PBA-4)", ()
     expect(inputs.maintenance.amcAnnualCost).toBeGreaterThan(0);
   });
 });
+
+describe("toAssessmentInputs — launchDelayMonths (ISSUES.md: collected but not yet applied)", () => {
+  it("changing basic.launchDelayMonths produces byte-identical AssessmentInputs and computeAssessment output", () => {
+    // This pins a known, documented limitation (not a desired behavior): the wizard
+    // collects "expected months before revenue starts" (SPEC.md §16) and validates it
+    // as required, but toAssessmentInputs never reads basic.launchDelayMonths, so
+    // AssessmentInputs (and every downstream NPV/IRR/payback figure) is currently
+    // invariant to it regardless of value. If a future change starts threading this
+    // field through, that's a deliberate methodology decision (how the delay composes
+    // with EMI timing, revenue start, and pre-operative interest — see SPEC.md §16.3)
+    // that this project's CLAUDE.md reserves for Jay, not something to half-wire
+    // incidentally. This test should be updated deliberately alongside that decision,
+    // not left to fail silently.
+    const withNoDelay = wizardReducer(baseMriState(), {
+      type: "SET_FIELD",
+      path: "basic.launchDelayMonths",
+      value: 0,
+    });
+    const withLongDelay = wizardReducer(baseMriState(), {
+      type: "SET_FIELD",
+      path: "basic.launchDelayMonths",
+      value: 9,
+    });
+
+    const inputsNoDelay = toAssessmentInputs(withNoDelay);
+    const inputsLongDelay = toAssessmentInputs(withLongDelay);
+    expect(inputsLongDelay).toEqual(inputsNoDelay);
+
+    const resultNoDelay = computeAssessment(inputsNoDelay);
+    const resultLongDelay = computeAssessment(inputsLongDelay);
+    expect(resultLongDelay).toEqual(resultNoDelay);
+  });
+});

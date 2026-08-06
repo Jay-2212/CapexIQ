@@ -15,13 +15,14 @@ export function SelectField({ path }: { path: string }) {
       isTypical={field.isTypical}
       error={field.error}
       tooltipKey={field.tooltipKey}
-      renderControl={({ id, describedBy }) => (
+      renderControl={({ id, describedBy, required }) => (
         <select
           id={id}
           className="field-shell__select"
           value={(field.value as string) ?? ""}
           aria-describedby={describedBy || undefined}
           aria-invalid={field.error !== null}
+          aria-required={required}
           onChange={(event) => field.setValue(event.target.value || null)}
         >
           <option value="" disabled>

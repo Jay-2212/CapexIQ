@@ -11,9 +11,23 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-07-14, Phase 9 (scenario comparison / sensitivity / actionable
-insight) built + verified; Phase 8 exports built + verified, ISS-29 resolved, IRR
-spot-checked against real LibreOffice; Phase 7's chart-tooltip gap closed)*
+*(Last updated: 2026-08-06, autonomous correctness/export/accessibility/release-quality
+pass — see the Change Log entry below for the full list; CI added, `npm run lint` fixed,
+9 new/expanded test files, no financial-model formula changed except IRR's error
+message wording)*
+
+**This session added CI (`.github/workflows/ci.yml`: install/typecheck/lint/test/build/
+`git diff --check` on every push+PR to `main` — none existed before), fixed `npm run
+lint` (was non-functional — see ISS-32), closed a real untested-module gap
+(`formulas/workingCapitalPeak.ts` had no dedicated test), fixed a dangling local-path
+reference in the flagship "independently derived" golden-scenario claim (ISS in the
+Change Log below), added `aria-required` to every wizard field control (was
+visually-only via an `aria-hidden` asterisk), and documented two real findings without
+changing model behavior: launch delay is collected but not applied to the projection
+(ISS-30) and IRR intentionally throws rather than picks a root for multiple-IRR cash
+flows (ISS-31, message wording only changed). Full detail in this session's Change Log
+entry. Everything below this paragraph describes state as of 2026-07-14 and is still
+accurate unless a note above says otherwise.**
 
 **The warm-beige "calm clinical intelligence" redesign and Phase 7's results dashboard
 depth are both implemented and verified live.** The canonical calculation pipeline and
@@ -238,6 +252,100 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 
 *(most recent first)*
 
+### 2026-08-06 — Autonomous correctness/export/accessibility/release-quality pass
+**What changed:** Jay was unavailable; ran an Opus-advised QA pass with a standing
+mandate to fix what's safely fixable and document (never invent a fix for) anything
+touching methodology, benchmarks, or scoring weights, per this project's `CLAUDE.md`.
+
+1. **CI added (new):** `.github/workflows/ci.yml` — install/typecheck/lint/test/build/
+   `git diff --check` on every push and PR to `main`. No CI existed before this session.
+2. **`npm run lint` fixed (ISS-32):** the repo never had a committed ESLint config, so
+   `next lint` (deprecated, interactive-only without one) had never actually run to
+   completion non-interactively. Added `eslint.config.mjs` (flat config,
+   `next/core-web-vitals` + `next/typescript`), pinned `eslint@^9`/
+   `eslint-config-next@15.5.22` to match the installed `next` version (note: a
+   same-session `npm audit fix` bumped `next` itself 15.5.20→15.5.22, a same-major
+   patch update within `package.json`'s existing `^15.0.0` range — see ISS-8), changed
+   the script to `eslint .`. Fixed the 7 findings the first clean run surfaced (2 real
+   unescaped-entity JSX issues, 1 stale eslint-disable, 2 dead variable bindings in
+   `exports/workbookPlan.ts`, 3 `let`→`const` in test files) — no behavior change.
+3. **`npm audit fix` (non-breaking) applied** — fixed `brace-expansion`/`undici`
+   findings surfaced by the new eslint dependency tree. Two more (next/sharp,
+   uuid/exceljs) remain and are documented as accepted in ISS-8, matching that issue's
+   existing "don't force a breaking downgrade" precedent.
+4. **`formulas/workingCapitalPeak.ts` gained its first dedicated unit test**
+   (`tests/formulas/workingCapitalPeak.test.ts`) — previously only exercised
+   indirectly through `computeAssessment.test.ts`'s golden scenarios. Hand-derived
+   fixtures (arithmetic shown in comments), including a same-value-doesn't-overtake-
+   the-peak tie case and a payer whose delay never resolves within the tested horizon.
+5. **Reproducibility fix for the "independently derived" golden-scenario claim:** four
+   `tests/scenarios/*.test.ts` files cited a now-nonexistent local path
+   (`/Users/jay/.claude/jobs/d6da810d/tmp/*.py`) as their derivation source — a claim
+   nobody could actually check. Recreated the derivation in-repo for two scenarios
+   (`tests/scenarios/derivations/scenario-a-derivation.py`,
+   `scenario-c-derivation.py` — standalone, no import from `/formulas`, independently
+   verified to reproduce every expected value in the corresponding test file exactly)
+   and honestly downgraded the claim for the other two (their arithmetic is shown
+   inline in each test's own comments, which was already true — the dangling external
+   reference was just removed rather than reproduced from scratch under this session's
+   time budget). See `tests/scenarios/derivations/README.md`.
+6. **`irr.ts`'s error message fixed for the multiple-IRR case (ISS-31), math
+   unchanged.** A classic multiple-sign-change cash flow (textbook: initial 4,000,
+   +25,000, then -25,000, real roots at 25% and 400%) has NPV the same sign at both
+   ends of the [-99%, 1000%] bracket, so `irr()` throws — defensible (picking a root
+   among several is a methodology call, not implemented) but the old message implied
+   no root existed at all. Message now says a single IRR isn't well-defined and cash
+   flows may have zero *or multiple* roots. `computeAssessment.ts` already converts
+   any thrown IRR to `null` either way — no downstream behavior changed. Pinned by a
+   new test in `tests/formulas/irr.test.ts`.
+7. **Export label fix for a real dashboard/export mismatch when a utilization ramp is
+   set:** `computeAssessment.ts`'s headline `roiBilled`/`roiRealized`/monthly-revenue
+   fields are flat (mature-utilization) figures, while NPV/IRR/payback already reflect
+   the ramp-up period (ISS-29, resolved 2026-07-14) — so a ramped assessment's Word
+   proposal and Excel Monthly tab could look like they disagreed with each other. Added
+   an "at mature utilization" note to Word §4/§5 (only when a ramp is set) and a
+   Formula Notes row on the Excel Monthly tab explaining the relationship — labels
+   only, no calculation changed. Pinned by new tests in
+   `tests/exports/word-generator.test.ts` and `tests/exports/workbookPlan.test.ts`.
+8. **`aria-required` added to every wizard field control** (`NumberField`,
+   `SelectField`, `TextField`, `SliderField`, `CurrencyUnitField`, via
+   `FieldShell`'s `renderControl`). Required fields previously showed a visual
+   asterisk marked `aria-hidden="true"` — correct for sighted users, but a screen
+   reader got no indication a field was required at all. Pinned by a new test in
+   `tests/wizard/components.test.tsx` (and a matching negative case confirming a
+   genuinely-optional field like Acquisition Mode stays `aria-required="false"`).
+9. **Two real, undocumented gaps found and left alone deliberately, not fixed:**
+   - **ISS-30:** `basic.launchDelayMonths` ("expected months before revenue starts")
+     is a real, required, validated wizard field with no effect whatsoever on
+     `computeAssessment()`'s output — `app/forms/toAssessmentInputs.ts` never reads
+     it. `formulas/launchDelay.ts`'s `preOperativeInterest()` is fully implemented and
+     tested but never called from the canonical pipeline. Wiring it in requires a
+     methodology decision (how the delay composes with EMI timing, revenue-start
+     shift, and pre-operative-interest capitalization — SPEC.md §16.3) that this
+     project's `CLAUDE.md` reserves for Jay; confirmed the document-only call with an
+     Opus advisor pass before proceeding. Fixed the tooltip copy so the field stops
+     implying it does something it doesn't (`content/tooltip-copy.md`, regenerated
+     into `content/tooltip-copy.generated.json` — that regeneration also picked up
+     unrelated copy improvements already in the `.md` source that a prior session
+     forgot to regenerate for, e.g. the realization %/claim-deduction wording and a
+     missing "Lease tenure" entry). Pinned by a new test in
+     `tests/wizard/toAssessmentInputs.test.ts`.
+   - **ISS-33:** `formatInr` builds an explicit U+2212 minus sign for negatives;
+     `formatNumber`/`formatPercent` rely on `Intl.NumberFormat`'s plain ASCII hyphen
+     default. Cosmetic inconsistency, not a correctness bug — documented, not fixed,
+     found while writing the first dedicated unit tests for
+     `app/components/formatting.ts` (previously only `formatInrCompact` had one).
+10. **Verification:** full test suite, `npx tsc --noEmit`, `npm run lint`, and
+    `npm run build` (static export) all run clean. One real export path
+    (`generateExcelWorkbook`/`generateWordProposal`/`generateExportZip`) exercised
+    end-to-end outside the test suite too — real `.xlsx`/`.docx`/`.zip` bytes
+    generated from realistic financed+ramped+multi-payer inputs, unzipped, and
+    structurally inspected. Confirmed no `localStorage` reference anywhere in
+    `exports/` or `formulas/`.
+**Not touched, on purpose:** any scoring weight, threshold, benchmark figure, or
+methodology composition rule; the disclaimer; the scoped code license; third-party
+notices.
+
 ### 2026-07-14 — Phase 9 built: scenario comparison, sensitivity strip, actionable insight
 **What changed:** Jay asked to build Phase 9 and to carry forward the chart-images
 fast-follow note rather than build it this session.
@@ -312,64 +420,4 @@ real-Excel IRR cell.
    See `ISSUES.md` ISS-29 (moved to Resolved).
 3. **Verification:** full suite 249/249 passing, clean `tsc --noEmit`.
 
-### 2026-07-14 — Phase 8 exports built (Excel/Word/ZIP), Phase 7's chart-tooltip gap closed
-**What changed:** Jay asked for Phase 8 (Excel/Word/ZIP exports) to be fully built,
-following the newly-updated design language, plus the one leftover Phase 7 item
-(chart-level hover tooltips). Full detail in the Current State block above; summary:
-1. **Chart hover tooltips** — `CashFlowChart`/`BreakEvenBar` bars now show exact
-   value + series + period on hover and keyboard focus (`.chart-tooltip`, new CSS),
-   per the `$dataviz` skill's interaction rules. 7 new tests.
-2. **`formulas/monthlySeries.ts` (new)** — extracted the ramp-fraction/monthly-array
-   logic already inside `computeAssessment.ts` (byte-identical refactor, all 203
-   pre-existing tests unchanged) and extended it with `monthlyCashReceived`/
-   `monthlyEmiOrLease` for the Excel export's Monthly tab. Billed revenue stays flat/
-   unramped, faithfully matching the existing engine rather than inventing a ramped
-   version that would disagree with the dashboard — flagged as `ISSUES.md` ISS-29.
-3. **`exports/workbookPlan.ts` + `excel-generator.ts`** — a pure cell/formula plan
-   (direct cell addresses, not Excel defined names — see the doc's rationale) written
-   into a real `.xlsx` via `exceljs`. Verified via a **HyperFormula test oracle**
-   (`tests/exports/workbookPlan.test.ts`, 23 tests across 4 golden scenarios — cash;
-   financed+ramped+DSO; a per-year maintenance override; lease financing) that
-   evaluates every formula cell and checks it against `computeAssessment()`/
-   `buildMonthlySeries()`'s own numbers — not merely that a formula string exists,
-   per an advisor review that flagged the weaker check before it was built. Caught 3
-   real bugs pre-ship: an unquoted space-containing sheet name; a missing upper-bound
-   guard on a DSO cash-received `INDEX()` lookup; and a second advisor pass catching
-   that the Excel maintenance formulas ignored `costByYearPct` (ISS-19) — a real,
-   UI-reachable Advanced-mode override that would have made the Excel's headline
-   NPV/IRR silently disagree with the dashboard for any user who sets one. Fixed by
-   adding a per-year override table to the Assumptions sheet, checked first in both
-   the Monthly and Maintenance Schedule formulas.
-4. **`exports/word-generator.ts`** — 12-section Word proposal via `docx`, reusing
-   `app/components/riskNotes.ts` (extracted from `RiskCallout.tsx` this session) for
-   risk notes rather than a second derivation. Verified by unzipping the generated
-   `.docx` and checking `word/document.xml` for the exact numbers `computeAssessment()`
-   produced (6 tests).
-5. **`exports/zip-generator.ts` + `app/components/ExportPanel.tsx`** — bundles both
-   via `jszip`; three download buttons on `/results`, lazy-loading the heavy libraries
-   on click (confirmed via build output: `/results` grew ~1KB, not ~1MB+). Live-
-   verified in a real browser (MRI scenario, "Apex Test Hospital"): all three
-   downloads produced correctly-sized, correctly-MIME-typed blobs, zero console errors.
-6. **Chart images deferred, not built** — flagged explicitly in both
-   `report-templates/excel-sheet-structure.md` and `word-report-template.md` (data
-   tables stand in); no headless Excel/LibreOffice available here to verify a
-   rasterized image round-trips, judged the wrong tradeoff against the harder
-   live-formula verification work this phase actually required.
-**Verification:** 248 tests (up from 203), clean `tsc --noEmit`, clean static-export
-`npm run build`. Advisor consulted before implementation planning (chart-image scope,
-defined-names vs. direct cell refs, oracle-coverage requirements) and again before
-declaring done — that second pass is what caught the `costByYearPct` gap above.
-**Files touched:** `formulas/monthlySeries.ts` (new), `formulas/computeAssessment.ts`
-(byte-identical extraction of the ramp-fraction helper), `exports/{workbookPlan,
-excel-generator,word-generator,zip-generator}.ts`, `app/components/{ExportPanel,
-riskNotes}.tsx`, `app/components/RiskCallout.tsx` (now consumes `riskNotes.ts`),
-`app/charts/{CashFlowChart,BreakEvenBar}.tsx`, `app/globals.css` (chart-tooltip +
-export-panel CSS), `app/(assessment)/results/page.tsx`, `report-templates/
-{excel-sheet-structure,word-report-template}.md`, `package.json` (added `exceljs`,
-`docx`, `jszip`, dev-only `hyperformula`), `tests/exports/*.test.ts` (new),
-`tests/formulas/monthlySeries.test.ts` (new), `tests/results/charts.test.tsx`
-(tooltip tests added), `agent-build-plan.md`, `ISSUES.md`, `DIRECTORY.md`.
-
-
-See `handoff-archive/2026-Q3.md` for entries before 2026-07-13's Phase 7 results
-dashboard entry above.
+See `handoff-archive/2026-Q3.md` for entries before 2026-07-14's Phase 9 entry above.

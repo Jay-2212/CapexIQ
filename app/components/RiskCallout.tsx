@@ -39,7 +39,7 @@ export function RiskCallout({
         <CheckCircle2 aria-hidden="true" size={18} />
         <div>
           <h3>No major risk flags</h3>
-          <p>Every scored dimension of this assessment sits at or above the "Moderate" floor.</p>
+          <p>Every scored dimension of this assessment sits at or above the &ldquo;Moderate&rdquo; floor.</p>
         </div>
       </div>
     );

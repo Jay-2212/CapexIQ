@@ -89,7 +89,7 @@ export function buildWorkbookPlan(
   const workingDaysRef = addRow("Working days per month", inputs.workingDaysPerMonth);
   const variableCostPerUseRef = addRow("Variable cost per use", inputs.variableCostPerUse);
   const fixedCostPerMonthRef = addRow("Fixed cost per month", inputs.fixedCostPerMonth);
-  const usefulLifeYearsRef = addRow("Useful life (years)", inputs.usefulLifeYears);
+  addRow("Useful life (years)", inputs.usefulLifeYears);
   const discountRateRef = addRow("Discount rate (%)", inputs.discountRate);
   addRow("Salvage value (%)", inputs.salvageValuePercentage);
 
@@ -190,7 +190,6 @@ export function buildWorkbookPlan(
   const monthlySheetRows = monthly.monthlyCashReceived.length;
   const headerRow = 1;
   const firstDataRow = 2;
-  const lastDataRow = headerRow + monthlySheetRows;
 
   const headers = [
     "Month #",
@@ -425,6 +424,13 @@ export function buildWorkbookPlan(
     ["NPV", "Sum of discounted cash flows minus the initial investment; Excel's native NPV function"],
     ["IRR", "The discount rate at which NPV = 0; Excel's native IRR function"],
     ["Cash received by month", "Each payer's share of a month's realized revenue collected ceil(days-to-collect / 30) months later"],
+    [
+      "Monthly tab vs. dashboard headline figures",
+      "The Monthly tab's Billed/Realized revenue ramp up month by month per the Ramp % column above. The CapexIQ " +
+        "dashboard's own monthly revenue and ROI figures are shown at mature (fully ramped-up) utilization, so " +
+        "they will match this tab's later, fully-ramped months rather than month 1 whenever a utilization ramp " +
+        "is set. NPV/IRR here and on the dashboard both already account for the ramp-up period.",
+    ],
   ];
   push(F, "A1", { value: "Formula" });
   push(F, "B1", { value: "Description" });

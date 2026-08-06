@@ -96,7 +96,7 @@ equipment's data file at render time.
 - **Confidence:** Varies by equipment type; Dialysis/Ultrasound are Low confidence (informal/adjacent sources only).
 - **Source note:** `equipment-data/<type>.json`.
 - **How to estimate:** Sum your own civil work, installation, licensing, and training timelines if you have them — see the Advanced Mode launch-delay breakdown for the individual components.
-- **Why it matters:** Longer delays mean more pre-operative interest accrues (if financed) before revenue offsets it.
+- **Why it matters:** Longer delays mean more pre-operative interest accrues (if financed) before revenue offsets it. **Known limitation:** this figure is captured for your own planning but is not yet applied to the NPV/IRR/payback projection below — every projection currently assumes revenue starts in month 1 regardless of this value. Track the delay separately for now; see the Methodology page for the current status.
 
 ### Expected usage per day
 - **Definition:** Scans/sessions/procedures per average working day.

@@ -60,7 +60,7 @@
     "confidence": "Varies by equipment type; Dialysis/Ultrasound are Low confidence (informal/adjacent sources only).",
     "sourceNote": "`equipment-data/<type>.json`.",
     "howToEstimate": "Sum your own civil work, installation, licensing, and training timelines if you have them — see the Advanced Mode launch-delay breakdown for the individual components.",
-    "whyItMatters": "Longer delays mean more pre-operative interest accrues (if financed) before revenue offsets it."
+    "whyItMatters": "Longer delays mean more pre-operative interest accrues (if financed) before revenue offsets it. **Known limitation:** this figure is captured for your own planning but is not yet applied to the NPV/IRR/payback projection below — every projection currently assumes revenue starts in month 1 regardless of this value. Track the delay separately for now; see the Methodology page for the current status."
   },
   "Expected usage per day": {
     "definition": "Scans/sessions/procedures per average working day.",
@@ -198,22 +198,22 @@
     "whyItMatters": "Some payers (e.g. government scheme) are billed differently than private cash for the same procedure."
   },
   "Realization % by payer type": {
-    "definition": "The share of that payer's billed tariff you actually expect to collect.",
+    "definition": "Of the amount a claim survives claim deduction/disallowance (see below), the share you actually expect to collect — e.g. slower TPA settlement, minor short-payments, or write-offs on the approved portion. **Not** a share of billed tariff directly; claim deduction is applied first, realization second (`effective collection = billed tariff × (1 − claim deduction%) × realization%`), so the two haircuts multiply rather than overlap (ISS-17).",
     "direction": "Higher is better.",
     "defaultValue": "No centralized benchmark — payer-contract and collections-history specific.",
     "confidence": "Unavailable — a genuinely open data gap (`ISSUES.md` ISS-4).",
     "sourceNote": "N/A.",
-    "howToEstimate": "Use your own historical collections data by payer type if available.",
-    "whyItMatters": "Directly scales realized revenue down from billed revenue."
+    "howToEstimate": "Use your own historical collections data by payer type, on the *approved* (post-deduction) amount, if available.",
+    "whyItMatters": "Scales realized revenue down from the claim-deduction-adjusted amount."
   },
   "Claim deduction / disallowance % by payer type": {
-    "definition": "The share of insurance/TPA claims typically disallowed on review.",
+    "definition": "The share of billed tariff typically disallowed/rejected on claim review, before realization is applied.",
     "direction": "Lower is better.",
     "defaultValue": "No benchmark.",
     "confidence": "Unavailable.",
     "sourceNote": "N/A.",
     "howToEstimate": "Use your own claims-history disallowance rate if available.",
-    "whyItMatters": "Kept separate from realization % so the two effects aren't conflated."
+    "whyItMatters": "Kept separate from realization % so the two effects — formal claim rejection vs. collection shortfall on what's approved — aren't conflated (see realization %'s definition above for how they combine)."
   },
   "Collection delay / DSO by payer type": {
     "definition": "How long, on average, it takes to receive cash from this payer type after billing.",
@@ -313,6 +313,15 @@
     "sourceNote": "N/A.",
     "howToEstimate": "Use your actual lease quotation.",
     "whyItMatters": "Replaces EMI in the cash-flow-after-financing calculation."
+  },
+  "Lease tenure (if lease mode)": {
+    "definition": "How many months the lease rental is paid before the equipment is modeled as owned outright for the rest of its useful life (ISS-18) — mirrors Loan tenure.",
+    "direction": "Context-dependent — reflects your actual lease agreement, not a lever to optimize.",
+    "defaultValue": "No centralized benchmark — lessor-specific.",
+    "confidence": "Unavailable.",
+    "sourceNote": "N/A.",
+    "howToEstimate": "Use your actual lease agreement's term.",
+    "whyItMatters": "Without a bounded tenure, a lease would be charged for the equipment's entire useful life while a loan payoff eventually stops — understating Lease relative to Loan in the financing-mode comparison."
   },
   "D. Launch delay and pre-opening cost": {
     "definition": "",

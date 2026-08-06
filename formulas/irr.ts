@@ -32,8 +32,16 @@ export function irr(
   }
 
   if (Math.sign(lowerNpv) === Math.sign(upperNpv)) {
+    // NPV has the same sign at both bracket ends (-99% and 1000%). This means either
+    // (a) no discount rate in that range makes NPV cross zero at all, or (b) the cash
+    // flow stream reverses sign more than once (e.g. a large mid-project cost after an
+    // early positive year) and NPV has an even number of roots inside the bracket —
+    // classic multiple-IRR cash flows can cross zero twice and end up back at the same
+    // sign, which this same-sign check alone can't tell apart from "no root." Either
+    // way, a single IRR isn't well-defined without an extra rule (e.g. "smallest
+    // positive root") this project hasn't adopted — see ISSUES.md.
     throw new Error(
-      "IRR is undefined because no discount-rate sign change exists between -99% and 1000%."
+      "IRR is undefined: no single discount rate between -99% and 1000% makes NPV cross zero exactly once. This can mean no root exists, or that the cash flows change sign more than once and have multiple possible IRRs."
     );
   }
 

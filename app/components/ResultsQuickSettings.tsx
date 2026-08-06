@@ -40,7 +40,7 @@ export function ResultsQuickSettings() {
           {acquisitionMode === "Lease" && <NumberField path="advanced.C.leaseRentalPerMonth" />}
           {acquisitionMode === "Cash" && (
             <p className="results-quick-settings__note">
-              This is a cash purchase, so there's no financing rate to adjust here.
+              This is a cash purchase, so there&apos;s no financing rate to adjust here.
             </p>
           )}
         </div>

@@ -7,10 +7,13 @@
 // cash purchase, composite = 0.4375*rs + 0.3125*stp + 0.25*om, so if rs = stp = om =
 // target, composite = target exactly regardless of the weights (they sum to 1).
 //
-// Every input below, and the resulting sub-scores, were independently solved and
-// verified via a standalone Python re-implementation of financial-model-spec.md §1.2's
-// four formulas (NOT by calling investmentOutlookScore() itself) — see
-// /Users/jay/.claude/jobs/d6da810d/tmp/boundaries.py.
+// Every input below is solved algebraically from financial-model-spec.md §1.2's four
+// sub-score formulas (worked by hand, not by calling investmentOutlookScore() itself)
+// so that rs = stp = om = the target value directly — see the composite-score identity
+// above for why that forces the composite to equal the target regardless of weights.
+// (An earlier version of this comment referenced an external Python script at a local,
+// non-repo path that no longer exists — removed rather than left dangling; the
+// algebraic construction above is what actually makes each case checkable by hand.)
 
 import { describe, expect, it } from "vitest";
 import { investmentOutlookScore, InvestmentOutlookInputs } from "../../formulas/investmentOutlookScore";

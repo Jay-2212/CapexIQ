@@ -9,6 +9,7 @@ import "@testing-library/jest-dom/vitest";
 import { WizardProvider, useWizard } from "../../app/forms/WizardContext";
 import { NumberField } from "../../app/components/NumberField";
 import { SliderField } from "../../app/components/SliderField";
+import { SelectField } from "../../app/components/SelectField";
 import { StepNav } from "../../app/components/StepNav";
 import PreStepPage from "../../app/(assessment)/assess/page";
 
@@ -165,5 +166,39 @@ describe("ISS-25 — red validation state is gated by touch/attempt, not shown o
     // ATTEMPT_STEP reveals purchaseCost's error but must not have written to
     // `touched` — warrantyYears' Typical pill must survive.
     expect(screen.getByText("Typical")).toBeInTheDocument();
+  });
+});
+
+describe("required fields expose aria-required, not just a visual asterisk (asterisk is aria-hidden)", () => {
+  it("NumberField, SelectField, and SliderField all set aria-required=true for a required field", () => {
+    render(
+      <WizardProvider>
+        <SelectMri />
+        <NumberField path="basic.purchaseCost" />
+        <SelectField path="preStep.cityTier" />
+        <SliderField path="basic.usagePerDay" />
+      </WizardProvider>
+    );
+
+    fireEvent.click(screen.getByText("select mri"));
+
+    expect(screen.getByLabelText(/Purchase cost/)).toHaveAttribute("aria-required", "true");
+    expect(screen.getByLabelText(/City \/ tier/i)).toHaveAttribute("aria-required", "true");
+    // The range input's implicit ARIA role (slider) doesn't support aria-required
+    // (caught by eslint-plugin-jsx-a11y) — required semantics live on the paired
+    // "exact value" number input instead, whose implicit spinbutton role does.
+    expect(screen.getByLabelText(/exact value/i)).toHaveAttribute("aria-required", "true");
+  });
+
+  it("a non-required field (e.g. acquisition mode, which defaults to Cash) correctly leaves aria-required unset/false", () => {
+    render(
+      <WizardProvider>
+        <SelectMri />
+        <SelectField path="basic.acquisitionMode" />
+      </WizardProvider>
+    );
+
+    fireEvent.click(screen.getByText("select mri"));
+    expect(screen.getByLabelText(/Acquisition mode/i)).toHaveAttribute("aria-required", "false");
   });
 });

@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build (production static export)
+        run: npm run build
+
+      - name: Whitespace / diff hygiene check
+        run: git diff --check
+
+      - name: Check the static export was never accidentally committed
+        run: |
+          if git ls-files --error-unmatch out >/dev/null 2>&1; then
+            echo "out/ (the static export build output) is tracked by git — it must stay gitignored."
+            exit 1
+          fi

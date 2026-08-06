@@ -15,8 +15,11 @@
 //   warrantyYears = 5, cmcYears = 2 (INR 60,000/yr), then AMC (INR 40,000/yr)
 //   usefulLifeYears = 8, discountRate = 12.5%
 //
-// See /Users/jay/.claude/jobs/d6da810d/tmp/scenario_a.py for the full independent
-// derivation this file's expectations were copied from.
+// The full independent derivation this file's expectations were copied from lives at
+// tests/scenarios/derivations/scenario-a-derivation.py — a standalone script with no
+// import from /formulas, re-implementing NPV/IRR/EAC/payback from first principles.
+// Run it directly (`python3 tests/scenarios/derivations/scenario-a-derivation.py`) to
+// reproduce every expected value below independently of this TypeScript test file.
 
 import { describe, expect, it } from "vitest";
 

@@ -71,7 +71,7 @@ export function SliderField({ path }: { path: string }) {
       error={field.error}
       tooltipKey={field.tooltipKey}
       unit={def.unit}
-      renderControl={({ id, describedBy }) => (
+      renderControl={({ id, describedBy, required }) => (
         <div className="slider-field">
           <input
             id={id}
@@ -83,6 +83,11 @@ export function SliderField({ path }: { path: string }) {
             value={localValue ?? def.min ?? 0}
             aria-describedby={describedBy || undefined}
             aria-invalid={field.error !== null}
+            // No aria-required here: the native `range` input's implicit ARIA role
+            // is `slider`, which the ARIA spec doesn't define aria-required for
+            // (jsx-a11y/role-supports-aria-props catches this) — required semantics
+            // are carried on the paired "exact value" number input below instead,
+            // whose implicit `spinbutton` role does support it.
             onKeyDown={(event) => {
               if (KEYS_THAT_CHANGE_VALUE.has(event.key)) {
                 isKeyboardInteraction.current = true;
@@ -105,6 +110,7 @@ export function SliderField({ path }: { path: string }) {
             step={def.decimalPlaces ? 1 / 10 ** def.decimalPlaces : (def.sliderStep ?? 1)}
             value={localValue ?? ""}
             aria-label={`${field.label}, exact value`}
+            aria-required={required}
             onChange={(event) => {
               const raw = event.target.value;
               const numeric = raw === "" ? null : Number(raw);
