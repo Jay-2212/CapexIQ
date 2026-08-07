@@ -12,6 +12,33 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
+### ISS-35 — `ActionableInsightCard` always fires and renders the literal text "Infinity months" when the baseline scenario never pays back
+**Area:** UI / formatting
+**What was found:** 2026-08-07, during browser QA of a Dialysis "Weak" outcome (the
+non-MRI/non-"Strong or Moderate" combination flagged as untested in the prior
+2026-08-06 session's fast-follow note). `formulas/actionableInsight.ts`'s
+`paybackImprovementMonths = (baselinePaybackYears - scenarioPaybackYears) * 12` (line
+37-38) uses `runScenario()`'s `Infinity` sentinel for "never pays back" as
+`baselinePaybackYears`. When the baseline never pays back, this makes
+`paybackImprovementMonths` itself `Infinity` whenever any candidate price increase
+yields a finite `scenarioPaybackYears` — the `>= 6` months gate at line 40 is then
+trivially satisfied regardless of whether the suggested price increase is actually a
+meaningful lever (if no candidate increase yields a finite payback, the improvement is
+`Infinity - Infinity = NaN`, which fails the gate and the card correctly doesn't
+render). `ActionableInsightCard.tsx`
+line 40 then renders `Math.round(insight.paybackImprovementMonths)` directly into the
+sentence, producing the literal text "...would improve your payback period by about
+Infinity months (from Never (within useful life) to 14.7 yr)." The `(from ... to ...)`
+clause still shows correct, real numbers, so the sentence is recoverable but reads
+oddly to a lay user.
+**Not fixed this session:** this is a gating decision (should a never-payback baseline
+skip the insight, or use a different qualifying rule than "≥6 months improvement") as
+much as a display bug — fixing only the string would leave the always-fires behavior
+unexamined. Out of scope for a QA/correctness pass per this project's mechanical-only
+scoping; flagged rather than guessed at.
+**Next action:** decide whether "never pays back" should be excluded from the ≥6-month
+gate entirely (a methodology-adjacent call) before touching the display string.
+
 ### ISS-30 — "Expected months before revenue starts" (launch delay) is collected and validated, but never reaches the calculation pipeline
 **Area:** formulas / UI consistency
 **What was found:** 2026-08-06, during a QA/correctness pass. `basic.launchDelayMonths`
@@ -281,6 +308,44 @@ is a placeholder only, safe to replace once real product screenshots exist.
 ---
 
 ## Resolved
+
+### ISS-34 — `equipmentDefaults()` silently mis-converted the "Typical" purchase-cost default for every currently-populated equipment type
+**Resolved:** 2026-08-07, during browser QA of the non-MRI equipment types flagged as
+untested in the prior 2026-08-06 session's fast-follow note (only MRI, whose
+`purchaseCost.typical` is `null`, had been browser-tested). `app/forms/
+equipmentDefaults.ts` computed the wizard's seeded "Typical"-badged purchase cost as
+`data.purchaseCost.typical / CRORE` (`CRORE = 10_000_000`), silently assuming every
+equipment file's `purchaseCost.typical` is denominated in raw rupees. It isn't: each
+`equipment-data/*.json` file states its own `unit` for that field, and the two
+currently-populated cases both use a scaled unit —
+Dialysis (`unit: "INR (Lakh)"`, `typical: 11.5`, i.e. ₹11.5 lakh/machine per S36) and
+Cath Lab (`unit: "INR (Crore)"`, `typical: 9`, i.e. ₹9 crore per S13). The bug meant
+100% of currently-populated purchase-cost defaults were wrong: Dialysis's seeded field
+showed `0.00000115` Crore (off by 10^5) instead of `0.115`, and Cath Lab's would have
+shown `0.0000009` Crore (off by 10^7) instead of `9` — both pass validation silently
+(a required, non-zero number), so a hospital administrator trusting the "Typical" badge
+in Basic Mode could run an entire assessment on a purchase cost wrong by 5-7 orders of
+magnitude. `installationCost` (derived from the same `purchaseCostInr` variable) was
+wrong by the same factor. MRI/CT/Ultrasound/Custom were unaffected only because their
+`purchaseCost.typical` is still `null` (unresearched, per ISS-9) — the bug has existed
+since Phase 6 (commit `4853b73`, 2026-07-13) with zero correct cases once any equipment
+file's default is populated.
+**Fix:** made the one consumer (`app/forms/equipmentDefaults.ts`) read the `unit` field
+already present in every `equipment-data/*.json` purchaseCost block, via a new
+`purchaseCostTypicalInCrore()` — `"INR (Crore)"` as-is, `"INR (Lakh)"` ÷100, else ÷CRORE
+(preserves today's behavior for the four still-`null` equipment types). No sourced
+value in any `equipment-data/*.json` file was edited — every cited figure (S36, S13,
+etc.) is byte-identical; only how the already-correct number gets scaled into the
+wizard's internal Crore representation changed. This is why Cath Lab's seeded default
+visibly jumps from ~₹0 to ₹9 Cr: that was always the sourced figure, just never
+converted correctly before reaching the screen. Confirmed live in the browser both
+directions of the Lakh/Crore toggle for both equipment types (Cath Lab: 9 Cr ↔ 900
+Lakh; Dialysis: 0.115 Cr ↔ 11.5 Lakh) after the fix, not just via the unit test.
+**Verified:** new `tests/wizard/equipmentDefaults.test.ts` (Cath Lab's Crore case,
+Dialysis's Lakh case, MRI's still-null case); full suite 293/293 passing (290 baseline
++ 3 new), clean `tsc --noEmit`, clean `npm run lint`, clean static-export `npm run
+build`. See also ISS-35 (a smaller, separate defect found in the same QA pass,
+documented but not fixed).
 
 ### ISS-29 — `computeAssessment.ts` ramped realized revenue and variable cost by `utilizationRamp` but never ramped billed revenue
 **Resolved:** 2026-07-14. Surfaced during Phase 8's Excel export monthly-breakdown work

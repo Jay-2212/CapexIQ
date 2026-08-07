@@ -11,23 +11,29 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-06, autonomous correctness/export/accessibility/release-quality
-pass — see the Change Log entry below for the full list; CI added, `npm run lint` fixed,
-9 new/expanded test files, no financial-model formula changed except IRR's error
-message wording)*
+*(Last updated: 2026-08-07, autonomous release-quality/accessibility verification pass
+— see the Change Log entry below for the full list; one mechanical bug fixed
+(ISS-34, purchase-cost unit conversion), one new bug documented not fixed (ISS-35), no
+financial-model formula/scoring/threshold/benchmark changed)*
 
-**This session added CI (`.github/workflows/ci.yml`: install/typecheck/lint/test/build/
-`git diff --check` on every push+PR to `main` — none existed before), fixed `npm run
-lint` (was non-functional — see ISS-32), closed a real untested-module gap
-(`formulas/workingCapitalPeak.ts` had no dedicated test), fixed a dangling local-path
-reference in the flagship "independently derived" golden-scenario claim (ISS in the
-Change Log below), added `aria-required` to every wizard field control (was
-visually-only via an `aria-hidden` asterisk), and documented two real findings without
-changing model behavior: launch delay is collected but not applied to the projection
-(ISS-30) and IRR intentionally throws rather than picks a root for multiple-IRR cash
-flows (ISS-31, message wording only changed). Full detail in this session's Change Log
-entry. Everything below this paragraph describes state as of 2026-07-14 and is still
-accurate unless a note above says otherwise.**
+**This session re-ran the full baseline (npm ci, typecheck, lint, 290 tests, build,
+`git diff --check`, a real end-to-end Excel/Word/ZIP export generation+structural
+inspection) — all green, matching the 2026-08-06 session's claims exactly. GitHub
+Actions CI showed one failed run on commit `8bc6c3c`
+("job was not acquired by Runner... even after multiple attempts") — confirmed
+transient infra, not a code/workflow defect, by re-running the identical job, which
+went green with no changes. Browser QA (Claude-in-Chrome, no Dark Reader interference
+confirmed via DOM check) walked the full flow on **Dialysis, a non-MRI equipment type
+producing a Weak outcome** — the exact combination the 2026-08-06 session flagged as
+still-untested. Found and fixed one real, high-value mechanical bug: `app/forms/
+equipmentDefaults.ts` was converting every equipment type's "Typical" purchase-cost
+default as if it were raw rupees, when each `equipment-data/*.json` file states its own
+unit (Lakh or Crore) — both currently-populated cases (Dialysis, Cath Lab) were wrong by
+a factor of 10^5-10^7, silently seeding a "Typical"-badged field a real user could trust
+without noticing (see ISS-34, resolved). Also found and documented, not fixed, a second,
+smaller defect in the actionable-insight card's never-payback gating (ISS-35). Everything
+below this paragraph describes state as of 2026-07-14/2026-08-06 and is still accurate
+unless a note above says otherwise.**
 
 **The warm-beige "calm clinical intelligence" redesign and Phase 7's results dashboard
 depth are both implemented and verified live.** The canonical calculation pipeline and
@@ -251,6 +257,67 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-08-07 — Autonomous release-quality/accessibility verification pass
+**What changed:** Jay was unavailable; ran a scoped verification pass per this
+project's `CLAUDE.md` (advisor-triage for judgment calls, never touch methodology/
+benchmarks/scoring, close at most one high-value mechanical issue found via tests or
+browser QA).
+1. **Full baseline re-verified, matching the 2026-08-06 session's claims exactly:**
+   `npm ci` (clean, 5 accepted dev-only audit findings per ISS-8), `npx tsc --noEmit`
+   (clean), `npm run lint` (clean), `npm test` (290/290 passing before this session's
+   own additions), `npm run build` (clean static export), `git diff --check` (clean).
+   A real end-to-end export pass (financed loan + ramped utilization + multi-payer MRI
+   scenario, run outside the test suite) generated real `.xlsx`/`.docx` files,
+   confirmed via `file`/`unzip -l` as genuine OOXML with the expected 7-sheet/
+   correctly-sized structure.
+2. **GitHub Actions CI investigated:** the run on commit `8bc6c3c` showed as failed
+   ("job was not acquired by Runner of type hosted even after multiple attempts") —
+   this is a GitHub-side runner-provisioning glitch, not a workflow or code defect
+   (public repo, unlimited hosted-runner minutes, standard `ubuntu-latest`). Confirmed
+   by re-running the identical job with no changes: went green. No CI changes made or
+   needed.
+3. **Browser QA (Claude-in-Chrome) walked the full flow on Dialysis** — a non-MRI
+   equipment type producing a Weak outcome, the exact gap the 2026-08-06 session
+   flagged as still-untested ("only MRI at Strong/Moderate has been browser-tested").
+   No Dark Reader interference (confirmed via a `data-darkreader-*` DOM check before
+   trusting any visual/contrast observation). Verified: landing → equipment select →
+   hospital profile validation (confirm-again "Start over," per-field
+   `aria-required`/`aria-invalid`/`data-invalid` gating spot-checked via DOM, matching
+   the 2026-08-06 session's fix) → Investment/Usage/Costs steps → Basic-path
+   completion → Results dashboard (Weak/0, NPV/IRR/payback, risk notes) → quick-
+   settings live recalculation (discount rate 12.5%→6% moved NPV live, no separate
+   wiring) → Advanced Mode opens without error (Payers & collection table renders) →
+   export buttons (self-labeling text, no `aria-label` needed) → keyboard focus
+   (Tab moves through interactive elements with a visible focus ring, confirmed via
+   `getComputedStyle` box-shadow, not just a screenshot).
+4. **ISS-34 (resolved) — found and fixed:** `app/forms/equipmentDefaults.ts` divided
+   every equipment type's `purchaseCost.typical` by a flat 10,000,000 to seed the
+   "Typical"-badged purchase-cost default, silently assuming raw rupees. Each
+   `equipment-data/*.json` file actually states its own unit for that field, and both
+   currently-populated cases use a scaled unit (Dialysis: Lakh, Cath Lab: Crore) — the
+   bug produced a default off by 10^5 (Dialysis) to 10^7 (Cath Lab), passing validation
+   silently since it's a required-but-nonzero number. Fixed by making the one consumer
+   unit-aware (`purchaseCostTypicalInCrore()`, three cases: Crore as-is, Lakh ÷100,
+   else ÷CRORE) — no sourced value in any `equipment-data/*.json` file was touched,
+   only how the already-correct number scales into the wizard's internal Crore
+   representation. `installationCost` (derived from the same base value) is fixed too.
+   Verified live in the browser, both directions of the Lakh/Crore toggle, for both
+   equipment types, not just via the new unit test
+   (`tests/wizard/equipmentDefaults.test.ts`, 3 cases). Full detail in `ISSUES.md`.
+5. **ISS-35 (open) — found, documented, not fixed:** in the same Weak-outcome scenario,
+   `ActionableInsightCard` rendered the literal text "...by about Infinity months" —
+   `formulas/actionableInsight.ts`'s `paybackImprovementMonths` is `Infinity` whenever
+   the baseline never pays back (using `runScenario()`'s `Infinity` sentinel), which
+   trivially clears the ≥6-month qualifying gate and renders unformatted into the
+   sentence. This is a gating decision as much as a display bug, so it's documented
+   only, not fixed this session — see `ISSUES.md` ISS-35.
+6. **Verification:** 293/293 tests (290 baseline + 3 new), clean `tsc --noEmit`, clean
+   `npm run lint`, clean static-export `npm run build`, `git diff --check` clean.
+**Not touched, on purpose:** ISS-30 (launch delay methodology, reserved for Jay),
+ISS-31 (accepted IRR behavior), ISS-28 (stale Cloudflare deploy — no direct deployment
+evidence gathered this session, not claimed fixed), any scoring weight, threshold,
+benchmark figure, sourced default value, or methodology composition rule.
 
 ### 2026-08-06 — Autonomous correctness/export/accessibility/release-quality pass
 **What changed:** Jay was unavailable; ran an Opus-advised QA pass with a standing
