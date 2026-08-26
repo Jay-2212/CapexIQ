@@ -107,17 +107,6 @@ inconsistency doesn't silently drift further.
 same way `formatInr` does (format the absolute value, prepend U+2212 for negatives)
 rather than trusting `Intl.NumberFormat`'s locale default.
 
-### ISS-28 — Live deploy (`capexiq.jaybharti.me`) is badly stale
-**Area:** deployment
-**What was found:** 2026-07-13, during Phase 7 browser QA. The live Cloudflare Pages
-site still serves the pre-Phase-6 scaffold placeholder ("This is a scaffold...") —
-none of Phase 6's wizard, Phase 4-13's redesign, or Phase 7's dashboard are live.
-`/assess` 404s directly (static-export routing not configured for direct navigation,
-separate from the staleness). Likely Cloudflare Pages isn't auto-deploying from
-`origin/main` pushes, or the last successful deploy predates Phase 6 entirely.
-**Not fixed this session:** deployment configuration is outside this session's scope
-and may be an intentional pause — flagged for Jay to decide, not silently changed.
-
 No other open issues from the 2026-07-13 visual audit. Phase 7 formula/export items
 remain tracked below under their existing IDs.
 
@@ -308,6 +297,17 @@ is a placeholder only, safe to replace once real product screenshots exist.
 ---
 
 ## Resolved
+
+### ISS-28 — Live deploy (`capexiq.jaybharti.me`) was badly stale
+**Area:** deployment
+**What was found:** 2026-07-13, during Phase 7 browser QA. The live Cloudflare Pages
+site served the pre-Phase-6 scaffold placeholder and did not expose `/assess` directly.
+**Resolution (2026-08-27):** Pushed the current source to GitHub `main` at `9b14e06`,
+then published the verified static `out/` build to the authenticated
+`capexiq-portfolio` Cloudflare Pages project because its Git integration did not
+create a deployment for the new commit. Deployment `8328e860-913a-4f5a-8616-b02b0d5a2009`
+is recorded against `9b14e06`; the custom domain and direct `/assess` route now serve
+the current build, including WebP assets.
 
 ### ISS-36 — Basic financing path forced Advanced Mode and the result action label was misleading
 **Area:** UI / calculation flow

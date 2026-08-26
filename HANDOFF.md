@@ -13,8 +13,8 @@ of *how* we got here.
 
 *(Last updated: 2026-08-27, CAPEX IQ foundation pass for the WebMCP challenge)*
 
-**The non-WebMCP foundation work requested by Jay is complete in the source tree and
-ready to push:**
+**The non-WebMCP foundation work requested by Jay is complete, committed as `9b14e06`,
+and published to `capexiq.jaybharti.me`:**
 
 - The preview/payback strip is in normal document flow, so it no longer covers the
   page while the user scrolls.
@@ -34,6 +34,9 @@ ready to push:**
 - Verification for this pass: 298 tests, TypeScript, ESLint, static export build, and
   `git diff --check` all pass. A clean local browser run also exercised the loan path
   through Results and confirmed the optimized image URLs load.
+- The Cloudflare Pages deployment is recorded against `9b14e06`; direct checks of the
+  custom domain and the deployment URL show the new WebP assets and direct `/assess`
+  route. The old stale-deployment issue is resolved.
 
 **WebMCP is intentionally not implemented yet.** The app remains a static,
 client-only site with browser-local draft storage and no backend. The next phase is the
@@ -137,11 +140,12 @@ for visual QA should do the same, or ask Jay to disable the extension for `local
    component keys its red state off the gated `error`/`data-invalid`, never off raw
    `required`. Re-open if Jay still sees it — that would mean a component or browser
    this session didn't reach.
-2. **`capexiq.jaybharti.me` (the live Cloudflare Pages deployment) is badly stale** —
-   it still serves the pre-Phase-6 scaffold placeholder ("This is a scaffold...instead
-   of the built product. Likely means Cloudflare Pages isn't auto-deploying from
-   `origin/main` pushes, or the last deploy predates Phase 6 entirely. Worth Jay's
-   attention independent of this session's work.
+2. **Historical deployment note — ISS-28 is now resolved:** at the time of this older
+   verification the live Cloudflare Pages deployment was stale and `/assess` was not
+   directly available. The verified `9b14e06` Pages deployment now serves the current
+   build on the custom domain and direct `/assess` route. The Git integration still did
+   not auto-create the deployment, so this release used the authenticated Pages upload
+   path after the source push.
 
 **2026-07-14 session — Phase 8 (Excel/Word/ZIP exports) built, plus Phase 7's last
 open item:**
