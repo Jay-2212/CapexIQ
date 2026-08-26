@@ -1,6 +1,6 @@
 # app/forms/wizard-state.md — wizard state & transition table (Phase 5)
 
-This is the doc `agent-build-plan.md` Phase 5 requires before any wizard component gets
+This is the doc `docs/agent-build-plan.md` Phase 5 requires before any wizard component gets
 written — "do not skip; do not start Phase 6 without this." It exists for the same
 reason `CONVENTIONS.md` §1 exists: an undocumented interaction rule becomes an
 inconsistent implementation you debug into consistency later, instead of a decision you
@@ -12,7 +12,7 @@ settled here.
 first draft could not safely infer from existing docs alone — see each section below
 for why): the wizard shape, step-routing strategy, and draft-persistence approach. Every
 other transition rule below was inferable from Phase 4 (`design/ux-product-spec.md`,
-`agent-build-plan.md` Phase 4) and is stated here as a direct consequence, not a new
+`docs/agent-build-plan.md` Phase 4) and is stated here as a direct consequence, not a new
 decision — cross-referenced rather than re-argued.
 
 ### 2026-07-13 experience amendment
@@ -43,7 +43,7 @@ interaction rules now supersede older presentation language below:
 ## 1. The wizard shape
 
 **Resolved fork:** SPEC.md §7's "possible wizard-style layout" suggested 7 discrete
-steps including "Step 6: Advanced Model" as its own step. `agent-build-plan.md` Phase
+steps including "Step 6: Advanced Model" as its own step. `docs/agent-build-plan.md` Phase
 4-F decided Advanced Mode is "an inline, collapsible panel directly below the Basic
 Mode fields on the same screen — not a separate wizard step" — which contradicts a
 literal reading of SPEC.md §7. This doc resolves it: **Advanced Mode is not a step; it's
@@ -135,7 +135,7 @@ sensible three-part story (what it costs → what it earns → what it costs to 
 Every field's control type, bounds, decimal places, required-ness, and error copy come
 from `content/inputs-metadata.json` — this doc does not restate or re-derive any of
 that (`CONVENTIONS.md` §3's single-source-of-truth rule, extended from formulas to
-input metadata by `agent-build-plan.md` Phase 4). What this doc adds is the **timing**
+input metadata by `docs/agent-build-plan.md` Phase 4). What this doc adds is the **timing**
 of validation, which `inputs-metadata.json` doesn't cover:
 
 - **Validate on every change, not on blur or submit — but only *display* the error
@@ -212,7 +212,7 @@ of validation, which `inputs-metadata.json` doesn't cover:
 
 ## 3. Basic ↔ Advanced toggle persistence
 
-Already decided, `agent-build-plan.md` Phase 4-F: entered Advanced values persist in
+Already decided, `docs/agent-build-plan.md` Phase 4-F: entered Advanced values persist in
 memory even while the panel is collapsed — collapsing never discards them. This doc
 adds the concrete mechanism: Advanced field values live in the same top-level wizard
 state container as Basic values (§7 below — one reducer, not a second state tree that
@@ -236,7 +236,7 @@ immediately") presupposes a preview is visible during input, not only after reac
 - Both the preview strip and the full `/results` dashboard call the **same** computed-
   results derivation from the **same** wizard state — never two independently-run
   copies of the formula pipeline (`CONVENTIONS.md` §3's dependency-direction rule,
-  same reasoning `agent-build-plan.md` Phase 7 already applies to the dashboard's
+  same reasoning `docs/agent-build-plan.md` Phase 7 already applies to the dashboard's
   charts vs. metric cards). Phase 6/7 own the exact function name and shape; this doc's
   requirement is only that there is exactly one.
 - **Invalid-state contract** (Phase 4-G, restated precisely as a state machine): each
@@ -408,7 +408,7 @@ truncate/extend rule.
   still valid per §2's route guard). If `schemaVersion` doesn't match, or the draft is
   malformed/unparseable, **discard it silently and start fresh** — no migration
   attempt, no error shown to the user. This is the "future format change doesn't crash
-  on an old saved draft" requirement `agent-build-plan.md` Phase 5 calls for, resolved
+  on an old saved draft" requirement `docs/agent-build-plan.md` Phase 5 calls for, resolved
   as simply as possible: a version bump is a clean break, not a migration project.
 - **Clear:** the draft is deleted from `localStorage` on (a) a successful export
   (Phase 8 — out of scope for this doc to define precisely, since export doesn't exist
@@ -506,7 +506,7 @@ without an explicit guard a double-click could interleave them.
 
 ## 10. Definition of Done — cross-reference
 
-| Phase 5 requirement (`agent-build-plan.md`) | Resolved here |
+| Phase 5 requirement (`docs/agent-build-plan.md`) | Resolved here |
 |---|---|
 | Every step, every field, its validation rule | §1.2 (assignment), §2 (timing) — bounds/errors stay in `content/inputs-metadata.json`, not duplicated |
 | Basic↔Advanced toggle effect on entered values | §3 (confirms Phase 4-F, adds the reducer mechanism) |
@@ -535,5 +535,5 @@ are now resolved, see §2 and §7.3.
 **Next:** Phase 6 (wizard UI implementation) builds against this doc exactly — a single
 `useReducer` for all wizard state (§3, §6), one `<input type="range" step=...>`-backed
 slider component reused everywhere (§5), and a test file exercising every transition
-named above with a plain-language test name, per `agent-build-plan.md` Phase 6's own
+named above with a plain-language test name, per `docs/agent-build-plan.md` Phase 6's own
 "Do" list.

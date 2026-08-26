@@ -1,6 +1,6 @@
 "use client";
 
-// Phase 7's "Advanced settings pane" goal line (agent-build-plan.md): lets a user
+// Phase 7's "Advanced settings pane" goal line (docs/agent-build-plan.md): lets a user
 // nudge the handful of assumptions that most directly move the outlook — Discount
 // Rate, Target Hurdle IRR, and the financing rate/rental for whichever acquisition
 // mode is active — without leaving /results. Reuses NumberField (the same control

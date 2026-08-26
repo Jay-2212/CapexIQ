@@ -3,7 +3,7 @@
 Plain-language definitions for every financial and product term this tool uses.
 Referenced by `field-explanations.md`, and intended to be the source `tooltip-copy.md`
 and `report-templates/formula-appendix.md` link back to once those are written (Phase
-4/Phase 2 respectively — see `agent-build-plan.md` Phase 3), rather than each
+4/Phase 2 respectively — see `docs/agent-build-plan.md` Phase 3), rather than each
 redefining the same term differently. Alphabetical within each group.
 
 ---
@@ -114,7 +114,7 @@ current benchmark (12.5% typical, sourced from listed Indian hospital-chain WACC
 
 **Target IRR / hurdle rate** — the minimum return a hospital requires before an
 investment is considered acceptable. No reliable published Indian benchmark exists for
-this (see `data-requirements.md` §17.2) — the tool suggests discount rate + 300–500bps
+this (see `docs/data-requirements.md` §17.2) — the tool suggests discount rate + 300–500bps
 as a starting heuristic, not a researched figure.
 
 ## Core financial outputs
@@ -157,7 +157,7 @@ Payback (25%, how quickly discounted payback happens relative to useful life),
 Financing Resilience (20%, DSCR-based — zero-weighted for cash purchases), and
 Operational Margin of Safety (20%, how much cushion exists above break-even usage).
 Bands: Strong (75–100), Moderate (55–74), Caution (35–54), Weak (0–34). See
-`financial-model-spec.md` §1 for the full methodology — the score is always a lens on
+`docs/financial-model-spec.md` §1 for the full methodology — the score is always a lens on
 numbers already shown elsewhere on the dashboard, never a hidden calculation.
 
 **Sensitivity analysis** — recalculating ROI/payback/NPV/IRR under different
@@ -166,7 +166,7 @@ the investment is to those assumptions being wrong.
 
 **Actionable insight (price-increase suggestion)** — an automatic, silent-unless-useful
 suggestion the tool surfaces only when a modest price increase (≤15%) would materially
-improve payback (by ≥6 months) — see `financial-model-spec.md` §4. Doesn't appear if
+improve payback (by ≥6 months) — see `docs/financial-model-spec.md` §4. Doesn't appear if
 no such improvement exists; never appears as a permanent UI element.
 
 ## Confidence and sourcing

@@ -47,9 +47,42 @@ export default function CostsStepPage() {
         </div>
       </section>
 
+      {state.basic.acquisitionMode !== "Cash" && !state.advancedOpen && (
+        <section className="question-card basic-financing-details">
+          <div className="question-section__heading">
+            <span>{state.basic.acquisitionMode === "Loan" ? "Loan details" : "Lease details"}</span>
+            <p>
+              {state.basic.acquisitionMode === "Loan"
+                ? "Add the few figures needed to include the loan in your basic result."
+                : "Add the few figures needed to include the lease in your basic result."}
+            </p>
+          </div>
+          <div className={`question-grid ${state.basic.acquisitionMode === "Loan" ? "question-grid--three" : "question-grid--two"}`}>
+            {state.basic.acquisitionMode === "Loan" ? (
+              <>
+                <NumberField path="advanced.C.downPayment" />
+                <NumberField path="advanced.C.loanInterestRate" />
+                <NumberField path="advanced.C.loanTenureMonths" />
+              </>
+            ) : (
+              <>
+                <NumberField path="advanced.C.leaseRentalPerMonth" />
+                <NumberField path="advanced.C.leaseTenureMonths" />
+              </>
+            )}
+          </div>
+        </section>
+      )}
+
       <AdvancedPanel />
 
-      <StepNav step="costs" complete={isStepComplete("costs", state)} backHref="/assess/usage" nextHref="/results" nextLabel="Continue with Basic and see my result" />
+      <StepNav
+        step="costs"
+        complete={isStepComplete("costs", state)}
+        backHref="/assess/usage"
+        nextHref="/results"
+        nextLabel={state.advancedOpen ? "Continue with Advanced and see my result" : "Continue with Basic and see my result"}
+      />
     </div>
   );
 }

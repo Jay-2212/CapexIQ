@@ -1,7 +1,7 @@
 # Tooltip Copy
 
 The actual short-form text shown in each field's click-to-open popover (SPEC.md §23.4,
-UI mechanics resolved in `agent-build-plan.md`'s Phase 4 gap-analysis pass: click-to-open,
+UI mechanics resolved in `docs/agent-build-plan.md`'s Phase 4 gap-analysis pass: click-to-open,
 not hover). Distinct from `content/field-explanations.md`, which is the longer prose
 reference this file draws from — these entries are the compressed, structured version
 meant to fit in a small popover.
@@ -56,7 +56,7 @@ equipment's data file at render time.
 ### Hospital bed size
 - **Definition:** Your hospital's total bed count.
 - **Direction:** Context-dependent — used as a lookup key for scale-dependent benchmarks, not a value with a "better" direction.
-- **Default/typical value:** No default; required input (`data-requirements.md` §19).
+- **Default/typical value:** No default; required input (`docs/data-requirements.md` §19).
 - **Confidence:** N/A (your own hospital's fact, not a benchmark).
 - **Source note:** N/A.
 - **How to estimate:** Use your hospital's registered/licensed bed count.
@@ -293,7 +293,7 @@ equipment's data file at render time.
 - **Direction:** Lower is better.
 - **Default/typical value:** 8-15% range referenced in research.
 - **Confidence:** Low-Medium.
-- **Source note:** `data-requirements.md`.
+- **Source note:** `docs/data-requirements.md`.
 - **How to estimate:** Prefer your own lender's actual quote over this range.
 - **Why it matters:** Directly drives EMI size and total interest paid.
 
@@ -425,7 +425,7 @@ equipment's data file at render time.
 - **Direction:** Lower discount rate raises calculated NPV; higher lowers it — not itself a value to "improve," but a cost-of-capital input.
 - **Default/typical value:** 12.5% typical (11.1-14.1% range).
 - **Confidence:** Medium — proxy from listed Indian hospital-chain WACC, not project-specific.
-- **Source note:** `equipment-data/common-assumptions.json`; `data-requirements.md` §17.1.
+- **Source note:** `equipment-data/common-assumptions.json`; `docs/data-requirements.md` §17.1.
 - **How to estimate:** Confirm against your own hospital's actual cost of capital where known.
 - **Why it matters:** Used in NPV, discounted payback, and the Investment Outlook score's Return Strength component.
 
@@ -434,7 +434,7 @@ equipment's data file at render time.
 - **Direction:** N/A — a threshold you set, not a calculated output.
 - **Default/typical value:** No reliable Indian benchmark exists; suggested starting point is discount rate + 300-500bps.
 - **Confidence:** Unavailable (confirmed unresearchable after two research passes).
-- **Source note:** `data-requirements.md` §17.2.
+- **Source note:** `docs/data-requirements.md` §17.2.
 - **How to estimate:** Use your own institution's hurdle-rate policy if one exists.
 - **Why it matters:** A comparison bar for IRR; not itself consumed by the Investment Outlook score, which uses discount rate as the hurdle instead.
 
@@ -452,7 +452,7 @@ equipment's data file at render time.
 - **Direction:** N/A — a regulatory/accounting fact, not a lever.
 - **Default/typical value:** 13 years (MRI/CT/Ultrasound) or 15 years (Cath Lab/Dialysis).
 - **Confidence:** High (Companies Act Schedule II, source S8).
-- **Source note:** `equipment-data/<type>.json`; `data-requirements.md` §12.4/§14.
+- **Source note:** `equipment-data/<type>.json`; `docs/data-requirements.md` §12.4/§14.
 - **How to estimate:** Use the sourced figure unless your own accounting policy differs.
 - **Why it matters:** The denominator in depreciation, EAC, and the Investment Outlook score's Speed to Payback ratio.
 
@@ -461,7 +461,7 @@ equipment's data file at render time.
 - **Direction:** Higher salvage value lowers annual depreciation.
 - **Default/typical value:** 5% of original cost, all equipment types (Companies Act Schedule II).
 - **Confidence:** Medium-High — well-established in practice, but not independently re-verified against primary Schedule II text this pass.
-- **Source note:** `equipment-data/<type>.json`; `data-requirements.md` §18.2.
+- **Source note:** `equipment-data/<type>.json`; `docs/data-requirements.md` §18.2.
 - **How to estimate:** Use the sourced figure unless you have a specific reason to expect a different residual value.
 - **Why it matters:** Reduces the depreciable base in the straight-line depreciation formula.
 
@@ -490,7 +490,7 @@ equipment's data file at render time.
 - **Confidence:** Unavailable.
 - **Source note:** N/A.
 - **How to estimate:** Use your own historical tariff/cost growth if available.
-- **Why it matters:** Affects multi-year projections beyond Year 1; distinct from the automatic actionable-insight engine's own tariff-increase testing (`financial-model-spec.md` §4).
+- **Why it matters:** Affects multi-year projections beyond Year 1; distinct from the automatic actionable-insight engine's own tariff-increase testing (`docs/financial-model-spec.md` §4).
 
 #### Scenario assumptions
 - **Definition:** The set of overrides (utilization, realization %, financing type, and similar) defining a named alternative scenario in sensitivity analysis.

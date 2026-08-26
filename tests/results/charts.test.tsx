@@ -1,5 +1,5 @@
 // Edge-case coverage for the two Phase 7 chart components — the "technically correct
-// but visually broken for edge values" risk agent-build-plan.md's Phase 7 DoD calls
+// but visually broken for edge values" risk docs/agent-build-plan.md's Phase 7 DoD calls
 // out explicitly. Live browser QA this session only exercised one winning scenario
 // (MRI, Caution -> Moderate); these tests cover the losing-scenario branches that
 // weren't otherwise rendered anywhere.

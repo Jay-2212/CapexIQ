@@ -294,9 +294,7 @@ h1[tabindex="-1"]:focus-visible {
 /* ---- Preview strip ---- */
 
 .preview-strip {
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  position: static;
   display: flex;
   align-items: center;
   gap: var(--space-5);
@@ -1149,7 +1147,7 @@ a { color: var(--accent-interactive); }
 .progress-stepper__item { position:relative; min-width:180px; justify-content:center; padding-right:32px; }
 .progress-stepper__item:not(:last-child)::after { content:""; position:absolute; right:0; width:40px; height:1px; background:var(--border-default); }
 .progress-stepper__index { width:28px; height:28px; background:rgba(255,255,255,.45); }
-.preview-strip { top:80px; z-index:5; min-height:58px; background:rgba(255,253,247,.9); border-color:var(--border-subtle); box-shadow:0 10px 32px rgba(65,53,38,.06); backdrop-filter:blur(12px); }
+.preview-strip { min-height:58px; background:rgba(255,253,247,.9); border-color:var(--border-subtle); box-shadow:0 10px 32px rgba(65,53,38,.06); backdrop-filter:blur(12px); }
 
 /* Equipment and hospital identity */
 .equipment-tile-grid { grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:42px; }
@@ -1193,6 +1191,8 @@ a { color: var(--accent-interactive); }
 .question-section__heading { margin-bottom:22px; }
 .question-section__heading span { font-size:17px; font-weight:750; }
 .question-section__heading p { margin:5px 0 0; font-size:13px; color:var(--text-secondary); }
+.basic-financing-details { margin-top:18px; padding:24px; }
+.basic-financing-details .question-section__heading { margin-bottom:18px; }
 .step-nav { justify-content:space-between; align-items:center; margin-top:28px; }
 
 /* Basic / Advanced decision and focused workspace */
@@ -1290,7 +1290,7 @@ a { color: var(--accent-interactive); }
 .cash-flow-chart__label strong { font-family:var(--font-mono); font-size:11px; font-weight:600; color:var(--text-primary); }
 
 /* Chart-level hover/focus tooltip — distinct from the 7-slot wizard-field tooltip
-   (agent-build-plan.md Phase 7 leftover item): value + series + period only, shown
+   (docs/agent-build-plan.md Phase 7 leftover item): value + series + period only, shown
    on hover and on keyboard focus alike, never gating a value only reachable this way
    (the accessible <table> beside each chart already covers that). */
 .chart-tooltip { position:absolute; z-index:5; max-width:min(220px, 90vw); transform:translate(-50%, calc(-100% - 10px)); pointer-events:none; padding:8px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); background:var(--text-primary); color:#fff; box-shadow:var(--shadow-modal); white-space:nowrap; opacity:0; transition:opacity 120ms ease-out; }

@@ -26,19 +26,20 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 ├── DIRECTORY.md                 <- this file
 ├── ISSUES.md                    <- open/accepted/resolved tracker, check every session
 ├── CONVENTIONS.md               <- how code gets written here — read before coding
-├── agent-build-plan.md          <- phased build plan (10 phases), dependencies, DoD —
-│                                  Phases 1-6 (data/formulas/content/design/wizard-state/
-│                                  wizard UI) are complete; Phase 7 (results dashboard) is next
-├── financial-model-spec.md      <- Investment Outlook score, EAC, discounted payback,
-│                                  automatic actionable-insight engine — implemented
+├── docs/                         <- long-form planning, research, and formula documentation
+│   ├── agent-build-plan.md       <- phased build plan (10 phases), dependencies, DoD —
+│   │                              Phases 1-6 (data/formulas/content/design/wizard-state/
+│   │                              wizard UI) are complete; Phase 7 (results dashboard) is next
+│   ├── financial-model-spec.md   <- Investment Outlook score, EAC, discounted payback,
+│   │                              automatic actionable-insight engine — implemented
+│   └── data-requirements.md      <- research brief + five completed research passes on
+│                                  real Indian healthcare-equipment data, see below
 ├── design/frontend-experience-audit-2026-07-13.md
 │                               <- live-browser frontend critique and phased redesign
 │                                  plan (ISS-27): guided flow, units, help, assets,
 │                                  Advanced workspace, Methodology, and Results
 ├── SPEC.md                      <- full product spec (has its own index, don't read
 │                                  front-to-back)
-├── data-requirements.md          research brief + five completed research passes on
-│                                 real Indian healthcare-equipment data, see below
 ├── AGENTS.md                    <- thin pointer to INTRODUCTION.md (auto-discovered filename)
 ├── .github/workflows/ci.yml     <- install/typecheck/lint/test/build/`git diff --check`
 │                                  on every push+PR to main (added 2026-08-06 — no CI
@@ -91,7 +92,7 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │   │   │                          realization sliders, canonical computeAssessment),
 │   │   │                          ScenarioComparisonTable.tsx (SPEC §28 user-named
 │   │   │                          scenario comparison), and ActionableInsightCard.tsx
-│   │   │                          (financial-model-spec.md §4 price-increase insight)
+│   │   │                          (docs/financial-model-spec.md §4 price-increase insight)
 │   └── charts/                   BreakEvenBar.tsx, CashFlowChart.tsx (Phase 7) — see
 │                                  its own README.md
 ├── public/                       Next.js static-export assets (equipment-images/,
@@ -170,13 +171,13 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 |---|---|---|
 | To understand the product | `SPEC.md` | Use its index at the top, don't read front-to-back |
 | Where things stand right now | `HANDOFF.md` | Current State block at the top — the actual source of truth |
-| Which phase to build next | `agent-build-plan.md` | Phases 1-6, 8 done; Phase 7's multi-equipment/multi-band visual QA pass and Phase 9 (scenario comparison) remain |
+| Which phase to build next | `docs/agent-build-plan.md` | Phases 1-6, 8 done; Phase 7's multi-equipment/multi-band visual QA pass and Phase 9 (scenario comparison) remain |
 | The wizard's route map, field-to-step assignment, and state transitions | `app/forms/wizard-state.md` | Read before writing any wizard component |
 | The actual wizard reducer/schema/validation code | `app/forms/README.md` | Full per-file table — reducer, field schema, validation, persistence |
 | The canonical wizard-to-result calculation pipeline | `formulas/computeAssessment.ts` | Validated against `tests/scenarios/`'s golden numbers; the preview strip and `/results` both call this, never a second copy |
 | How code should be structured/tested | `CONVENTIONS.md` | Read before writing or editing any code |
-| Real Indian data on equipment cost/maintenance/financing/utilization | `data-requirements.md` | §12-§20 have five research passes' findings; see its own table below |
-| The Investment Outlook score, EAC, discounted-payback, actionable-insight formulas | `financial-model-spec.md` | Implemented in `formulas/investmentOutlookScore.ts` etc. |
+| Real Indian data on equipment cost/maintenance/financing/utilization | `docs/data-requirements.md` | §12-§20 have five research passes' findings; see its own table below |
+| The Investment Outlook score, EAC, discounted-payback, actionable-insight formulas | `docs/financial-model-spec.md` | Implemented in `formulas/investmentOutlookScore.ts` etc. |
 | Typography/spacing scale, tooltip mechanics, theme, landing-page/entry-flow decisions | `design/ux-product-spec.md` | Phase 4 deliverable, resolves SPEC.md §36.3 |
 | Per-field validation bounds, control type (slider vs. input box), tooltip key | `content/inputs-metadata.json` | UI/control schema only — no numeric defaults |
 | The exact popover copy for a field's tooltip | `content/tooltip-copy.md` | 7-slot format; keyed by readable field name |
@@ -219,7 +220,7 @@ than duplicating it.
 | `maintenance.ts` | AMC/CMC annual cost |
 | `launchDelay.ts` | Simple monthly pre-operative interest during launch delay |
 | `sensitivity.ts` | Scenario-level sensitivity grid (`runScenario`); **Phase 9** added `deriveScenarioAssumptions()`, bridging canonical `AssessmentInputs`/`AssessmentResult` into this file's `ScenarioAssumptions` shape for the actionable insight and the sensitivity strip's tariff context |
-| `investmentOutlookScore.ts` | The 0-100 Investment Outlook score — 4 weighted sub-scores per `financial-model-spec.md` §1 |
+| `investmentOutlookScore.ts` | The 0-100 Investment Outlook score — 4 weighted sub-scores per `docs/financial-model-spec.md` §1 |
 | `eac.ts` | Equivalent Annual Cost |
 | `discountedPayback.ts` | Discounted payback period |
 | `actionableInsight.ts` | The automatic "cheapest win" tariff/timing suggestion engine |
@@ -276,7 +277,7 @@ old hex across the `.svg` files too.
 
 ---
 
-## data-requirements.md — what's actually in it
+## docs/data-requirements.md — what's actually in it
 
 Not just a research brief — five completed research passes live here too. Structure (§
 numbers match its own headers, not SPEC.md's):
@@ -324,7 +325,7 @@ accessibility note).
 
 ## What's NOT here yet
 
-Phases 1-6 of `agent-build-plan.md` are complete: real equipment data, the tested
+Phases 1-6 of `docs/agent-build-plan.md` are complete: real equipment data, the tested
 formula engine, content, the wizard state contract, and the full wizard. The
 2026-07-13 experience redesign is also implemented: premium beige landing,
 narrated/grouped Basic flow, one-topic Advanced workspace, designed Methodology, and
@@ -336,7 +337,7 @@ remaining:
   outlook story, score ring, NPV/IRR/payback cards, supporting metrics, and Advanced
   route. It still needs break-even/cash-flow charts, richer risk/narrative depth, and
   accessible table equivalents. The mandatory design gate at the top of
-  `agent-build-plan.md` Phase 7 governs styling. `design/dashboard-mockup.svg` is an
+  `docs/agent-build-plan.md` Phase 7 governs styling. `design/dashboard-mockup.svg` is an
   information-architecture reference only, not the current visual language. Phase 7 adds the
   Advanced settings pane (`discountRate`/`targetIrr`/`loanInterestRate` quick-tweak,
   wizard-state.md §1.2) — not built.
@@ -354,7 +355,7 @@ remaining:
   no invented Conservative/Optimistic deltas), `SensitivityStrip.tsx` (usage/
   realization sliders, runs the canonical `computeAssessment()` rather than the
   lighter `runScenario`, so it never disagrees with the dashboard headline above it),
-  and `ActionableInsightCard.tsx` (financial-model-spec.md §4, reusing
+  and `ActionableInsightCard.tsx` (docs/financial-model-spec.md §4, reusing
   `formulas/actionableInsight.ts` which turned out to already exist from Phase 2/3).
   `tests/scenarios/` holds golden end-to-end regression tests (2026-07-13), unrelated
   to this UI. ISS-19's utilization ramp-up and per-year maintenance override are

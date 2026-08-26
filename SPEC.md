@@ -55,7 +55,7 @@ Section numbers match the `##` headers below — jump to the one you need rather
 - §30 Narrative Summary — auto-generated written summary requirements
 
 **Data, research & risk**
-- §24 Research and Data Requirements — what `data-requirements.md` needs to cover (**the recommended next artifact — see §39**)
+- §24 Research and Data Requirements — what `docs/data-requirements.md` needs to cover (**the recommended next artifact — see §39**)
 - §36 Open Questions for Future Iteration — unresolved product / data / design questions
 - §37 Risks — 7 named risks + mitigations
 
@@ -68,7 +68,7 @@ Section numbers match the `##` headers below — jump to the one you need rather
 - §34 Naming Ideas
 - §35 Portfolio / Resume Value
 - §38 Proposed Version Roadmap — v0.1 through v0.6 plan
-- §39 Immediate Next Steps — explicitly recommends `data-requirements.md` next
+- §39 Immediate Next Steps — explicitly recommends `docs/data-requirements.md` next
 - §40 Current Conclusion — the "why this matters" closing thought
 
 ---
@@ -1143,7 +1143,7 @@ This should be in Advanced Mode.
 Used for NPV calculation.
 
 No sourced benchmark exists yet for an Indian private-healthcare-capex cost-of-capital
-figure — a prior draft of this section cited `data-requirements.md` §12.3 for a 12.0%
+figure — a prior draft of this section cited `docs/data-requirements.md` §12.3 for a 12.0%
 default, but that citation was false (§12.3 has no discount-rate row; see ISSUES.md
 ISS-9). Until real research lands, the tool must ship with this field genuinely
 unset/user-entered rather than a fabricated-looking default, and must let the user edit
@@ -1155,18 +1155,18 @@ real-time. See `equipment-data/common-assumptions.json`.
 Used to evaluate the Investment Outlook.
 
 Same problem as §18.2: a prior draft cited a 15.0% default as "sourced from
-`data-requirements.md` §12.3," which is false — no such row exists. Confirmed
-unresearchable after two research passes (`ISSUES.md` ISS-9, `data-requirements.md`
+`docs/data-requirements.md` §12.3," which is false — no such row exists. Confirmed
+unresearchable after two research passes (`ISSUES.md` ISS-9, `docs/data-requirements.md`
 §17.2) — no fabricated benchmark is ever shown for this field.
 
 **Resolved 2026-07-12** (UI assurance audit finding F1, Jay's decision) — see
-`design/ux-product-spec.md` §6 and `agent-build-plan.md` Phase 5: rather than leaving
+`design/ux-product-spec.md` §6 and `docs/agent-build-plan.md` Phase 5: rather than leaving
 this genuinely blank (which would block Basic Mode's step-gate on an unresearchable
 field), the wizard auto-fills it with a computed heuristic (`discountRate + 400bps`),
 shown with the same "Typical" tag every sourced default uses, and its tooltip states
 explicitly that this is a suggested starting point, not a researched number — the field
 stays fully user-editable. The Investment Outlook score itself does not consume this
-field directly (`financial-model-spec.md` §1.6 uses `discountRate` as the hurdle); its
+field directly (`docs/financial-model-spec.md` §1.6 uses `discountRate` as the hurdle); its
 only role is this UI comparison/starting-value.
 
 Do not hardcode unsupported assumptions without sources.
@@ -1460,7 +1460,7 @@ below.
 *   **Central Registry**: Control type classifications (sliders vs. static input boxes), slider bounds, and tooltip texts are stored cohesively in [inputs-metadata.json](file:///Users/jay/Documents/Roi_Calculator/content/inputs-metadata.json) to avoid duplication. The actual default *values* are not stored there — they live in `equipment-data/<type>.json` (equipment-specific) or `equipment-data/common-assumptions.json` (shared), each carrying its own confidence/sourceId, per the fix in ISSUES.md ISS-9.
 *   **Content Schema**: Each popover contains:
     1.  **Professional Definition**: Standard business/medical description of the variable.
-    2.  **Default Value**: Sourced from `data-requirements.md` benchmarks where one exists (e.g., 13 years useful life for diagnostics per Companies Act, S8, High confidence, or discount rate at 12.5% typical, Medium confidence). Where no benchmark exists at all (target IRR is the one such field — see ISSUES.md ISS-9 and §18.3's 2026-07-12 resolution for its labeled-heuristic exception), the popover must say so explicitly ("no benchmark available, enter your own estimate") rather than showing a number that looks sourced but isn't.
+    2.  **Default Value**: Sourced from `docs/data-requirements.md` benchmarks where one exists (e.g., 13 years useful life for diagnostics per Companies Act, S8, High confidence, or discount rate at 12.5% typical, Medium confidence). Where no benchmark exists at all (target IRR is the one such field — see ISSUES.md ISS-9 and §18.3's 2026-07-12 resolution for its labeled-heuristic exception), the popover must say so explicitly ("no benchmark available, enter your own estimate") rather than showing a number that looks sourced but isn't.
     3.  **Higher Value Impact**: Clear description of what increasing this variable does to ROI, NPV, payback, or risk.
     4.  **Lower Value Impact**: Clear description of what decreasing this variable does to the financial model.
 
@@ -1493,7 +1493,7 @@ A separate Markdown file should be created later for the research agent.
 Working file name:
 
 ```text
-data-requirements.md
+docs/data-requirements.md
 ```
 
 The research file should ask an internet-enabled agent to collect grounded Indian data.
@@ -1850,7 +1850,7 @@ The exported model should be transparent enough that a finance person can inspec
 **Resolved 2026-07-07:** this means live, embedded Excel formulas (cells reference an
 Assumptions sheet, e.g. `=Assumptions!B4*...`), not static computed values — "inspect and
 challenge" requires being able to click into a cell and trace it. See
-`agent-build-plan.md` Phase 4-H and Phase 8.
+`docs/agent-build-plan.md` Phase 4-H and Phase 8.
 
 ---
 
@@ -2220,7 +2220,7 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 4. Should the tool include a disclaimer that outputs are indicative and not financial advice?
 5. Should the tool allow hospital type selection: private, charitable, trust, corporate, government? —
    **Resolved 2026-07-11**: yes, optional, in Basic Mode — informational/report-context
-   only. No formula in `financial-model-spec.md` or `/formulas` currently consumes it;
+   only. No formula in `docs/financial-model-spec.md` or `/formulas` currently consumes it;
    if a future version wants it to actually affect the model (e.g. tax treatment), that
    needs a separate formula-design pass, not a silent assumption. See
    `content/inputs-metadata.json#basic.hospitalType`.
@@ -2230,7 +2230,7 @@ Built a healthcare capex decision-support tool for hospital equipment investment
    documenting their own vendor's CMC/AMC quote), not for a bed-tiered CMC/AMC
    *default*. A hypothesis that CMC/AMC pricing itself scales with bed count was
    tested via a fourth research pass and found unsupported — see
-   `data-requirements.md` §19.5, `ISSUES.md` ISS-12 (resolved).
+   `docs/data-requirements.md` §19.5, `ISSUES.md` ISS-12 (resolved).
 7. Should city tier be required or optional? — **Resolved 2026-07-11**: required,
    alongside bed size — same benchmarking-lookup role (§23.3's tooltip example already
    references "Tier 2 city" as a benchmark dimension). See §10.1.
@@ -2241,7 +2241,7 @@ Built a healthcare capex decision-support tool for hospital equipment investment
    `formula-appendix.md`. See `design/ux-product-spec.md` §5.3.
 10. Should the score be shown immediately or only after advanced metrics are calculated?
     — **Resolved 2026-07-07**: immediately, live, no "Calculate" button or loading
-    screen — see `agent-build-plan.md` Phase 4-G (live-recalculation contract);
+    screen — see `docs/agent-build-plan.md` Phase 4-G (live-recalculation contract);
     formulas are pure and cheap enough that there's nothing to wait on.
 11. Should Basic Mode show only billed revenue or also a simplified realized-revenue
     assumption? — **Found already resolved, annotated 2026-07-11**: §10.4 already
@@ -2278,7 +2278,7 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 6. How should useful life be assigned to each equipment category?
 7. What default discount rate should be used? — **Resolved 2026-07-07**: 12.5% typical
    (range 11.1–14.1%), sourced from listed Indian hospital-chain WACC. See
-   `data-requirements.md` §17.1 and `equipment-data/common-assumptions.json`.
+   `docs/data-requirements.md` §17.1 and `equipment-data/common-assumptions.json`.
 8. Should payer mix include PM-JAY as a default advanced option?
 9. Can loan/lease assumptions be grounded in current Indian healthcare equipment financing norms?
 10. What sources can support space and civil-work assumptions?
@@ -2288,11 +2288,11 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 14. Should DSCR (debt service coverage ratio) be part of the model, despite Advanced
     Mode's financing section (§11.C) never mentioning it? — **Resolved 2026-07-07**:
     yes — it's the "Financing Resilience" component of the Investment Outlook score.
-    See `financial-model-spec.md` §1.2.3 for the exact formula and normalization.
+    See `docs/financial-model-spec.md` §1.2.3 for the exact formula and normalization.
 
 ### 36.3 Design questions
 
-1. What exact typography should be used? — **Open.** `agent-build-plan.md` Phase 4-A
+1. What exact typography should be used? — **Open.** `docs/agent-build-plan.md` Phase 4-A
    names what has to be decided (a concrete type scale, line-heights, and a
    weight-to-role mapping) but does not itself decide it — `design/ux-product-spec.md`
    does not exist yet. Deliberately deferred; Jay is taking this up directly (2026-07-07).
@@ -2300,10 +2300,10 @@ Built a healthcare capex decision-support tool for hospital equipment investment
 3. Should the result score be circular, card-based, or text-based?
 4. How much color is acceptable before it starts feeling generic?
 5. Should the homepage include equipment visuals or remain mostly typographic?
-6. Should the advanced mode be a drawer, accordion, or separate tab? — **Resolved 2026-07-07**: inline collapsible panel below Basic Mode fields, with a preview banner listing what it unlocks. See `agent-build-plan.md` Phase 4-F.
+6. Should the advanced mode be a drawer, accordion, or separate tab? — **Resolved 2026-07-07**: inline collapsible panel below Basic Mode fields, with a preview banner listing what it unlocks. See `docs/agent-build-plan.md` Phase 4-F.
 7. Should charts appear immediately or after clicking “View financial dashboard”?
 8. How should warnings be displayed without making the tool feel negative or scary?
-9. Excel export formula strategy — **Resolved 2026-07-07**: live, embedded Excel formulas (not static pasted values), so a finance person can click into and trace any cell. See `agent-build-plan.md` Phase 4-H.
+9. Excel export formula strategy — **Resolved 2026-07-07**: live, embedded Excel formulas (not static pasted values), so a finance person can click into and trace any cell. See `docs/agent-build-plan.md` Phase 4-H.
 
 ---
 
@@ -2402,7 +2402,7 @@ Merge the original idea with healthcare-specific financial realism: revenue real
 Create:
 
 ```text
-data-requirements.md
+docs/data-requirements.md
 ```
 
 Goal:
@@ -2430,7 +2430,7 @@ Define user journey, screens, information architecture, field labels, tooltip co
 Create:
 
 ```text
-financial-model-spec.md
+docs/financial-model-spec.md
 ```
 
 Goal:
@@ -2444,7 +2444,7 @@ Define formulas, assumptions, calculations, exports, test cases, model states, a
 Create:
 
 ```text
-agent-build-plan.md
+docs/agent-build-plan.md
 ```
 
 Goal:
@@ -2473,7 +2473,7 @@ When work resumes, the next discussion should focus on:
 Recommended next artifact:
 
 ```text
-data-requirements.md
+docs/data-requirements.md
 ```
 
 Reason:

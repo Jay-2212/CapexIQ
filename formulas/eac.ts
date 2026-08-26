@@ -1,4 +1,4 @@
-// Equivalent Annual Cost — financial-model-spec.md §2.2
+// Equivalent Annual Cost — docs/financial-model-spec.md §2.2
 
 export function equivalentAnnualCost(
   initialInvestment: number,

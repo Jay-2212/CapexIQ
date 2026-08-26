@@ -1,6 +1,6 @@
 "use client";
 
-// Phase 7 — cumulative cash-flow chart (agent-build-plan.md Phase 7, design/
+// Phase 7 — cumulative cash-flow chart (docs/agent-build-plan.md Phase 7, design/
 // dashboard-mockup.svg's information architecture only, not its styling per the
 // 2026-07-13 design gate). Pure presentation: the running-total series itself comes
 // from formulas/roi.ts's cumulativeCashFlowSeries, never recomputed here

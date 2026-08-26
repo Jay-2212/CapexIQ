@@ -1,6 +1,6 @@
 # Word report template — Proposal Report.docx
 
-Phase 8 (`agent-build-plan.md`), per SPEC.md §29.4. Section-by-section structure for
+Phase 8 (`docs/agent-build-plan.md`), per SPEC.md §29.4. Section-by-section structure for
 `exports/word-generator.ts`, written before that generator per Phase 5's "doc before
 code" pattern. Every number in every section below is read directly off the one
 `AssessmentResult` (`formulas/computeAssessment.ts`) / `MonthlySeries`

@@ -12,22 +12,30 @@ import {
 
 const PERSONAS = [
   {
-    image: "/people-personas/01-hospital-administrator.jpg",
+    image: "/people-personas/01-hospital-administrator.webp",
+    width: 600,
+    height: 338,
     label: "Administrators",
     note: "Frame the operating case",
   },
   {
-    image: "/people-personas/05-operations-head-coo-v2.png",
+    image: "/people-personas/05-operations-head-coo-v2.webp",
+    width: 480,
+    height: 600,
     label: "Operations",
     note: "Test demand and readiness",
   },
   {
-    image: "/people-personas/03-cfo-finance-manager.jpg",
+    image: "/people-personas/03-cfo-finance-manager.webp",
+    width: 400,
+    height: 600,
     label: "Finance",
     note: "Stress-test the return",
   },
   {
-    image: "/people-personas/04-healthcare-consultant.jpg",
+    image: "/people-personas/04-healthcare-consultant.webp",
+    width: 600,
+    height: 400,
     label: "Advisors",
     note: "Compare the full commitment",
   },
@@ -109,7 +117,15 @@ export default function Home() {
 
           <div className="landing-hero-v3__visual">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/design/hero-ct-suite-v2.png" alt="A modern CT scanner suite" />
+            <img
+              src="/design/hero-ct-suite-v2.webp"
+              alt="A modern CT scanner suite"
+              width={1600}
+              height={878}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
             <div className="landing-decision-card">
               <div className="landing-decision-card__heading">
                 <span>Decision brief</span>
@@ -198,7 +214,14 @@ export default function Home() {
             {PERSONAS.map((persona) => (
               <article key={persona.label}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={persona.image} alt="" />
+                <img
+                  src={persona.image}
+                  alt=""
+                  width={persona.width}
+                  height={persona.height}
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div><h3>{persona.label}</h3><p>{persona.note}</p></div>
               </article>
             ))}

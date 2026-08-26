@@ -1,4 +1,4 @@
-// Investment Outlook score — financial-model-spec.md §1
+// Investment Outlook score — docs/financial-model-spec.md §1
 
 export type InvestmentOutlookBand =
   | "Strong"

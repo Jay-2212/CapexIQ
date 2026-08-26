@@ -1,7 +1,7 @@
 # Benchmark Notes — how to read a benchmark shown in this tool
 
 Every default value or suggested range in this tool (in a tooltip, a slider's starting
-position, or a report footnote) traces back to `data-requirements.md` — a single
+position, or a report footnote) traces back to `docs/data-requirements.md` — a single
 internal source-of-truth file that records where every number came from, how strong
 the evidence is, and where it doesn't apply. This page explains that system in plain
 language, for anyone reading a report or using the tool who isn't going to go read that
@@ -24,7 +24,7 @@ Every benchmark is tagged with exactly one of four confidence levels. These desc
   inference drawn from adjacent information rather than a direct statement, or only
   one indirect source.
 - **Unavailable** — no responsible source was found at all. In the underlying data
-  (`data-requirements.md`, `equipment-data/*.json`), the value stays `null` rather than
+  (`docs/data-requirements.md`, `equipment-data/*.json`), the value stays `null` rather than
   a guess. In most cases the wizard field itself is then also left blank for you to
   fill in — with one deliberate exception, target IRR/hurdle rate, noted below.
 

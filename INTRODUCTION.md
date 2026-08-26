@@ -50,7 +50,7 @@ given task doesn't touch works against that.
 - **ISSUES.md** — open problems/gaps being tracked. Worth a look before assuming
   something's fine; add to it the moment you spot something wrong, even if you don't
   fix it now.
-- **agent-build-plan.md** — the phased build plan. Check it when you need to know
+- **docs/agent-build-plan.md** — the phased build plan. Check it when you need to know
   which phase is next, or a phase's Definition of Done.
 - **SPEC.md** — the full product spec, has its own index at the top. Use it when you
   need the detail behind a specific decision, not front-to-back.
@@ -95,14 +95,14 @@ given task doesn't touch works against that.
 
 ## What's already done vs. what's next
 
-Visual/design assets, `data-requirements.md`, the rebrand to CapexIQ, a skeletal
+Visual/design assets, `docs/data-requirements.md`, the rebrand to CapexIQ, a skeletal
 Next.js code structure (build-verified — `npm install && npm run build` both succeed),
 the GitHub repo, and this documentation system including `CONVENTIONS.md` and
-`agent-build-plan.md` are all in place — see DIRECTORY.md for the map.
+`docs/agent-build-plan.md` are all in place — see DIRECTORY.md for the map.
 
-Not yet built: everything in `agent-build-plan.md`'s phases — real equipment data,
+Not yet built: everything in `docs/agent-build-plan.md`'s phases — real equipment data,
 formula implementations, content/copy, the wizard UI, the dashboard, exports. Check
-`HANDOFF.md`'s Current State block and `agent-build-plan.md` for exactly which phase is
+`HANDOFF.md`'s Current State block and `docs/agent-build-plan.md` for exactly which phase is
 next and why.
 
 ---

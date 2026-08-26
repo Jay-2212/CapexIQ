@@ -15,13 +15,13 @@ Read `INTRODUCTION.md`, then the project files it mandates. For UI work, always 
 - `design/tokens.css` and `design/colors.md`
 - `app/forms/wizard-state.md`
 - `content/inputs-metadata.json`
-- relevant sections of `SPEC.md`, `agent-build-plan.md`, and `financial-model-spec.md`
+- relevant sections of `SPEC.md`, `docs/agent-build-plan.md`, and `docs/financial-model-spec.md`
 
 Treat those files as product requirements. Do not propose a new theme, palette, typography system, icon family, aesthetic, page hierarchy, or interaction model merely because a generic guideline prefers one. Do not generate a replacement design system.
 
 Recommend a design change only when evidence shows an accessibility, usability, platform, correctness, or performance failure. Preserve the intended appearance when offering a compliant implementation.
 
-Default to an audit only. Do not edit implementation, specifications, `ISSUES.md`, or `agent-build-plan.md` unless the user explicitly asks for changes.
+Default to an audit only. Do not edit implementation, specifications, `ISSUES.md`, or `docs/agent-build-plan.md` unless the user explicitly asks for changes.
 
 ## Select the audit mode
 

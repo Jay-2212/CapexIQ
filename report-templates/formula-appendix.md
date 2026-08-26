@@ -234,7 +234,7 @@ should never be persisted there in the first place). Any future serialization
 boundary must encode `Infinity` as an explicit, distinct marker (e.g., a string
 `"never"` or a `neverPaysBack: true` flag) before calling `JSON.stringify` — never
 rely on `JSON.stringify`'s default behavior for a value that can be `Infinity`. See
-`agent-build-plan.md` Phase 6/8 for the corresponding checklist item.
+`docs/agent-build-plan.md` Phase 6/8 for the corresponding checklist item.
 
 ### 4.7 EAC (Equivalent Annual Cost)
 `formulas/eac.ts` — `equivalentAnnualCost()`
@@ -257,7 +257,7 @@ the Investment Outlook score.
 ## 5. Investment Outlook score
 
 `formulas/investmentOutlookScore.ts` — `investmentOutlookScore()`. Full methodology,
-worked example, and design rationale in `financial-model-spec.md` §1 — this section is
+worked example, and design rationale in `docs/financial-model-spec.md` §1 — this section is
 the condensed formula reference; that document is the one to read for *why* each
 anchor point was chosen.
 
@@ -367,7 +367,7 @@ baseline.
 
 ### 6.2 Automatic actionable price-increase insight
 `formulas/actionableInsight.ts` — `actionablePriceIncreaseInsight()`. Full rationale
-and worked example in `financial-model-spec.md` §4.
+and worked example in `docs/financial-model-spec.md` §4.
 
 ```text
 Test grid: price increases of [2%, 5%, 8%, 10%, 15%] of current billed tariff,

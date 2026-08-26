@@ -1,5 +1,5 @@
 // Peak working-capital need across a DSO-extended cash-received horizon —
-// financial-model-spec.md's dashboard-warning framing (SPEC.md §14.2: "may require
+// docs/financial-model-spec.md's dashboard-warning framing (SPEC.md §14.2: "may require
 // approximately INR X working capital support during the first Y months"), built on
 // top of workingCapitalGap()/cashReceivedByMonth() rather than only checking the
 // end-of-horizon convergence those two already prove (see PBA-3,

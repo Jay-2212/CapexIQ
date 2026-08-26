@@ -1,4 +1,4 @@
-// Discounted payback period — financial-model-spec.md §2.1
+// Discounted payback period — docs/financial-model-spec.md §2.1
 
 export function discountedPaybackPeriod(
   initialInvestment: number,

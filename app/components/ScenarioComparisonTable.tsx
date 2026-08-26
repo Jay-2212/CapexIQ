@@ -4,7 +4,7 @@
 // scenario-naming schemes: auto Conservative/Base/Optimistic presets, or user-created
 // named scenarios ("MRI Option A" vs "MRI Option B"). This build deliberately only
 // implements the second: there is no researched or Jay-approved definition anywhere in
-// data-requirements.md/financial-model-spec.md for what "Conservative" or "Optimistic"
+// docs/data-requirements.md/docs/financial-model-spec.md for what "Conservative" or "Optimistic"
 // mean numerically, and inventing a delta (e.g. "-10% usage") would be exactly the
 // kind of unsourced product constant CLAUDE.md's escalation rule reserves for Jay. The
 // three names remain available as suggestions (the <datalist> below) for whatever

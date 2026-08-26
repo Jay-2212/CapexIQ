@@ -82,7 +82,7 @@ describe("golden scenario C — non-viable purchase at the minimum useful-life h
 });
 
 describe("edge case — negative contribution margin (variable cost exceeds realized revenue per use)", () => {
-  it("breakEvenUsagePerDay throws when contribution per use is negative (financial-model-spec.md §1.6: the Investment Outlook score treats this as Operational Margin of Safety = 0, not an error to hide)", () => {
+  it("breakEvenUsagePerDay throws when contribution per use is negative (docs/financial-model-spec.md §1.6: the Investment Outlook score treats this as Operational Margin of Safety = 0, not an error to hide)", () => {
     const contribution = contributionPerUse(900, 1200); // realized 900, variable cost 1200
     expect(contribution).toBe(-300);
     expect(() => breakEvenUsagePerDay(100_000, contribution, 25)).toThrow(

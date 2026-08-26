@@ -193,7 +193,7 @@ relative to lenders' typical comfort margin (DSCR 1.41×)."
 The driver line is always generated from the actual lowest-scoring component and its
 real underlying number — never separately written copy that could drift from what the
 score is actually measuring. Full methodology and every anchor-point's rationale live
-in `financial-model-spec.md` §1.
+in `docs/financial-model-spec.md` §1.
 
 ## 8. Sensitivity analysis and the automatic actionable insight
 
@@ -207,7 +207,7 @@ background on every scenario: it tests a grid of modest tariff increases (2% to 
 starting at different future years, and surfaces the single smallest price change that
 would improve payback by at least 6 months. If no realistic price change clears that
 bar, nothing is shown — silence is the normal, expected result, not a fallback state.
-Full grid, gate, and selection logic in `financial-model-spec.md` §4 and
+Full grid, gate, and selection logic in `docs/financial-model-spec.md` §4 and
 `report-templates/formula-appendix.md` §6.2.
 
 ---

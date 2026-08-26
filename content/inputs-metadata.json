@@ -1,5 +1,5 @@
 {
-  "_status": "UI/control + validation schema, updated 2026-07-11 — see design/ux-product-spec.md Phase 4 Definition of Done and agent-build-plan.md Phase 4's 'Also produce' section.",
+  "_status": "UI/control + validation schema, updated 2026-07-11 — see design/ux-product-spec.md Phase 4 Definition of Done and docs/agent-build-plan.md Phase 4's 'Also produce' section.",
   "_note": "This registry defines HOW each field is rendered and validated (control type, data type, numeric bounds, decimal places, required-ness, error copy) — it does NOT hold benchmark numbers or tooltip prose. Actual default values live in equipment-data/<type>.json (equipment-specific) or equipment-data/common-assumptions.json (shared), each with its own confidence/sourceId. Tooltip content lives in content/tooltip-copy.md (the 7-slot structure) — each entry below points to it via 'tooltipKey' rather than duplicating text, which is the reconciliation content/tooltip-copy.md's own header flagged as outstanding (this file previously carried an earlier, simpler 4-slot tooltip object for 10 fields; that's removed here in favor of the single tooltip-copy.md source of truth). Field keys below are readable, provisional machine IDs — Phase 5's wizard-state.md is the authoritative place final IDs get fixed; re-keying then is mechanical, not a schema rewrite. Numeric min/max bounds are UI sanity/validation bounds only, not benchmark claims — per this project's no-invented-benchmarks rule, they don't imply a 'typical' value.",
   "_templateNote": "Several Advanced Mode fields repeat per payer type, per ramp-up period, or per year of useful life (SPEC.md §11.1 groups A/B/E). Rather than enumerate every instance as a separate near-duplicate entry, those are written once as a template with the repeat dimension named explicitly — Phase 5/6 expand each into concrete machine keys (e.g. one per payer type) using the same bounds.",
 
@@ -60,7 +60,7 @@
       "options": ["Private", "Charitable / Trust", "Corporate", "Government"],
       "required": false,
       "errorMessage": "Select a hospital type, or leave blank.",
-      "resolvedNote": "SPEC.md §36.1 Q5, resolved 2026-07-11: optional, informational/report-context only — no formula in financial-model-spec.md or /formulas currently consumes this field.",
+      "resolvedNote": "SPEC.md §36.1 Q5, resolved 2026-07-11: optional, informational/report-context only — no formula in docs/financial-model-spec.md or /formulas currently consumes this field.",
       "tooltipKey": null
     },
     "purchaseCost": {
@@ -660,7 +660,7 @@
         "allowNegative": false,
         "required": true,
         "resolvedNote": "Independently flagged twice, 2026-07-12/13, by two parallel audits (capexiq-ui-assurance's F1/ISS-14 and capexiq-prebuild-assurance's PBA-5) -- both found required:true with no sourced default would block Basic-Mode users. Resolved per the ui-assurance audit's fix (Jay's decision, Opus-advisor-reviewed): auto-fill rather than loosen the requirement.",
-        "defaultSource": "Computed heuristic (audit F1, resolved 2026-07-12, Jay's decision): discountRate + 400bps, auto-filled and shown with the standard 'Typical' tag (design/ux-product-spec.md §6) — never left blank. Not a researched benchmark; equipment-data/common-assumptions.json#targetIrr stays 'Unavailable' as the honest research status, this is a UI-level suggested-starting-point heuristic (already documented there and in financial-model-spec.md §1.6) applied so Basic Mode never blocks on an unresearchable field. User can override in Advanced Mode; not consumed by the Investment Outlook score itself (financial-model-spec.md §1.6 uses discountRate as the hurdle).",
+        "defaultSource": "Computed heuristic (audit F1, resolved 2026-07-12, Jay's decision): discountRate + 400bps, auto-filled and shown with the standard 'Typical' tag (design/ux-product-spec.md §6) — never left blank. Not a researched benchmark; equipment-data/common-assumptions.json#targetIrr stays 'Unavailable' as the honest research status, this is a UI-level suggested-starting-point heuristic (already documented there and in docs/financial-model-spec.md §1.6) applied so Basic Mode never blocks on an unresearchable field. User can override in Advanced Mode; not consumed by the Investment Outlook score itself (docs/financial-model-spec.md §1.6 uses discountRate as the hurdle).",
         "errorMessage": "Enter a target IRR between 0% and 50%.",
         "tooltipKey": "Target IRR / hurdle rate"
       },
@@ -733,7 +733,7 @@
         "decimalPlaces": 1,
         "allowNegative": false,
         "required": false,
-        "note": "Not yet consumed by any formula in this version — distinct from the automatic actionable-insight engine's own tariff-increase testing (financial-model-spec.md §4).",
+        "note": "Not yet consumed by any formula in this version — distinct from the automatic actionable-insight engine's own tariff-increase testing (docs/financial-model-spec.md §4).",
         "errorMessage": "Enter a value between 0% and 20%.",
         "tooltipKey": "Price escalation / Cost escalation"
       },

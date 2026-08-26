@@ -41,7 +41,7 @@ exported report. Doesn't affect any calculation.
 
 ### Hospital bed size
 Your hospital's total bed count. Used as a lookup key for utilization and (once
-researched — see `data-requirements.md` §19) maintenance-contract benchmarks that
+researched — see `docs/data-requirements.md` §19) maintenance-contract benchmarks that
 scale with hospital size and negotiating volume. A 50-bed hospital and a 500-bed
 hospital genuinely see different typical utilization and vendor pricing; this field is
 what lets the tool distinguish them instead of showing one generic number to everyone.
@@ -135,7 +135,7 @@ Hidden by default — see the persistent preview banner shown above the collapse
 for what opening this unlocks. Everything below adds precision on top of Basic Mode's
 first-pass estimate; none of it is required to see an initial result.
 
-**Preview banner copy** (shown above the collapsed panel, per `agent-build-plan.md`
+**Preview banner copy** (shown above the collapsed panel, per `docs/agent-build-plan.md`
 Phase 4-F; extends SPEC.md §10.4's original soft-note to name all six groups below by
 label, so nothing Advanced unlocks stays invisible to a Basic-only user):
 

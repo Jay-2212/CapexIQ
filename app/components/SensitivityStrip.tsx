@@ -1,6 +1,6 @@
 "use client";
 
-// Phase 9's continuous sensitivity view (agent-build-plan.md): drag usage/day or
+// Phase 9's continuous sensitivity view (docs/agent-build-plan.md): drag usage/day or
 // realization % and see NPV/IRR/payback update live next to the main charts. Runs the
 // full canonical computeAssessment() (CONVENTIONS.md §3 — one engine), never the
 // lighter runScenario model, so the strip's resting-position numbers always match the

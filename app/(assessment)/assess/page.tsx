@@ -10,12 +10,18 @@ import { Button } from "../../components/Button";
 import { firstInvalidFieldOnStep, isStepComplete } from "../../forms/wizardValidation";
 import type { EquipmentCategory } from "../../forms/wizardTypes";
 
-const EQUIPMENT_TILES: { category: EquipmentCategory; image: string | null; note: string }[] = [
-  { category: "MRI", image: "/equipment-images/01-mri-machine.jpg", note: "Magnetic resonance" },
-  { category: "CT", image: "/equipment-images/02-ct-scanner.jpg", note: "Computed tomography" },
-  { category: "Cath Lab", image: "/equipment-images/03-cath-lab-cardiology-equipment.jpg", note: "Interventional cardiology" },
-  { category: "Dialysis", image: "/equipment-images/04-dialysis-unit.jpg", note: "Renal care" },
-  { category: "Ultrasound", image: "/equipment-images/05-ultrasound-machine.jpg", note: "Diagnostic imaging" },
+const EQUIPMENT_TILES: {
+  category: EquipmentCategory;
+  image: string | null;
+  width?: number;
+  height?: number;
+  note: string;
+}[] = [
+  { category: "MRI", image: "/equipment-images/01-mri-machine.webp", width: 1200, height: 800, note: "Magnetic resonance" },
+  { category: "CT", image: "/equipment-images/02-ct-scanner.webp", width: 1200, height: 800, note: "Computed tomography" },
+  { category: "Cath Lab", image: "/equipment-images/03-cath-lab-cardiology-equipment.webp", width: 1200, height: 800, note: "Interventional cardiology" },
+  { category: "Dialysis", image: "/equipment-images/04-dialysis-unit.webp", width: 974, height: 1200, note: "Renal care" },
+  { category: "Ultrasound", image: "/equipment-images/05-ultrasound-machine.webp", width: 801, height: 1200, note: "Diagnostic imaging" },
   { category: "Custom", image: null, note: "Another equipment type" },
 ];
 
@@ -64,7 +70,15 @@ export default function PreStepPage() {
           >
             {tile.image ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={tile.image} alt="" className="equipment-tile__image" />
+              <img
+                src={tile.image}
+                alt=""
+                width={tile.width}
+                height={tile.height}
+                loading="lazy"
+                decoding="async"
+                className="equipment-tile__image"
+              />
             ) : (
               <div className="equipment-tile__icon"><Puzzle aria-hidden="true" size={34} /></div>
             )}
@@ -79,7 +93,14 @@ export default function PreStepPage() {
           <div className="profile-stage__visual">
             {selected.image ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={selected.image} alt="" />
+              <img
+                src={selected.image}
+                alt=""
+                width={selected.width}
+                height={selected.height}
+                loading="lazy"
+                decoding="async"
+              />
             ) : <Puzzle aria-hidden="true" size={68} />}
             <span>{selected.category} assessment</span>
           </div>

@@ -11,6 +11,40 @@ of *how* we got here.
 
 ## Current State
 
+*(Last updated: 2026-08-27, CAPEX IQ foundation pass for the WebMCP challenge)*
+
+**The non-WebMCP foundation work requested by Jay is complete in the source tree and
+ready to push:**
+
+- The preview/payback strip is in normal document flow, so it no longer covers the
+  page while the user scrolls.
+- Step 3's result button now names the active path: Basic when Advanced Mode is closed,
+  Advanced when it is open.
+- Loan and Lease users get a compact financing section in Basic Mode. Loan interest,
+  tenure, and down payment (or Lease rental and tenure) are required there, feed the
+  same canonical calculation, and reappear with the same values when Advanced Mode is
+  opened. Basic Mode does not force the rest of the Advanced workspace.
+- Served landing and equipment images are now resized, high-quality WebP files with
+  explicit dimensions and lazy loading where appropriate. The original source assets
+  remain in the repo; the web copies are quality-85 lossy WebP, not mathematically
+  lossless files.
+- The three long planning/research/model documents now live under `docs/`; the root
+  keeps the short project instructions, README, licence, specifications, handoff, and
+  issue tracker easy to find.
+- Verification for this pass: 298 tests, TypeScript, ESLint, static export build, and
+  `git diff --check` all pass. A clean local browser run also exercised the loan path
+  through Results and confirmed the optimized image URLs load.
+
+**WebMCP is intentionally not implemented yet.** The app remains a static,
+client-only site with browser-local draft storage and no backend. The next phase is the
+WebMCP tool surface and the document-to-assessment demo.
+
+**Tooling note:** Chrome DevTools MCP was installed/configured in the local Codex
+configuration for the next refreshed session. This running session cannot load newly
+configured MCP tools, so no formal DevTools performance trace is claimed here.
+
+### Earlier verification context retained below
+
 *(Last updated: 2026-08-07, autonomous release-quality/accessibility verification pass
 — see the Change Log entry below for the full list; one mechanical bug fixed
 (ISS-34, purchase-cost unit conversion), one new bug documented not fixed (ISS-35), no
@@ -42,8 +76,8 @@ Crore-based financial contracts are unchanged throughout.
 - `/` has a decision-led hero, a compact model-coverage strip, a three-step story, a
   legible Basic/Advanced comparison, concise role cards, and a final CTA. Landing-only
   rules live in `app/landing.css`. Purpose-made CT and COO assets are in
-  `public/design/hero-ct-suite-v2.png` and
-  `public/people-personas/05-operations-head-coo-v2.png`.
+  `public/design/hero-ct-suite-v2.webp` and
+  `public/people-personas/05-operations-head-coo-v2.webp`.
 - `/assess` collects hospital name and carries the selected equipment into the hospital
   profile stage. Investment supports independent Lakh/Crore display units for purchase
   and civil cost while persisting canonical Crore values. Usage and costs are grouped
@@ -114,7 +148,7 @@ open item:**
 - **Chart-level hover tooltips** (the one item Phase 7 was missing) are built:
   `app/charts/CashFlowChart.tsx`/`BreakEvenBar.tsx` bars are focusable/hoverable marks
   showing exact value + series label + period, on both mouse hover and keyboard focus,
-  live-verified in a real browser. See `agent-build-plan.md` Phase 7's Do-list.
+  live-verified in a real browser. See `docs/agent-build-plan.md` Phase 7's Do-list.
 - **Phase 8 exports are real**, not stubs: `exports/excel-generator.ts` produces a
   `.xlsx` with live, embedded formulas (Assumptions/Monthly/Annual Summary/Break-even
   Analysis/Maintenance Schedule/Charts(data)/Formula Notes tabs) referencing an
@@ -132,7 +166,7 @@ open item:**
   `formulas/monthlySeries.ts` across two golden scenarios. This caught two real bugs
   before they shipped (an unquoted space-containing sheet-name reference, and a
   missing upper-bound guard on a DSO cash-received lookup that produced `#NUM!` past
-  the useful-life horizon). See `agent-build-plan.md` Phase 8's DoD status for the
+  the useful-life horizon). See `docs/agent-build-plan.md` Phase 8's DoD status for the
   full verification writeup. **Follow-up (2026-07-14):** LibreOffice is now installed
   in this environment and was used to actually recalculate a real generated `.xlsx`
   headlessly (`soffice --convert-to xlsx` with `OOXMLRecalcMode` forced to always-
@@ -173,13 +207,13 @@ sensitivity / actionable insight) built:**
   §11.2/§27 name but never spec in detail): drags usage/day and realization %
   (bounds from `content/inputs-metadata.json`) and shows a live NPV/IRR/payback strip.
   Deliberately runs the full canonical `computeAssessment()`, **not** the lighter
-  `runScenario` `agent-build-plan.md`'s Phase 9 text originally pointed at — an Opus
+  `runScenario` `docs/agent-build-plan.md`'s Phase 9 text originally pointed at — an Opus
   advisor pass caught that `runScenario` has no utilization ramp/maintenance
   schedule/payer-mix granularity, so at rest it would show different numbers than the
   dashboard headline directly above it. Local-state only, never dispatched through
   the wizard reducer (unlike `ResultsQuickSettings`), so it can never mutate the
   user's real inputs.
-- **`app/components/ActionableInsightCard.tsx`** (financial-model-spec.md §4,
+- **`app/components/ActionableInsightCard.tsx`** (docs/financial-model-spec.md §4,
   Jay-approved 2026-07-07): renders the passive price-increase suggestion or nothing.
   **Found the underlying formula already built** — `formulas/actionableInsight.ts`
   existed since a Phase 2/3-era session (commit `128a929`), fully implementing §4's
@@ -214,7 +248,7 @@ sensitivity / actionable insight) built:**
   LibreOffice-verifying it, no blocker to re-confirm first.
 
 **Next:** Phase 9 (sensitivity/scenario comparison/actionable insight) is now built —
-see this doc's entry above and `agent-build-plan.md`'s Phase 9 section. Two fast-follows
+see this doc's entry above and `docs/agent-build-plan.md`'s Phase 9 section. Two fast-follows
 remain open across Phases 7-8: a visual QA pass across the other equipment types and a
 Strong/Weak outcome (only MRI at Caution/Moderate, and this session's own fresh MRI
 Strong/100 run, have been live-tested — Weak/Caution on a non-MRI type is still
@@ -257,6 +291,38 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-08-27 — WebMCP foundation pass: financing flow, layout, assets, and repository organization
+**What changed:** Jay asked for five foundation fixes before WebMCP itself: repair the
+preview strip, make the Basic/Advanced action mode-aware, make Basic loan calculations
+complete without forcing the full Advanced panel, optimize served images, and clean the
+GitHub root.
+1. **Preview strip:** removed sticky positioning so the payback/status strip stays in
+   the page's normal flow and cannot cover the heading or fields while scrolling.
+2. **Mode-aware result action:** Step 3 now says `Continue with Basic...` while the
+   Advanced workspace is closed and `Continue with Advanced...` while it is open.
+3. **Basic financing:** added the minimum Loan fields (down payment, interest rate,
+   tenure) and the analogous Lease fields to Basic Mode. They use the existing Group C
+   state, existing validation, and the canonical `toAssessmentInputs()` mapping, so
+   the loan/lease math is included in Basic results and the values carry into Advanced.
+   Added focused component, validation, and calculation regression tests.
+4. **Image delivery:** replaced served raster copies with resized quality-85 WebP
+   copies, added intrinsic dimensions and loading hints, and removed one unused served
+   COO image. Root source assets were preserved. This is a visual-quality optimization,
+   not mathematical lossless encoding.
+5. **Repository organization:** moved the three long planning/research/model documents
+   into `docs/`, added `docs/README.md`, and updated repository references and the
+   directory map. The existing MIT code licence remains at `LICENSE-CODE`.
+6. **Tool preparation:** updated the local web-search skill to prefer TinyFish with
+   Firecrawl as fallback, and configured Chrome DevTools MCP for a refreshed Codex
+   session. WebMCP code was not added in this pass.
+7. **Verification:** `npm test` 298/298, `npx tsc --noEmit`, `npm run lint`,
+   `npm run build`, and `git diff --check` all pass. Local browser verification covered
+   the Basic Loan path, Advanced value carry-over, Results navigation, normal-flow
+   preview strip, and WebP image loading.
+**Not touched, on purpose:** backend/Supabase, WebMCP tool definitions, Excel/Word
+export redesign, financial methodology, scoring constants, sourced benchmarks, and
+deployment configuration.
 
 ### 2026-08-07 — Autonomous release-quality/accessibility verification pass
 **What changed:** Jay was unavailable; ran a scoped verification pass per this
@@ -430,14 +496,14 @@ fast-follow note rather than build it this session.
    overrides, full SPEC §28.2 column set, ephemeral `useState`.
 3. **`app/components/SensitivityStrip.tsx` (new):** the continuous, slider-driven view
    SPEC §11.2/§27 name but never spec in UI detail. An Opus advisor pass caught that
-   `agent-build-plan.md`'s Phase 9 text pointed at `runScenario` for this, which lacks
+   `docs/agent-build-plan.md`'s Phase 9 text pointed at `runScenario` for this, which lacks
    utilization ramp/maintenance-schedule/payer-mix granularity and would show numbers
    diverging from the dashboard headline at rest — resolved toward the full canonical
    `computeAssessment()` instead, honoring the same section's live-recalculation-
    contract instruction. Local-state overrides only, never dispatched through the
    wizard reducer.
 4. **`app/components/ActionableInsightCard.tsx` (new) + `formulas/sensitivity.ts`'s
-   `deriveScenarioAssumptions()` (new):** financial-model-spec.md §4's passive
+   `deriveScenarioAssumptions()` (new):** docs/financial-model-spec.md §4's passive
    price-increase suggestion. **Found `formulas/actionableInsight.ts` already fully
    implemented** from a Phase 2/3-era session (commit `128a929`, predating this phase
    by weeks) — its existing tests confirmed it matches §4's grid/gate/cheapest-win/

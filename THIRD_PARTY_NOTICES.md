@@ -38,7 +38,7 @@ websites is granted by this repository.
 ## Financial assumptions and methodology
 
 The calculation model's defaults and example values are illustrative. The
-research notes in `data-requirements.md` distinguish sourced references,
+research notes in `docs/data-requirements.md` distinguish sourced references,
 confidence, and values that should remain user-entered. No benchmark database,
 vendor quote, hospital record, or professional recommendation is being
 relicensed here.

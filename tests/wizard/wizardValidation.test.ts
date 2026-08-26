@@ -139,6 +139,45 @@ describe("isStepComplete / firstInvalidFieldOnStep", () => {
     expect(state.basic.billedTariffPerUse).toBeNull();
     expect(isStepComplete("usage", state)).toBe(false);
   });
+
+  it("Loan mode blocks Costs until its Basic financing values are filled, without requiring unrelated Advanced fields", () => {
+    let state = completeMri();
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: "basic.acquisitionMode",
+      value: "Loan",
+    });
+    expect(isStepComplete("costs", state)).toBe(false);
+
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: "advanced.C.downPayment",
+      value: 0.75,
+    });
+    expect(isStepComplete("costs", state)).toBe(true);
+  });
+
+  it("Lease mode blocks Costs until the compact lease values are filled", () => {
+    let state = completeMri();
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: "basic.acquisitionMode",
+      value: "Lease",
+    });
+    expect(isStepComplete("costs", state)).toBe(false);
+
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: "advanced.C.leaseRentalPerMonth",
+      value: 50_000,
+    });
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: "advanced.C.leaseTenureMonths",
+      value: 60,
+    });
+    expect(isStepComplete("costs", state)).toBe(true);
+  });
 });
 
 describe("earliestIncompleteStep — route guard (wizard-state.md §2)", () => {

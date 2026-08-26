@@ -1,5 +1,5 @@
 {
-  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md §17/§18 and ISSUES.md ISS-9/ISS-3",
+  "_status": "partially populated (2026-07-07 second + third research pass) - see docs/data-requirements.md §17/§18 and ISSUES.md ISS-9/ISS-3",
   "equipmentType": "mri",
   "purchaseCost": {
     "low": null,
@@ -14,14 +14,14 @@
     "unit": "years",
     "confidence": "High",
     "sourceId": "S8",
-    "note": "Companies Act Schedule II names 'Cat-scan and ultrasound machines' as the diagnostic-scan category (13 years) -- MRI is grouped here as the same class of diagnostic imaging equipment. See data-requirements.md §12.4/§14."
+    "note": "Companies Act Schedule II names 'Cat-scan and ultrasound machines' as the diagnostic-scan category (13 years) -- MRI is grouped here as the same class of diagnostic imaging equipment. See docs/data-requirements.md §12.4/§14."
   },
   "salvageValuePercentage": {
     "value": 5,
     "unit": "percent",
     "confidence": "Medium-High",
     "sourceId": "S8",
-    "note": "Companies Act Schedule II caps residual value at 5% of original cost unless separately justified; no evidence found of a different treatment for medical equipment. Citation corrected to S8 (Schedule II itself, already used for usefulLifeYears) -- the third research pass cited an Income Tax depreciation-rates page, which looks like a citation mismatch (different regime). Full independent verification of the exact Schedule II clause was not completed -- see data-requirements.md §18.2."
+    "note": "Companies Act Schedule II caps residual value at 5% of original cost unless separately justified; no evidence found of a different treatment for medical equipment. Citation corrected to S8 (Schedule II itself, already used for usefulLifeYears) -- the third research pass cited an Income Tax depreciation-rates page, which looks like a citation mismatch (different regime). Full independent verification of the exact Schedule II clause was not completed -- see docs/data-requirements.md §18.2."
   },
   "installationAndAncillaryCostPercentage": {
     "low": 10,
@@ -30,7 +30,7 @@
     "unit": "percent of equipment cost",
     "confidence": "Medium",
     "sourceId": "S38,S40,S49",
-    "note": "NEIGRIHMS tenders require a minimum 10% of product cost allocated to installation/commissioning/testing; a Borooah Cancer Institute MRI tender sets the minimum at 30%. These are tender-mandated bid-allocation floors, not measured actual average spend -- see data-requirements.md §18.3."
+    "note": "NEIGRIHMS tenders require a minimum 10% of product cost allocated to installation/commissioning/testing; a Borooah Cancer Institute MRI tender sets the minimum at 30%. These are tender-mandated bid-allocation floors, not measured actual average spend -- see docs/data-requirements.md §18.3."
   },
   "warrantyYears": {
     "low": 5,
@@ -39,7 +39,7 @@
     "unit": "years",
     "confidence": "High",
     "sourceId": "S37,S38",
-    "note": "Two independent government tenders (Shirdi Saibaba Sansthan Trust 3T MRI; NEIGRIHMS 1.5T MRI) both specify 5-year comprehensive warranty. See data-requirements.md §18.1. Normalized to {low,typical,high} 2026-07-13 (capexiq-prebuild-assurance PBA-1) for cross-equipment schema consistency -- a single reported figure, not a real range, so low=typical=high."
+    "note": "Two independent government tenders (Shirdi Saibaba Sansthan Trust 3T MRI; NEIGRIHMS 1.5T MRI) both specify 5-year comprehensive warranty. See docs/data-requirements.md §18.1. Normalized to {low,typical,high} 2026-07-13 (capexiq-prebuild-assurance PBA-1) for cross-equipment schema consistency -- a single reported figure, not a real range, so low=typical=high."
   },
   "cmcYears": {
     "low": 5,
@@ -48,7 +48,7 @@
     "unit": "years",
     "confidence": "Medium",
     "sourceId": "S38",
-    "note": "Follows the 5-year warranty in the NEIGRIHMS tender. See data-requirements.md §18.4. Normalized to {low,typical,high} 2026-07-13 (PBA-1) -- a single reported figure, not a real range, so low=typical=high."
+    "note": "Follows the 5-year warranty in the NEIGRIHMS tender. See docs/data-requirements.md §18.4. Normalized to {low,typical,high} 2026-07-13 (PBA-1) -- a single reported figure, not a real range, so low=typical=high."
   },
   "amcAnnualCostPercentage": {
     "low": 2,
@@ -57,7 +57,7 @@
     "unit": "percent of equipment cost per year",
     "confidence": "Low",
     "sourceId": "S52",
-    "note": "Labour-only AMC. This is a single generic tender clause (SCTIMST) applied identically across all 5 equipment types in the absence of equipment-specific AMC data -- not independently researched for MRI specifically. See data-requirements.md §18.4."
+    "note": "Labour-only AMC. This is a single generic tender clause (SCTIMST) applied identically across all 5 equipment types in the absence of equipment-specific AMC data -- not independently researched for MRI specifically. See docs/data-requirements.md §18.4."
   },
   "cmcAnnualCostPercentage": {
     "low": 3,
@@ -66,14 +66,14 @@
     "unit": "percent of equipment cost per year",
     "confidence": "Low-Medium",
     "sourceId": "S51,S52",
-    "note": "IMPORTANT CONTRADICTION -- do not use as sole default: this is a generic tender-ceiling range (what vendors are contractually allowed to bid up to), not equipment-specific. A peer-reviewed life-cycle-costing study of one MRI at an unnamed tertiary-care teaching hospital (S53) found ACTUAL post-warranty CMC cost was only ~0.23-0.28% of equipment value per year (Rs 9.7 lakh over 5 years on a ~Rs 7.5 crore machine) -- roughly 25-30x lower than this range. A bed/volume-tiering theory for this gap was tested via a fourth research pass (2026-07-11) and is NOT verified -- no bed-count or scan-volume MRI maintenance-pricing schedule exists in any source found. See data-requirements.md §18.4/§19.5 (ISS-12, resolved).",
+    "note": "IMPORTANT CONTRADICTION -- do not use as sole default: this is a generic tender-ceiling range (what vendors are contractually allowed to bid up to), not equipment-specific. A peer-reviewed life-cycle-costing study of one MRI at an unnamed tertiary-care teaching hospital (S53) found ACTUAL post-warranty CMC cost was only ~0.23-0.28% of equipment value per year (Rs 9.7 lakh over 5 years on a ~Rs 7.5 crore machine) -- roughly 25-30x lower than this range. A bed/volume-tiering theory for this gap was tested via a fourth research pass (2026-07-11) and is NOT verified -- no bed-count or scan-volume MRI maintenance-pricing schedule exists in any source found. See docs/data-requirements.md §18.4/§19.5 (ISS-12, resolved).",
     "_observedActualAlternative": {
       "value": 0.25,
       "range": "0.23-0.28",
       "unit": "percent of equipment cost per year",
       "confidence": "Medium",
       "sourceId": "S53",
-      "note": "One unnamed tertiary-care teaching hospital's real observed cost from a peer-reviewed life-cycle-costing study. The paper's authors were affiliated with AIIMS New Delhi, but the paper does not name the hospital, and author affiliation is not proof of which institution owned the scanner -- do not describe this as an AIIMS case study. May be unusually low (a legacy contract, limited coverage scope, exceptional negotiation, or a data/units issue) rather than representative of a typical private hospital. See data-requirements.md §19.5."
+      "note": "One unnamed tertiary-care teaching hospital's real observed cost from a peer-reviewed life-cycle-costing study. The paper's authors were affiliated with AIIMS New Delhi, but the paper does not name the hospital, and author affiliation is not proof of which institution owned the scanner -- do not describe this as an AIIMS case study. May be unusually low (a legacy contract, limited coverage scope, exceptional negotiation, or a data/units issue) rather than representative of a typical private hospital. See docs/data-requirements.md §19.5."
     }
   },
   "typicalUtilization": {

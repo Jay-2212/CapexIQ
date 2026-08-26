@@ -89,7 +89,7 @@ The following routes and interactions were reviewed in the live app:
 ### 5. Help content exposes the repository
 
 - Expanded More info content displays strings such as
-  `equipment-data/<type>.json#purchaseCost`, `data-requirements.md §19`, and
+  `equipment-data/<type>.json#purchaseCost`, `docs/data-requirements.md §19`, and
   `capexiq-prebuild-assurance PBA-4`.
 - The methodology page also mentions repository files, TypeScript functions, internal
   audit notes, sentinel behavior, and implementation history.

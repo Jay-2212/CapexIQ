@@ -1,6 +1,6 @@
 # design/ux-product-spec.md — CapexIQ UX/UI Product Spec (v0.5)
 
-This is the `design/ux-product-spec.md` artifact `agent-build-plan.md` Phase 4 and
+This is the `design/ux-product-spec.md` artifact `docs/agent-build-plan.md` Phase 4 and
 SPEC.md §38 have named since 2026-07-07 but never produced. It resolves Phase 4-A
 through Phase 4-H, plus three product questions SPEC.md §36.1 left open (Q9, Q14, and
 the landing-page CTA wording in §26.1). Written directly with Jay, 2026-07-11, after
@@ -151,12 +151,12 @@ applies only to:
   *only* conditional one — the fill-under-line, if used, stays a light tint of
   whichever color the line currently is, never a third color.
 - The break-even marker: `--status-caution` (amber) when actual usage sits within a
-  defined risk band of the break-even point (reuse `financial-model-spec.md`'s
+  defined risk band of the break-even point (reuse `docs/financial-model-spec.md`'s
   Moderate band threshold, 55–74, as the risk-band definition — usage within that
   percentile range of break-even), `--status-strong` outside it on the safe side,
   `--status-risk` outside it on the unsafe side.
 - The Investment Outlook gauge and any score-driven badge: mapped directly to
-  `financial-model-spec.md` §1.4's Strong/Moderate/Caution/Weak bands
+  `docs/financial-model-spec.md` §1.4's Strong/Moderate/Caution/Weak bands
   (75–100 / 55–74 / 35–54 / 0–34) using the matching `--status-*` token. This is the
   concrete tie-in Phase 2's build note called for — the score and the charts can never
   tell contradictory stories about the same numbers, because both read the same bands.
@@ -186,11 +186,11 @@ per its role, never value-driven.
 ## 4. Tooltip UI mechanics (resolves Phase 4-E)
 
 Two distinct mechanisms, for two distinct contexts — this is the one place this spec
-adds real nuance beyond what `agent-build-plan.md`'s original Phase 4-E draft said, and
+adds real nuance beyond what `docs/agent-build-plan.md`'s original Phase 4-E draft said, and
 it **corrects a contradiction**: that draft suggested hover-to-open on desktop, which
 directly contradicts SPEC.md §23.4's explicit, reasoned rejection of hover ("poor
 touch-screen and mobile support"). SPEC.md §23.4 wins — click-to-open only, everywhere,
-no hover trigger on any device. `agent-build-plan.md` Phase 4-E is corrected to match
+no hover trigger on any device. `docs/agent-build-plan.md` Phase 4-E is corrected to match
 (see that file).
 
 ### 4.A Dashboard / results / anywhere outside the wizard
@@ -298,7 +298,7 @@ real math, consistent with §5.1's "no sales language" rule.
 ## 6. Default-value visual treatment (new)
 
 Every wizard field is pre-filled with its default/typical value where one exists
-(sourced, per `data-requirements.md` — never invented). Two visual states:
+(sourced, per `docs/data-requirements.md` — never invented). Two visual states:
 
 | State | Text color/weight | Extra element |
 |---|---|---|
@@ -317,7 +317,7 @@ a real sourced default (`typical: 12.5%`, Medium confidence, S22/S23,
 sourced field, above. **Target IRR is the one field with no sourced benchmark**
 (confirmed unresearchable, `Unavailable` per `common-assumptions.json`) —
 **resolved (audit F1, Jay's decision):** rather than showing empty and blocking the
-Basic-Mode step gate (see `agent-build-plan.md` Phase 5's F1 note), it is auto-filled
+Basic-Mode step gate (see `docs/agent-build-plan.md` Phase 5's F1 note), it is auto-filled
 with a computed heuristic (`discountRate + 400bps`) using the exact same "Typical" tag
 treatment above, with its tooltip explicit that this is a suggested starting point, not
 a researched number — distinguishing a labeled heuristic from a fabricated benchmark.
@@ -441,7 +441,7 @@ CFO/administrator audience this product targets. Fixed here, once:
 | Phase 4-B Spacing scale | §1.2 | `tokens.css` |
 | Phase 4-C Chart color fixed/conditional | §2 | — |
 | Phase 4-D Chart label/contrast | §3 | — |
-| Phase 4-E Tooltip mechanics | §4 | `agent-build-plan.md` Phase 4-E (hover/click correction) |
+| Phase 4-E Tooltip mechanics | §4 | `docs/agent-build-plan.md` Phase 4-E (hover/click correction) |
 | Phase 4-F Basic/Advanced surfacing | §7 | — (unchanged) |
 | Phase 4-G Live recalculation | §8 | — (unchanged) |
 | Phase 4-H Excel export | §9 | — (unchanged) |
@@ -454,7 +454,7 @@ CFO/administrator audience this product targets. Fixed here, once:
 | Reduced motion (audit F3) | §10 | — |
 | Number formatting (audit F9) | §10.5 | — |
 
-**Definition of Done for Phase 4, per `agent-build-plan.md`:** this doc exists and
+**Definition of Done for Phase 4, per `docs/agent-build-plan.md`:** this doc exists and
 gives a concrete answer to A–H (done, above); `tokens.css` has spacing/type-scale
 tokens added (done, see that file); `content/inputs-metadata.json`'s per-field
 validation contract is **not** written by this doc — that's a separate, still-open

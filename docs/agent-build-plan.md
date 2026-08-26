@@ -38,7 +38,7 @@ phase is fully checked, update `HANDOFF.md` and move to the next.
 
 **Goal:** Replace the null placeholders in `/equipment-data/*.json` and
 `/equipment-data/common-assumptions.json` with real values, sourced from
-`data-requirements.md` §14's starter assumptions table plus whatever the research
+`docs/data-requirements.md` §14's starter assumptions table plus whatever the research
 passes have returned (see ISSUES.md ISS-9 — a prior pass invented several of these
 numbers instead of researching them, and they were stripped back to `null` on
 2026-07-06, then partly refilled by two subsequent Deep Research passes).
@@ -106,22 +106,22 @@ independent. Suggested split:
 **Gap found in the 2026-07-07 pass, resolved same day:** SPEC.md §21/§11.2 name several
 outputs — the Investment Outlook 0–100 score and its Strong/Moderate/Caution/Weak
 bands, EAC (Equivalent Annual Cost), discounted payback — that had **no corresponding
-formula in §31**. `financial-model-spec.md` now exists (reviewed and approved by Jay,
+formula in §31**. `docs/financial-model-spec.md` now exists (reviewed and approved by Jay,
 resolves `ISSUES.md` ISS-10) and defines all three:
-- [x] Implement the Investment Outlook score exactly per `financial-model-spec.md` §1 —
+- [x] Implement the Investment Outlook score exactly per `docs/financial-model-spec.md` §1 —
       four weighted sub-scores (Return Strength 35%, Speed to Payback 25%, Financing
       Resilience/DSCR 20%, Operational Margin of Safety 20%), each with its own
       normalization formula and edge cases already defined there. Don't re-derive or
       adjust the weighting inline — if it needs to change, that's an edit to
-      `financial-model-spec.md` first, not a silent divergence in `roi.ts`.
-- [x] Implement EAC and discounted payback per `financial-model-spec.md` §2 (standard
+      `docs/financial-model-spec.md` first, not a silent divergence in `roi.ts`.
+- [x] Implement EAC and discounted payback per `docs/financial-model-spec.md` §2 (standard
       finance formulas, not a designed methodology — no further review needed).
 - [x] Tie the score bands (§1.4: Strong 75–100 / Moderate 55–74 / Caution 35–54 / Weak
       0–34) into Phase 4-C's chart conditional-coloring thresholds exactly, so the score
       and the charts never tell contradictory stories about the same numbers. Done via
       `design/ux-product-spec.md` §2, which maps the gauge/badge directly to these bands.
-- [x] DSCR (`financial-model-spec.md` §1.2.3) is the answer to the open question below —
-      add a one-line "Resolved — see financial-model-spec.md §1.2.3" annotation to
+- [x] DSCR (`docs/financial-model-spec.md` §1.2.3) is the answer to the open question below —
+      add a one-line "Resolved — see docs/financial-model-spec.md §1.2.3" annotation to
       SPEC.md §36.2 rather than leaving it silently open: DSCR is never mentioned
       anywhere in SPEC.md despite Advanced Mode's financing section (§11.C) covering
       loan terms in detail, and lenders commonly require it.
@@ -137,7 +137,7 @@ here rather than acted on since another session may still be using it).
 
 **Definition of Done:** every function in `/formulas` has real logic and a passing test
 file, including the score/EAC/discounted-payback trio (against
-`financial-model-spec.md`'s worked examples); `npm test` is green.
+`docs/financial-model-spec.md`'s worked examples); `npm test` is green.
 
 ---
 
@@ -227,7 +227,7 @@ red once it dips below zero, a break-even marker turning amber inside a defined 
 band) versus which stay a *fixed* series color regardless of value (billed vs. realized
 vs. cash always keep their assigned color so a user can track a series across charts).
 Tie every conditional threshold to the same Strong/Moderate/Caution/Weak bands Phase
-2's `financial-model-spec.md` defines, so the score and the charts are never in tension
+2's `docs/financial-model-spec.md` defines, so the score and the charts are never in tension
 over the same numbers.
 
 **D. Chart label, contrast & legibility rules.** SPEC.md has zero coverage here.
@@ -255,7 +255,7 @@ content order remains 7 slots, one more than SPEC.md's original 6:
    note below" (new: SPEC.md never specifies this; it's necessary for a user to
    interpret any number without external context)
 3. Default/typical value **with its confidence label**, pulled live from
-   `data-requirements.md` — never hand-restated in `tooltip-copy.md`, to avoid the
+   `docs/data-requirements.md` — never hand-restated in `tooltip-copy.md`, to avoid the
    exact "false citation" failure class `ISSUES.md` ISS-9 already caught once
 4. Source note
 5. How to estimate this if unknown
@@ -339,8 +339,8 @@ per field, is populated as part of this phase, not left as a 1-entry stub):
     "tooltip": {
       "definition": "How many times per day you expect this equipment to be used.",
       "direction": "Higher is better — usage drives revenue.",
-      "default": { "value": null, "confidenceLabel": "See data-requirements.md §14" },
-      "sourceNote": "Pulled live from data-requirements.md — never hardcode a number here.",
+      "default": { "value": null, "confidenceLabel": "See docs/data-requirements.md §14" },
+      "sourceNote": "Pulled live from docs/data-requirements.md — never hardcode a number here.",
       "howToEstimate": "Start from your current similar-equipment usage, or ask 2-3 vendors for a realistic range.",
       "whyItMatters": "This is the single input break-even usage is measured against."
     }
@@ -367,7 +367,7 @@ per field, is populated as part of this phase, not left as a 1-entry stub):
       (repeat dimension named explicitly) rather than enumerated per instance —
       Phase 5/6 expand these into concrete machine keys.
 - [x] Every SPEC.md §36.3 bullet this phase resolves has a one-line "Resolved — see
-      agent-build-plan.md Phase 4-X" annotation added directly in SPEC.md, so the two
+      docs/agent-build-plan.md Phase 4-X" annotation added directly in SPEC.md, so the two
       docs can't silently disagree the way ISS-7/ISS-9 already happened once (items 1,
       6, and the §29.5 export-philosophy line were annotated in the 2026-07-07 pass;
       items 2-5, 7-8 remain genuinely open and unrelated to this phase). §36.1 Q9/Q14
@@ -626,7 +626,7 @@ live-recalculation behavior; Phase 4 is where that got decided).
       recalculated copy of the same numbers inside a chart component. This is the
       concrete mechanism that makes Phase 4-G's live-recalculation contract hold: the
       metric cards and the chart can never show numbers that briefly disagree.
-- [x] Apply Phase 4-C's conditional-color thresholds (tied to `financial-model-spec.md`'s
+- [x] Apply Phase 4-C's conditional-color thresholds (tied to `docs/financial-model-spec.md`'s
       Strong/Moderate/Caution/Weak bands) and Phase 4-D's label placement/contrast/
       legibility rules during this phase's build, not bolted on afterward. **2026-07-13:**
       Phase 4-D's contrast rule was verified by computing actual WCAG ratios via
@@ -662,7 +662,7 @@ live-recalculation behavior; Phase 4 is where that got decided).
       sourced default" — false for Discount Rate, which `equipment-data/common-
       assumptions.json` gives a real `typical: 12.5%` (Medium confidence, S22/S23).
       Only **Target Hurdle IRR** is genuinely `Unavailable` (confirmed unresearchable,
-      `ISSUES.md` ISS-9/`data-requirements.md` §17.2). **Resolved (audit finding F1,
+      `ISSUES.md` ISS-9/`docs/data-requirements.md` §17.2). **Resolved (audit finding F1,
       Jay's decision):** rather than a blank prompt, the pane shows Target Hurdle IRR
       pre-filled with a computed `discountRate + 400bps` heuristic under the same
       "Typical" tag treatment as any sourced default, with its tooltip stating plainly
@@ -873,7 +873,7 @@ both, not conflated:
       `app/components/ScenarioComparisonTable.tsx`.** Deliberately implements only
       SPEC §28.1's *user-named* scenario option, not an auto Conservative/Base/
       Optimistic preset: there is no researched or Jay-approved definition anywhere in
-      `data-requirements.md`/`financial-model-spec.md` for what "Conservative" or
+      `docs/data-requirements.md`/`docs/financial-model-spec.md` for what "Conservative" or
       "Optimistic" mean numerically, and inventing a delta (e.g. "usage −10%") would be
       exactly the unsourced product constant CLAUDE.md's escalation rule reserves for
       Jay. "Conservative"/"Base case"/"Optimistic" remain available as `<datalist>`
@@ -906,7 +906,7 @@ both, not conflated:
       the user's real assessment (unlike `ResultsQuickSettings`, which intentionally
       does dispatch).
 - [x] **Automatic actionable insights** (added 2026-07-07, approved by Jay — see
-      `financial-model-spec.md` §4): a passive, threshold-gated price-increase
+      `docs/financial-model-spec.md` §4): a passive, threshold-gated price-increase
       suggestion, distinct from the two user-driven features above — the user never
       requests this, it either appears or it doesn't. Implements `financial-model-
       spec.md` §4 exactly: a grid of test tariff increases (2/5/8/10/15% of current
@@ -995,8 +995,8 @@ deliberately configured policy, not host defaults.
 ## Not yet in this plan (flagged, not forgotten)
 
 SPEC.md §38 named two artifacts this build plan didn't originally replace:
-`ux-product-spec.md` (v0.4) and `financial-model-spec.md` (v0.5). Both are now written
-and approved by Jay — `financial-model-spec.md` on 2026-07-07 (see Phase 2/Phase 9
+`ux-product-spec.md` (v0.4) and `docs/financial-model-spec.md` (v0.5). Both are now written
+and approved by Jay — `docs/financial-model-spec.md` on 2026-07-07 (see Phase 2/Phase 9
 above), `ux-product-spec.md` on 2026-07-11 (see Phase 4 above). Neither is missing any
 longer. `content/inputs-metadata.json`'s per-field validation contract, initially
 deferred to Phase 5, was also completed 2026-07-11 (same session) — **Phase 4 is now

@@ -12,6 +12,7 @@ import { SliderField } from "../../app/components/SliderField";
 import { SelectField } from "../../app/components/SelectField";
 import { StepNav } from "../../app/components/StepNav";
 import PreStepPage from "../../app/(assessment)/assess/page";
+import CostsStepPage from "../../app/(assessment)/assess/costs/page";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
@@ -22,6 +23,24 @@ function SelectMri() {
   return (
     <button onClick={() => dispatch({ type: "SELECT_EQUIPMENT_CATEGORY", category: "MRI" })}>
       select mri
+    </button>
+  );
+}
+
+function ChooseLoan() {
+  const { dispatch } = useWizard();
+  return (
+    <button onClick={() => dispatch({ type: "SET_FIELD", path: "basic.acquisitionMode", value: "Loan" })}>
+      choose loan
+    </button>
+  );
+}
+
+function ChooseLease() {
+  const { dispatch } = useWizard();
+  return (
+    <button onClick={() => dispatch({ type: "SET_FIELD", path: "basic.acquisitionMode", value: "Lease" })}>
+      choose lease
     </button>
   );
 }
@@ -101,6 +120,63 @@ describe("StepNav — disabled-\"Next\" moves focus to the first invalid field (
     // one focus lands on.
     expect(screen.getByText(/Enter the equipment.s purchase cost/)).toBeInTheDocument();
     expect(screen.getByText(/Enter installation.civil cost/)).toBeInTheDocument();
+  });
+});
+
+describe("CostsStepPage — mode-aware completion and compact financing details", () => {
+  it("labels the result action for the active mode", () => {
+    render(
+      <WizardProvider>
+        <CostsStepPage />
+      </WizardProvider>
+    );
+
+    expect(screen.getByRole("button", { name: /Continue with Basic/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Enter Advanced Mode/i }));
+    expect(screen.getByRole("button", { name: /Continue with Advanced/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Continue with Basic/i })).not.toBeInTheDocument();
+  });
+
+  it("shows only the compact Loan fields while closed and preserves them in Advanced Financing", () => {
+    render(
+      <WizardProvider>
+        <SelectMri />
+        <ChooseLoan />
+        <CostsStepPage />
+      </WizardProvider>
+    );
+
+    fireEvent.click(screen.getByText("select mri"));
+    fireEvent.click(screen.getByText("choose loan"));
+    expect(screen.getByText("Loan details")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Down payment/)).toHaveValue(null);
+    expect(screen.getByLabelText(/Interest rate/)).toHaveValue(11.5);
+    expect(screen.getByLabelText(/Loan tenure/)).toHaveValue(60);
+    expect(screen.queryByLabelText(/Processing charges/)).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/Down payment/), { target: { value: "0.75" } });
+    fireEvent.click(screen.getByRole("button", { name: /Enter Advanced Mode/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Financing/ }));
+
+    expect(screen.queryByText("Loan details")).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/Down payment/)).toHaveValue(0.75);
+    expect(screen.getByLabelText(/Interest rate/)).toHaveValue(11.5);
+    expect(screen.getByLabelText(/Loan tenure/)).toHaveValue(60);
+  });
+
+  it("uses the same compact pattern for Lease without showing Loan fields", () => {
+    render(
+      <WizardProvider>
+        <ChooseLease />
+        <CostsStepPage />
+      </WizardProvider>
+    );
+
+    fireEvent.click(screen.getByText("choose lease"));
+    expect(screen.getByText("Lease details")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Lease rental/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Lease tenure/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/Down payment/)).not.toBeInTheDocument();
   });
 });
 

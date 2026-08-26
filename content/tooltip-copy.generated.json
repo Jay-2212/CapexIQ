@@ -20,7 +20,7 @@
   "Hospital bed size": {
     "definition": "Your hospital's total bed count.",
     "direction": "Context-dependent — used as a lookup key for scale-dependent benchmarks, not a value with a \"better\" direction.",
-    "defaultValue": "No default; required input (`data-requirements.md` §19).",
+    "defaultValue": "No default; required input (`docs/data-requirements.md` §19).",
     "confidence": "N/A (your own hospital's fact, not a benchmark).",
     "sourceNote": "N/A.",
     "howToEstimate": "Use your hospital's registered/licensed bed count.",
@@ -274,7 +274,7 @@
     "direction": "Lower is better.",
     "defaultValue": "8-15% range referenced in research.",
     "confidence": "Low-Medium.",
-    "sourceNote": "`data-requirements.md`.",
+    "sourceNote": "`docs/data-requirements.md`.",
     "howToEstimate": "Prefer your own lender's actual quote over this range.",
     "whyItMatters": "Directly drives EMI size and total interest paid."
   },
@@ -427,7 +427,7 @@
     "direction": "Lower discount rate raises calculated NPV; higher lowers it — not itself a value to \"improve,\" but a cost-of-capital input.",
     "defaultValue": "12.5% typical (11.1-14.1% range).",
     "confidence": "Medium — proxy from listed Indian hospital-chain WACC, not project-specific.",
-    "sourceNote": "`equipment-data/common-assumptions.json`; `data-requirements.md` §17.1.",
+    "sourceNote": "`equipment-data/common-assumptions.json`; `docs/data-requirements.md` §17.1.",
     "howToEstimate": "Confirm against your own hospital's actual cost of capital where known.",
     "whyItMatters": "Used in NPV, discounted payback, and the Investment Outlook score's Return Strength component."
   },
@@ -436,7 +436,7 @@
     "direction": "N/A — a threshold you set, not a calculated output.",
     "defaultValue": "No reliable Indian benchmark exists; suggested starting point is discount rate + 300-500bps.",
     "confidence": "Unavailable (confirmed unresearchable after two research passes).",
-    "sourceNote": "`data-requirements.md` §17.2.",
+    "sourceNote": "`docs/data-requirements.md` §17.2.",
     "howToEstimate": "Use your own institution's hurdle-rate policy if one exists.",
     "whyItMatters": "A comparison bar for IRR; not itself consumed by the Investment Outlook score, which uses discount rate as the hurdle instead."
   },
@@ -454,7 +454,7 @@
     "direction": "N/A — a regulatory/accounting fact, not a lever.",
     "defaultValue": "13 years (MRI/CT/Ultrasound) or 15 years (Cath Lab/Dialysis).",
     "confidence": "High (Companies Act Schedule II, source S8).",
-    "sourceNote": "`equipment-data/<type>.json`; `data-requirements.md` §12.4/§14.",
+    "sourceNote": "`equipment-data/<type>.json`; `docs/data-requirements.md` §12.4/§14.",
     "howToEstimate": "Use the sourced figure unless your own accounting policy differs.",
     "whyItMatters": "The denominator in depreciation, EAC, and the Investment Outlook score's Speed to Payback ratio."
   },
@@ -463,7 +463,7 @@
     "direction": "Higher salvage value lowers annual depreciation.",
     "defaultValue": "5% of original cost, all equipment types (Companies Act Schedule II).",
     "confidence": "Medium-High — well-established in practice, but not independently re-verified against primary Schedule II text this pass.",
-    "sourceNote": "`equipment-data/<type>.json`; `data-requirements.md` §18.2.",
+    "sourceNote": "`equipment-data/<type>.json`; `docs/data-requirements.md` §18.2.",
     "howToEstimate": "Use the sourced figure unless you have a specific reason to expect a different residual value.",
     "whyItMatters": "Reduces the depreciable base in the straight-line depreciation formula."
   },
@@ -492,7 +492,7 @@
     "confidence": "Unavailable.",
     "sourceNote": "N/A.",
     "howToEstimate": "Use your own historical tariff/cost growth if available.",
-    "whyItMatters": "Affects multi-year projections beyond Year 1; distinct from the automatic actionable-insight engine's own tariff-increase testing (`financial-model-spec.md` §4)."
+    "whyItMatters": "Affects multi-year projections beyond Year 1; distinct from the automatic actionable-insight engine's own tariff-increase testing (`docs/financial-model-spec.md` §4)."
   },
   "Scenario assumptions": {
     "definition": "The set of overrides (utilization, realization %, financing type, and similar) defining a named alternative scenario in sensitivity analysis.",

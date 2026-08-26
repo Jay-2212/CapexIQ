@@ -1,7 +1,7 @@
 # financial-model-spec.md — Investment Outlook score, EAC, discounted payback, and the automatic actionable-insight engine
 
 This is the "v0.5 — Formula and Model Spec" artifact SPEC.md §38 named but never
-produced. It exists because `agent-build-plan.md` Phase 2 found that SPEC.md §21/§11.2
+produced. It exists because `docs/agent-build-plan.md` Phase 2 found that SPEC.md §21/§11.2
 name the Investment Outlook 0–100 score, EAC (Equivalent Annual Cost), and discounted
 payback as required outputs, but §31 (the formula list) has no corresponding formula for
 any of them — this document is that missing formula spec, reviewed and approved by Jay
@@ -39,7 +39,7 @@ If financing mode is **cash purchase** (no loan), the Financing Resilience compo
 Each sub-score is computed independently, then combined by weight (§1.3). Each
 normalization is a **designed methodology, not a sourced benchmark** — the anchor points
 below are deliberate judgment calls (documented so they can be revisited), not numbers
-that need a `data-requirements.md` citation.
+that need a `docs/data-requirements.md` citation.
 
 #### 1.2.1 Return Strength — weight 35%
 
@@ -91,7 +91,7 @@ of 0 on this component is itself the correct, informative answer.
 Measures whether debt service is comfortably covered by operating cash flow — a
 DSCR-style ratio. **SPEC.md never mentions DSCR despite Advanced Mode's financing
 section (§11.C) covering loan terms in detail** (flagged as an open question,
-`agent-build-plan.md` Phase 2); this component is how DSCR enters the product, without
+`docs/agent-build-plan.md` Phase 2); this component is how DSCR enters the product, without
 inventing a separate, unexplained metric on the dashboard.
 
 ```text
@@ -146,7 +146,7 @@ Caution   35–54
 Weak      0–34
 ```
 
-These exact thresholds are what `agent-build-plan.md` Phase 4-C's chart
+These exact thresholds are what `docs/agent-build-plan.md` Phase 4-C's chart
 conditional-coloring must key off of — the score and the charts must never tell
 contradictory stories about the same underlying numbers.
 
@@ -163,7 +163,7 @@ driver = the component (of the 4, or 3 for cash purchases) with the minimum scor
 Ties broken in this fixed order: Return Strength → Speed to Payback → Financing
 Resilience → Operational Margin of Safety (arbitrary but must be deterministic — a tied
 result must always name the same driver on repeated identical runs, per
-`agent-build-plan.md` Phase 9's determinism requirement, which applies here too).
+`docs/agent-build-plan.md` Phase 9's determinism requirement, which applies here too).
 
 Per-component copy template (Phase 3 owns final wording; this defines which template
 fires and from what data):
@@ -196,7 +196,7 @@ forced into a "risk" framing.
   directly, don't compute the ratio.
 - **`discountRate` is a range, not a point value** (`common-assumptions.json` stores
   low/typical/high, 11.1–14.1%): use `typical` (12.5%) for the score unless the user has
-  overridden it via the Advanced settings pane (`agent-build-plan.md` Phase 7); if
+  overridden it via the Advanced settings pane (`docs/agent-build-plan.md` Phase 7); if
   overridden, use their value.
 - **`targetIrr` is `"Unavailable"`** (confirmed unresearchable, see
   `equipment-data/common-assumptions.json`): this component doesn't consume
@@ -275,11 +275,11 @@ No new research needed. `equipment-data/common-assumptions.json` already has:
 
 - **Discount rate: 12.5% typical** (range 11.1–14.1%), sourced from listed Indian
   hospital-chain WACC (Apollo, Fortis, Max, HCG, KMC, Narayana — see
-  `data-requirements.md` §17.1). Static, editable, stored in the repo — not fetched from
+  `docs/data-requirements.md` §17.1). Static, editable, stored in the repo — not fetched from
   any external API.
 - **Target IRR / hurdle rate: confirmed unresearchable** after two research passes (no
   public Indian hospital/investor hurdle-rate benchmark exists —
-  `data-requirements.md` §17.2). UI guidance: suggest `discountRate + 300–500bps` as a
+  `docs/data-requirements.md` §17.2). UI guidance: suggest `discountRate + 300–500bps` as a
   starting point, explicitly labeled a suggestion, never presented as a researched
   number.
 
@@ -287,7 +287,7 @@ No new research needed. `equipment-data/common-assumptions.json` already has:
 
 ## 4. Automatic actionable insight — price-increase suggestion
 
-**Where this lives:** a new sub-section of `agent-build-plan.md` Phase 9 (scenario /
+**Where this lives:** a new sub-section of `docs/agent-build-plan.md` Phase 9 (scenario /
 sensitivity), reusing `formulas/sensitivity.ts`'s existing `runScenario` machinery — not
 a new phase. Framed as a passive, threshold-gated insight, distinct from Phase 9's
 user-driven discrete-scenario and continuous-sensitivity-slider features.
@@ -385,7 +385,7 @@ Rupee amounts round to the nearest ₹5 for display (`₹1,500 × 1.08 = ₹1,62
 
 ### 4.8 Determinism requirement
 
-Same as `agent-build-plan.md` Phase 9's existing rule: running this computation twice
+Same as `docs/agent-build-plan.md` Phase 9's existing rule: running this computation twice
 against identical inputs must produce an identical result (same insight, or the same
 `null`). No randomness, no floating-point-order-dependent iteration.
 
@@ -401,9 +401,9 @@ against identical inputs must produce an identical result (same insight, or the 
       `equipment-data/common-assumptions.json`, no new research needed.
 - [x] Automatic actionable insight: grid, materiality gate (6 months), price cap (15%),
       selection rule, null case, all approved by Jay (2026-07-07).
-- [ ] `agent-build-plan.md` Phase 2's blocked score/EAC/discounted-payback stub can now
+- [ ] `docs/agent-build-plan.md` Phase 2's blocked score/EAC/discounted-payback stub can now
       be implemented against §1/§2 of this document.
-- [ ] `agent-build-plan.md` Phase 9 gets a new "automatic actionable insights"
+- [ ] `docs/agent-build-plan.md` Phase 9 gets a new "automatic actionable insights"
       sub-section implementing §4.
-- [ ] `agent-build-plan.md` Phase 4-C's chart conditional-coloring thresholds must match
+- [ ] `docs/agent-build-plan.md` Phase 4-C's chart conditional-coloring thresholds must match
       §1.4's bands exactly.

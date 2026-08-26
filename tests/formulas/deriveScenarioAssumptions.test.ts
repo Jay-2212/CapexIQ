@@ -1,7 +1,7 @@
 // deriveScenarioAssumptions bridges the canonical computeAssessment()
 // AssessmentInputs/AssessmentResult pair into runScenario's flatter ScenarioAssumptions
 // shape — used by both the continuous sensitivity strip's baseline and the automatic
-// actionable insight (financial-model-spec.md §4). This test checks the derivation
+// actionable insight (docs/financial-model-spec.md §4). This test checks the derivation
 // itself is faithful to the canonical inputs, not that runScenario's own numbers match
 // computeAssessment's (they deliberately don't, for a cash + no-ramp + no-maintenance
 // scenario the two models agree closely, which this test also spot-checks).

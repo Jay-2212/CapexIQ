@@ -7,7 +7,7 @@
 // cash purchase, composite = 0.4375*rs + 0.3125*stp + 0.25*om, so if rs = stp = om =
 // target, composite = target exactly regardless of the weights (they sum to 1).
 //
-// Every input below is solved algebraically from financial-model-spec.md §1.2's four
+// Every input below is solved algebraically from docs/financial-model-spec.md §1.2's four
 // sub-score formulas (worked by hand, not by calling investmentOutlookScore() itself)
 // so that rs = stp = om = the target value directly — see the composite-score identity
 // above for why that forces the composite to equal the target regardless of weights.
@@ -93,7 +93,7 @@ describe("golden scenario — Investment Outlook band boundaries (cash purchase)
     expect(result.band).toBe("Weak");
   });
 
-  it("matches financial-model-spec.md §1.7's own worked example exactly (a loan purchase, all four sub-scores active)", () => {
+  it("matches docs/financial-model-spec.md §1.7's own worked example exactly (a loan purchase, all four sub-scores active)", () => {
     const result = investmentOutlookScore({
       irr: 18.2,
       discountRate: 12.5,
@@ -117,7 +117,7 @@ describe("golden scenario — Investment Outlook band boundaries (cash purchase)
     expect(result.driverFraming).toBe("risk"); // lowest sub-score (40.625) is < 55
   });
 
-  it("running the same inputs twice produces an identical result (determinism, per agent-build-plan.md Phase 9's requirement extended to the score itself)", () => {
+  it("running the same inputs twice produces an identical result (determinism, per docs/agent-build-plan.md Phase 9's requirement extended to the score itself)", () => {
     const inputs: InvestmentOutlookInputs = {
       ...CASH_PURCHASE_BASE,
       irr: 17.5,

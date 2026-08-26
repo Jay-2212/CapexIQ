@@ -39,7 +39,7 @@ describe("toAssessmentInputs — financing mode mapping", () => {
     );
   });
 
-  it("Loan: EMI is computed from the financed principal (purchase+installation minus down payment)", () => {
+  it("Basic Mode Loan: compact financing values reach the canonical inputs and calculation", () => {
     let state = baseMriState();
     state = wizardReducer(state, {
       type: "SET_FIELD",
@@ -62,8 +62,14 @@ describe("toAssessmentInputs — financing mode mapping", () => {
       value: 60,
     });
 
+    expect(state.advancedOpen).toBe(false);
     const inputs = toAssessmentInputs(state);
-    expect(inputs.financing).toMatchObject({ type: "loan", tenureMonths: 60 });
+    expect(inputs.financing).toEqual({
+      type: "loan",
+      downPayment: 0.66 * 10_000_000,
+      interestRate: 11.5,
+      tenureMonths: 60,
+    });
     const result = computeAssessment(inputs);
     expect(result.monthlyEmiOrLease).toBeGreaterThan(0);
     // First-year cash flow is reduced by 12 months of EMI relative to the

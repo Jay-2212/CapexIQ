@@ -1,6 +1,6 @@
 "use client";
 
-// Phase 9's automatic actionable insight — financial-model-spec.md §4 (Jay-approved
+// Phase 9's automatic actionable insight — docs/financial-model-spec.md §4 (Jay-approved
 // 2026-07-07). Passive: renders nothing when actionablePriceIncreaseInsight() returns
 // null, which is the expected, common result, not a fallback state to fill in.
 // Reuses the existing formulas/actionableInsight.ts (built ahead of this phase) and

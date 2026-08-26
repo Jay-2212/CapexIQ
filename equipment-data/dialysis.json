@@ -1,5 +1,5 @@
 {
-  "_status": "partially populated (2026-07-07 second + third research pass) - see data-requirements.md §17/§18 and ISSUES.md ISS-9/ISS-3",
+  "_status": "partially populated (2026-07-07 second + third research pass) - see docs/data-requirements.md §17/§18 and ISSUES.md ISS-9/ISS-3",
   "equipmentType": "dialysis",
   "purchaseCost": {
     "low": 10,
@@ -15,14 +15,14 @@
     "unit": "years",
     "confidence": "High",
     "sourceId": "S8",
-    "note": "Companies Act Schedule II's only other category besides the named diagnostic-scan class (Cat-scan/ultrasound, 13yr) is 'other medical/surgical equipment' at 15 years. Dialysis machines aren't individually named by S8, but as therapeutic (not imaging-diagnostic) equipment they fall in this second category by elimination -- a direct inference from S8's own two-way split, not a separate research claim. See data-requirements.md §12.4/§14."
+    "note": "Companies Act Schedule II's only other category besides the named diagnostic-scan class (Cat-scan/ultrasound, 13yr) is 'other medical/surgical equipment' at 15 years. Dialysis machines aren't individually named by S8, but as therapeutic (not imaging-diagnostic) equipment they fall in this second category by elimination -- a direct inference from S8's own two-way split, not a separate research claim. See docs/data-requirements.md §12.4/§14."
   },
   "salvageValuePercentage": {
     "value": 5,
     "unit": "percent",
     "confidence": "Medium-High",
     "sourceId": "S8",
-    "note": "Companies Act Schedule II caps residual value at 5% of original cost unless separately justified. See data-requirements.md §18.2 for the citation-correction caveat (same as MRI)."
+    "note": "Companies Act Schedule II caps residual value at 5% of original cost unless separately justified. See docs/data-requirements.md §18.2 for the citation-correction caveat (same as MRI)."
   },
   "installationAndAncillaryCostPercentage": {
     "low": 5,
@@ -31,7 +31,7 @@
     "unit": "percent of equipment cost",
     "confidence": "Low",
     "sourceId": null,
-    "note": "GeM spec requires turnkey RO-plant installation but states no cost percentage. This range is the research pass's own inference from uncited 'anecdotal project reports' -- weaker evidence than the tender-mandated MRI/CT floors. See data-requirements.md §18.3."
+    "note": "GeM spec requires turnkey RO-plant installation but states no cost percentage. This range is the research pass's own inference from uncited 'anecdotal project reports' -- weaker evidence than the tender-mandated MRI/CT floors. See docs/data-requirements.md §18.3."
   },
   "warrantyYears": {
     "low": 2,
@@ -40,7 +40,7 @@
     "unit": "years",
     "confidence": "Medium",
     "sourceId": "S44,S45",
-    "note": "Machine only, excludes the RO water-treatment system. MEA/Nepal tender: 2yr warranty (parts+consumables). NHM Odisha pre-bid clarification: 3yr comprehensive warranty. The RO plant itself carries a separate 5-year warranty in a different GeM spec (see _roSystemWarrantyYears below) -- a different equipment item bundled in the same tender, not a contradiction. See data-requirements.md §18.1/§18.8.",
+    "note": "Machine only, excludes the RO water-treatment system. MEA/Nepal tender: 2yr warranty (parts+consumables). NHM Odisha pre-bid clarification: 3yr comprehensive warranty. The RO plant itself carries a separate 5-year warranty in a different GeM spec (see _roSystemWarrantyYears below) -- a different equipment item bundled in the same tender, not a contradiction. See docs/data-requirements.md §18.1/§18.8.",
     "_roSystemWarrantyYears": {
       "value": 5,
       "confidence": "Medium",
@@ -55,7 +55,7 @@
     "unit": "years",
     "confidence": "Medium",
     "sourceId": "S46",
-    "note": "5-year CMC for the RO plant following the warranty period. See data-requirements.md §18.4. Normalized to {low,typical,high} 2026-07-13 (PBA-1) -- a single reported figure, not a real range, so low=typical=high."
+    "note": "5-year CMC for the RO plant following the warranty period. See docs/data-requirements.md §18.4. Normalized to {low,typical,high} 2026-07-13 (PBA-1) -- a single reported figure, not a real range, so low=typical=high."
   },
   "amcAnnualCostPercentage": {
     "low": 2,
@@ -64,7 +64,7 @@
     "unit": "percent of equipment cost per year",
     "confidence": "Low",
     "sourceId": "S52",
-    "note": "Labour-only AMC. Generic tender clause (SCTIMST) applied identically across all 5 equipment types -- not Dialysis-specific. See data-requirements.md §18.4."
+    "note": "Labour-only AMC. Generic tender clause (SCTIMST) applied identically across all 5 equipment types -- not Dialysis-specific. See docs/data-requirements.md §18.4."
   },
   "cmcAnnualCostPercentage": {
     "low": 3,
@@ -73,7 +73,7 @@
     "unit": "percent of equipment cost per year",
     "confidence": "Low",
     "sourceId": "S51,S52",
-    "note": "Generic tender-ceiling range (GeM + SCTIMST caps), no cost percentages were found specific to dialysis/RO-plant CMC. See data-requirements.md §18.4."
+    "note": "Generic tender-ceiling range (GeM + SCTIMST caps), no cost percentages were found specific to dialysis/RO-plant CMC. See docs/data-requirements.md §18.4."
   },
   "typicalUtilization": {
     "usagePerDay": 3,
@@ -100,6 +100,6 @@
     "unit": "months",
     "confidence": "Low",
     "sourceId": "S56",
-    "note": "Still weakly sourced after a third pass -- not dialysis-specific. A general (non-dialysis) RO-plant installation FAQ states small/medium RO systems commission 'within days to a few weeks'; converted here to ~2-4 weeks (0.5-1 month) since RO water-treatment is the main bottleneck for a dialysis centre. Prefer a vendor-specific estimate. See data-requirements.md §18.6."
+    "note": "Still weakly sourced after a third pass -- not dialysis-specific. A general (non-dialysis) RO-plant installation FAQ states small/medium RO systems commission 'within days to a few weeks'; converted here to ~2-4 weeks (0.5-1 month) since RO water-treatment is the main bottleneck for a dialysis centre. Prefer a vendor-specific estimate. See docs/data-requirements.md §18.6."
   }
 }

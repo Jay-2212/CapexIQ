@@ -1,4 +1,4 @@
-// Automatic price-increase suggestion — financial-model-spec.md §4
+// Automatic price-increase suggestion — docs/financial-model-spec.md §4
 
 import { runScenario, ScenarioAssumptions } from "./sensitivity";
 

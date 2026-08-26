@@ -92,7 +92,7 @@ export function runScenario(assumptions: ScenarioAssumptions): ScenarioResult {
  *  pair — never invents its own assumptions, just reshapes already-computed canonical
  *  values into ScenarioAssumptions' flatter shape. Used by both the continuous
  *  sensitivity slider's tariff/payback context and the automatic actionable insight
- *  (financial-model-spec.md §4), so the two features' "no tariff increase" baseline
+ *  (docs/financial-model-spec.md §4), so the two features' "no tariff increase" baseline
  *  agree with each other even though they're not compared against the dashboard's own
  *  computeAssessment figures byte-for-byte (this simplified model has no utilization
  *  ramp, per-year maintenance schedule, or payer-mix granularity — an accepted,

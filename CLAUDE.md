@@ -9,7 +9,7 @@ Claude-in-Chrome preload habit. Both apply here.
 Never resolve these with the advisor alone — always bring them to Jay:
 
 - Anything methodology- or benchmark-related. Every number must trace to
-  `data-requirements.md`; never invent or approximate one.
+  `docs/data-requirements.md`; never invent or approximate one.
 - Scoring weights, thresholds, or other product-judgment constants.
 - Anything flagged in project memory as a standing pause (e.g. a UI/UX design
   freeze) unless Jay has explicitly lifted it.

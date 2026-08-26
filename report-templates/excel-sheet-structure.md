@@ -1,6 +1,6 @@
 # Excel sheet structure — Financial Model.xlsx
 
-Phase 8 (`agent-build-plan.md`), per SPEC.md §29 and Phase 4-H's resolved decision:
+Phase 8 (`docs/agent-build-plan.md`), per SPEC.md §29 and Phase 4-H's resolved decision:
 **every downstream cell is a live, embedded Excel formula referencing the Assumptions
 sheet — never a pasted-in value.** This document is the tab-by-tab contract
 `exports/excel-generator.ts` builds against, written before that generator per Phase
@@ -179,7 +179,7 @@ IRR = IRR({-InitialInvestment, [Net cash flow after financing, year 1..UsefulLif
 
 Both use Excel's native `NPV`/`IRR` functions directly against the annual net-cash-
 flow row — the same accrual (realized-revenue) series `computeAssessment.ts` feeds
-its own `npv()`/`irr()` calls (per `agent-build-plan.md` Phase 6's PBA-3 note: NPV/IRR
+its own `npv()`/`irr()` calls (per `docs/agent-build-plan.md` Phase 6's PBA-3 note: NPV/IRR
 use the accrual series; the DSO-extended cash-received series feeds the working-
 capital metric only, not headline NPV/IRR — the Monthly tab's Cash received columns
 exist for transparency/traceability, not because NPV/IRR are computed from them).
@@ -243,7 +243,7 @@ directly from a small formula-notes content object shared with the Word generato
 
 ---
 
-## Explicitly out of scope for Phase 8 (per `agent-build-plan.md`)
+## Explicitly out of scope for Phase 8 (per `docs/agent-build-plan.md`)
 
 - **Sensitivity analysis tab** — SPEC.md §29.3 lists it, but `formulas/sensitivity.ts`
   is still Phase 9 scope (`runScenario()` is a stub the discrete/continuous scenario

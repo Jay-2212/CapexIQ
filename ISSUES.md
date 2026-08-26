@@ -2,7 +2,7 @@
 
 A running list so nothing gets lost between sessions. Log something here the moment you
 notice it, even if you don't fix it now — that's the whole point of this file. Don't
-duplicate long explanations that already live elsewhere (e.g. `data-requirements.md`
+duplicate long explanations that already live elsewhere (e.g. `docs/data-requirements.md`
 §15) — link to them instead.
 
 Status values: **open** (needs action), **accepted** (known, deliberately not fixing),
@@ -132,12 +132,12 @@ remain tracked below under their existing IDs.
 project's own sourcing discipline) added `content/inputs-metadata.json` with per-field
 numeric defaults, several of which were invented rather than sourced:
 - SPEC.md §18.2/§18.3 claimed a 12.0% discount rate and 15.0% target IRR were "sourced
-  from `data-requirements.md` §12.3" — **false**; §12.3 has no discount-rate or
+  from `docs/data-requirements.md` §12.3" — **false**; §12.3 has no discount-rate or
   hurdle-rate row at all. This is exactly the failure mode the project's own rules
-  (SPEC.md §24/§36, `data-requirements.md` §3/§9, `INTRODUCTION.md` rule 5) exist to
+  (SPEC.md §24/§36, `docs/data-requirements.md` §3/§9, `INTRODUCTION.md` rule 5) exist to
   prevent, and it happened inside the safeguard doc itself.
 - Per-equipment `usagePerDay` and most `billedTariffPerUse` defaults had no
-  corresponding source anywhere in `data-requirements.md` (utilization is explicitly
+  corresponding source anywhere in `docs/data-requirements.md` (utilization is explicitly
   listed as an open gap in §15). Dialysis's tariff default (₹2,000) even contradicted
   its own cited source (S19), which explicitly says its private-tariff figure "should
   not become a default revenue value."
@@ -146,7 +146,7 @@ numeric defaults, several of which were invented rather than sourced:
   presented as if precise.
 - The registry dropped `confidence`/`sourceId` tracking entirely (unlike
   `equipment-data/*.json`'s established schema), so `loanInterestRate: 11.5%` was shown
-  as a clean default despite `data-requirements.md` explicitly rating it Low-Medium
+  as a clean default despite `docs/data-requirements.md` explicitly rating it Low-Medium
   confidence and recommending `sensitivity_range` treatment, not `default_assumption` —
   precisely the "hide low confidence behind a clean-looking default" anti-pattern that
   file's own §9 warns against.
@@ -160,7 +160,7 @@ interest rate/tenure, working days/month) moved to new
 false-citation numbers are now `null`/`"Unavailable"` instead of looking sourced.
 SPEC.md §18.2/§18.3 and §23.4 corrected to stop asserting the false citation.
 **Update (2026-07-07):** a deep-research pass (ChatGPT Deep Research, see
-data-requirements.md §17 for full findings) came back and filled most of the null
+docs/data-requirements.md §17 for full findings) came back and filled most of the null
 gaps with real, cited data: discount rate (11.1-14.1% proxy from listed hospital-chain
 WACC), MRI/dialysis utilization, CGHS reimbursement-ceiling tariffs for CT/MRI/
 Ultrasound/Dialysis, MRI/CT/Cath-Lab launch-delay ranges, and a real per-machine
@@ -178,7 +178,7 @@ remain `null`/`"Unavailable"` deliberately, not from oversight.
 **Update (2026-07-12, fifth pass — live web search):** Jay asked whether Claude Code's
 own `WebSearch`/`WebFetch` access (not available to earlier passes, which went through
 externally-run ChatGPT Deep Research) could close these last two fields. It didn't —
-see `data-requirements.md` §20 for the full write-up. Checked and rejected: an ICRA
+see `docs/data-requirements.md` §20 for the full write-up. Checked and rejected: an ICRA
 hospital-sector credit-rating report (real, but no IRR/hurdle-rate figure), a
 government PPP practitioner's guide for diagnostic centers (procedural, names "the
 IRR" as a DPR line item without stating one), two more Indian CT-utilization studies
@@ -194,7 +194,7 @@ future live-search research pass on this project, not just this one.
 **Status:** **accepted** for every field now populated (the large majority — unchanged).
 **Accepted, not open, for the two remaining fields** (target IRR/hurdle rate, standalone
 CT utilization) — five research passes across two different methods (external Deep
-Research, direct live web search) found nothing usable. Per `data-requirements.md`
+Research, direct live web search) found nothing usable. Per `docs/data-requirements.md`
 §20.5: don't re-run the same kind of general search a sixth time; only revisit if a
 qualitatively different lead surfaces (a leaked lender credit memorandum, a hospital
 finance-committee policy document, or a dedicated India CT-utilization field study).
@@ -275,7 +275,7 @@ session.
 actual vendor quotes have no benchmark default anywhere in this project.
 **Why accepted, not open (corrected 2026-07-12):** these were previously logged as an
 open research gap implying a future research pass could eventually supply defaults.
-That's not accurate — `data-requirements.md` §7.3 already classifies exactly this list
+That's not accurate — `docs/data-requirements.md` §7.3 already classifies exactly this list
 (hospital-specific utilization, hospital-specific payer mix, negotiated insurance
 realization, actual vendor quotation, actual professional payout agreement) as
 **"highly local, commercially sensitive, or too variable"** to ever have a single
@@ -308,6 +308,21 @@ is a placeholder only, safe to replace once real product screenshots exist.
 ---
 
 ## Resolved
+
+### ISS-36 — Basic financing path forced Advanced Mode and the result action label was misleading
+**Area:** UI / calculation flow
+**What was found:** The Step 3 action always said "Continue with Basic" even when the
+Advanced workspace was open. Loan and Lease fields lived only in Advanced Group C, so
+choosing a financed purchase could require opening and working through the whole
+Advanced workspace even when the user wanted only a Basic assessment. The canonical
+mapping already had financing branches, but Basic Mode had no compact UI for the
+required financing values.
+**Resolution (2026-08-27):** Added a compact Basic financing section for Loan and Lease,
+reusing the existing Group C state, field definitions, validation, and canonical
+`toAssessmentInputs()` path. Basic Loan results now include down payment, interest, and
+tenure; opening Advanced carries those same values into Group C. The CTA reflects the
+active mode, and the payback preview strip is now normal-flow content rather than a
+sticky overlay. Added component, validation, and calculation regression coverage.
 
 ### ISS-34 — `equipmentDefaults()` silently mis-converted the "Typical" purchase-cost default for every currently-populated equipment type
 **Resolved:** 2026-08-07, during browser QA of the non-MRI equipment types flagged as
@@ -437,7 +452,7 @@ both the diagnosis and the fix approach before implementation:
    header, hero, "how it works," "who it's for," a "what's in the tool" section, and
    a footer — plus a minimal Methodology page (`app/methodology/page.tsx`, see
    ISS-24) so the footer/header link isn't dead. This had fallen through the cracks
-   between phases: no phase's "Do" checklist in `agent-build-plan.md` explicitly
+   between phases: no phase's "Do" checklist in `docs/agent-build-plan.md` explicitly
    listed it, even though the entry flow was finalized back in Phase 5. Root `/` had
    shown the original pre-Phase-6 scaffold placeholder text until this fix.
 **Files touched:** `app/globals.css`, `app/forms/wizardTypes.ts`, `app/forms/
@@ -667,7 +682,7 @@ uses, with its tooltip stating explicitly that this is a suggested starting poin
 a researched number — distinct in kind from every other default in this product,
 which is a cited figure. The field stays fully user-editable in Advanced Mode; the
 Investment Outlook score itself doesn't even consume this field directly
-(`financial-model-spec.md` §1.6 uses `discountRate` as the hurdle), so nothing about
+(`docs/financial-model-spec.md` §1.6 uses `discountRate` as the hurdle), so nothing about
 the scoring model changed. See `content/inputs-metadata.json#targetIrr`,
 `equipment-data/common-assumptions.json#targetIrr`, `design/ux-product-spec.md` §6,
 `app/forms/wizard-state.md` §2, `SPEC.md` §18.3, and `content/benchmark-notes.md` §2
@@ -699,7 +714,7 @@ was always a dashboard-only task outside this environment's reach.
 **What was flagged:** `usefulLifeYears`, `salvageValuePercentage`,
 `installationAndAncillaryCostPercentage`, `warrantyYears`, `cmcYears`, and
 `amcAnnualCostPercentage` were `null` in every equipment file, several with zero research
-attempted across two prior passes and not even named in `data-requirements.md` §15's gap
+attempted across two prior passes and not even named in `docs/data-requirements.md` §15's gap
 list.
 **Resolution (2026-07-07, in two steps):**
 1. `usefulLifeYears` filled first from data already sitting unused in this doc (Companies
@@ -715,7 +730,7 @@ list.
    prior passes** — ₹11,920-₹15,000 per diagnostic catheterization, High confidence
    (CGHS + PM-JAY converge, independently re-verified this session against a second site).
    Dialysis and Ultrasound `launchDelayMonths` also filled (Low confidence, still weakly
-   sourced). See `data-requirements.md` §18 for full findings, per-field confidence
+   sourced). See `docs/data-requirements.md` §18 for full findings, per-field confidence
    levels, and the complete new source register (S37-S57).
 **Caveats carried forward, not silently swept under this resolution:**
 - The AMC figures (2-2.5%, labour-only) are **identical across all 5 equipment types**
@@ -731,7 +746,7 @@ list.
 
 ### ISS-12 — MRI CMC cost: generic tender-ceiling range contradicts one real observed-cost study
 **Area:** data / product
-**What was flagged:** The third research pass (2026-07-07, see `data-requirements.md`
+**What was flagged:** The third research pass (2026-07-07, see `docs/data-requirements.md`
 §18.4) found two genuinely conflicting figures for MRI's post-warranty comprehensive-
 maintenance (CMC) cost: a generic tender-ceiling range of 3-10% of equipment value/year,
 versus a peer-reviewed life-cycle-costing study of one MRI at an unnamed tertiary-care
@@ -740,7 +755,7 @@ roughly 25-30x lower. Jay's working theory (2026-07-11): this might be a volume/
 count effect rather than a true contradiction, since the study's authors were AIIMS
 New Delhi-affiliated and a hospital that large would plausibly negotiate a far better
 rate than a smaller private hospital. Written up as a hypothesis in
-`data-requirements.md` §19 and scaffolded (not populated) in `equipment-data/mri.json`.
+`docs/data-requirements.md` §19 and scaffolded (not populated) in `equipment-data/mri.json`.
 **Resolution (2026-07-11, a fourth targeted research pass, same day):** the hypothesis
 was tested directly and is **not verified**. Key findings: (1) the study never names
 its hospital — author affiliation with AIIMS New Delhi is not proof the scanner was
@@ -754,7 +769,7 @@ quantifies a usable discount or transfers to MRI. **Decision:** no bed-count-tie
 CMC/AMC defaults will be built; the `_bedVolumeTierHypothesis` scaffold in
 `equipment-data/mri.json` has been removed. The two MRI figures stay recorded
 separately (never averaged, never silently picked as the sole default), per
-`data-requirements.md` §18.4/§19.5. A set of quote-context fields (bed count, annual
+`docs/data-requirements.md` §18.4/§19.5. A set of quote-context fields (bed count, annual
 scan volume, same-OEM fleet size, model/age, warranty status, uptime SLA, parts
 coverage) was captured as a candidate future Advanced Mode addition — not built, since
 Phase 4/5 (UI/UX) remains paused; see §19.5 point 4. **Reopen only if:** an OEM rate
@@ -794,8 +809,8 @@ deliberately out of scope; don't add a field for it.
 **What was flagged:** SPEC.md §21/§11.2 name the Investment Outlook 0–100 score and its
 Strong/Moderate/Caution/Weak bands, EAC (Equivalent Annual Cost), and discounted payback
 as required outputs, but §31 (the formula list) had no corresponding entry for any of
-the three. Found during the 2026-07-07 gap-analysis pass on `agent-build-plan.md`.
-**Resolution (2026-07-07):** wrote `financial-model-spec.md` (SPEC.md §38's
+the three. Found during the 2026-07-07 gap-analysis pass on `docs/agent-build-plan.md`.
+**Resolution (2026-07-07):** wrote `docs/financial-model-spec.md` (SPEC.md §38's
 named-but-never-written v0.5 artifact) — Jay reviewed and approved the methodology
 directly. It defines: a 4-component weighted Investment Outlook score (Return Strength
 35%, Speed to Payback 25%, Financing Resilience/DSCR 20%, Operational Margin of Safety
@@ -805,7 +820,7 @@ researched) and target IRR (confirmed unresearchable, use discountRate+300-500bp
 heuristic) need no further work; and a new automatic actionable-insight feature (a
 threshold-gated price-increase suggestion, only surfaced when it improves payback by
 ≥6 months with a price increase ≤15%, silent otherwise) that Jay specifically requested
-during this same discussion. `agent-build-plan.md` Phase 2 and Phase 9 updated to
+during this same discussion. `docs/agent-build-plan.md` Phase 2 and Phase 9 updated to
 reference it.
 
 ### ISS-7 — "App repo not yet renamed to CapexIQ" (false alarm — one repo, not two)
