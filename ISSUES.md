@@ -12,7 +12,7 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
-### ISS-36 — WebMCP source is not present in the live deployment and registry lifecycle is stale
+### ISS-37 — WebMCP source is not present in the live deployment and registry lifecycle is stale
 **Area:** deployment / WebMCP integration
 **What was found:** 2026-08-27. The canonical source checkout contains the six
 WebMCP tools and its local production bundle includes `document.modelContext`,

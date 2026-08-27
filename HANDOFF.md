@@ -342,7 +342,7 @@ origin-isolation policy signals called out by current Chrome guidance; no restri
 The registry also needs an API
 conformance follow-up for async registration and AbortController cleanup.
 **Not changed:** No application code or deployment was changed. Tracked the finding
-as `ISS-36` in `ISSUES.md`.
+as `ISS-37` in `ISSUES.md`.
 
 ### 2026-08-27 — Web Model Context Protocol (WebMCP) standard implementation
 **What changed:** Implemented native WebMCP support (`document.modelContext`) for CapexIQ under `app/webmcp/` with zero modifications to existing financial formulas in `formulas/`:
