@@ -10,21 +10,24 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ---
 
-## Open
+## Recently resolved
 
-### ISS-37 — Built-in browser WebMCP bridge cannot discover deployed tools
+### ISS-37 — WebMCP discovery compatibility mismatch
 **Area:** deployment / WebMCP integration
-**What was found:** 2026-08-27. The source implementation was corrected and
-deployed in Pages deployment `e6802ef3-c38c-4948-86e5-26d00253a295` from source
-`95350c7`. The live bundle contains `document.modelContext`, `registerTool`, and
-all six tool names, and the response includes `Origin-Agent-Cluster: ?1`.
-However, the built-in browser reports `document.modelContext` as undefined and
-its WebMCP capability fails on `webmcp_list_tools` because that bridge command
-is unsupported by the current browser agent.
-**Status:** The CapexIQ deployment and registry fixes are resolved. The browser
-bridge limitation remains open and must be retested in a Chrome build/agent that
-actually implements WebMCP discovery. The default top-level `tools`
-Permissions Policy is sufficient unless the app is embedded cross-origin.
+**What was found:** 2026-08-27. The current WebMCP standard uses
+`document.modelContext`, which CapexIQ already supported, while the required
+IsItAgentReady validator still injects and checks deprecated
+`navigator.modelContext`. The Codex in-app Browser could discover and execute all six
+tools through the current API, but the external scan failed until the legacy namespace
+was supported.
+**Resolution:** The registry now prefers `document.modelContext` and falls back to
+`navigator.modelContext`. Pages deployment `090ed09e-0792-4b50-ada5-c90c4c500ea4`
+from source `2eac4c4` is live. The validator reports
+`checks.discovery.webMcp.status = "pass"` with six tools, and the in-app Browser
+also lists all six and executes `simulate` successfully.
+**Status:** resolved.
+
+## Open
 
 ### ISS-35 — `ActionableInsightCard` always fires and renders the literal text "Infinity months" when the baseline scenario never pays back
 **Area:** UI / formatting

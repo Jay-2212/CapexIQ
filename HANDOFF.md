@@ -11,11 +11,10 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-27, WebMCP deployment and runtime verification)*
+*(Last updated: 2026-08-27, WebMCP compatibility and live verification)*
 
-**CapexIQ is now packaged as a polished GitHub showcase with the WebMCP
-implementation deployed to the live Pages project; the remaining limitation is
-the built-in browser's WebMCP bridge:**
+**CapexIQ's six-tool WebMCP surface is deployed and verified in both the Codex
+in-app Browser and the required external readiness scan:**
 
 - The root `LICENSE` with the official MIT text and Copyright 2026 Jay Prakash
   Bharti is the single project license presented for GitHub detection.
@@ -27,23 +26,22 @@ the built-in browser's WebMCP bridge:**
   the first three cropped to remove capture-only empty canvas from the live
   deployment screenshots. The folder's `README.txt` records capture provenance and
   refresh guidance.
-- The existing native WebMCP surface remains under `app/webmcp/` and exposes
+- The native WebMCP surface under `app/webmcp/` exposes
   `get_presets`, `get_wizard_form`, `simulate`, `apply_inputs`,
-  `export_assessment`, and `get_metric_guide` through `document.modelContext`.
-- Source verification is green: 327 tests, `npx tsc --noEmit`, `npm run lint`,
-  `npm run build`, and `git diff --check`. Pages deployment
-  `e6802ef3-c38c-4948-86e5-26d00253a295` (source `95350c7`) is live at both
-  `https://e6802ef3.capexiq-portfolio.pages.dev` and
-  `https://capexiq.jaybharti.me/assess`. The live layout bundle contains
-  `modelContext`, `registerTool`, and the six tool names, and the response now
-  includes `Origin-Agent-Cluster: ?1`.
-- In the built-in browser, the live page still reports
-  `typeof document.modelContext === "undefined"`; its WebMCP capability's
-  `fetchTools()` fails because the bridge does not support
-  `webmcp_list_tools` for the current browser agent. This is a browser-bridge
-  limitation, not evidence that the deployed page lacks the implementation.
-- The registry now follows the current async registration/lifecycle shape:
-  registration passes an `AbortSignal`, and cleanup aborts that signal.
+  `export_assessment`, and `get_metric_guide`. The registry prefers the current
+  `document.modelContext` API and falls back to deprecated
+  `navigator.modelContext` for older validators and hosts.
+- Source verification is green: 329 tests, `npx tsc --noEmit`, `npm run lint`,
+  `npm run build`, and `git diff --check`. Production Pages deployment
+  `090ed09e-0792-4b50-ada5-c90c4c500ea4` (source `2eac4c4`) is live at both
+  `https://090ed09e.capexiq-portfolio.pages.dev` and
+  `https://capexiq.jaybharti.me/assess`.
+- The IsItAgentReady scan now reports
+  `checks.discovery.webMcp.status = "pass"` and finds all six tools via its legacy
+  navigator host. The in-app Browser independently lists all six tools and executes
+  `simulate` successfully with synthetic CT inputs.
+- Registration passes an `AbortSignal`, cleanup aborts that signal, and execute
+  callback typing includes the API's cancellation options.
 
 ### Earlier verification context retained below
 
@@ -294,6 +292,25 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-08-27 — WebMCP legacy-host compatibility and acceptance pass
+**What was found:** CapexIQ's live implementation already followed the current
+`document.modelContext` API, and the Codex in-app Browser exposed all six tools. The
+required IsItAgentReady scan still injected the deprecated `navigator.modelContext`
+namespace, so it reported no tools even though the production bundle and browser
+runtime were healthy.
+
+**What changed:** Added a narrow host resolver that prefers `document.modelContext`
+and falls back to `navigator.modelContext`, tightened execute-callback cancellation
+typing, added fallback and precedence tests, and documented the compatibility rule.
+No financial formulas, wizard behavior, or tool handlers changed.
+
+**Verification:** 329/329 tests, TypeScript, ESLint, static build, and diff check pass.
+Committed and pushed as `2eac4c4`. Cloudflare Pages production deployment
+`090ed09e-0792-4b50-ada5-c90c4c500ea4` is live on the custom domain. The external
+scan now reports `checks.discovery.webMcp.status = "pass"` with six tools. The in-app
+Browser independently listed the same six tools and executed `simulate` with synthetic
+CT inputs successfully.
 
 ### 2026-08-27 — Showcase screenshot cleanup and license consolidation
 **What changed:** Tightened the public repository presentation without touching the
