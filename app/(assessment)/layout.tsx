@@ -1,17 +1,15 @@
 "use client";
 
-// The layout-level provider above every /assess/* route and /results (wizard-state.md
-// §6) — a route group so both share one WizardProvider/persistence/route-guard
-// instance despite /results not being nested under /assess in the URL.
+// The assessment shell for /assess/* and /results. Its shared wizard and WebMCP
+// providers are mounted at the app root so the tools are also available on landing.
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { WizardProvider, useWizard } from "../forms/WizardContext";
+import { useWizard } from "../forms/WizardContext";
 import { useWizardPersistence } from "../forms/useWizardPersistence";
 import { RouteGuard } from "../forms/RouteGuard";
 import { LiveRegion } from "../components/LiveRegion";
 import { StartOver } from "../components/StartOver";
-import { WebMCPProvider } from "../webmcp/WebMCPProvider";
 
 function AssessmentShell({ children }: { children: ReactNode }) {
   const { state, dispatch } = useWizard();
@@ -55,11 +53,5 @@ function AssessmentShell({ children }: { children: ReactNode }) {
 }
 
 export default function AssessmentLayout({ children }: { children: ReactNode }) {
-  return (
-    <WizardProvider>
-      <WebMCPProvider>
-        <AssessmentShell>{children}</AssessmentShell>
-      </WebMCPProvider>
-    </WizardProvider>
-  );
+  return <AssessmentShell>{children}</AssessmentShell>;
 }

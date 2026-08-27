@@ -11,10 +11,15 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-27, WebMCP compatibility and live verification)*
+*(Last updated: 2026-08-28, landing-page WebMCP availability)*
 
 **CapexIQ's six-tool WebMCP surface is deployed and verified in both the Codex
 in-app Browser and the required external readiness scan:**
+
+- The WebMCP and wizard providers now mount once at `app/AppProviders.tsx`, under the
+  root layout. The six tools are therefore available from `/` as well as `/assess`
+  and `/results`; `apply_inputs` can carry its state straight into the assessment
+  flow without duplicate tool registration.
 
 - The root `LICENSE` with the official MIT text and Copyright 2026 Jay Prakash
   Bharti is the single project license presented for GitHub detection.
@@ -295,6 +300,20 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-08-28 — Landing-page WebMCP availability
+**What was found:** The production deployment already contained the six-tool WebMCP
+implementation, but the registry was mounted only under the assessment route group.
+The landing page (`/`) therefore exposed no tools, while `/assess` exposed all six.
+
+**What changed:** Lifted `WizardProvider` and `WebMCPProvider` into the new root-level
+`app/AppProviders.tsx`, and simplified the assessment layout to consume that shared
+context. This gives the landing page the same live tool surface and preserves wizard
+state when `apply_inputs` routes an agent into the assessment flow. No financial model,
+tool schema, or handler changed.
+
+**Verification:** WebMCP unit suite and TypeScript check pass; lint, full tests, static
+build, deployment, and live `/` tool discovery remain to be recorded after release.
 
 ### 2026-08-27 — WebMCP legacy-host compatibility and acceptance pass
 **What was found:** CapexIQ's live implementation already followed the current
