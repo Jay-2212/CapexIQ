@@ -11,6 +11,17 @@ of *how* we got here.
 
 ## Current State
 
+*(Last updated: 2026-08-28, VERIFY-001 Basic/Advanced state boundary repair)*
+
+**The targeted VERIFY-001 repair is complete in source commit
+`1e9c700a2522888a46d1f06fc3194a03ab8bd625`:** collapsed Advanced Mode now leaves its
+stored Group A/B/E values available for reopening but excludes them from the active
+Basic calculation. Basic maps to flat utilization, a five-row 100% private-cash payer
+assumption using the Basic tariff with full realization/no delay, and the flat Basic
+post-warranty maintenance rate. Compact Basic financing remains unchanged. Focused
+regressions, 338 full tests, typecheck, lint, build, and diff check pass; Stage D must
+re-run the browser boundary scenario and exports. No deployment was performed.
+
 *(Last updated: 2026-08-28, landing-page WebMCP availability)*
 
 **CapexIQ's six-tool WebMCP surface is deployed and verified in both the Codex
@@ -300,6 +311,22 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-08-28 — VERIFY-001 Basic/Advanced state boundary repair
+**What was found:** Closing Advanced Mode after entering payer/DSO, utilization ramp,
+and yearly maintenance values still allowed those inactive values to affect the Basic
+calculation and exports.
+
+**What changed:** Gated the canonical WizardState-to-AssessmentInputs mapping on
+`advancedOpen`. Closed Basic now uses flat utilization, the Basic billed tariff with
+100% private cash/full realization/zero delay across the existing five payer rows, and
+the flat Basic post-warranty maintenance rate. Advanced values remain stored and are
+still applied while open; compact Basic Loan/Lease financing is unchanged.
+
+**Verification:** 338/338 tests, focused mapping regressions, TypeScript, ESLint,
+static build, and `git diff --check` pass. Repair committed as
+`1e9c700a2522888a46d1f06fc3194a03ab8bd625`; Stage D browser/export re-verification is
+the remaining action.
 
 ### 2026-08-28 — Landing-page WebMCP availability
 **What was found:** The production deployment already contained the six-tool WebMCP
