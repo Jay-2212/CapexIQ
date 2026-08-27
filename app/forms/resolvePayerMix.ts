@@ -1,10 +1,9 @@
-// Resolves WizardState's Advanced Group A payer-mix fields into the AssessmentPayer[]
-// shape formulas/computeAssessment.ts expects — SPEC.md §14.3's "Basic Mode calculates
-// first-pass billed revenue; Advanced Mode models net realization and collection
-// timing." advanced.A is always populated with a valid default (100% private cash,
-// see initialState.ts's defaultPayerMixShare) whether or not the Advanced panel has
-// ever been opened, so this function never branches on advancedOpen — one code path,
-// same as every other field.
+// Resolves WizardState into the AssessmentPayer[] shape formulas/computeAssessment.ts
+// expects. Basic Mode is deliberately a first-pass billed-revenue path: it keeps the
+// existing five-row payer shape but uses the Basic tariff as 100% private cash with
+// full realization and no collection delay. Advanced Group A is only active while the
+// Advanced panel is open, so collapsing it preserves the entered values for reopening
+// without letting them affect the active Basic calculation.
 //
 // Realization/claim-deduction combination rule (ISS-17, resolved 2026-07-13 — Opus
 // advisor pass, no product decision needed): this is a standard healthcare
@@ -23,6 +22,16 @@ import type { WizardState } from "./wizardTypes";
 
 export function resolvePayerMix(state: WizardState): AssessmentPayer[] {
   return PAYER_TYPES.map((payer) => {
+    if (!state.advancedOpen) {
+      return {
+        payerName: payer.suffix,
+        shareOfVolume: payer.suffix === "privateCash" ? 100 : 0,
+        billedTariff: state.basic.billedTariffPerUse ?? 0,
+        realizationPercentage: 100,
+        collectionDelayDays: 0,
+      };
+    }
+
     const share = state.advanced.A.payerMixSharePct[payer.suffix] ?? 0;
     const billedTariff =
       state.advanced.A.billedTariffByPayerType[payer.suffix] ??
