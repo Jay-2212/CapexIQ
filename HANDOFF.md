@@ -11,7 +11,7 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-27, CAPEX IQ result-repair pass for the WebMCP challenge)*
+*(Last updated: 2026-08-27, CAPEX IQ results-presentation pass for the WebMCP challenge)*
 
 **The non-WebMCP foundation and result-repair work requested by Jay is complete,
 committed on `main`, and published to `capexiq.jaybharti.me`:**
@@ -34,10 +34,16 @@ committed on `main`, and published to `capexiq.jaybharti.me`:**
 - The result dashboard now reports recoverable IRRs, gives the break-even bar a visible
   scale, gives cumulative cash flow a five-step Y-axis, uses the full width for the
   demand sensitivity plot, and restores the fixed lower/base/higher comparison layout.
-- Verification for the repair pass: 301 tests, TypeScript, ESLint, static-export build,
+- The latest presentation pass keeps the cash-flow axis labels outside the stretchable
+  SVG, stacks the break-even and cash-flow cards vertically, and renders the what-if
+  marker as a true circle. Compare Options now shows a compact five-row summary with
+  editable lower/higher tariff and usage fields, a read-only base case, and a collapsed
+  details section for the remaining metrics.
+- Verification for the results work: 302 tests, TypeScript, ESLint, static-export build,
   and `git diff --check` all pass. The live Results page was refreshed and checked in the
-  browser: IRR rendered, chart axis labels were present, the sensitivity SVG used its
-  full width, and the scenario headers appeared in lower/base/higher order.
+  browser: the axis labels were readable, the chart cards stacked at full width, the
+  marker measured 16x16 pixels, the comparison edits recalculated, the details expanded,
+  and IRR remained defined.
 - The latest Cloudflare Pages deployment is recorded in the change log below; direct
   checks of the custom domain and deployment URL show the repaired Results dashboard.
 
@@ -298,6 +304,28 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-08-27 — Results dashboard presentation refinement
+**What changed:** Jay asked for a narrow visual and comparison pass before WebMCP. The
+existing calculation engine and previously approved wizard behavior were preserved.
+1. **Cumulative cash flow:** moved the five Y-axis labels into a fixed HTML axis so
+   they remain readable instead of being horizontally stretched with the SVG plot.
+2. **Chart arrangement:** stacked the break-even and cumulative cash-flow cards at full
+   width, removing the empty side space created by the shorter break-even card.
+3. **What-if marker:** moved the current-value marker outside the non-uniformly-scaled
+   SVG and made it a fixed CSS circle, preserving the chart's wide aspect ratio.
+4. **Compare Options:** replaced the old dense table with a compact lower/base/higher
+   summary. Lower and higher tariff/usage values start at −20%/+20% and are editable;
+   the base case remains read-only. Break-even usage and risk stay visible, while the
+   other ten metrics are behind a `Look at all the details` disclosure and recalculate
+   through the canonical assessment engine.
+5. **Verification:** focused results tests (12/12), full suite (302/302), TypeScript,
+   ESLint, static-export build, and `git diff --check` passed. The live Results page was
+   refreshed and checked in the browser, including editing an alternative and expanding
+   its detail table.
+**Not touched, on purpose:** WebMCP, backend/Supabase, export formatting, financial
+methodology, scoring constants, sourced benchmarks, purchase-unit behavior, payer
+collection behavior, financing flow, and image assets.
 
 ### 2026-08-27 — WebMCP foundation pass: financing flow, layout, assets, and repository organization
 **What changed:** Jay asked for five foundation fixes before WebMCP itself: repair the

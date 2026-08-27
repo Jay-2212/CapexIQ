@@ -135,37 +135,37 @@ export function SensitivityStrip({ inputs }: { inputs: AssessmentInputs }) {
         </output>
       </div>
       <div className="sensitivity-strip__plot-wrap">
-        <svg
-          ref={plotRef}
-          className="sensitivity-strip__plot"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          role="img"
-          aria-label={`Scenario consumption sensitivity. Current usage is ${formatNumber(usagePerDay, 1)} per day and current NPV is ${formatInr(scenarioResult.npv)}. Click or drag across the chart to change usage.`}
-          onPointerDown={(event) => {
-            event.currentTarget.setPointerCapture(event.pointerId);
-            setUsageFromPointer(event.clientX);
-          }}
-          onPointerMove={(event) => {
-            if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        <div className="sensitivity-strip__plot-stage">
+          <svg
+            ref={plotRef}
+            className="sensitivity-strip__plot"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            role="img"
+            aria-label={`Scenario consumption sensitivity. Current usage is ${formatNumber(usagePerDay, 1)} per day and current NPV is ${formatInr(scenarioResult.npv)}. Click or drag across the chart to change usage.`}
+            onPointerDown={(event) => {
+              event.currentTarget.setPointerCapture(event.pointerId);
               setUsageFromPointer(event.clientX);
-            }
-          }}
-        >
-          <line x1={PLOT_LEFT} y1="27" x2={PLOT_RIGHT} y2="27" className="sensitivity-strip__grid-line" />
-          <line x1={PLOT_LEFT} y1="54" x2={PLOT_RIGHT} y2="54" className="sensitivity-strip__grid-line" />
-          {plot.zeroY !== null && (
-            <line x1={PLOT_LEFT} y1={plot.zeroY} x2={PLOT_RIGHT} y2={plot.zeroY} className="sensitivity-strip__zero-line" />
-          )}
-          <path d={plot.path} className="sensitivity-strip__line" />
-          <circle
-            cx={plot.currentX}
-            cy={plot.currentY}
-            r="3.2"
+            }}
+            onPointerMove={(event) => {
+              if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                setUsageFromPointer(event.clientX);
+              }
+            }}
+          >
+            <line x1={PLOT_LEFT} y1="27" x2={PLOT_RIGHT} y2="27" className="sensitivity-strip__grid-line" />
+            <line x1={PLOT_LEFT} y1="54" x2={PLOT_RIGHT} y2="54" className="sensitivity-strip__grid-line" />
+            {plot.zeroY !== null && (
+              <line x1={PLOT_LEFT} y1={plot.zeroY} x2={PLOT_RIGHT} y2={plot.zeroY} className="sensitivity-strip__zero-line" />
+            )}
+            <path d={plot.path} className="sensitivity-strip__line" />
+          </svg>
+          <div
             className="sensitivity-strip__marker"
+            style={{ left: `${plot.currentX}%`, top: `${plot.currentY}%` }}
             aria-hidden="true"
           />
-        </svg>
+        </div>
         <div className="sensitivity-strip__plot-hint">Click or drag the line to change scenario consumption</div>
       </div>
       <div className="sensitivity-strip__axis" aria-hidden="true">

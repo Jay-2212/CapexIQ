@@ -11,7 +11,7 @@ import { formatInr, formatInrCompact } from "../components/formatting";
 import { clampTooltipPercent } from "./chartTooltipUtils";
 
 const CHART_HEIGHT = 200;
-const PLOT_LEFT = 16;
+const PLOT_LEFT = 0;
 const PLOT_RIGHT = 100;
 const BAR_GAP = 1.2;
 
@@ -43,81 +43,88 @@ export function CashFlowChart({
   return (
     <div className="cash-flow-chart">
       <div className="cash-flow-chart__plot-wrap">
-        <svg
-          viewBox={`0 0 100 ${CHART_HEIGHT}`}
-          preserveAspectRatio="none"
-          className="cash-flow-chart__plot"
-          role="img"
-          aria-label="Cumulative cash flow by year, starting below zero at the initial investment and crossing to positive once the investment is recovered."
-        >
+        <div className="cash-flow-chart__axis" aria-hidden="true">
           {axisTicks.map((value) => {
             const y = zeroY - value * scale;
             return (
-              <g key={value}>
+              <span
+                key={value}
+                className="cash-flow-chart__axis-label"
+                style={{ top: `${(y / CHART_HEIGHT) * 100}%` }}
+              >
+                {formatInrCompact(value)}
+              </span>
+            );
+          })}
+        </div>
+        <div className="cash-flow-chart__plot-area">
+          <svg
+            viewBox={`0 0 100 ${CHART_HEIGHT}`}
+            preserveAspectRatio="none"
+            className="cash-flow-chart__plot"
+            role="img"
+            aria-label="Cumulative cash flow by year, starting below zero at the initial investment and crossing to positive once the investment is recovered."
+          >
+            {axisTicks.map((value) => {
+              const y = zeroY - value * scale;
+              return (
                 <line
+                  key={value}
                   x1={PLOT_LEFT}
                   y1={y}
                   x2={PLOT_RIGHT}
                   y2={y}
                   className={value === 0 ? "cash-flow-chart__zero-line" : "cash-flow-chart__grid-line"}
                 />
-                <text
-                  x={PLOT_LEFT - 1}
-                  y={y - 2}
-                  textAnchor="end"
-                  className="cash-flow-chart__axis-label"
-                >
-                  {formatInrCompact(value)}
-                </text>
-              </g>
-            );
-          })}
-          {series.map((value, index) => {
-            const barHeight = Math.abs(value) * scale;
-            const x = PLOT_LEFT + index * barWidth + BAR_GAP / 2;
-            const width = barWidth - BAR_GAP;
-            const y = value >= 0 ? zeroY - barHeight : zeroY;
-            return (
-              <rect
-                key={index}
-                x={x}
-                y={y}
-                width={Math.max(width, 0)}
-                height={Math.max(barHeight, 1)}
-                rx="1.2"
-                tabIndex={0}
-                className={value >= 0 ? "cash-flow-chart__bar--positive" : "cash-flow-chart__bar--negative"}
-                onMouseEnter={() => setActiveIndex(index)}
-                onMouseLeave={() => clearActive(index)}
-                onFocus={() => setActiveIndex(index)}
-                onBlur={() => clearActive(index)}
-              />
-            );
-          })}
-        </svg>
-        {activeIndex !== null && (
-          <div
-            className="chart-tooltip"
-            data-visible="true"
-            style={{
-              // Clamped so the tooltip's own width (centered via translateX(-50%))
-              // never pushes past the plot's edges on a narrow viewport — a bar near
-              // 0% or 100% would otherwise overflow the card and trigger horizontal
-              // page scroll, which this project's mobile QA explicitly forbids.
-              left: `${clampTooltipPercent((activeIndex + 0.5) * barWidth)}%`,
-              top: `${
-                (series[activeIndex] >= 0
-                  ? zeroY - Math.abs(series[activeIndex]) * scale
-                  : zeroY) /
-                CHART_HEIGHT *
-                100
-              }%`,
-            }}
-          >
-            <strong>{formatInr(series[activeIndex])}</strong>
-            <span>Year {activeIndex + 1} · cumulative position</span>
-          </div>
-        )}
+              );
+            })}
+            {series.map((value, index) => {
+              const barHeight = Math.abs(value) * scale;
+              const x = PLOT_LEFT + index * barWidth + BAR_GAP / 2;
+              const width = barWidth - BAR_GAP;
+              const y = value >= 0 ? zeroY - barHeight : zeroY;
+              return (
+                <rect
+                  key={index}
+                  x={x}
+                  y={y}
+                  width={Math.max(width, 0)}
+                  height={Math.max(barHeight, 1)}
+                  rx="1.2"
+                  tabIndex={0}
+                  className={value >= 0 ? "cash-flow-chart__bar--positive" : "cash-flow-chart__bar--negative"}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  onMouseLeave={() => clearActive(index)}
+                  onFocus={() => setActiveIndex(index)}
+                  onBlur={() => clearActive(index)}
+                />
+              );
+            })}
+          </svg>
+          {activeIndex !== null && (
+            <div
+              className="chart-tooltip"
+              data-visible="true"
+              style={{
+                // Clamped so the tooltip's own width (centered via translateX(-50%))
+                // never pushes past the plot's edges on a narrow viewport — a bar near
+                // 0% or 100% would otherwise overflow the card and trigger horizontal
+                // page scroll, which this project's mobile QA explicitly forbids.
+                left: `${clampTooltipPercent((activeIndex + 0.5) * barWidth)}%`,
+                top: `${
+                  (series[activeIndex] >= 0
+                    ? zeroY - Math.abs(series[activeIndex]) * scale
+                    : zeroY) /
+                  CHART_HEIGHT *
+                  100
+                }%`,
+              }}
+            >
+              <strong>{formatInr(series[activeIndex])}</strong>
+              <span>Year {activeIndex + 1} · cumulative position</span>
+            </div>
+          )}
+        </div>
       </div>
       <div className="cash-flow-chart__labels">
         {series.map((value, index) => (
