@@ -1,30 +1,20 @@
 "use client";
 
-// Phase 9's discrete scenario comparison — SPEC.md §28. SPEC.md §28.1 offers two
-// scenario-naming schemes: auto Conservative/Base/Optimistic presets, or user-created
-// named scenarios ("MRI Option A" vs "MRI Option B"). This build deliberately only
-// implements the second: there is no researched or Jay-approved definition anywhere in
-// docs/data-requirements.md/docs/financial-model-spec.md for what "Conservative" or "Optimistic"
-// mean numerically, and inventing a delta (e.g. "-10% usage") would be exactly the
-// kind of unsourced product constant CLAUDE.md's escalation rule reserves for Jay. The
-// three names remain available as suggestions (the <datalist> below) for whatever
-// scenario a user builds — the numbers are always theirs, never auto-generated.
-//
-// Every scenario (including the Base row) runs through the same computeAssessment()
-// used everywhere else (CONVENTIONS.md §3) — purchaseCost/billedTariffPerUse/
-// usagePerDay overrides are the only three fields varied, matching SPEC §28's
-// "comparing vendor quotes or different equipment options" use case (Capex is the
-// column that makes this table distinct from the sensitivity strip above it, which
-// only varies usage/realization). Scenarios are ephemeral component state, not wizard
-// state — they never dispatch through the reducer and are lost on reload, same as the
-// sensitivity strip.
+// Phase 9's discrete scenario comparison — SPEC.md §28. The base column is the
+// exact current assessment. The two named presets are deliberately small and
+// explicit: Jay approved a lower case at -20% billed tariff and usage, and a
+// higher case at +20% for those same two drivers. A Custom option preserves the
+// original user-entered scenario workflow.
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { computeAssessment, type AssessmentInputs } from "@/formulas/computeAssessment";
 import {
   applyAssessmentOverrides,
+  applyScenarioPreset,
+  SCENARIO_PRESET_MULTIPLIER,
   weightedAverageBilledTariff,
+  type ScenarioPreset,
 } from "@/formulas/assessmentOverrides";
 import { formatInr, formatPercent, formatYears, formatNumber } from "./formatting";
 
@@ -36,15 +26,39 @@ const TARIFF_MAX = 25000;
 const USAGE_MIN = 0;
 const USAGE_MAX = 50;
 
+type ScenarioMode = ScenarioPreset | "custom";
+
 interface ScenarioDraft {
   id: string;
+  mode: ScenarioMode;
   name: string;
   purchaseCostCr: number;
   billedTariffPerUse: number;
   usagePerDay: number;
 }
 
+const PRESET_LABELS: Record<ScenarioPreset, string> = {
+  lower: "Lower assumption",
+  higher: "Higher assumption",
+};
+
+function effectiveDraft(base: ScenarioDraft, draft: ScenarioDraft): ScenarioDraft {
+  if (draft.mode === "custom") return draft;
+  const multiplier = SCENARIO_PRESET_MULTIPLIER[draft.mode];
+  return {
+    ...draft,
+    name: PRESET_LABELS[draft.mode],
+    purchaseCostCr: base.purchaseCostCr,
+    billedTariffPerUse: base.billedTariffPerUse * multiplier,
+    usagePerDay: base.usagePerDay * multiplier,
+  };
+}
+
 function scenarioResultFor(inputs: AssessmentInputs, draft: ScenarioDraft) {
+  if (draft.mode !== "custom") {
+    return computeAssessment(applyScenarioPreset(inputs, draft.mode));
+  }
+
   return computeAssessment(
     applyAssessmentOverrides(inputs, {
       purchaseCost: draft.purchaseCostCr * CRORE,
@@ -57,7 +71,8 @@ function scenarioResultFor(inputs: AssessmentInputs, draft: ScenarioDraft) {
 export function ScenarioComparisonTable({ inputs }: { inputs: AssessmentInputs }) {
   const baseDraft: ScenarioDraft = {
     id: "base",
-    name: "Current assessment",
+    mode: "custom",
+    name: "Base case",
     purchaseCostCr: inputs.purchaseCost / CRORE,
     billedTariffPerUse: weightedAverageBilledTariff(inputs),
     usagePerDay: inputs.usagePerDay,
@@ -68,8 +83,9 @@ export function ScenarioComparisonTable({ inputs }: { inputs: AssessmentInputs }
     setScenarios((current) => [
       ...current,
       {
-        id: `scenario-${Date.now()}`,
-        name: `Scenario ${current.length + 2}`,
+        id: `scenario-${Date.now()}-${current.length}`,
+        mode: "lower",
+        name: PRESET_LABELS.lower,
         purchaseCostCr: baseDraft.purchaseCostCr,
         billedTariffPerUse: baseDraft.billedTariffPerUse,
         usagePerDay: baseDraft.usagePerDay,
@@ -77,9 +93,33 @@ export function ScenarioComparisonTable({ inputs }: { inputs: AssessmentInputs }
     ]);
   };
 
-  const updateScenario = (id: string, patch: Partial<ScenarioDraft>) => {
+  const chooseScenarioMode = (id: string, mode: ScenarioMode) => {
     setScenarios((current) =>
-      current.map((scenario) => (scenario.id === id ? { ...scenario, ...patch } : scenario))
+      current.map((scenario) => {
+        if (scenario.id !== id) return scenario;
+        const scenarioNumber = current.findIndex((item) => item.id === id) + 2;
+        return {
+          ...scenario,
+          mode,
+          name:
+            mode === "custom"
+              ? scenario.mode === "custom"
+                ? scenario.name
+                : `Scenario ${scenarioNumber}`
+              : PRESET_LABELS[mode],
+        };
+      })
+    );
+  };
+
+  const updateCustomScenario = (
+    id: string,
+    patch: Partial<Pick<ScenarioDraft, "name" | "purchaseCostCr" | "billedTariffPerUse" | "usagePerDay">>
+  ) => {
+    setScenarios((current) =>
+      current.map((scenario) =>
+        scenario.id === id ? { ...scenario, mode: "custom", ...patch } : scenario
+      )
     );
   };
 
@@ -87,24 +127,32 @@ export function ScenarioComparisonTable({ inputs }: { inputs: AssessmentInputs }
     setScenarios((current) => current.filter((scenario) => scenario.id !== id));
   };
 
-  const allDrafts = [baseDraft, ...scenarios];
-  const allResults = allDrafts.map((draft) => ({
-    draft,
-    result: scenarioResultFor(inputs, draft),
-  }));
+  const columns = [
+    {
+      draft: baseDraft,
+      display: baseDraft,
+      result: computeAssessment(inputs),
+      scenarioNumber: null,
+    },
+    ...scenarios.map((draft, index) => ({
+      draft,
+      display: effectiveDraft(baseDraft, draft),
+      result: scenarioResultFor(inputs, draft),
+      scenarioNumber: index + 2,
+    })),
+  ];
 
   return (
     <section className="scenario-table" aria-label="Scenario comparison">
-      <datalist id="scenario-name-suggestions">
-        <option value="Conservative" />
-        <option value="Base case" />
-        <option value="Optimistic" />
-      </datalist>
-
       <div className="scenario-table__heading">
         <div>
           <span className="narrative-intro__eyebrow">Compare options</span>
-          <h2>Add a scenario to compare vendor quotes or assumptions side by side</h2>
+          <h2>Compare the base case with lower or higher demand assumptions</h2>
+          <p className="scenario-table__explanation">
+            Lower and higher assumptions change billed tariff and usage per day by
+            20%. Together, that moves revenue to roughly 64% or 144% of the base
+            case before costs.
+          </p>
         </div>
         <button type="button" className="button button--secondary" onClick={addScenario}>
           <Plus aria-hidden="true" size={16} /> Add scenario
@@ -113,8 +161,8 @@ export function ScenarioComparisonTable({ inputs }: { inputs: AssessmentInputs }
 
       {scenarios.length === 0 ? (
         <p className="scenario-table__empty">
-          Only the current assessment is shown. Add a scenario to compare a different
-          purchase price, tariff, or expected usage.
+          Add a scenario to compare the current assessment with the approved lower
+          or higher assumption.
         </p>
       ) : (
         <div className="scenario-table__scroll">
@@ -122,24 +170,43 @@ export function ScenarioComparisonTable({ inputs }: { inputs: AssessmentInputs }
             <thead>
               <tr>
                 <th scope="col">Assumption</th>
-                {allResults.map(({ draft }) => (
+                {columns.map(({ draft, scenarioNumber }) => (
                   <th key={draft.id} scope="col">
-                    {draft.id === "base" ? (
-                      draft.name
+                    {scenarioNumber === null ? (
+                      <div className="scenario-table__base-head">
+                        <strong>{draft.name}</strong>
+                        <small>Current assessment</small>
+                      </div>
                     ) : (
                       <div className="scenario-table__scenario-head">
-                        <input
-                          type="text"
-                          list="scenario-name-suggestions"
-                          value={draft.name}
-                          aria-label="Scenario name"
+                        <label className="visually-hidden" htmlFor={`scenario-mode-${draft.id}`}>
+                          Scenario {scenarioNumber} assumption
+                        </label>
+                        <select
+                          id={`scenario-mode-${draft.id}`}
+                          value={draft.mode}
+                          aria-label={`Scenario ${scenarioNumber} assumption`}
                           onChange={(event) =>
-                            updateScenario(draft.id, { name: event.target.value })
+                            chooseScenarioMode(draft.id, event.target.value as ScenarioMode)
                           }
-                        />
+                        >
+                          <option value="lower">Lower assumption (−20%)</option>
+                          <option value="higher">Higher assumption (+20%)</option>
+                          <option value="custom">Custom scenario</option>
+                        </select>
+                        {draft.mode === "custom" && (
+                          <input
+                            type="text"
+                            value={draft.name}
+                            aria-label={`Scenario ${scenarioNumber} name`}
+                            onChange={(event) =>
+                              updateCustomScenario(draft.id, { name: event.target.value })
+                            }
+                          />
+                        )}
                         <button
                           type="button"
-                          aria-label={`Remove ${draft.name}`}
+                          aria-label={`Remove ${effectiveDraft(baseDraft, draft).name}`}
                           onClick={() => removeScenario(draft.id)}
                         >
                           <Trash2 aria-hidden="true" size={14} />
@@ -153,104 +220,104 @@ export function ScenarioComparisonTable({ inputs }: { inputs: AssessmentInputs }
             <tbody>
               <tr>
                 <th scope="row">Purchase cost (Cr)</th>
-                {allResults.map(({ draft }) =>
-                  draft.id === "base" ? (
-                    <td key={draft.id}>{formatNumber(draft.purchaseCostCr, 2)}</td>
-                  ) : (
-                    <td key={draft.id}>
+                {columns.map(({ draft, display }) => (
+                  <td key={draft.id}>
+                    {draft.mode === "custom" && draft.id !== "base" ? (
                       <input
                         type="number"
                         min={PURCHASE_COST_MIN_CR}
                         max={PURCHASE_COST_MAX_CR}
                         step={0.1}
-                        value={draft.purchaseCostCr}
-                        aria-label="Purchase cost in Crore"
+                        value={display.purchaseCostCr}
+                        aria-label={`Purchase cost in Crore for ${display.name}`}
                         onChange={(event) =>
-                          updateScenario(draft.id, {
+                          updateCustomScenario(draft.id, {
                             purchaseCostCr: Number(event.target.value),
                           })
                         }
                       />
-                    </td>
-                  )
-                )}
+                    ) : (
+                      formatNumber(display.purchaseCostCr, 2)
+                    )}
+                  </td>
+                ))}
               </tr>
               <tr>
                 <th scope="row">Billed tariff per use</th>
-                {allResults.map(({ draft }) =>
-                  draft.id === "base" ? (
-                    <td key={draft.id}>{formatInr(draft.billedTariffPerUse)}</td>
-                  ) : (
-                    <td key={draft.id}>
+                {columns.map(({ draft, display }) => (
+                  <td key={draft.id}>
+                    {draft.mode === "custom" && draft.id !== "base" ? (
                       <input
                         type="number"
                         min={TARIFF_MIN}
                         max={TARIFF_MAX}
                         step={100}
-                        value={draft.billedTariffPerUse}
-                        aria-label="Billed tariff per use"
+                        value={display.billedTariffPerUse}
+                        aria-label={`Billed tariff per use for ${display.name}`}
                         onChange={(event) =>
-                          updateScenario(draft.id, {
+                          updateCustomScenario(draft.id, {
                             billedTariffPerUse: Number(event.target.value),
                           })
                         }
                       />
-                    </td>
-                  )
-                )}
+                    ) : (
+                      formatInr(display.billedTariffPerUse)
+                    )}
+                  </td>
+                ))}
               </tr>
               <tr>
                 <th scope="row">Usage per day</th>
-                {allResults.map(({ draft }) =>
-                  draft.id === "base" ? (
-                    <td key={draft.id}>{formatNumber(draft.usagePerDay, 1)}</td>
-                  ) : (
-                    <td key={draft.id}>
+                {columns.map(({ draft, display }) => (
+                  <td key={draft.id}>
+                    {draft.mode === "custom" && draft.id !== "base" ? (
                       <input
                         type="number"
                         min={USAGE_MIN}
                         max={USAGE_MAX}
                         step={1}
-                        value={draft.usagePerDay}
-                        aria-label="Usage per day"
+                        value={display.usagePerDay}
+                        aria-label={`Usage per day for ${display.name}`}
                         onChange={(event) =>
-                          updateScenario(draft.id, {
+                          updateCustomScenario(draft.id, {
                             usagePerDay: Number(event.target.value),
                           })
                         }
                       />
-                    </td>
-                  )
-                )}
+                    ) : (
+                      formatNumber(display.usagePerDay, 1)
+                    )}
+                  </td>
+                ))}
               </tr>
 
               <tr className="scenario-table__divider">
                 <th scope="row">Capex</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>{formatInr(result.initialInvestment)}</td>
                 ))}
               </tr>
               <tr>
                 <th scope="row">Monthly billed revenue</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>{formatInr(result.monthlyBilledRevenue)}</td>
                 ))}
               </tr>
               <tr>
                 <th scope="row">Monthly realized revenue</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>{formatInr(result.monthlyRealizedRevenue)}</td>
                 ))}
               </tr>
               <tr>
                 <th scope="row">Monthly operating surplus</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>{formatInr(result.annualOperatingSurplus / 12)}</td>
                 ))}
               </tr>
               <tr>
                 <th scope="row">Cash flow after EMI (monthly)</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>
                     {formatInr((result.annualNetCashFlowsAfterFinancing[0] ?? 0) / 12)}
                   </td>
@@ -258,25 +325,25 @@ export function ScenarioComparisonTable({ inputs }: { inputs: AssessmentInputs }
               </tr>
               <tr>
                 <th scope="row">Payback</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>{formatYears(result.paybackYearsFromCashFlows)}</td>
                 ))}
               </tr>
               <tr>
                 <th scope="row">ROI</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>{formatPercent(result.roiCashFlow)}</td>
                 ))}
               </tr>
               <tr>
                 <th scope="row">NPV</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>{formatInr(result.npv)}</td>
                 ))}
               </tr>
               <tr>
                 <th scope="row">IRR</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>
                     {result.irr === null ? "Undefined" : formatPercent(result.irr)}
                   </td>
@@ -284,7 +351,7 @@ export function ScenarioComparisonTable({ inputs }: { inputs: AssessmentInputs }
               </tr>
               <tr>
                 <th scope="row">Break-even usage</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>
                     {result.breakEvenUsagePerDay === null
                       ? "Not achievable"
@@ -294,18 +361,15 @@ export function ScenarioComparisonTable({ inputs }: { inputs: AssessmentInputs }
               </tr>
               <tr>
                 <th scope="row">Working capital gap</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>{formatInr(result.workingCapitalPeakGap)}</td>
                 ))}
               </tr>
               <tr>
                 <th scope="row">Risk level</th>
-                {allResults.map(({ draft, result }) => (
+                {columns.map(({ draft, result }) => (
                   <td key={draft.id}>
-                    <span
-                      className="scenario-table__band"
-                      data-band={result.investmentOutlook.band}
-                    >
+                    <span className="scenario-table__band" data-band={result.investmentOutlook.band}>
                       {result.investmentOutlook.band}
                     </span>
                   </td>

@@ -29,11 +29,11 @@ const inputs: AssessmentInputs = {
 describe("ScenarioComparisonTable", () => {
   it("shows only the empty-state note before any scenario is added", () => {
     render(<ScenarioComparisonTable inputs={inputs} />);
-    expect(screen.getByText(/Only the current assessment is shown/)).toBeInTheDocument();
+    expect(screen.getByText(/Add a scenario to compare the current assessment/)).toBeInTheDocument();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
-  it("adds a scenario, renders every §28.2 comparison row, and recomputes when overrides change", () => {
+  it("adds the approved lower preset, switches to higher, and keeps custom scenarios available", () => {
     render(<ScenarioComparisonTable inputs={inputs} />);
 
     fireEvent.click(screen.getByRole("button", { name: /add scenario/i }));
@@ -55,7 +55,20 @@ describe("ScenarioComparisonTable", () => {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
 
-    const tariffInput = screen.getByLabelText("Billed tariff per use") as HTMLInputElement;
+    const scenarioMode = screen.getByLabelText("Scenario 2 assumption") as HTMLSelectElement;
+    expect(scenarioMode).toHaveValue("lower");
+    expect(screen.getByText("₹640")).toBeInTheDocument();
+    expect(screen.getByText("8.0")).toBeInTheDocument();
+
+    fireEvent.change(scenarioMode, { target: { value: "higher" } });
+    expect(scenarioMode).toHaveValue("higher");
+    expect(screen.getByText("₹960")).toBeInTheDocument();
+    expect(screen.getByText("12.0")).toBeInTheDocument();
+
+    fireEvent.change(scenarioMode, { target: { value: "custom" } });
+    const tariffInput = screen.getByLabelText(
+      "Billed tariff per use for Scenario 2"
+    ) as HTMLInputElement;
     const npvCellsBefore = screen.getAllByText(/₹/).length;
     fireEvent.change(tariffInput, { target: { value: "2000" } });
     const npvCellsAfter = screen.getAllByText(/₹/).length;
@@ -68,6 +81,6 @@ describe("ScenarioComparisonTable", () => {
     fireEvent.click(screen.getByRole("button", { name: /add scenario/i }));
     fireEvent.click(screen.getByRole("button", { name: /remove/i }));
 
-    expect(screen.getByText(/Only the current assessment is shown/)).toBeInTheDocument();
+    expect(screen.getByText(/Add a scenario to compare the current assessment/)).toBeInTheDocument();
   });
 });

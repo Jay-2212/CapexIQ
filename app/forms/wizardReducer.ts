@@ -12,6 +12,18 @@ import type {
   WizardStep,
 } from "./wizardTypes";
 
+const DEFAULT_CURRENCY_UNITS = {
+  purchaseCost: "Crore",
+  installationCost: "Lakh",
+} as const;
+
+function currencyUnitFor(
+  state: WizardState,
+  field: "purchaseCost" | "installationCost"
+): CurrencyUnit {
+  return state.currencyUnits?.[field] ?? DEFAULT_CURRENCY_UNITS[field];
+}
+
 export type WizardAction =
   | { type: "SET_FIELD"; path: string; value: FieldValue }
   | { type: "SELECT_EQUIPMENT_CATEGORY"; category: EquipmentCategory }
@@ -71,10 +83,36 @@ export function wizardReducer(
     }
 
     case "SET_CURRENCY_UNIT": {
+      const previousUnit = currencyUnitFor(state, action.field);
+      if (previousUnit === action.unit) return state;
+
+      // The unit toggle intentionally reinterprets the number currently shown to
+      // the user. A visible `9` stays `9`; only its Crore/Lakh meaning changes.
+      // Formula state remains canonical Crore, so convert that displayed number
+      // back into Crore before storing it.
+      const canonicalValue = state.basic[action.field];
+      const displayValue =
+        typeof canonicalValue === "number"
+          ? previousUnit === "Lakh"
+            ? Number((canonicalValue * 100).toFixed(2))
+            : canonicalValue
+          : null;
+      const nextCanonicalValue =
+        displayValue === null
+          ? null
+          : action.unit === "Lakh"
+            ? displayValue / 100
+            : displayValue;
+      const nextState = setFieldValue(
+        state,
+        `basic.${action.field}`,
+        nextCanonicalValue
+      );
+
       return {
-        ...state,
+        ...nextState,
         currencyUnits: {
-          ...(state.currencyUnits ?? { purchaseCost: "Crore", installationCost: "Lakh" }),
+          ...(state.currencyUnits ?? DEFAULT_CURRENCY_UNITS),
           [action.field]: action.unit,
         },
       };

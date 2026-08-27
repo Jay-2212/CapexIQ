@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyAssessmentOverrides,
+  applyScenarioPreset,
+  SCENARIO_PRESET_MULTIPLIER,
   weightedAverageBilledTariff,
   weightedAverageRealization,
 } from "../../formulas/assessmentOverrides";
@@ -70,5 +72,29 @@ describe("applyAssessmentOverrides", () => {
     const overridden = applyAssessmentOverrides(baseInputs, {});
     expect(overridden).toEqual(baseInputs);
     expect(overridden).not.toBe(baseInputs);
+  });
+});
+
+describe("applyScenarioPreset", () => {
+  it("moves only billed tariff and usage by the approved lower/higher percentages", () => {
+    const lower = applyScenarioPreset(baseInputs, "lower");
+    const higher = applyScenarioPreset(baseInputs, "higher");
+
+    expect(SCENARIO_PRESET_MULTIPLIER.lower).toBe(0.8);
+    expect(SCENARIO_PRESET_MULTIPLIER.higher).toBe(1.2);
+    expect(lower.usagePerDay).toBe(8);
+    expect(higher.usagePerDay).toBe(12);
+    expect(lower.payerMix.map((payer) => payer.billedTariff)).toEqual([640, 800]);
+    expect(higher.payerMix.map((payer) => payer.billedTariff)).toEqual([960, 1200]);
+
+    for (const preset of [lower, higher]) {
+      expect(preset.purchaseCost).toBe(baseInputs.purchaseCost);
+      expect(preset.installationCost).toBe(baseInputs.installationCost);
+      expect(preset.payerMix.map((payer) => payer.shareOfVolume)).toEqual([60, 40]);
+      expect(preset.payerMix.map((payer) => payer.realizationPercentage)).toEqual([100, 80]);
+      expect(preset.payerMix.map((payer) => payer.collectionDelayDays)).toEqual([0, 30]);
+      expect(preset.financing).toEqual(baseInputs.financing);
+      expect(preset.maintenance).toEqual(baseInputs.maintenance);
+    }
   });
 });

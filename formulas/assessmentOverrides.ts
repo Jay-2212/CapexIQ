@@ -18,6 +18,34 @@ export interface AssessmentOverrides {
   realizationPercentage?: number;
 }
 
+export type ScenarioPreset = "lower" | "higher";
+
+/**
+ * The comparison view's two approved what-if presets. They change only the two
+ * demand-side drivers Jay specified: billed tariff per use and usage per day.
+ * All payer shares, realization, collection delays, costs, maintenance and
+ * financing remain the assessment's own values.
+ */
+export const SCENARIO_PRESET_MULTIPLIER: Record<ScenarioPreset, number> = {
+  lower: 0.8,
+  higher: 1.2,
+};
+
+export function applyScenarioPreset(
+  inputs: AssessmentInputs,
+  preset: ScenarioPreset
+): AssessmentInputs {
+  const multiplier = SCENARIO_PRESET_MULTIPLIER[preset];
+  return {
+    ...inputs,
+    usagePerDay: inputs.usagePerDay * multiplier,
+    payerMix: inputs.payerMix.map((payer) => ({
+      ...payer,
+      billedTariff: payer.billedTariff * multiplier,
+    })),
+  };
+}
+
 export function applyAssessmentOverrides(
   inputs: AssessmentInputs,
   overrides: AssessmentOverrides

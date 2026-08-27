@@ -56,6 +56,70 @@ describe("SET_FIELD", () => {
   });
 });
 
+describe("SET_CURRENCY_UNIT", () => {
+  it("keeps the displayed purchase number while changing its interpretation", () => {
+    let state = wizardReducer(emptyWizardState(), {
+      type: "SET_FIELD",
+      path: "basic.purchaseCost",
+      value: 9,
+    });
+
+    state = wizardReducer(state, {
+      type: "SET_CURRENCY_UNIT",
+      field: "purchaseCost",
+      unit: "Lakh",
+    });
+
+    expect(state.currencyUnits.purchaseCost).toBe("Lakh");
+    expect(state.basic.purchaseCost).toBe(0.09);
+    expect(state.touched["basic.purchaseCost"]).toBe(true);
+
+    state = wizardReducer(state, {
+      type: "SET_CURRENCY_UNIT",
+      field: "purchaseCost",
+      unit: "Crore",
+    });
+    expect(state.basic.purchaseCost).toBe(9);
+  });
+
+  it("keeps the displayed installation number while changing its interpretation", () => {
+    let state = wizardReducer(emptyWizardState(), {
+      type: "SET_FIELD",
+      path: "basic.installationCost",
+      // The field stores Crore internally; 20 Lakh is 0.2 Crore.
+      value: 0.2,
+    });
+
+    state = wizardReducer(state, {
+      type: "SET_CURRENCY_UNIT",
+      field: "installationCost",
+      unit: "Crore",
+    });
+
+    expect(state.currencyUnits.installationCost).toBe("Crore");
+    expect(state.basic.installationCost).toBe(20);
+  });
+
+  it("only changes the unit for a blank field and is a no-op for the same unit", () => {
+    const empty = emptyWizardState();
+    const changed = wizardReducer(empty, {
+      type: "SET_CURRENCY_UNIT",
+      field: "purchaseCost",
+      unit: "Lakh",
+    });
+    expect(changed.basic.purchaseCost).toBeNull();
+    expect(changed.currencyUnits.purchaseCost).toBe("Lakh");
+    expect(changed.touched).toEqual({});
+
+    const same = wizardReducer(changed, {
+      type: "SET_CURRENCY_UNIT",
+      field: "purchaseCost",
+      unit: "Lakh",
+    });
+    expect(same).toBe(changed);
+  });
+});
+
 describe("maintenanceCostByYearPct array resize (wizard-state.md §5)", () => {
   it("extends the array with null slots when useful life increases, preserving existing entries", () => {
     let state = wizardReducer(emptyWizardState(), {
