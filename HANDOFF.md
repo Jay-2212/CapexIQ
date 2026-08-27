@@ -11,11 +11,11 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-27, WebMCP deployment diagnosis)*
+*(Last updated: 2026-08-27, WebMCP deployment and runtime verification)*
 
-**CapexIQ is now packaged as a polished GitHub showcase while preserving
-the WebMCP implementation in source; the live deployment still needs a
-WebMCP-specific release and runtime check:**
+**CapexIQ is now packaged as a polished GitHub showcase with the WebMCP
+implementation deployed to the live Pages project; the remaining limitation is
+the built-in browser's WebMCP bridge:**
 
 - The root `LICENSE` with the official MIT text and Copyright 2026 Jay Prakash
   Bharti is the single project license presented for GitHub detection.
@@ -30,18 +30,20 @@ WebMCP-specific release and runtime check:**
 - The existing native WebMCP surface remains under `app/webmcp/` and exposes
   `get_presets`, `get_wizard_form`, `simulate`, `apply_inputs`,
   `export_assessment`, and `get_metric_guide` through `document.modelContext`.
-- Source verification is green: the WebMCP suite is 24/24, `npx tsc --noEmit`
-  is clean after the build, and `npm run build` is clean. The live
-  `https://capexiq.jaybharti.me/assess` bundle is stale: it is 4,971 bytes and
-  contains no WebMCP symbols, while the current local layout bundle is 35,843
-  bytes and contains the six tool names. The live response also omits the
-  origin-isolation response headers/signals called out by the current Chrome
-  WebMCP guidance. (The default top-level `tools` Permissions Policy is not a
-  problem by itself.)
-- The registry needs a follow-up conformance pass: current WebMCP registration
-  is async and lifecycle cleanup is documented through `AbortController`, but
-  `app/webmcp/registry.ts` calls `registerTool()` without awaiting it and relies
-  on the older `unregisterTool(name)` shape.
+- Source verification is green: 327 tests, `npx tsc --noEmit`, `npm run lint`,
+  `npm run build`, and `git diff --check`. Pages deployment
+  `e6802ef3-c38c-4948-86e5-26d00253a295` (source `95350c7`) is live at both
+  `https://e6802ef3.capexiq-portfolio.pages.dev` and
+  `https://capexiq.jaybharti.me/assess`. The live layout bundle contains
+  `modelContext`, `registerTool`, and the six tool names, and the response now
+  includes `Origin-Agent-Cluster: ?1`.
+- In the built-in browser, the live page still reports
+  `typeof document.modelContext === "undefined"`; its WebMCP capability's
+  `fetchTools()` fails because the bridge does not support
+  `webmcp_list_tools` for the current browser agent. This is a browser-bridge
+  limitation, not evidence that the deployed page lacks the implementation.
+- The registry now follows the current async registration/lifecycle shape:
+  registration passes an `AbortSignal`, and cleanup aborts that signal.
 
 ### Earlier verification context retained below
 
@@ -330,7 +332,7 @@ application or financial-model behavior:
 passed. The four final assets are tracked only as `docs/assets/screenshots/*.png`
 alongside the provenance README.
 
-### 2026-08-27 — WebMCP deployment and runtime diagnosis
+### 2026-08-27 — WebMCP deployment and runtime verification
 **What was found:** The canonical source checkout contains the six-tool WebMCP
 implementation, but the live `/assess` page serves a pre-WebMCP 4,971-byte layout
 bundle with no `modelContext`, `registerTool`, or tool-name symbols. The in-app
@@ -341,8 +343,12 @@ origin-isolation policy signals called out by current Chrome guidance; no restri
 `tools` Permissions Policy was observed. Source tests/build/typecheck remain green.
 The registry also needs an API
 conformance follow-up for async registration and AbortController cleanup.
-**Not changed:** No application code or deployment was changed. Tracked the finding
-as `ISS-37` in `ISSUES.md`.
+**Resolution:** Updated the registry to the current async registration/lifecycle
+shape, added `public/_headers` with `Origin-Agent-Cluster: ?1`, added the Chrome
+DevTools WebMCP `.mcp.json` configuration, pushed commits `4e2a71e` and `95350c7`,
+and directly deployed the verified `out/` artifact to Pages as deployment
+`e6802ef3-c38c-4948-86e5-26d00253a295`. The built-in browser still cannot list
+page tools because its `webmcp_list_tools` bridge command is unsupported.
 
 ### 2026-08-27 — Web Model Context Protocol (WebMCP) standard implementation
 **What changed:** Implemented native WebMCP support (`document.modelContext`) for CapexIQ under `app/webmcp/` with zero modifications to existing financial formulas in `formulas/`:
