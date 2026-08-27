@@ -4,7 +4,8 @@
 // just the underlying reducer/validation functions.
 
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { useEffect } from "react";
 import "@testing-library/jest-dom/vitest";
 import { WizardProvider, useWizard } from "../../app/forms/WizardContext";
 import { NumberField } from "../../app/components/NumberField";
@@ -13,6 +14,8 @@ import { SelectField } from "../../app/components/SelectField";
 import { StepNav } from "../../app/components/StepNav";
 import PreStepPage from "../../app/(assessment)/assess/page";
 import CostsStepPage from "../../app/(assessment)/assess/costs/page";
+import { emptyWizardState } from "../../app/forms/initialState";
+import { wizardReducer } from "../../app/forms/wizardReducer";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
@@ -43,6 +46,26 @@ function ChooseLease() {
       choose lease
     </button>
   );
+}
+
+function RestoreTouchedDraft() {
+  const { dispatch } = useWizard();
+
+  useEffect(() => {
+    let draft = wizardReducer(emptyWizardState(), {
+      type: "SET_FIELD",
+      path: "basic.purchaseCost",
+      value: null,
+    });
+    draft = wizardReducer(draft, { type: "ATTEMPT_STEP", step: "investment" });
+    dispatch({
+      type: "RESTORE_DRAFT",
+      state: draft,
+      savedAt: "2026-07-13T00:00:00.000Z",
+    });
+  }, [dispatch]);
+
+  return <NumberField path="basic.purchaseCost" />;
 }
 
 describe("NumberField — the 'Typical' tag (ux-product-spec.md §6)", () => {
@@ -222,6 +245,19 @@ describe("ISS-25 — red validation state is gated by touch/attempt, not shown o
     );
 
     expect(screen.queryByText(/Enter the equipment.s purchase cost/)).not.toBeInTheDocument();
+  });
+
+  it("does not restore a previous session's validation reveal with a draft", async () => {
+    render(
+      <WizardProvider>
+        <RestoreTouchedDraft />
+      </WizardProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Purchase cost/)).not.toHaveAttribute("aria-invalid", "true");
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("a blocked Next does not clear the 'Typical' pill on a still-default, still-valid field on the same step", () => {

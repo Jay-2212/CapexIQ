@@ -149,6 +149,10 @@ export function wizardReducer(
           purchaseCost: "Crore",
           installationCost: "Lakh",
         },
+        // Draft values/settings are durable, but touched is session-level
+        // presentation state. Do not restore stale validation reveals from a
+        // previous session alongside the analyst's values.
+        touched: {},
         attemptedSteps: {},
         restoredDraftSavedAt: action.savedAt,
         hasHydrated: true,

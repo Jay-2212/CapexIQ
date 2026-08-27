@@ -19,8 +19,8 @@ function heading(text: string) {
   return new Paragraph({ text, heading: HeadingLevel.HEADING_1 });
 }
 
-function para(text: string) {
-  return new Paragraph({ children: [new TextRun(text)] });
+function para(text: string, options: { keepLines?: boolean } = {}) {
+  return new Paragraph({ ...options, children: [new TextRun(text)] });
 }
 
 function simpleTable(rows: [string, string][]): Table {
@@ -145,7 +145,8 @@ export async function generateWordProposal(
             "Note: the ROI figures above reflect mature (fully ramped-up) monthly utilization. NPV, IRR, and " +
               "both payback figures already account for the slower utilization ramp-up entered for this " +
               "assessment (see the Usage assumptions), so they will differ from a simple ROI-based projection " +
-              "during the ramp-up period — see the Monthly tab of the Excel export for the month-by-month figures."
+              "during the ramp-up period — see the Monthly tab of the Excel export for the month-by-month figures.",
+            { keepLines: true }
           ),
         ]
       : []),

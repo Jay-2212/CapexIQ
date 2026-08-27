@@ -124,6 +124,22 @@ describe("generateWordProposal", () => {
     expect(xml).toMatch(/ROI figures above reflect mature/i);
   });
 
+  it("keeps the ramp note together during Word pagination", async () => {
+    const rampedInputs: AssessmentInputs = {
+      ...inputs,
+      utilizationRamp: { month1to3Pct: 40, month4to6Pct: 70, month7to12Pct: 90, year2PlusPct: 100 },
+    };
+    const result = computeAssessment(rampedInputs);
+    const buffer = await generateWordProposal(rampedInputs, result, {
+      hospitalName: "Test Hospital",
+      equipmentCategory: "MRI",
+    });
+    const xml = await extractDocumentXml(buffer);
+
+    expect(xml).toContain("ROI figures above reflect mature");
+    expect(xml).toMatch(/<w:keepLines(?: [^>]*)?\/?>(?:<\/w:keepLines>)?/);
+  });
+
   it("says nothing about a utilization ramp when none was entered (no misleading note on a flat scenario)", async () => {
     const result = computeAssessment(inputs);
     const buffer = await generateWordProposal(inputs, result, {
