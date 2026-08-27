@@ -300,7 +300,7 @@ downloads, ExcelJS/LibreOffice recalculation, rendered artifact inspection, 338 
 TypeScript, ESLint, static build, and diff check all pass. Excel renders reduced from
 32 pages to 8 per workbook. QA evidence is under `capexiq-qa/`. No deployment or
 production-data mutation was performed. Final source is `1e9c700a` with documentation
-commit `91d96fc`.
+commit `bc6758c`.
 
 ### 2026-08-28 — VERIFY-001 Basic/Advanced state boundary repair
 **What was found:** Closing Advanced Mode after entering payer/DSO, utilization ramp,
