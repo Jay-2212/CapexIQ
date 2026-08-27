@@ -11,56 +11,29 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-28, VERIFY-001 Basic/Advanced state boundary repair)*
+*(Last updated: 2026-08-28, overnight QA pipeline complete)*
 
-**The targeted VERIFY-001 repair is complete in source commit
-`1e9c700a2522888a46d1f06fc3194a03ab8bd625`:** collapsed Advanced Mode now leaves its
-stored Group A/B/E values available for reopening but excludes them from the active
-Basic calculation. Basic maps to flat utilization, a five-row 100% private-cash payer
-assumption using the Basic tariff with full realization/no delay, and the flat Basic
-post-warranty maintenance rate. Compact Basic financing remains unchanged. Focused
-regressions, 338 full tests, typecheck, lint, build, and diff check pass; Stage D must
-re-run the browser boundary scenario and exports. No deployment was performed.
+**CapexIQ is source-verified through the four-stage overnight QA pipeline on
+`codex/overnight-qa-2026-08-28` at commit
+`1e9c700a2522888a46d1f06fc3194a03ab8bd625`:**
 
-*(Last updated: 2026-08-28, landing-page WebMCP availability)*
+- Advanced and Basic Mode browser flows completed with synthetic data on a clean local
+  build, including persistence, results, and fresh Excel/Word downloads. The live
+  canonical host remained reachable as a baseline; the repaired source was not deployed.
+- Restored drafts now clear stale session validation state; non-finite actionable insights
+  are suppressed; Excel exports have consistent formulas, number formats, styles, panes,
+  widths, and print setup; the Advanced Word note stays together across pagination.
+- Closed Advanced Mode now preserves its stored values for reopening without allowing
+  payer/DSO, ramp, or yearly-maintenance overrides to contaminate the active Basic
+  calculation. Compact Basic financing behavior remains unchanged.
+- Final verification: 338 tests, typecheck, lint, build, and diff check pass. Final QA
+  evidence is in `capexiq-qa/TEST_REPORT.md`, `DIAGNOSIS_REPORT.md`, `FIX_REPORT.md`, and
+  `VERIFY_REPORT.md`; final exports are under `capexiq-qa/artifacts/after/`.
+- The earlier six-tool WebMCP deployment and verification remain documented in the
+  change log below. No production data, deployment configuration, or remote state was
+  changed during this overnight QA run.
 
-**CapexIQ's six-tool WebMCP surface is deployed and verified in both the Codex
-in-app Browser and the required external readiness scan:**
-
-- The WebMCP and wizard providers now mount once at `app/AppProviders.tsx`, under the
-  root layout. The six tools are therefore available from `/` as well as `/assess`
-  and `/results`; `apply_inputs` can carry its state straight into the assessment
-  flow without duplicate tool registration.
-
-- The root `LICENSE` with the official MIT text and Copyright 2026 Jay Prakash
-  Bharti is the single project license presented for GitHub detection.
-- The README is a visual product brief covering CapexIQ's differentiators, Chrome
-  `document.modelContext` integration, six tools, Mermaid agent flow,
-  auditable calculation spine, gallery, quickstart, verification, disclaimers, and
-  third-party attribution.
-- Added four optimized PNG showcase assets under `docs/assets/screenshots/`, with
-  the first three cropped to remove capture-only empty canvas from the live
-  deployment screenshots. The folder's `README.txt` records capture provenance and
-  refresh guidance.
-- The native WebMCP surface under `app/webmcp/` exposes
-  `get_presets`, `get_wizard_form`, `simulate`, `apply_inputs`,
-  `export_assessment`, and `get_metric_guide`. The registry prefers the current
-  `document.modelContext` API and falls back to deprecated
-  `navigator.modelContext` for older validators and hosts.
-- Source verification is green: 330 tests, `npx tsc --noEmit`, `npm run lint`,
-  `npm run build`, and `git diff --check`. Production Pages deployment
-  `c5519861-9568-424b-8d79-bfb918fe05a5` (source `51bc16f`) is live at both
-  `https://c5519861.capexiq-portfolio.pages.dev` and
-  `https://capexiq.jaybharti.me/assess`.
-- The IsItAgentReady scan now reports
-  `checks.discovery.webMcp.status = "pass"` and finds all six tools via its legacy
-  navigator host. The in-app Browser independently executes all six tools successfully
-  with synthetic CT inputs, including a no-download Excel export.
-- Registration passes an `AbortSignal`, cleanup aborts that signal, and execute
-  callback typing includes the API's cancellation options.
-- `apply_inputs` now derives its immediate response through the same wizard reducer
-  actions it dispatches, so `currentStateSummary`, completion, and KPIs no longer lag
-  one React render behind the applied values.
+The prior six-tool WebMCP release state is retained in the change log below.
 
 ### Earlier verification context retained below
 
@@ -311,6 +284,23 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-08-28 — Overnight QA pipeline completion
+**What was found:** Stage A reproduced stale restored-draft validation state, an
+unformatted 32-page Excel printout, a non-finite actionable insight, and a Word note
+pagination split. The verification boundary pass also exposed Advanced payer/DSO, ramp,
+and maintenance values leaking into Basic after Advanced was closed.
+
+**What changed:** Applied targeted fixes for each confirmed issue, including the final
+`advancedOpen` mapping boundary repair. Basic now remains a flat first-pass model while
+Advanced values remain available for reopening and active when Advanced is open.
+
+**Verification:** Advanced and Basic browser flows, persistence, fresh Excel/Word
+downloads, ExcelJS/LibreOffice recalculation, rendered artifact inspection, 338 tests,
+TypeScript, ESLint, static build, and diff check all pass. Excel renders reduced from
+32 pages to 8 per workbook. QA evidence is under `capexiq-qa/`. No deployment or
+production-data mutation was performed. Final source is `1e9c700a` with documentation
+commit `91d96fc`.
 
 ### 2026-08-28 — VERIFY-001 Basic/Advanced state boundary repair
 **What was found:** Closing Advanced Mode after entering payer/DSO, utilization ramp,
