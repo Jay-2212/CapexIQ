@@ -21,13 +21,13 @@ cash flow, NPV, IRR, payback, break-even usage, risk, and board-ready exports.
 </p>
 <p align="center"><em>A calm, decision-led interface for turning an equipment quote into a case the decision room can explain.</em></p>
 
-## The hackathon hook: from spreadsheet risk to decision clarity
+## What makes CapexIQ better
 
-Traditional spreadsheets are good at storing numbers. They are much worse at
-preserving the timing, assumptions, and audit trail that make a hospital capex
-decision credible.
+Hospital capital decisions depend on timing and operating reality—not only on
+the equipment price. CapexIQ keeps the drivers visible, editable, and traceable
+from the first assumption to the final decision brief.
 
-| Where a traditional spreadsheet fails | How CapexIQ responds |
+| Common gap in a basic spreadsheet | How CapexIQ helps |
 | --- | --- |
 | Government-scheme DSO lags of 60–120 days disappear inside a blended revenue line. | Billed revenue, realized revenue, payer mix, collection delays, working-capital gaps, and cash receipts remain separate inputs and outputs. |
 | A Year-6 warranty-to-CMC maintenance cliff is hidden by one average annual cost. | The model carries a warranty → CMC → AMC schedule and exposes the lifecycle cost transition. |

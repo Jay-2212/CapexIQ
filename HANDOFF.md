@@ -11,21 +11,21 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-27, GitHub product showcase and live evidence capture)*
+*(Last updated: 2026-08-27, GitHub product showcase cleanup)*
 
-**CapexIQ is now packaged as a hackathon-ready GitHub showcase while preserving
+**CapexIQ is now packaged as a polished GitHub showcase while preserving
 the verified WebMCP and financial-model implementation:**
 
-- Added the standard root `LICENSE` with the official MIT text and Copyright 2026
-  Jay Prakash Bharti so GitHub can detect the project license.
-- Replaced the stale README with a visual product brief covering the hackathon
-  hook, Chrome `document.modelContext` integration, six tools, Mermaid agent flow,
+- The root `LICENSE` with the official MIT text and Copyright 2026 Jay Prakash
+  Bharti is the single project license presented for GitHub detection.
+- The README is a visual product brief covering CapexIQ's differentiators, Chrome
+  `document.modelContext` integration, six tools, Mermaid agent flow,
   auditable calculation spine, gallery, quickstart, verification, disclaimers, and
   third-party attribution.
-- Added four optimized PNG showcase assets under
-  `docs/assets/screenshots/`, captured from the live deployment with a synthetic
-  MRI assessment and no patient or private hospital data. The folder's `README.txt`
-  records capture provenance and refresh guidance.
+- Added four optimized PNG showcase assets under `docs/assets/screenshots/`, with
+  the first three cropped to remove capture-only empty canvas from the live
+  deployment screenshots. The folder's `README.txt` records capture provenance and
+  refresh guidance.
 - The existing native WebMCP surface remains under `app/webmcp/` and exposes
   `get_presets`, `get_wizard_form`, `simulate`, `apply_inputs`,
   `export_assessment`, and `get_metric_guide` through `document.modelContext`.
@@ -282,6 +282,21 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-08-27 — Showcase screenshot cleanup and license consolidation
+**What changed:** Tightened the public repository presentation without touching the
+application, methodology page, financial model, or WebMCP implementation:
+1. Cropped `01-hero-landing.png`, `02-assessment-wizard.png`, and
+   `03-results-dashboard.png` to remove the capture-only empty canvas while
+   preserving their full visible content. `04-sensitivity-and-exports.png` was
+   already clean and was left unchanged.
+2. Replaced the README's previous promotional framing with a neutral “What makes
+   CapexIQ better” comparison focused on hospital decision quality.
+3. Removed the duplicate `LICENSE-CODE` file so the root `LICENSE` is the single
+   MIT license presented for GitHub detection.
+**Verification:** `npm test` passed 326/326 tests in 47 files; `npx tsc --noEmit`,
+`npm run lint` (zero errors/warnings), `npm run build`, and `git diff --check` all
+passed.
 
 ### 2026-08-27 — README showcase, screenshot evidence, and GitHub license detection
 **What changed:** Elevated the repository's public presentation without changing
