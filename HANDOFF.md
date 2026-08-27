@@ -312,8 +312,10 @@ context. This gives the landing page the same live tool surface and preserves wi
 state when `apply_inputs` routes an agent into the assessment flow. No financial model,
 tool schema, or handler changed.
 
-**Verification:** WebMCP unit suite and TypeScript check pass; lint, full tests, static
-build, deployment, and live `/` tool discovery remain to be recorded after release.
+**Verification:** 330/330 tests, TypeScript, ESLint, static build, and diff check pass.
+Committed and pushed as `e64dcf1`; Cloudflare Pages production deployment
+`1a3f12fb-4e99-47c2-b224-e6ff153f17e1` is successful and assigned to the custom
+domain. Live WebMCP discovery on `https://capexiq.jaybharti.me/` lists all six tools.
 
 ### 2026-08-27 — WebMCP legacy-host compatibility and acceptance pass
 **What was found:** CapexIQ's live implementation already followed the current
