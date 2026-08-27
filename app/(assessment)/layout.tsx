@@ -11,6 +11,7 @@ import { useWizardPersistence } from "../forms/useWizardPersistence";
 import { RouteGuard } from "../forms/RouteGuard";
 import { LiveRegion } from "../components/LiveRegion";
 import { StartOver } from "../components/StartOver";
+import { WebMCPProvider } from "../webmcp/WebMCPProvider";
 
 function AssessmentShell({ children }: { children: ReactNode }) {
   const { state, dispatch } = useWizard();
@@ -56,7 +57,9 @@ function AssessmentShell({ children }: { children: ReactNode }) {
 export default function AssessmentLayout({ children }: { children: ReactNode }) {
   return (
     <WizardProvider>
-      <AssessmentShell>{children}</AssessmentShell>
+      <WebMCPProvider>
+        <AssessmentShell>{children}</AssessmentShell>
+      </WebMCPProvider>
     </WizardProvider>
   );
 }

@@ -11,49 +11,24 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-27, CAPEX IQ results-presentation pass for the WebMCP challenge)*
+*(Last updated: 2026-08-27, WebMCP standard tool surface and modelContext implementation)*
 
-**The non-WebMCP foundation and result-repair work requested by Jay is complete,
-committed on `main`, and published to `capexiq.jaybharti.me`:**
+**WebMCP (Web Model Context Protocol) support is fully implemented, verified, and isolated under `app/webmcp/` and `tests/webmcp/`:**
 
-- The preview/payback strip is in normal document flow, so it no longer covers the
-  page while the user scrolls.
-- Step 3's result button now names the active path: Basic when Advanced Mode is closed,
-  Advanced when it is open.
-- Loan and Lease users get a compact financing section in Basic Mode. Loan interest,
-  tenure, and down payment (or Lease rental and tenure) are required there, feed the
-  same canonical calculation, and reappear with the same values when Advanced Mode is
-  opened. Basic Mode does not force the rest of the Advanced workspace.
-- Served landing and equipment images are now resized, high-quality WebP files with
-  explicit dimensions and lazy loading where appropriate. The original source assets
-  remain in the repo; the web copies are quality-85 lossy WebP, not mathematically
-  lossless files.
-- The three long planning/research/model documents now live under `docs/`; the root
-  keeps the short project instructions, README, licence, specifications, handoff, and
-  issue tracker easy to find.
-- The result dashboard now reports recoverable IRRs, gives the break-even bar a visible
-  scale, gives cumulative cash flow a five-step Y-axis, uses the full width for the
-  demand sensitivity plot, and restores the fixed lower/base/higher comparison layout.
-- The latest presentation pass keeps the cash-flow axis labels outside the stretchable
-  SVG, stacks the break-even and cash-flow cards vertically, and renders the what-if
-  marker as a true circle. Compare Options now shows a compact five-row summary with
-  editable lower/higher tariff and usage fields, a read-only base case, and a collapsed
-  details section for the remaining metrics.
-- Verification for the results work: 302 tests, TypeScript, ESLint, static-export build,
-  and `git diff --check` all pass. The live Results page was refreshed and checked in the
-  browser: the axis labels were readable, the chart cards stacked at full width, the
-  marker measured 16x16 pixels, the comparison edits recalculated, the details expanded,
-  and IRR remained defined.
-- The latest Cloudflare Pages deployment is recorded in the change log below; direct
-  checks of the custom domain and deployment URL show the repaired Results dashboard.
-
-**WebMCP is intentionally not implemented yet.** The app remains a static,
-client-only site with browser-local draft storage and no backend. The next phase is the
-WebMCP tool surface and the document-to-assessment demo.
-
-**Tooling note:** Chrome DevTools MCP was installed/configured in the local Codex
-configuration for the next refreshed session. This running session cannot load newly
-configured MCP tools, so no formal DevTools performance trace is claimed here.
+- **Standard `document.modelContext` Interface**: Implements safe browser/SSR feature detection and error-shielded registration for 6 CapexIQ tools (`get_presets`, `get_wizard_form`, `simulate`, `apply_inputs`, `export_assessment`, `get_metric_guide`).
+- **Standard 3-Part Diagnostic Error Envelopes**: All tool handlers return standard error envelopes (`error_code`, `message`, `suggested_fix`) for actionable recovery on negative contribution margins, invalid payer mix sums, out-of-bounds inputs, and incomplete states.
+- **In-Memory Sandbox & Live Wizard Interaction**:
+  - `handleGetPresets`: Sourced Indian healthcare benchmarks from `equipment-data/*.json`.
+  - `handleGetWizardForm`: Live 4-step wizard snapshot, validation status, and live computed KPIs.
+  - `handleSimulate`: Pure in-memory calculation calling canonical `formulas/computeAssessment.ts`.
+  - `handleApplyInputs`: Direct dispatch updates to `WizardContext`, Basic vs. Advanced mode toggling, and automated navigation to `/results` via Next.js router.
+  - `handleExport`: Audit-grade `.xlsx`, `.docx`, and `.zip` generators with download triggers.
+  - `handleGetMetricGuide`: Reference lookup for NPV, IRR, Payback, EAC, Working Capital, and Payer Mix optimization strategies.
+- **React Integration**: `WebMCPProvider` mounted in `app/(assessment)/layout.tsx` binds the live session state and Next.js router with cleanup on unmount.
+- **Quality & Verification**:
+  - Full Vitest suite: 326 tests passing (all 302 existing tests + 24 new WebMCP tests).
+  - Clean TypeScript (`tsc --noEmit`) and ESLint (`eslint .`) with zero errors and zero warnings.
+  - Static HTML export (`next build`) builds cleanly with zero SSR or hydration regressions.
 
 ### Earlier verification context retained below
 
@@ -304,6 +279,20 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-08-27 — Web Model Context Protocol (WebMCP) standard implementation
+**What changed:** Implemented native WebMCP support (`document.modelContext`) for CapexIQ under `app/webmcp/` with zero modifications to existing financial formulas in `formulas/`:
+1. **Core WebMCP layer:** Built `types.ts`, `toolDefinitions.ts` (with strict schemas and character budgets), and `registry.ts` (with safe SSR/browser feature detection and error shielding).
+2. **6 Tool Handlers (`app/webmcp/handlers/`):**
+   - `handleGetPresets`: Benchmark lookup across all 6 equipment types from `equipment-data/*.json`.
+   - `handleGetWizardForm`: Live 4-step snapshot inspection with computed KPIs.
+   - `handleSimulate`: In-memory sandbox financial simulation without mutating browser state.
+   - `handleApplyInputs`: Dispatches updates to `WizardContext`, supports Basic vs. Advanced mode, and automatically routes to `/results`.
+   - `handleExport`: Integrated with `.xlsx`, `.docx`, and `.zip` generators.
+   - `handleGetMetricGuide`: Reference manual for NPV, IRR, Payback, EAC, Working Capital, and Payer Mix optimization.
+3. **React Integration:** Mounted `WebMCPProvider` in `app/(assessment)/layout.tsx` for tool registration on mount and unregistration on teardown.
+4. **Error recovery envelopes:** Standardized 3-part diagnostic envelopes (`error_code`, `message`, `suggested_fix`) across negative contribution margins, invalid payer mixes, and out-of-bounds parameters.
+5. **Verification:** 326/326 tests passing in Vitest (24 new WebMCP tests), clean TypeScript, clean ESLint, and clean `next build` static export.
 
 ### 2026-08-27 — Results dashboard presentation refinement
 **What changed:** Jay asked for a narrow visual and comparison pass before WebMCP. The

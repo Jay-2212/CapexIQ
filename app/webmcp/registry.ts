@@ -1,0 +1,181 @@
+// Safe registry wrapper for WebMCP tools on document.modelContext
+// Implements robust browser/SSR feature detection and error shielding.
+
+import type {
+  GetPresetsInput,
+  GetWizardFormInput,
+  SimulateInput,
+  ApplyInputsInput,
+  ExportAssessmentInput,
+  GetMetricGuideInput,
+  ModelContextTool,
+  WebMCPContextAccessor,
+  WebMCPResult,
+} from "./types";
+import {
+  GET_PRESETS_TOOL_DEF,
+  GET_WIZARD_FORM_TOOL_DEF,
+  SIMULATE_TOOL_DEF,
+  APPLY_INPUTS_TOOL_DEF,
+  EXPORT_ASSESSMENT_TOOL_DEF,
+  GET_METRIC_GUIDE_TOOL_DEF,
+} from "./toolDefinitions";
+import {
+  handleGetPresets,
+  handleGetWizardForm,
+  handleSimulate,
+  handleApplyInputs,
+  handleExport,
+  handleGetMetricGuide,
+} from "./handlers";
+
+/** Safe check for document.modelContext support in the current runtime environment */
+export function isWebMCPAvailable(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    typeof document !== "undefined" &&
+    "modelContext" in document &&
+    Boolean(document.modelContext) &&
+    typeof (document.modelContext as unknown as { registerTool?: unknown }).registerTool === "function"
+  );
+}
+
+/** Error-shielded tool wrapper */
+function shieldHandler<TInput, TOutput>(
+  toolName: string,
+  handler: (input: TInput) => Promise<WebMCPResult<TOutput>> | WebMCPResult<TOutput>
+): (input: TInput) => Promise<WebMCPResult<TOutput>> {
+  return async (input: TInput): Promise<WebMCPResult<TOutput>> => {
+    try {
+      const result = await handler(input);
+      return result;
+    } catch (err) {
+      return {
+        success: false,
+        error: {
+          error_code: "INTERNAL_TOOL_ERROR",
+          message:
+            err instanceof Error
+              ? err.message
+              : `Unhandled error executing WebMCP tool '${toolName}'.`,
+          suggested_fix: "Verify input arguments and ensure the page is in a valid state.",
+        },
+      };
+    }
+  };
+}
+
+/** Builds the full array of CapexIQ WebMCP tools wired to a live context accessor */
+export function createWebMCPTools(
+  context?: WebMCPContextAccessor
+): ModelContextTool<unknown, unknown>[] {
+  const getPresetsHandler = shieldHandler("get_presets", (params: GetPresetsInput) =>
+    handleGetPresets(params)
+  );
+
+  const getWizardFormHandler = shieldHandler("get_wizard_form", (params: GetWizardFormInput) =>
+    handleGetWizardForm(params, context)
+  );
+
+  const simulateHandler = shieldHandler("simulate", (params: SimulateInput) =>
+    handleSimulate(params)
+  );
+
+  const applyInputsHandler = shieldHandler("apply_inputs", (params: ApplyInputsInput) =>
+    handleApplyInputs(params, context)
+  );
+
+  const exportAssessmentHandler = shieldHandler(
+    "export_assessment",
+    (params: ExportAssessmentInput) => handleExport(params, context)
+  );
+
+  const getMetricGuideHandler = shieldHandler(
+    "get_metric_guide",
+    (params: GetMetricGuideInput) => handleGetMetricGuide(params)
+  );
+
+  return [
+    {
+      ...GET_PRESETS_TOOL_DEF,
+      parameters: GET_PRESETS_TOOL_DEF.inputSchema,
+      handler: getPresetsHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+      execute: getPresetsHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+    },
+    {
+      ...GET_WIZARD_FORM_TOOL_DEF,
+      parameters: GET_WIZARD_FORM_TOOL_DEF.inputSchema,
+      handler: getWizardFormHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+      execute: getWizardFormHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+    },
+    {
+      ...SIMULATE_TOOL_DEF,
+      parameters: SIMULATE_TOOL_DEF.inputSchema,
+      handler: simulateHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+      execute: simulateHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+    },
+    {
+      ...APPLY_INPUTS_TOOL_DEF,
+      parameters: APPLY_INPUTS_TOOL_DEF.inputSchema,
+      handler: applyInputsHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+      execute: applyInputsHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+    },
+    {
+      ...EXPORT_ASSESSMENT_TOOL_DEF,
+      parameters: EXPORT_ASSESSMENT_TOOL_DEF.inputSchema,
+      handler: exportAssessmentHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+      execute: exportAssessmentHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+    },
+    {
+      ...GET_METRIC_GUIDE_TOOL_DEF,
+      parameters: GET_METRIC_GUIDE_TOOL_DEF.inputSchema,
+      handler: getMetricGuideHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+      execute: getMetricGuideHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
+    },
+  ];
+}
+
+/**
+ * Registers all CapexIQ WebMCP tools on document.modelContext if supported.
+ * Returns an unregister cleanup function for React useEffect unmount.
+ */
+export function registerWebMCPTools(
+  context?: WebMCPContextAccessor
+): () => void {
+  if (!isWebMCPAvailable()) {
+    // Graceful no-op in standard browsers or SSR
+    return () => {};
+  }
+
+  const host = document.modelContext;
+  if (!host || typeof host.registerTool !== "function") {
+    return () => {};
+  }
+
+  const tools = createWebMCPTools(context);
+
+  for (const tool of tools) {
+    try {
+      host.registerTool(tool);
+    } catch {
+      // Shield against registration conflicts or host errors
+    }
+  }
+
+  return () => {
+    if (
+      typeof document !== "undefined" &&
+      "modelContext" in document &&
+      document.modelContext &&
+      typeof document.modelContext.unregisterTool === "function"
+    ) {
+      for (const tool of tools) {
+        try {
+          document.modelContext.unregisterTool(tool.name);
+        } catch {
+          // Ignore unregister errors
+        }
+      }
+    }
+  };
+}
