@@ -11,24 +11,27 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-27, WebMCP standard tool surface and modelContext implementation)*
+*(Last updated: 2026-08-27, GitHub product showcase and live evidence capture)*
 
-**WebMCP (Web Model Context Protocol) support is fully implemented, verified, and isolated under `app/webmcp/` and `tests/webmcp/`:**
+**CapexIQ is now packaged as a hackathon-ready GitHub showcase while preserving
+the verified WebMCP and financial-model implementation:**
 
-- **Standard `document.modelContext` Interface**: Implements safe browser/SSR feature detection and error-shielded registration for 6 CapexIQ tools (`get_presets`, `get_wizard_form`, `simulate`, `apply_inputs`, `export_assessment`, `get_metric_guide`).
-- **Standard 3-Part Diagnostic Error Envelopes**: All tool handlers return standard error envelopes (`error_code`, `message`, `suggested_fix`) for actionable recovery on negative contribution margins, invalid payer mix sums, out-of-bounds inputs, and incomplete states.
-- **In-Memory Sandbox & Live Wizard Interaction**:
-  - `handleGetPresets`: Sourced Indian healthcare benchmarks from `equipment-data/*.json`.
-  - `handleGetWizardForm`: Live 4-step wizard snapshot, validation status, and live computed KPIs.
-  - `handleSimulate`: Pure in-memory calculation calling canonical `formulas/computeAssessment.ts`.
-  - `handleApplyInputs`: Direct dispatch updates to `WizardContext`, Basic vs. Advanced mode toggling, and automated navigation to `/results` via Next.js router.
-  - `handleExport`: Audit-grade `.xlsx`, `.docx`, and `.zip` generators with download triggers.
-  - `handleGetMetricGuide`: Reference lookup for NPV, IRR, Payback, EAC, Working Capital, and Payer Mix optimization strategies.
-- **React Integration**: `WebMCPProvider` mounted in `app/(assessment)/layout.tsx` binds the live session state and Next.js router with cleanup on unmount.
-- **Quality & Verification**:
-  - Full Vitest suite: 326 tests passing (all 302 existing tests + 24 new WebMCP tests).
-  - Clean TypeScript (`tsc --noEmit`) and ESLint (`eslint .`) with zero errors and zero warnings.
-  - Static HTML export (`next build`) builds cleanly with zero SSR or hydration regressions.
+- Added the standard root `LICENSE` with the official MIT text and Copyright 2026
+  Jay Prakash Bharti so GitHub can detect the project license.
+- Replaced the stale README with a visual product brief covering the hackathon
+  hook, Chrome `document.modelContext` integration, six tools, Mermaid agent flow,
+  auditable calculation spine, gallery, quickstart, verification, disclaimers, and
+  third-party attribution.
+- Added four optimized PNG showcase assets under
+  `docs/assets/screenshots/`, captured from the live deployment with a synthetic
+  MRI assessment and no patient or private hospital data. The folder's `README.txt`
+  records capture provenance and refresh guidance.
+- The existing native WebMCP surface remains under `app/webmcp/` and exposes
+  `get_presets`, `get_wizard_form`, `simulate`, `apply_inputs`,
+  `export_assessment`, and `get_metric_guide` through `document.modelContext`.
+- Verification completed: `npm test` = 326/326 tests, `npx tsc --noEmit` clean,
+  `npm run lint` clean with zero warnings, `npm run build` clean, and
+  `git diff --check` clean.
 
 ### Earlier verification context retained below
 
@@ -279,6 +282,28 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-08-27 — README showcase, screenshot evidence, and GitHub license detection
+**What changed:** Elevated the repository's public presentation without changing
+application or financial-model behavior:
+1. Added a standard root `LICENSE` containing the official MIT License text and
+   `Copyright (c) 2026 Jay Prakash Bharti`; retained `LICENSE-CODE` for its existing
+   source-scope documentation.
+2. Rewrote `README.md` as a visual product showcase with Live Demo, 326-test,
+   Chrome WebMCP, TypeScript strict-mode, Next.js App Router, and MIT badges;
+   problem/solution comparison; WebMCP tool catalog and Mermaid flow; calculation
+   spine; screenshot gallery; quickstart; DevTools inspection notes; disclaimer;
+   and third-party attribution.
+3. Added `docs/assets/screenshots/README.txt` plus four PNG assets captured from
+   `https://capexiq.jaybharti.me` in the Codex in-app Browser on a synthetic MRI
+   assessment: landing hero, assessment wizard, results dashboard, and sensitivity
+   plus local exports. PNG encoding and compression were normalized after capture.
+4. Removed capture-only temporary files; no application, formula, WebMCP, or export
+   source files were changed.
+**Verification:** `npm test` passed 326/326 tests in 47 files; `npx tsc --noEmit`,
+`npm run lint` (zero errors/warnings), `npm run build`, and `git diff --check` all
+passed. The four final assets are tracked only as `docs/assets/screenshots/*.png`
+alongside the provenance README.
 
 ### 2026-08-27 — Web Model Context Protocol (WebMCP) standard implementation
 **What changed:** Implemented native WebMCP support (`document.modelContext`) for CapexIQ under `app/webmcp/` with zero modifications to existing financial formulas in `formulas/`:

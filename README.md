@@ -1,196 +1,201 @@
 # CapexIQ
 
-[![Code licence: MIT](https://img.shields.io/badge/code%20licence-MIT-blue.svg)](LICENSE-CODE)
-[![Live demo](https://img.shields.io/badge/live%20demo-capexiq.jaybharti.me-6f42c1.svg)](https://capexiq.jaybharti.me/)
-[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
+### Know if it pays for itself, before you buy it.
 
-CapexIQ is a browser-based decision-support tool for evaluating hospital
-capital-equipment assumptions before a purchase decision. It turns an
-equipment, utilization, pricing, collection, cost, financing, and lifecycle
-scenario into transparent operating and investment calculations.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-capexiq.jaybharti.me-315f55?logo=googlechrome&logoColor=white)](https://capexiq.jaybharti.me/)
+[![Vitest](https://img.shields.io/badge/Vitest-326%20tests%20passing-6e9f18?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Chrome](https://img.shields.io/badge/Chrome-WebMCP%20Enabled-4285f4?logo=googlechrome&logoColor=white)](https://developer.chrome.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict%20Mode-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15%20App%20Router-111111?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-2f7d5f.svg)](LICENSE)
 
-- **Live application:** [capexiq.jaybharti.me](https://capexiq.jaybharti.me/)
-- **Methodology:** [capexiq.jaybharti.me/methodology](https://capexiq.jaybharti.me/methodology)
+CapexIQ is a browser-first capital-equipment decision-support system for Indian
+hospitals. It turns a vendor quote and operating assumptions into an explainable
+view of utilization, revenue realization, collection timing, lifecycle costs,
+cash flow, NPV, IRR, payback, break-even usage, risk, and board-ready exports.
 
-## Status
+<p align="center">
+  <a href="https://capexiq.jaybharti.me/">
+    <img src="docs/assets/screenshots/01-hero-landing.png" alt="CapexIQ landing page with hospital capex decision brief" width="100%">
+  </a>
+</p>
+<p align="center"><em>A calm, decision-led interface for turning an equipment quote into a case the decision room can explain.</em></p>
 
-The repository contains the current working application and a static-export
-deployment. The README that described an early scaffold was stale; the
-implementation now includes the assessment flow, results dashboard, export
-generators, methodology page, sensitivity view, scenario comparison, and
-actionable insight component. This is a decision-support prototype/application,
-not a verified financial model, professional advisory service, or claim of
-production readiness.
+## The hackathon hook: from spreadsheet risk to decision clarity
 
-> **Important disclaimer:** CapexIQ is for informational decision support. It is
-> not financial, investment, tax, accounting, medical, or legal advice. Validate
-> every assumption with qualified professionals, current vendor quotations,
-> hospital operating data, applicable regulations, and your own finance team
-> before making a capital decision.
+Traditional spreadsheets are good at storing numbers. They are much worse at
+preserving the timing, assumptions, and audit trail that make a hospital capex
+decision credible.
 
-## What it covers
+| Where a traditional spreadsheet fails | How CapexIQ responds |
+| --- | --- |
+| Government-scheme DSO lags of 60–120 days disappear inside a blended revenue line. | Billed revenue, realized revenue, payer mix, collection delays, working-capital gaps, and cash receipts remain separate inputs and outputs. |
+| A Year-6 warranty-to-CMC maintenance cliff is hidden by one average annual cost. | The model carries a warranty → CMC → AMC schedule and exposes the lifecycle cost transition. |
+| A single-point formula corruption can quietly poison every copied scenario. | Pure formulas feed the preview, dashboard, scenarios, charts, and exports through one canonical calculation spine. |
+| Sensitivity analysis means duplicating tabs and hoping every copy stayed linked. | Usage and realization sliders recalculate an in-memory scenario and show the effect on NPV, IRR, and payback immediately. |
+| A pasted “answer” is hard for a CFO, auditor, or board member to challenge. | The result explains its drivers and exports an Excel model with traceable live formulas, a Word proposal, or a ZIP package. |
 
-The guided assessment currently supports:
+The assumptions are always editable. Scheme rules, vendor terms, tariffs,
+utilization, and maintenance contracts must be validated against the hospital’s
+current evidence before a purchase decision.
 
-- MRI, CT, Cath Lab, Dialysis, Ultrasound, and Custom equipment categories;
-- purchase and setup costs, utilization, price, and operating assumptions;
-- billed versus realized revenue;
-- payer mix, collection assumptions, delays, and DSO;
-- working-capital gap and peak working-capital need;
-- variable and fixed costs, maintenance, warranty/CMC/AMC-style lifecycle
-  inputs, and maintenance inflation;
-- financing, interest/EMI, launch delay, pre-operative interest, and
-  depreciation inputs;
-- monthly and annual cash-flow views;
-- break-even usage, ROI, NPV, IRR, payback, and equivalent-annual-cost views;
-- user-added scenario comparison rows;
-- a sensitivity strip for usage and realization assumptions;
-- risk callouts and a price-change actionable insight when the model supports
-  one;
-- locally generated Excel, Word, and ZIP exports; and
-- a methodology page that explains the model's calculation sequence and
-  limitations.
+## Native Chrome WebMCP agent integration
 
-The application does not supply a national benchmark database. Defaults and
-example values are illustrative starting points; users should replace them with
-their own quotes, tariffs, utilization data, payer mix, collection behavior,
-costs, and financing terms.
+CapexIQ exposes its interactive surface through Chrome’s browser-native WebMCP
+contract, `document.modelContext`. The registration is client-side and page-bound:
+an AI agent can inspect the current tab, simulate alternatives, populate the
+wizard, navigate to results, and request local exports without a CapexIQ backend,
+login, or server-side financial state.
 
-## How it works
+The six tools are deliberately thin adapters over the existing wizard state and
+[`formulas/computeAssessment.ts`](formulas/computeAssessment.ts) engine:
 
-CapexIQ is a client-side Next.js application configured for a static export.
-The assessment state is held in the browser and draft progress is persisted to
-`localStorage`; this repository contains no login, account system, or application
-backend. Excel, Word, and ZIP files are generated in the browser from the same
-assessment state used by the results dashboard.
+| Tool | Agent capability |
+| --- | --- |
+| `get_presets` | Reads sourced Indian healthcare equipment reference values from `equipment-data/*.json`, including confidence, source IDs, and explicit research gaps. |
+| `get_wizard_form` | Returns a full 4-step wizard snapshot, validation state, and live computed KPIs for the current tab. |
+| `simulate` | Runs a sub-millisecond, in-memory calculation sandbox without changing the live form. |
+| `apply_inputs` | Populates hospital and equipment inputs, toggles Basic/Advanced mode, and can navigate directly to `/results`. |
+| `export_assessment` | Generates the live `.xlsx`, `.docx`, or `.zip` package. The Excel workbook keeps native `=NPV()` and `=IRR()` formulas where the metric is defined. |
+| `get_metric_guide` | Looks up the reference manual for NPV, IRR, payback, break-even, ROI, EAC, working capital, payer mix, and Investment Outlook. |
 
-The calculation path is intentionally visible in the repository:
+### Quote PDF → autonomous decision brief
+
+```mermaid
+flowchart LR
+  Q[Equipment quote PDF] --> A[AI agent extracts quote and operating terms]
+  A --> P[get_presets]
+  P --> S[simulate alternatives]
+  S --> G[get_metric_guide]
+  S --> I[apply_inputs]
+  I --> W[Live CapexIQ wizard]
+  W --> F[get_wizard_form]
+  F --> R[Results dashboard]
+  R --> E[export_assessment]
+  E --> X[Local Excel / Word / ZIP package]
+```
+
+`simulate` is the safe comparison surface. `apply_inputs` changes the live tab,
+and `export_assessment` can trigger a browser download; both remain explicit tools
+so an agent can distinguish analysis from actuation.
+
+## The auditable calculation spine
+
+CapexIQ keeps the financial methodology visible and testable:
 
 ```text
-Assessment inputs
-  → usage and billed/realized revenue
-  → payer collections and working-capital timing
-  → variable/fixed/maintenance/financing/depreciation costs
-  → monthly cash flows
-  → break-even, ROI, NPV, IRR, payback, scenarios, sensitivity
-  → dashboard and local exports
+Inputs
+  → Billed revenue / realized revenue
+  → Payer mix and DSO collections
+  → Variable costs, fixed costs, financing, and maintenance cliff
+  → Monthly cash flow
+  → NPV / IRR / ROI / payback / break-even / Investment Outlook
+  → Dashboard, scenarios, and local exports
 ```
 
-The [methodology page](https://capexiq.jaybharti.me/methodology) is the best
-starting point for reviewing formulas and assumptions. It describes an
-illustrative hypothetical MRI example, not a real hospital benchmark or
-recommendation.
+The dashboard and the exports consume the same typed result. The key source paths
+are [`computeAssessment.ts`](formulas/computeAssessment.ts),
+[`monthlySeries.ts`](formulas/monthlySeries.ts),
+[`registry.ts`](app/webmcp/registry.ts), and
+[`workbookPlan.ts`](exports/workbookPlan.ts). The Excel plan is checked with a
+formula engine against the TypeScript result so a report cannot silently drift
+from the screen.
 
-## Requirements
+## Product gallery
 
-- Node.js compatible with the versions in `package-lock.json`.
-- npm.
-- A modern browser for the interactive assessment and local file exports.
+<table>
+  <tr>
+    <td width="33%"><img src="docs/assets/screenshots/02-assessment-wizard.png" alt="CapexIQ guided assessment wizard with equipment selector and hospital context form"></td>
+    <td width="33%"><img src="docs/assets/screenshots/03-results-dashboard.png" alt="CapexIQ Results Dashboard with Investment Outlook score, KPIs, break-even bar, and cumulative cash flow chart"></td>
+    <td width="33%"><img src="docs/assets/screenshots/04-sensitivity-and-exports.png" alt="CapexIQ sensitivity controls and local Excel, Word, and ZIP export panel"></td>
+  </tr>
+  <tr>
+    <th>01 · Guided assessment</th>
+    <th>02 · Results dashboard</th>
+    <th>03 · Sensitivity + exports</th>
+  </tr>
+</table>
 
-## Development setup
+The live app supports MRI, CT, Cath Lab, Dialysis, Ultrasound, and Custom
+equipment categories. It is intentionally a client-side static export: draft
+state stays in the browser, and exports are generated locally from the same
+assessment state used by the dashboard.
+
+## Developer quickstart
 
 ```bash
-git clone https://github.com/Jay-2212/CapexIQ.git
-cd CapexIQ
 npm ci
-npm run dev
+npm test        # Runs all 326 unit and scenario tests
+npm run build   # Next.js static export
 ```
 
-Useful checks — this is also the full local release-validation sequence
-(mirrored in `.github/workflows/ci.yml`, which runs on every push/PR to `main`):
+For the complete release check:
 
 ```bash
-npm ci
 npx tsc --noEmit
 npm run lint
-npm test
-npm run build
 git diff --check
 ```
 
-`npm run build` creates the static export configured by `next.config.ts`. The
-`lint` script runs `eslint .` against a flat `eslint.config.mjs`
-(`next/core-web-vitals` + `next/typescript`) — before this was added, the repo
-had no committed ESLint config and `next lint` fell back to an interactive
-setup prompt that could not run non-interactively or in CI (see `ISSUES.md`
-ISS-32).
+Start a local preview when you want to inspect the exported site:
 
-## Testing methodology
+```bash
+npx serve -l 3005 out
+```
 
-- **Formula tests** (`tests/formulas/*.test.ts`): one file per `/formulas`
-  module. Most combine a clean round-number case, a realistic messy-number
-  case, and at least one edge case (zero, negative, or a boundary value) per
-  `CONVENTIONS.md` §5.
-- **Independent fixtures** (`tests/scenarios/`): five golden end-to-end
-  scenarios (simple cash purchase, financed + payer mix + DSO, non-viable/
-  minimum-horizon, Investment Outlook band boundaries, Custom equipment with
-  zero benchmark data) whose *expected values* were derived independently of
-  the TypeScript implementation, not copied from a run of the code under
-  test. Two of them (`simple-cash-purchase.test.ts`,
-  `non-viable-and-edge-cases.test.ts`) are backed by standalone Python
-  scripts in `tests/scenarios/derivations/` that re-implement NPV/IRR/EAC/
-  payback from first principles with no import from `/formulas` — run one
-  directly (`python3 tests/scenarios/derivations/scenario-a-derivation.py`)
-  to reproduce its expected values from scratch. The other three show their
-  arithmetic inline in each test's own comments. Plain per-function unit
-  tests (e.g. `tests/formulas/irr.test.ts`) are a second, complementary
-  layer — useful for regression coverage and edge cases, but not a
-  substitute for the independent scenarios when checking whether a formula
-  is *correct*, since a unit test's expected value can itself be a snapshot
-  of the implementation it's testing.
-- **Reconciliation/invariant tests** (e.g.
-  `tests/formulas/monthlySeries.test.ts`,
-  `tests/exports/workbookPlan.test.ts`): assert that two independently-
-  computed views of the same assessment agree — monthly series summed by
-  year against the annual pipeline, Excel formula-engine evaluation against
-  `computeAssessment()`'s own output, exported document numbers against the
-  dashboard's. This is the primary defense against the dashboard, charts,
-  and exports silently drifting apart (`CONVENTIONS.md` §3: one engine,
-  never a second calculation path).
-- **Known financial-model limitations:** see `ISSUES.md`'s Open/Accepted
-  sections — notably ISS-30 (launch delay is collected but not yet applied
-  to the projection) and ISS-31 (IRR is intentionally left undefined, not
-  auto-resolved, for cash flows with more than one valid root).
-- **Known export limitations:** Excel/Word chart *images* remain deferred
-  (data tables stand in — see `exports/workbookPlan.ts`'s Charts sheet and
-  Word §8); see `ISSUES.md` for the reasoning. When a utilization ramp is
-  set, the Word proposal and Excel Monthly tab both now say plainly that the
-  headline ROI/monthly-revenue figures are at mature (fully ramped-up)
-  utilization, while NPV/IRR/payback already account for the ramp-up period
-  — see `tests/exports/word-generator.test.ts` and
-  `tests/exports/workbookPlan.test.ts`'s Formula Notes assertions.
+### Inspecting WebMCP in Chrome DevTools
 
-## Deployment
+1. Open the live demo or local preview in a WebMCP-capable Chrome build.
+2. In **DevTools → Console**, verify the native surface is present:
 
-The application is configured with `output: "export"`. Deploy the generated
-static output using a static host such as Cloudflare Pages or another provider
-that supports the output directory. The repository does not contain a
-deployment secret, API route, or server-side credential flow.
+   ```js
+   typeof document.modelContext
+   typeof document.modelContext?.registerTool
+   ```
 
-## Privacy and security
+3. Set a breakpoint in [`app/webmcp/registry.ts`](app/webmcp/registry.ts) and
+   reload an assessment route. The registration loop should expose these six
+   names: `get_presets`, `get_wizard_form`, `simulate`, `apply_inputs`,
+   `export_assessment`, and `get_metric_guide`.
+4. Use Chrome’s WebMCP/model-context inspection surface or a connected agent to
+   call `get_presets`, `get_wizard_form`, `simulate`, and `get_metric_guide`.
+   Start with `simulate` when testing because it does not mutate the tab. Verify
+   `apply_inputs` navigation and the three download formats only when those
+   actions are intended.
 
-- Draft assessment state is stored in the browser's `localStorage`.
-- There is no account system or server-side persistence in this repository.
-- Exports may contain sensitive operating and financial assumptions; treat them
-  as confidential and remove them from shared machines when appropriate.
-- The application does not establish that a value is accurate merely because
-  it is displayed or exported.
-- The stock photos, fonts, icons, dependencies, and other non-original
-  materials are documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The implementation feature-detects `document.modelContext`, no-ops in ordinary
+browsers, shields handler failures with actionable error envelopes, and cleans
+up registrations when the assessment layout unmounts.
 
-## Licence scope
+## What is tested
 
-[LICENSE-CODE](LICENSE-CODE) applies only to the original CapexIQ source code
-and original documentation that Jay owns. It does not grant a project-wide
-licence to the stock images, font files, icon files, third-party dependencies,
-trademarks, or external source material listed in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Review those notices before
-redistributing a complete copy or a deployment bundle.
+- 326 Vitest tests across formula units, independent golden scenarios, wizard
+  transitions, dashboard components, chart behavior, export reconciliation, and
+  the complete WebMCP tool suite.
+- Independent scenario fixtures cover cash purchase, financing + payer mix + DSO,
+  non-viable and horizon edges, Investment Outlook band boundaries, and Custom
+  equipment with no benchmark data.
+- Export checks verify that Excel formulas evaluate to the same result as the
+  dashboard and that the Word and ZIP outputs preserve the same assessment.
 
-## Contributing
+## Disclaimers and license
 
-Issues and pull requests are welcome for reproducible calculation defects,
-accessibility improvements, documentation corrections, and export regressions.
-When reporting a calculation issue, include the equipment category and a
-minimal synthetic input set; do not upload patient data, confidential quotes,
-or real hospital financial records.
+CapexIQ is professional decision-support software, not financial, investment,
+tax, accounting, medical, legal, procurement, or engineering advice. It does not
+guarantee a return, validate a vendor quote, or replace due diligence. Confirm
+every tariff, payer rule, DSO assumption, maintenance contract, financing term,
+tax treatment, regulatory requirement, and operating forecast with qualified
+professionals and current hospital evidence. Never enter patient data.
+
+The original CapexIQ source code and original documentation are released under
+the [MIT License](LICENSE), Copyright 2026 Jay Prakash Bharti. Stock photography,
+fonts, icons, dependencies, trademarks, and other third-party materials are not
+automatically covered by that grant; review
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) before redistributing a full
+copy or deployment bundle.
+
+## Links
+
+- [Open the live demo](https://capexiq.jaybharti.me/)
+- [Read the methodology](https://capexiq.jaybharti.me/methodology)
+- [Review the source repository](https://github.com/Jay-2212/CapexIQ)
