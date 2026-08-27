@@ -21,10 +21,11 @@ IsItAgentReady validator still injects and checks deprecated
 tools through the current API, but the external scan failed until the legacy namespace
 was supported.
 **Resolution:** The registry now prefers `document.modelContext` and falls back to
-`navigator.modelContext`. Pages deployment `090ed09e-0792-4b50-ada5-c90c4c500ea4`
-from source `2eac4c4` is live. The validator reports
+`navigator.modelContext`. Pages deployment `c5519861-9568-424b-8d79-bfb918fe05a5`
+from source `51bc16f` is live. The validator reports
 `checks.discovery.webMcp.status = "pass"` with six tools, and the in-app Browser
-also lists all six and executes `simulate` successfully.
+executes all six successfully with synthetic data. The live test also found and fixed
+`apply_inputs` returning a stale pre-dispatch summary even though its mutations applied.
 **Status:** resolved.
 
 ## Open

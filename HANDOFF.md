@@ -31,10 +31,10 @@ in-app Browser and the required external readiness scan:**
   `export_assessment`, and `get_metric_guide`. The registry prefers the current
   `document.modelContext` API and falls back to deprecated
   `navigator.modelContext` for older validators and hosts.
-- Source verification is green: 329 tests, `npx tsc --noEmit`, `npm run lint`,
+- Source verification is green: 330 tests, `npx tsc --noEmit`, `npm run lint`,
   `npm run build`, and `git diff --check`. Production Pages deployment
-  `090ed09e-0792-4b50-ada5-c90c4c500ea4` (source `2eac4c4`) is live at both
-  `https://090ed09e.capexiq-portfolio.pages.dev` and
+  `c5519861-9568-424b-8d79-bfb918fe05a5` (source `51bc16f`) is live at both
+  `https://c5519861.capexiq-portfolio.pages.dev` and
   `https://capexiq.jaybharti.me/assess`.
 - The IsItAgentReady scan now reports
   `checks.discovery.webMcp.status = "pass"` and finds all six tools via its legacy
@@ -42,6 +42,9 @@ in-app Browser and the required external readiness scan:**
   `simulate` successfully with synthetic CT inputs.
 - Registration passes an `AbortSignal`, cleanup aborts that signal, and execute
   callback typing includes the API's cancellation options.
+- `apply_inputs` now derives its immediate response through the same wizard reducer
+  actions it dispatches, so `currentStateSummary`, completion, and KPIs no longer lag
+  one React render behind the applied values.
 
 ### Earlier verification context retained below
 
@@ -303,14 +306,16 @@ runtime were healthy.
 **What changed:** Added a narrow host resolver that prefers `document.modelContext`
 and falls back to `navigator.modelContext`, tightened execute-callback cancellation
 typing, added fallback and precedence tests, and documented the compatibility rule.
-No financial formulas, wizard behavior, or tool handlers changed.
+The final live-tool pass also found and fixed stale immediate output from
+`apply_inputs` by deriving its response through the canonical wizard reducer. No
+financial formulas changed.
 
-**Verification:** 329/329 tests, TypeScript, ESLint, static build, and diff check pass.
-Committed and pushed as `2eac4c4`. Cloudflare Pages production deployment
-`090ed09e-0792-4b50-ada5-c90c4c500ea4` is live on the custom domain. The external
+**Verification:** 330/330 tests, TypeScript, ESLint, static build, and diff check pass.
+Committed and pushed as `2eac4c4` and `51bc16f`. Cloudflare Pages production deployment
+`c5519861-9568-424b-8d79-bfb918fe05a5` is live on the custom domain. The external
 scan now reports `checks.discovery.webMcp.status = "pass"` with six tools. The in-app
-Browser independently listed the same six tools and executed `simulate` with synthetic
-CT inputs successfully.
+Browser independently executed all six tools with synthetic CT inputs, including a
+no-download Excel export; all six returned success.
 
 ### 2026-08-27 — Showcase screenshot cleanup and license consolidation
 **What changed:** Tightened the public repository presentation without touching the
