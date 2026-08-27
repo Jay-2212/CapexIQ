@@ -1,5 +1,5 @@
-// Safe registry wrapper for WebMCP tools on document.modelContext
-// Implements robust browser/SSR feature detection and error shielding.
+// Safe registry wrapper for WebMCP tools. The current API lives on
+// document.modelContext; navigator.modelContext is a legacy compatibility path.
 
 import type {
   GetPresetsInput,
@@ -8,6 +8,7 @@ import type {
   ApplyInputsInput,
   ExportAssessmentInput,
   GetMetricGuideInput,
+  ModelContextHost,
   ModelContextTool,
   WebMCPContextAccessor,
   WebMCPResult,
@@ -29,15 +30,23 @@ import {
   handleGetMetricGuide,
 } from "./handlers";
 
-/** Safe check for document.modelContext support in the current runtime environment */
+/** Resolve the current WebMCP host, preferring the standards-track namespace. */
+function getModelContextHost(): ModelContextHost | undefined {
+  if (typeof document !== "undefined" && document.modelContext) {
+    return document.modelContext;
+  }
+
+  if (typeof navigator !== "undefined" && navigator.modelContext) {
+    return navigator.modelContext;
+  }
+
+  return undefined;
+}
+
+/** Safe check for WebMCP support in the current runtime environment. */
 export function isWebMCPAvailable(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    typeof document !== "undefined" &&
-    "modelContext" in document &&
-    Boolean(document.modelContext) &&
-    typeof (document.modelContext as unknown as { registerTool?: unknown }).registerTool === "function"
-  );
+  const host = getModelContextHost();
+  return typeof host?.registerTool === "function";
 }
 
 /** Error-shielded tool wrapper */
@@ -124,7 +133,7 @@ export function createWebMCPTools(
 }
 
 /**
- * Registers all CapexIQ WebMCP tools on document.modelContext if supported.
+ * Registers all CapexIQ WebMCP tools on the available model-context host.
  * Returns an unregister cleanup function for React useEffect unmount.
  */
 export function registerWebMCPTools(
@@ -135,7 +144,7 @@ export function registerWebMCPTools(
     return () => {};
   }
 
-  const host = document.modelContext;
+  const host = getModelContextHost();
   if (!host || typeof host.registerTool !== "function") {
     return () => {};
   }

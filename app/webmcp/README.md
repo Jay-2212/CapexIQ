@@ -1,6 +1,6 @@
 # app/webmcp — Web Model Context Protocol (WebMCP) Integration
 
-This folder contains CapexIQ's WebMCP support for exposing interactive clinical and financial modeling capabilities directly to LLM agents via Chrome's `document.modelContext` standard.
+This folder contains CapexIQ's WebMCP support for exposing interactive clinical and financial modeling capabilities directly to LLM agents. It prefers the current `document.modelContext` API and retains `navigator.modelContext` as a compatibility fallback for older hosts and validators.
 
 ## Structure
 - `types.ts`: Core TypeScript types, JSON schema interfaces, error recovery envelopes (`error_code`, `message`, `suggested_fix`).

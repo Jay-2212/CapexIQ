@@ -467,7 +467,7 @@ describe("WebMCP Tool Suite", () => {
       ]);
     });
 
-    it("isWebMCPAvailable returns false in default test environment without document.modelContext", () => {
+    it("isWebMCPAvailable returns false without a model-context host", () => {
       expect(isWebMCPAvailable()).toBe(false);
     });
 
@@ -508,6 +508,42 @@ describe("WebMCP Tool Suite", () => {
       // Clean up mock
       delete document.modelContext;
       expect(isWebMCPAvailable()).toBe(false);
+    });
+
+    it("supports the deprecated navigator.modelContext host as a compatibility fallback", () => {
+      const mockHost: ModelContextHost = {
+        registerTool: vi.fn(async () => {}),
+      };
+
+      navigator.modelContext = mockHost;
+      expect(isWebMCPAvailable()).toBe(true);
+
+      const unregister = registerWebMCPTools();
+      expect(mockHost.registerTool).toHaveBeenCalledTimes(6);
+
+      unregister();
+      delete navigator.modelContext;
+      expect(isWebMCPAvailable()).toBe(false);
+    });
+
+    it("prefers document.modelContext when both namespaces are available", () => {
+      const documentHost: ModelContextHost = {
+        registerTool: vi.fn(async () => {}),
+      };
+      const navigatorHost: ModelContextHost = {
+        registerTool: vi.fn(async () => {}),
+      };
+
+      document.modelContext = documentHost;
+      navigator.modelContext = navigatorHost;
+
+      const unregister = registerWebMCPTools();
+      expect(documentHost.registerTool).toHaveBeenCalledTimes(6);
+      expect(navigatorHost.registerTool).not.toHaveBeenCalled();
+
+      unregister();
+      delete document.modelContext;
+      delete navigator.modelContext;
     });
   });
 });

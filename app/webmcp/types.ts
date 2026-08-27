@@ -39,7 +39,7 @@ export interface ModelContextExecuteToolOptions {
 export interface ModelContextTool<TInput = unknown, TOutput = unknown> extends ModelContextToolDefinition {
   execute: (
     params: TInput,
-    options?: ModelContextExecuteToolOptions
+    options: ModelContextExecuteToolOptions
   ) => Promise<WebMCPResult<TOutput>> | WebMCPResult<TOutput>;
 }
 
@@ -54,6 +54,11 @@ export interface ModelContextHost {
 
 declare global {
   interface Document {
+    modelContext?: ModelContextHost;
+  }
+
+  interface Navigator {
+    /** Deprecated Chrome WebMCP namespace retained for legacy scanners/hosts. */
     modelContext?: ModelContextHost;
   }
 }

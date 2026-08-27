@@ -47,6 +47,10 @@ an AI agent can inspect the current tab, simulate alternatives, populate the
 wizard, navigate to results, and request local exports without a CapexIQ backend,
 login, or server-side financial state.
 
+The registry prefers the current `document.modelContext` namespace and falls back
+to the deprecated `navigator.modelContext` namespace for older browser hosts and
+readiness scanners that have not yet migrated.
+
 The six tools are deliberately thin adapters over the existing wizard state and
 [`formulas/computeAssessment.ts`](formulas/computeAssessment.ts) engine:
 
@@ -125,7 +129,7 @@ assessment state used by the dashboard.
 
 ```bash
 npm ci
-npm test        # Runs all 326 unit and scenario tests
+npm test        # Runs all 329 unit and scenario tests
 npm run build   # Next.js static export
 ```
 
@@ -163,13 +167,13 @@ npx serve -l 3005 out
    `apply_inputs` navigation and the three download formats only when those
    actions are intended.
 
-The implementation feature-detects `document.modelContext`, no-ops in ordinary
-browsers, shields handler failures with actionable error envelopes, and cleans
-up registrations when the assessment layout unmounts.
+The implementation feature-detects the current host plus the legacy navigator
+fallback, no-ops in ordinary browsers, shields handler failures with actionable
+error envelopes, and cleans up registrations when the assessment layout unmounts.
 
 ## What is tested
 
-- 326 Vitest tests across formula units, independent golden scenarios, wizard
+- 329 Vitest tests across formula units, independent golden scenarios, wizard
   transitions, dashboard components, chart behavior, export reconciliation, and
   the complete WebMCP tool suite.
 - Independent scenario fixtures cover cash purchase, financing + payer mix + DSO,

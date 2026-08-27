@@ -2,7 +2,7 @@
 
 // WebMCP Provider for CapexIQ
 // Mounts inside app/(assessment)/layout.tsx to wire live Wizard state and Next.js router
-// to document.modelContext when running in a WebMCP-enabled Chrome environment.
+// to the available WebMCP host in a supported browser environment.
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
