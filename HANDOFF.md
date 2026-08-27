@@ -11,10 +11,10 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-27, CAPEX IQ foundation pass for the WebMCP challenge)*
+*(Last updated: 2026-08-27, CAPEX IQ result-repair pass for the WebMCP challenge)*
 
-**The non-WebMCP foundation work requested by Jay is complete, committed as `9b14e06`,
-and published to `capexiq.jaybharti.me`:**
+**The non-WebMCP foundation and result-repair work requested by Jay is complete,
+committed on `main`, and published to `capexiq.jaybharti.me`:**
 
 - The preview/payback strip is in normal document flow, so it no longer covers the
   page while the user scrolls.
@@ -31,12 +31,15 @@ and published to `capexiq.jaybharti.me`:**
 - The three long planning/research/model documents now live under `docs/`; the root
   keeps the short project instructions, README, licence, specifications, handoff, and
   issue tracker easy to find.
-- Verification for this pass: 298 tests, TypeScript, ESLint, static export build, and
-  `git diff --check` all pass. A clean local browser run also exercised the loan path
-  through Results and confirmed the optimized image URLs load.
-- The Cloudflare Pages deployment is recorded against `9b14e06`; direct checks of the
-  custom domain and the deployment URL show the new WebP assets and direct `/assess`
-  route. The old stale-deployment issue is resolved.
+- The result dashboard now reports recoverable IRRs, gives the break-even bar a visible
+  scale, gives cumulative cash flow a five-step Y-axis, uses the full width for the
+  demand sensitivity plot, and restores the fixed lower/base/higher comparison layout.
+- Verification for the repair pass: 301 tests, TypeScript, ESLint, static-export build,
+  and `git diff --check` all pass. The live Results page was refreshed and checked in the
+  browser: IRR rendered, chart axis labels were present, the sensitivity SVG used its
+  full width, and the scenario headers appeared in lower/base/higher order.
+- The latest Cloudflare Pages deployment is recorded in the change log below; direct
+  checks of the custom domain and deployment URL show the repaired Results dashboard.
 
 **WebMCP is intentionally not implemented yet.** The app remains a static,
 client-only site with browser-local draft storage and no backend. The next phase is the
@@ -327,6 +330,25 @@ GitHub root.
 **Not touched, on purpose:** backend/Supabase, WebMCP tool definitions, Excel/Word
 export redesign, financial methodology, scoring constants, sourced benchmarks, and
 deployment configuration.
+
+### 2026-08-27 — Results dashboard repair before WebMCP
+**What changed:** Jay reported regressions in the results dashboard and asked for a
+narrow repair pass before beginning WebMCP. No wizard unit behavior, payer collection
+logic, financing flow, image assets, exports, or WebMCP code was changed.
+1. **IRR:** replaced endpoint-only bisection with a bounded scan plus bisection of each
+   sign-change interval. Multiple valid roots now use the smallest non-negative root;
+   genuinely unrecoverable cash flows remain `Undefined` by design.
+2. **Charts:** restored a compact break-even card with a numeric scale, added readable
+   Y-axis labels/grid lines to cumulative cash flow, removed the result-row stretch that
+   created a large blank break-even card, and made the sensitivity SVG fill its wide plot.
+3. **Scenario comparison:** restored the fixed three-column lower/base/higher layout,
+   with ±20% applied to billed tariff and usage and all metrics recomputed through the
+   canonical assessment engine.
+4. **Verification:** full suite 301/301, `npx tsc --noEmit`, `npm run lint`, static
+   `npm run build`, and `git diff --check` passed. Cloudflare Pages deployment
+   `845f8530` was refreshed and checked live before the final commit; the live DOM showed
+   a numeric IRR, five cash-flow axis labels, a full-width sensitivity path, and the
+   lower/base/higher scenario headers.
 
 ### 2026-08-07 — Autonomous release-quality/accessibility verification pass
 **What changed:** Jay was unavailable; ran a scoped verification pass per this

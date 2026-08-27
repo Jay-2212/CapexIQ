@@ -29,13 +29,18 @@ export function BreakEvenBar({
     );
   }
 
-  const scaleMax = Math.max(usagePerDay, breakEvenUsagePerDay) * 1.2;
+  const scaleMax = Math.max(Math.max(usagePerDay, breakEvenUsagePerDay) * 1.2, 1);
   const usagePct = Math.min(100, (usagePerDay / scaleMax) * 100);
   const breakEvenPct = Math.min(100, (breakEvenUsagePerDay / scaleMax) * 100);
   const clearsBreakEven = usagePerDay >= breakEvenUsagePerDay;
+  const scaleTicks = [0, scaleMax / 2, scaleMax];
 
   return (
-    <div className="break-even-bar" data-clears={clearsBreakEven}>
+    <div
+      className="break-even-bar"
+      data-clears={clearsBreakEven}
+      aria-label={`Expected usage ${formatNumber(usagePerDay, 1)} per day compared with break-even usage ${formatNumber(breakEvenUsagePerDay, 1)} per day`}
+    >
       <div className="break-even-bar__track">
         <div
           className="break-even-bar__fill"
@@ -67,6 +72,11 @@ export function BreakEvenBar({
             <span>Break-even threshold</span>
           </div>
         )}
+      </div>
+      <div className="break-even-bar__scale" aria-hidden="true">
+        {scaleTicks.map((tick) => (
+          <span key={tick}>{formatNumber(tick, 1)}</span>
+        ))}
       </div>
       <div className="break-even-bar__legend">
         <span>

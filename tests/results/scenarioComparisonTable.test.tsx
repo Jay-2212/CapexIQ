@@ -1,10 +1,8 @@
-// ScenarioComparisonTable: only the Base row shows until a scenario is added; adding
-// one runs the full canonical computeAssessment() with purchaseCost/billedTariffPerUse/
-// usagePerDay overridden and renders every SPEC.md §28.2 column; removing it returns
-// to the empty state.
+// ScenarioComparisonTable always shows the approved lower/base/higher cases in a
+// stable three-column layout, with every column running through the canonical engine.
 
 import { describe, expect, it } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import { ScenarioComparisonTable } from "../../app/components/ScenarioComparisonTable";
 import type { AssessmentInputs } from "../../formulas/computeAssessment";
@@ -27,18 +25,21 @@ const inputs: AssessmentInputs = {
 };
 
 describe("ScenarioComparisonTable", () => {
-  it("shows only the empty-state note before any scenario is added", () => {
+  it("renders lower, base, and higher assumptions side by side", () => {
     render(<ScenarioComparisonTable inputs={inputs} />);
-    expect(screen.getByText(/Add a scenario to compare the current assessment/)).toBeInTheDocument();
-    expect(screen.queryByRole("table")).not.toBeInTheDocument();
-  });
-
-  it("adds the approved lower preset, switches to higher, and keeps custom scenarios available", () => {
-    render(<ScenarioComparisonTable inputs={inputs} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /add scenario/i }));
-
     expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /add scenario/i })).not.toBeInTheDocument();
+
+    const headings = Array.from(screen.getAllByRole("columnheader")).map(
+      (heading) => heading.textContent
+    );
+    expect(headings).toEqual([
+      "Assumption",
+      "Lower assumption−20% tariff + usage",
+      "Base caseCurrent assessment",
+      "Higher assumption+20% tariff + usage",
+    ]);
+
     for (const label of [
       "Capex",
       "Monthly billed revenue",
@@ -54,33 +55,11 @@ describe("ScenarioComparisonTable", () => {
     ]) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
-
-    const scenarioMode = screen.getByLabelText("Scenario 2 assumption") as HTMLSelectElement;
-    expect(scenarioMode).toHaveValue("lower");
     expect(screen.getByText("₹640")).toBeInTheDocument();
-    expect(screen.getByText("8.0")).toBeInTheDocument();
-
-    fireEvent.change(scenarioMode, { target: { value: "higher" } });
-    expect(scenarioMode).toHaveValue("higher");
+    expect(screen.getByText("₹800")).toBeInTheDocument();
     expect(screen.getByText("₹960")).toBeInTheDocument();
+    expect(screen.getByText("8.0")).toBeInTheDocument();
+    expect(screen.getByText("10.0")).toBeInTheDocument();
     expect(screen.getByText("12.0")).toBeInTheDocument();
-
-    fireEvent.change(scenarioMode, { target: { value: "custom" } });
-    const tariffInput = screen.getByLabelText(
-      "Billed tariff per use for Scenario 2"
-    ) as HTMLInputElement;
-    const npvCellsBefore = screen.getAllByText(/₹/).length;
-    fireEvent.change(tariffInput, { target: { value: "2000" } });
-    const npvCellsAfter = screen.getAllByText(/₹/).length;
-    expect(npvCellsAfter).toBe(npvCellsBefore); // same number of currency cells, values just changed
-  });
-
-  it("removes a scenario and returns to the empty state", () => {
-    render(<ScenarioComparisonTable inputs={inputs} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /add scenario/i }));
-    fireEvent.click(screen.getByRole("button", { name: /remove/i }));
-
-    expect(screen.getByText(/Add a scenario to compare the current assessment/)).toBeInTheDocument();
   });
 });

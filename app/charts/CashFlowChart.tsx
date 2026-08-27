@@ -11,7 +11,9 @@ import { formatInr, formatInrCompact } from "../components/formatting";
 import { clampTooltipPercent } from "./chartTooltipUtils";
 
 const CHART_HEIGHT = 200;
-const BAR_GAP = 10;
+const PLOT_LEFT = 16;
+const PLOT_RIGHT = 100;
+const BAR_GAP = 1.2;
 
 export function CashFlowChart({
   series,
@@ -26,7 +28,8 @@ export function CashFlowChart({
   const maxMagnitude = Math.max(...series.map((value) => Math.abs(value)), 1);
   const zeroY = CHART_HEIGHT / 2;
   const scale = (CHART_HEIGHT / 2 - 12) / maxMagnitude;
-  const barWidth = 100 / series.length;
+  const barWidth = (PLOT_RIGHT - PLOT_LEFT) / series.length;
+  const axisTicks = [maxMagnitude, maxMagnitude / 2, 0, -maxMagnitude / 2, -maxMagnitude];
   // Every bar always renders — only the text labels below thin out once a long
   // useful-life series (10+ years is common) would otherwise cram illegible text
   // under each bar. The full year-by-year figures stay available in the accessible
@@ -47,17 +50,32 @@ export function CashFlowChart({
           role="img"
           aria-label="Cumulative cash flow by year, starting below zero at the initial investment and crossing to positive once the investment is recovered."
         >
-          <line
-            x1="0"
-            y1={zeroY}
-            x2="100"
-            y2={zeroY}
-            className="cash-flow-chart__zero-line"
-          />
+          {axisTicks.map((value) => {
+            const y = zeroY - value * scale;
+            return (
+              <g key={value}>
+                <line
+                  x1={PLOT_LEFT}
+                  y1={y}
+                  x2={PLOT_RIGHT}
+                  y2={y}
+                  className={value === 0 ? "cash-flow-chart__zero-line" : "cash-flow-chart__grid-line"}
+                />
+                <text
+                  x={PLOT_LEFT - 1}
+                  y={y - 2}
+                  textAnchor="end"
+                  className="cash-flow-chart__axis-label"
+                >
+                  {formatInrCompact(value)}
+                </text>
+              </g>
+            );
+          })}
           {series.map((value, index) => {
             const barHeight = Math.abs(value) * scale;
-            const x = index * barWidth + BAR_GAP / 4;
-            const width = barWidth - BAR_GAP / 2;
+            const x = PLOT_LEFT + index * barWidth + BAR_GAP / 2;
+            const width = barWidth - BAR_GAP;
             const y = value >= 0 ? zeroY - barHeight : zeroY;
             return (
               <rect

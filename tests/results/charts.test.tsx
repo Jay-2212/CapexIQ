@@ -9,6 +9,25 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import { BreakEvenBar } from "../../app/charts/BreakEvenBar";
 import { CashFlowChart } from "../../app/charts/CashFlowChart";
+import { SensitivityStrip } from "../../app/components/SensitivityStrip";
+import type { AssessmentInputs } from "../../formulas/computeAssessment";
+
+const sensitivityInputs: AssessmentInputs = {
+  purchaseCost: 2_000_000,
+  installationCost: 100_000,
+  usagePerDay: 10,
+  workingDaysPerMonth: 25,
+  payerMix: [
+    { payerName: "cash", shareOfVolume: 100, billedTariff: 800, realizationPercentage: 100, collectionDelayDays: 0 },
+  ],
+  variableCostPerUse: 50,
+  fixedCostPerMonth: 45_000,
+  financing: { type: "cash" },
+  maintenance: { warrantyYears: 8, cmcYears: 0, cmcAnnualCost: 0, amcAnnualCost: 0 },
+  usefulLifeYears: 8,
+  discountRate: 12.5,
+  salvageValuePercentage: 5,
+};
 
 describe("BreakEvenBar", () => {
   it("renders the unreachable-break-even message instead of a bar when breakEvenUsagePerDay is null", () => {
@@ -63,6 +82,9 @@ describe("CashFlowChart", () => {
     const negativeBars = container.querySelectorAll(".cash-flow-chart__bar--negative");
     expect(positiveBars).toHaveLength(0);
     expect(negativeBars).toHaveLength(series.length);
+    expect(container.querySelectorAll(".cash-flow-chart__axis-label")).toHaveLength(5);
+    expect(container.querySelectorAll(".cash-flow-chart__axis-label")[4]).toHaveTextContent("−₹5.00 L");
+    expect(container.querySelectorAll(".cash-flow-chart__axis-label")[2]).toHaveTextContent("₹0");
 
     // Accessible table still exposes every year's exact figure even though the
     // per-bar text labels thin out for long series.
@@ -95,5 +117,16 @@ describe("CashFlowChart", () => {
     expect(screen.getByText("−₹5,00,000")).toBeInTheDocument();
     fireEvent.blur(bars[0]);
     expect(container.querySelector(".chart-tooltip")).not.toBeInTheDocument();
+  });
+});
+
+describe("SensitivityStrip", () => {
+  it("uses the full responsive plot width instead of letterboxing the SVG into a square", () => {
+    const { container } = render(<SensitivityStrip inputs={sensitivityInputs} />);
+
+    expect(container.querySelector(".sensitivity-strip__plot")).toHaveAttribute(
+      "preserveAspectRatio",
+      "none"
+    );
   });
 });

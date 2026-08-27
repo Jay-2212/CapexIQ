@@ -26,16 +26,10 @@ describe("irr", () => {
   });
 
   // Classic textbook double-sign-change cash flow (Brealey-Myers): -4,000 upfront,
-  // +25,000 in year 1, then -25,000 in year 2 (e.g. a mid-project decommissioning
-  // cost). Hand-verifiable: NPV(25%) = 25000/1.25 - 25000/1.5625 - 4000
-  //   = 20,000 - 16,000 - 4,000 = 0, and NPV(400%) = 25000/5 - 25000/25 - 4000
-  //   = 5,000 - 1,000 - 4,000 = 0 — two distinct real IRRs (25% and 400%). At both
-  // bracket endpoints (-99% and 1000%) NPV is negative (same sign), so the current
-  // same-sign bisection guard throws rather than picking either root — a defensible
-  // behavior (which root is "the" IRR is a methodology call, not implemented here),
-  // pinned so a future change doesn't silently start returning one root without that
-  // decision being made deliberately. See ISSUES.md.
-  it("throws (rather than silently picking a root) for a classic multiple-IRR cash flow stream", () => {
-    expect(() => irr(4000, [25000, -25000])).toThrow(/multiple possible IRRs/);
+  // +25,000 in year 1, then -25,000 in year 2. It has two valid roots (25% and
+  // 400%); the product deliberately reports the smallest non-negative root so a
+  // decision report remains stable instead of falling back to "Undefined".
+  it("selects the smallest non-negative root when a cash-flow stream has multiple IRRs", () => {
+    expect(irr(4000, [25000, -25000])).toBeCloseTo(25, 6);
   });
 });

@@ -139,6 +139,7 @@ export function SensitivityStrip({ inputs }: { inputs: AssessmentInputs }) {
           ref={plotRef}
           className="sensitivity-strip__plot"
           viewBox="0 0 100 100"
+          preserveAspectRatio="none"
           role="img"
           aria-label={`Scenario consumption sensitivity. Current usage is ${formatNumber(usagePerDay, 1)} per day and current NPV is ${formatInr(scenarioResult.npv)}. Click or drag across the chart to change usage.`}
           onPointerDown={(event) => {

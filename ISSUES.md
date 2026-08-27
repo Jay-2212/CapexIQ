@@ -74,18 +74,16 @@ deliberately (not as a side effect of another change).
 **Area:** formulas
 **What was found:** 2026-08-06. Classic multiple-sign-change cash flows (e.g. a large
 cost after an early positive return — hand-verified textbook case: initial 4,000,
-+25,000, then -25,000, with real roots at both 25% and 400%) have NPV the same sign at
++25,000, then -25,000, with real roots at both 25% and 400%) had NPV the same sign at
 both ends of `irr.ts`'s [-99%, 1000%] bisection bracket, even though two valid roots
-exist inside it. The function throws — a defensible outcome (picking "the" IRR among
-several is a methodology call, not a bug) but the pre-existing error message ("no
-discount-rate sign change exists") implied no root existed at all, which is misleading
-for this case. Fixed the message wording only (now says a single IRR isn't
-well-defined and cash flows may have zero *or multiple* roots) — did not change which
-root, if any, gets returned. `computeAssessment.ts` already treats a thrown IRR as
-`null` either way, so no downstream behavior changed. Pinned by
+existed inside it. The endpoint-only bisection made `computeAssessment()` display
+`Undefined` for a recoverable cash-flow pattern.
+**Resolution (2026-08-27):** `irr.ts` now scans the supported rate range, solves each
+sign-change interval, and returns the smallest non-negative root when several exist
+(or the root closest to zero when all valid roots are negative). Truly no-root streams
+still return `null` through the existing `computeAssessment()` contract. Pinned by
 `tests/formulas/irr.test.ts`'s multiple-IRR test.
-**Status:** accepted as current behavior. Revisit only if Jay wants a specific
-tie-breaking rule (e.g. "smallest positive root") adopted deliberately.
+**Status:** resolved.
 
 ### ISS-33 — `formatPercent`/`formatNumber` use a plain ASCII hyphen for negatives; `formatInr`/`formatInrCompact` use the Unicode U+2212 minus sign
 **Area:** UI / formatting consistency
