@@ -72,4 +72,20 @@ describe("ScenarioComparisonTable", () => {
     expect(screen.getByText("IRR")).toBeInTheDocument();
     expect(screen.getByText("Working capital gap")).toBeInTheDocument();
   });
+
+  it("cleanly rounds fractional scenario defaults to avoid repeating decimals", () => {
+    const fractionalInputs: AssessmentInputs = {
+      ...inputs,
+      usagePerDay: 3,
+      payerMix: [
+        { payerName: "cash", shareOfVolume: 100, billedTariff: 2222, realizationPercentage: 100, collectionDelayDays: 0 },
+      ],
+    };
+
+    render(<ScenarioComparisonTable inputs={fractionalInputs} />);
+    expect(screen.getByRole("spinbutton", { name: "Lower assumption billed tariff per use" })).toHaveValue(1777.6);
+    expect(screen.getByRole("spinbutton", { name: "Higher assumption billed tariff per use" })).toHaveValue(2666.4);
+    expect(screen.getByRole("spinbutton", { name: "Lower assumption usage per day" })).toHaveValue(2.4);
+    expect(screen.getByRole("spinbutton", { name: "Higher assumption usage per day" })).toHaveValue(3.6);
+  });
 });

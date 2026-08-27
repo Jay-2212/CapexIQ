@@ -44,12 +44,12 @@ function defaultEditableScenarios(
 ): Record<ScenarioPreset, EditableScenario> {
   return {
     lower: {
-      billedTariffPerUse: baseTariff * SCENARIO_PRESET_MULTIPLIER.lower,
-      usagePerDay: baseUsage * SCENARIO_PRESET_MULTIPLIER.lower,
+      billedTariffPerUse: Math.round(baseTariff * SCENARIO_PRESET_MULTIPLIER.lower * 100) / 100,
+      usagePerDay: Math.round(baseUsage * SCENARIO_PRESET_MULTIPLIER.lower * 100) / 100,
     },
     higher: {
-      billedTariffPerUse: baseTariff * SCENARIO_PRESET_MULTIPLIER.higher,
-      usagePerDay: baseUsage * SCENARIO_PRESET_MULTIPLIER.higher,
+      billedTariffPerUse: Math.round(baseTariff * SCENARIO_PRESET_MULTIPLIER.higher * 100) / 100,
+      usagePerDay: Math.round(baseUsage * SCENARIO_PRESET_MULTIPLIER.higher * 100) / 100,
     },
   };
 }
@@ -73,6 +73,7 @@ function ScenarioEditor({
   step: number;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }) {
+  const displayValue = Number.isFinite(value) ? Math.round(value * 100) / 100 : value;
   return (
     <label className="scenario-table__editor">
       <span className="visually-hidden">{ariaLabel}</span>
@@ -80,7 +81,7 @@ function ScenarioEditor({
         type="number"
         min="0"
         step={step}
-        value={value}
+        value={displayValue}
         aria-label={ariaLabel}
         onChange={onChange}
       />
