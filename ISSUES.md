@@ -12,6 +12,29 @@ Status values: **open** (needs action), **accepted** (known, deliberately not fi
 
 ## Open
 
+### ISS-36 — WebMCP source is not present in the live deployment and registry lifecycle is stale
+**Area:** deployment / WebMCP integration
+**What was found:** 2026-08-27. The canonical source checkout contains the six
+WebMCP tools and its local production bundle includes `document.modelContext`,
+`registerTool`, and all six tool names. The live `/assess` page serves an older
+4,971-byte layout bundle with none of those symbols, so no Chrome agent can
+discover CapexIQ tools from the deployed site. The in-app browser has a WebMCP
+capability, but discovery fails because its bridge does not support
+`webmcp_list_tools`; the page itself still reports no `document.modelContext`. The
+live response also has no
+`Origin-Agent-Cluster`, `Cross-Origin-Opener-Policy`, or `Cross-Origin-Embedder-Policy`
+header; no restrictive `tools` Permissions Policy was observed. Separately,
+`app/webmcp/registry.ts` does not
+await the current async `registerTool()` API and uses `unregisterTool(name)`
+instead of the documented `AbortController` cleanup path.
+**Not fixed this session:** this was a diagnosis-only pass. Deployment source/
+branch and the exact header policy must be confirmed before release; registry
+lifecycle changes should be made together with a real WebMCP-capable Chrome test.
+**Next action:** deploy the commit containing `app/webmcp/`, add the required
+origin-isolation policy, then verify `getTools()` and a harmless read-only tool
+call in Chrome with WebMCP enabled. The default top-level `tools` Permissions
+Policy is sufficient unless the app is embedded cross-origin.
+
 ### ISS-35 — `ActionableInsightCard` always fires and renders the literal text "Infinity months" when the baseline scenario never pays back
 **Area:** UI / formatting
 **What was found:** 2026-08-07, during browser QA of a Dialysis "Weak" outcome (the

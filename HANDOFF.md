@@ -11,10 +11,11 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-27, GitHub product showcase cleanup)*
+*(Last updated: 2026-08-27, WebMCP deployment diagnosis)*
 
 **CapexIQ is now packaged as a polished GitHub showcase while preserving
-the verified WebMCP and financial-model implementation:**
+the WebMCP implementation in source; the live deployment still needs a
+WebMCP-specific release and runtime check:**
 
 - The root `LICENSE` with the official MIT text and Copyright 2026 Jay Prakash
   Bharti is the single project license presented for GitHub detection.
@@ -29,9 +30,18 @@ the verified WebMCP and financial-model implementation:**
 - The existing native WebMCP surface remains under `app/webmcp/` and exposes
   `get_presets`, `get_wizard_form`, `simulate`, `apply_inputs`,
   `export_assessment`, and `get_metric_guide` through `document.modelContext`.
-- Verification completed: `npm test` = 326/326 tests, `npx tsc --noEmit` clean,
-  `npm run lint` clean with zero warnings, `npm run build` clean, and
-  `git diff --check` clean.
+- Source verification is green: the WebMCP suite is 24/24, `npx tsc --noEmit`
+  is clean after the build, and `npm run build` is clean. The live
+  `https://capexiq.jaybharti.me/assess` bundle is stale: it is 4,971 bytes and
+  contains no WebMCP symbols, while the current local layout bundle is 35,843
+  bytes and contains the six tool names. The live response also omits the
+  origin-isolation response headers/signals called out by the current Chrome
+  WebMCP guidance. (The default top-level `tools` Permissions Policy is not a
+  problem by itself.)
+- The registry needs a follow-up conformance pass: current WebMCP registration
+  is async and lifecycle cleanup is documented through `AbortController`, but
+  `app/webmcp/registry.ts` calls `registerTool()` without awaiting it and relies
+  on the older `unregisterTool(name)` shape.
 
 ### Earlier verification context retained below
 
@@ -319,6 +329,20 @@ application or financial-model behavior:
 `npm run lint` (zero errors/warnings), `npm run build`, and `git diff --check` all
 passed. The four final assets are tracked only as `docs/assets/screenshots/*.png`
 alongside the provenance README.
+
+### 2026-08-27 — WebMCP deployment and runtime diagnosis
+**What was found:** The canonical source checkout contains the six-tool WebMCP
+implementation, but the live `/assess` page serves a pre-WebMCP 4,971-byte layout
+bundle with no `modelContext`, `registerTool`, or tool-name symbols. The in-app
+browser exposes a WebMCP capability, but the live page still reports no
+`document.modelContext`; its discovery wrapper then fails because the bridge's
+`webmcp_list_tools` command is unsupported. The live response also lacks the
+origin-isolation policy signals called out by current Chrome guidance; no restrictive
+`tools` Permissions Policy was observed. Source tests/build/typecheck remain green.
+The registry also needs an API
+conformance follow-up for async registration and AbortController cleanup.
+**Not changed:** No application code or deployment was changed. Tracked the finding
+as `ISS-36` in `ISSUES.md`.
 
 ### 2026-08-27 — Web Model Context Protocol (WebMCP) standard implementation
 **What changed:** Implemented native WebMCP support (`document.modelContext`) for CapexIQ under `app/webmcp/` with zero modifications to existing financial formulas in `formulas/`:

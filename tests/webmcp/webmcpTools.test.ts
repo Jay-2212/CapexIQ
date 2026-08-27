@@ -471,16 +471,16 @@ describe("WebMCP Tool Suite", () => {
       expect(isWebMCPAvailable()).toBe(false);
     });
 
-    it("registers and unregisters tools cleanly when document.modelContext is present", () => {
+    it("registers tools asynchronously and aborts them on cleanup", () => {
       const registeredTools: ModelContextTool<unknown, unknown>[] = [];
-      const unregisteredTools: string[] = [];
+      const registrationSignals: AbortSignal[] = [];
 
       const mockHost: ModelContextHost = {
-        registerTool: vi.fn((tool: ModelContextTool<unknown, unknown>) => {
+        registerTool: vi.fn(async (tool: ModelContextTool<unknown, unknown>, options) => {
           registeredTools.push(tool);
-        }),
-        unregisterTool: vi.fn((name: string) => {
-          unregisteredTools.push(name);
+          if (options?.signal) {
+            registrationSignals.push(options.signal);
+          }
         }),
       };
 
@@ -499,10 +499,11 @@ describe("WebMCP Tool Suite", () => {
       expect(mockHost.registerTool).toHaveBeenCalledTimes(6);
       expect(registeredTools.length).toBe(6);
 
-      // Execute unregister
+      // Abort the browser registrations on cleanup
       unregister();
-      expect(mockHost.unregisterTool).toHaveBeenCalledTimes(6);
-      expect(unregisteredTools.length).toBe(6);
+      expect(mockHost.registerTool).toHaveBeenCalledTimes(6);
+      expect(registrationSignals).toHaveLength(6);
+      expect(registrationSignals.every((signal) => signal.aborted)).toBe(true);
 
       // Clean up mock
       delete document.modelContext;

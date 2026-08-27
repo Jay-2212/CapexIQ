@@ -98,38 +98,26 @@ export function createWebMCPTools(
   return [
     {
       ...GET_PRESETS_TOOL_DEF,
-      parameters: GET_PRESETS_TOOL_DEF.inputSchema,
-      handler: getPresetsHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
       execute: getPresetsHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
     },
     {
       ...GET_WIZARD_FORM_TOOL_DEF,
-      parameters: GET_WIZARD_FORM_TOOL_DEF.inputSchema,
-      handler: getWizardFormHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
       execute: getWizardFormHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
     },
     {
       ...SIMULATE_TOOL_DEF,
-      parameters: SIMULATE_TOOL_DEF.inputSchema,
-      handler: simulateHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
       execute: simulateHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
     },
     {
       ...APPLY_INPUTS_TOOL_DEF,
-      parameters: APPLY_INPUTS_TOOL_DEF.inputSchema,
-      handler: applyInputsHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
       execute: applyInputsHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
     },
     {
       ...EXPORT_ASSESSMENT_TOOL_DEF,
-      parameters: EXPORT_ASSESSMENT_TOOL_DEF.inputSchema,
-      handler: exportAssessmentHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
       execute: exportAssessmentHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
     },
     {
       ...GET_METRIC_GUIDE_TOOL_DEF,
-      parameters: GET_METRIC_GUIDE_TOOL_DEF.inputSchema,
-      handler: getMetricGuideHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
       execute: getMetricGuideHandler as (params: unknown) => Promise<WebMCPResult<unknown>>,
     },
   ];
@@ -153,29 +141,16 @@ export function registerWebMCPTools(
   }
 
   const tools = createWebMCPTools(context);
+  const controller = new AbortController();
 
-  for (const tool of tools) {
-    try {
-      host.registerTool(tool);
-    } catch {
-      // Shield against registration conflicts or host errors
-    }
-  }
+  // The browser API is asynchronous. Keep every rejection contained because
+  // unsupported/blocked hosts must degrade to a no-op without an unhandled
+  // promise rejection. The signal also gives React a reliable teardown path.
+  void Promise.all(
+    tools.map((tool) => host.registerTool(tool, { signal: controller.signal }))
+  ).catch(() => {});
 
   return () => {
-    if (
-      typeof document !== "undefined" &&
-      "modelContext" in document &&
-      document.modelContext &&
-      typeof document.modelContext.unregisterTool === "function"
-    ) {
-      for (const tool of tools) {
-        try {
-          document.modelContext.unregisterTool(tool.name);
-        } catch {
-          // Ignore unregister errors
-        }
-      }
-    }
+    controller.abort();
   };
 }

@@ -21,18 +21,34 @@ export interface ModelContextToolDefinition {
   name: string;
   description: string;
   inputSchema: Record<string, unknown>;
-  parameters?: Record<string, unknown>;
+  annotations?: {
+    readOnlyHint?: boolean;
+    untrustedContentHint?: boolean;
+  };
+}
+
+export interface ModelContextRegisterToolOptions {
+  signal?: AbortSignal;
+  exposedTo?: string[];
+}
+
+export interface ModelContextExecuteToolOptions {
+  signal?: AbortSignal;
 }
 
 export interface ModelContextTool<TInput = unknown, TOutput = unknown> extends ModelContextToolDefinition {
-  handler: (params: TInput) => Promise<WebMCPResult<TOutput>> | WebMCPResult<TOutput>;
-  execute?: (params: TInput) => Promise<WebMCPResult<TOutput>> | WebMCPResult<TOutput>;
+  execute: (
+    params: TInput,
+    options?: ModelContextExecuteToolOptions
+  ) => Promise<WebMCPResult<TOutput>> | WebMCPResult<TOutput>;
 }
 
 export interface ModelContextHost {
-  registerTool: (tool: ModelContextTool<unknown, unknown>) => void;
-  unregisterTool: (name: string) => void;
-  getTools?: () => ModelContextToolDefinition[];
+  registerTool: (
+    tool: ModelContextTool<unknown, unknown>,
+    options?: ModelContextRegisterToolOptions
+  ) => Promise<void>;
+  getTools?: () => Promise<ModelContextToolDefinition[]>;
   [key: string]: unknown;
 }
 
