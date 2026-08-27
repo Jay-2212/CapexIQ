@@ -129,7 +129,7 @@ assessment state used by the dashboard.
 
 ```bash
 npm ci
-npm test        # Runs all 329 unit and scenario tests
+npm test        # Runs all 330 unit and scenario tests
 npm run build   # Next.js static export
 ```
 
@@ -173,7 +173,7 @@ error envelopes, and cleans up registrations when the assessment layout unmounts
 
 ## What is tested
 
-- 329 Vitest tests across formula units, independent golden scenarios, wizard
+- 330 Vitest tests across formula units, independent golden scenarios, wizard
   transitions, dashboard components, chart behavior, export reconciliation, and
   the complete WebMCP tool suite.
 - Independent scenario fixtures cover cash purchase, financing + payer mix + DSO,

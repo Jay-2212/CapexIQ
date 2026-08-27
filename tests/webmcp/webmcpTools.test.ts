@@ -317,6 +317,43 @@ describe("WebMCP Tool Suite", () => {
       expect(res.data?.navigatedTo).toBe("/assess/usage");
     });
 
+    it("returns the applied state when React dispatch has not committed yet", () => {
+      const initialState = emptyWizardState();
+      const queuedActions: Parameters<typeof wizardReducer>[1][] = [];
+      const context: WebMCPContextAccessor = {
+        getState: () => initialState,
+        dispatch: (action) => {
+          queuedActions.push(action);
+        },
+        navigateTo: vi.fn(),
+      };
+
+      const res = handleApplyInputs(
+        {
+          equipmentCategory: "CT",
+          updates: {
+            preStep: { hospitalName: "Synthetic Hospital" },
+            basic: {
+              purchaseCost: 4.5,
+              usagePerDay: 18,
+              billedTariffPerUse: 5000,
+            },
+          },
+        },
+        context
+      );
+
+      expect(queuedActions.length).toBeGreaterThan(0);
+      expect(res.success).toBe(true);
+      expect(res.data?.currentStateSummary).toMatchObject({
+        equipmentCategory: "CT",
+        hospitalName: "Synthetic Hospital",
+        purchaseCostCr: 4.5,
+        usagePerDay: 18,
+        billedTariffPerUse: 5000,
+      });
+    });
+
     it("returns error envelope when payer mix update produces non-100% total", () => {
       let state = createPopulatedWizardState();
       const dispatch = vi.fn((action) => {

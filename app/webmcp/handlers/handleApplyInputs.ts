@@ -2,6 +2,7 @@
 // Applies context and parameter updates to the active WizardContext and can trigger navigation.
 
 import type { FieldValue } from "../../forms/wizardTypes";
+import { wizardReducer, type WizardAction } from "../../forms/wizardReducer";
 import { isResultStateFresh, earliestIncompleteStep, payerMixGroupError } from "../../forms/wizardValidation";
 import { toAssessmentInputs } from "../../forms/toAssessmentInputs";
 import { computeAssessment } from "@/formulas/computeAssessment";
@@ -30,32 +31,40 @@ export function handleApplyInputs(
 
     const { equipmentCategory, updates = {}, navigateToResults, targetStep } = input;
     const { dispatch } = context;
+    let nextState = context.getState();
+
+    // React dispatch updates the provider state after this callback returns. Mirror
+    // each reducer transition locally so the tool response describes the applied
+    // state immediately instead of returning the pre-update snapshot.
+    const applyAction = (action: WizardAction) => {
+      nextState = wizardReducer(nextState, action);
+      dispatch(action);
+    };
 
     // 1. Select equipment category if supplied
     if (equipmentCategory) {
-      dispatch({ type: "SELECT_EQUIPMENT_CATEGORY", category: equipmentCategory });
+      applyAction({ type: "SELECT_EQUIPMENT_CATEGORY", category: equipmentCategory });
     }
 
     // 2. Toggle advanced mode if requested
-    const currentState = context.getState();
     if (
       typeof updates.advancedOpen === "boolean" &&
-      updates.advancedOpen !== currentState.advancedOpen
+      updates.advancedOpen !== nextState.advancedOpen
     ) {
-      dispatch({ type: "TOGGLE_ADVANCED" });
+      applyAction({ type: "TOGGLE_ADVANCED" });
     }
 
     // 3. Apply currency units if supplied
     if (updates.currencyUnits) {
       if (updates.currencyUnits.purchaseCost) {
-        dispatch({
+        applyAction({
           type: "SET_CURRENCY_UNIT",
           field: "purchaseCost",
           unit: updates.currencyUnits.purchaseCost,
         });
       }
       if (updates.currencyUnits.installationCost) {
-        dispatch({
+        applyAction({
           type: "SET_CURRENCY_UNIT",
           field: "installationCost",
           unit: updates.currencyUnits.installationCost,
@@ -66,7 +75,7 @@ export function handleApplyInputs(
     // 4. Apply preStep updates
     if (updates.preStep) {
       for (const [key, value] of Object.entries(updates.preStep)) {
-        dispatch({
+        applyAction({
           type: "SET_FIELD",
           path: `preStep.${key}`,
           value: value ?? null,
@@ -77,7 +86,7 @@ export function handleApplyInputs(
     // 5. Apply basic updates
     if (updates.basic) {
       for (const [key, value] of Object.entries(updates.basic)) {
-        dispatch({
+        applyAction({
           type: "SET_FIELD",
           path: `basic.${key}`,
           value: value ?? null,
@@ -93,14 +102,14 @@ export function handleApplyInputs(
             if (val && typeof val === "object" && !Array.isArray(val)) {
               // Sub-fields like payerMixSharePct.privateCash
               for (const [subKey, subVal] of Object.entries(val)) {
-                dispatch({
+                applyAction({
                   type: "SET_FIELD",
                   path: `advanced.${groupKey}.${fieldKey}.${subKey}`,
                   value: subVal as FieldValue,
                 });
               }
             } else {
-              dispatch({
+              applyAction({
                 type: "SET_FIELD",
                 path: `advanced.${groupKey}.${fieldKey}`,
                 value: val as FieldValue,
@@ -110,9 +119,6 @@ export function handleApplyInputs(
         }
       }
     }
-
-    // Read updated state after dispatches
-    const nextState = context.getState();
 
     // Check payer mix validity if advanced A was touched
     const payerMixError = payerMixGroupError(nextState);
