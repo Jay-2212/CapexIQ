@@ -38,8 +38,8 @@ in-app Browser and the required external readiness scan:**
   `https://capexiq.jaybharti.me/assess`.
 - The IsItAgentReady scan now reports
   `checks.discovery.webMcp.status = "pass"` and finds all six tools via its legacy
-  navigator host. The in-app Browser independently lists all six tools and executes
-  `simulate` successfully with synthetic CT inputs.
+  navigator host. The in-app Browser independently executes all six tools successfully
+  with synthetic CT inputs, including a no-download Excel export.
 - Registration passes an `AbortSignal`, cleanup aborts that signal, and execute
   callback typing includes the API's cancellation options.
 - `apply_inputs` now derives its immediate response through the same wizard reducer
