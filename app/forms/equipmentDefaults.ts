@@ -120,9 +120,10 @@ export function equipmentDefaults(
     const postWarrantyYears = usefulLifeYears - warrantyYears;
     const cmcPortionYears = Math.min(cmcYears, postWarrantyYears);
     const amcPortionYears = postWarrantyYears - cmcPortionYears;
-    amcCmcCostPostWarranty =
+    const rawRate =
       (cmcPortionYears * cmcAnnualPct + amcPortionYears * amcAnnualPct) /
       postWarrantyYears;
+    amcCmcCostPostWarranty = Math.round(rawRate * 100) / 100;
   }
 
   return {

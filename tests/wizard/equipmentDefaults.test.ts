@@ -21,4 +21,21 @@ describe("equipmentDefaults", () => {
     expect(defaults.purchaseCost).toBeNull();
     expect(defaults.installationCost).toBeNull();
   });
+
+  it("rounds amcCmcCostPostWarranty to at most 2 decimal places for all equipment categories", () => {
+    const cathLabDefaults = equipmentDefaults("Cath Lab");
+    expect(cathLabDefaults.amcCmcCostPostWarranty).toBe(4.67);
+
+    const ctDefaults = equipmentDefaults("CT");
+    expect(ctDefaults.amcCmcCostPostWarranty).toBe(4.61);
+
+    const mriDefaults = equipmentDefaults("MRI");
+    expect(mriDefaults.amcCmcCostPostWarranty).toBe(4.91);
+
+    const dialysisDefaults = equipmentDefaults("Dialysis");
+    expect(dialysisDefaults.amcCmcCostPostWarranty).toBe(4.02);
+
+    const ultrasoundDefaults = equipmentDefaults("Ultrasound");
+    expect(ultrasoundDefaults.amcCmcCostPostWarranty).toBe(3.34);
+  });
 });
