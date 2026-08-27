@@ -322,7 +322,9 @@ existing calculation engine and previously approved wizard behavior were preserv
 5. **Verification:** focused results tests (12/12), full suite (302/302), TypeScript,
    ESLint, static-export build, and `git diff --check` passed. The live Results page was
    refreshed and checked in the browser, including editing an alternative and expanding
-   its detail table.
+   its detail table. Code commit: `7ff85bd`; final Cloudflare Pages deployment:
+   `https://a6eab817.capexiq-portfolio.pages.dev`; the custom domain was refreshed and
+   showed the same result.
 **Not touched, on purpose:** WebMCP, backend/Supabase, export formatting, financial
 methodology, scoring constants, sourced benchmarks, purchase-unit behavior, payer
 collection behavior, financing flow, and image assets.
