@@ -9,9 +9,9 @@ Determine whether CapexIQ's non-visual technical contracts are safe and complete
 
 ## Boundaries
 
-Read `INTRODUCTION.md` and every file it mandates before auditing. Also read the completed UI assurance findings or resulting Phase 4-5 amendments when present. Treat accepted UI decisions as settled; do not repeat the UI/accessibility audit unless a model or security finding directly intersects them.
+Read `docs/project/INTRODUCTION.md` and every file it mandates before auditing. Also read the completed UI assurance findings or resulting Phase 4-5 amendments when present. Treat accepted UI decisions as settled; do not repeat the UI/accessibility audit unless a model or security finding directly intersects them.
 
-Default to findings only. Do not edit `docs/agent-build-plan.md`, specifications, code, tests, `ISSUES.md`, or `HANDOFF.md` unless the user separately authorizes consolidation or implementation.
+Default to findings only. Do not edit `docs/agent-build-plan.md`, specifications, code, tests, `docs/project/ISSUES.md`, or `docs/project/HANDOFF.md` unless the user separately authorizes consolidation or implementation.
 
 Do not claim that an unbuilt component, exporter, or deployed control passes. Record its requirement as a future implementation gate with a testable acceptance criterion.
 

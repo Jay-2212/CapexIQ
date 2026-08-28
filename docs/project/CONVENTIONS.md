@@ -27,7 +27,7 @@ The rule this produces:
 **Any stateful flow (multi-step wizard, anything with start/stop/pause/resume, anything
 that persists across a tab switch or a refresh) must have its states and transitions
 written down in a plain-language table *before* it's implemented — and every edge case
-in that table becomes a test, not an afterthought.** See `docs/agent-build-plan.md` Phase 4
+in that table becomes a test, not an afterthought.** See `../agent-build-plan.md` Phase 4
 for exactly where this applies in this project (the input wizard) and what the edge-case
 list already looks like.
 
@@ -74,7 +74,7 @@ content/   --->  (nothing; it's copy, not logic)
 - `/equipment-data` and `/content` are data, not code. Nothing in there should contain
   logic; if you find yourself writing a conditional inside a `.json` consumer that only
   exists to work around a data-shape problem, fix the schema instead.
-- `content/inputs-metadata.json` (per `docs/agent-build-plan.md` Phase 4) is the single
+- `content/inputs-metadata.json` (per `../agent-build-plan.md` Phase 4) is the single
   source of truth for every wizard field's type, numeric bounds, and validation error
   copy. It's consumed read-only by the wizard's validation logic, the tooltip display,
   and the Excel export's cell formatting — never let any of those three redefine a
@@ -106,7 +106,7 @@ content/   --->  (nothing; it's copy, not logic)
 
 ---
 
-## 6. Definition of Done (applies to every phase in `docs/agent-build-plan.md`)
+## 6. Definition of Done (applies to every phase in `../agent-build-plan.md`)
 
 A phase isn't done when it compiles. It's done when:
 

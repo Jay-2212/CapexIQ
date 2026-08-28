@@ -11,11 +11,11 @@ of *how* we got here.
 
 ## Current State
 
-*(Last updated: 2026-08-28, overnight QA pipeline complete)*
+*(Last updated: 2026-08-28, documentation organization and README showcase refresh)*
 
-**CapexIQ is source-verified through the four-stage overnight QA pipeline on
-`codex/overnight-qa-2026-08-28` at commit
-`1e9c700a2522888a46d1f06fc3194a03ab8bd625`:**
+**CapexIQ is source-verified through the four-stage overnight QA pipeline merged into
+remote `main` at commit `7de81e6688127e2bdeaf914992b5194c23d13fab`, with the
+documentation-only cleanup in branch `codex/repository-organization-2026-08-28`:**
 
 - Advanced and Basic Mode browser flows completed with synthetic data on a clean local
   build, including persistence, results, and fresh Excel/Word downloads. The live
@@ -32,6 +32,11 @@ of *how* we got here.
 - The earlier six-tool WebMCP deployment and verification remain documented in the
   change log below. No production data, deployment configuration, or remote state was
   changed during this overnight QA run.
+- Internal project documentation now lives under `docs/project/`; root `AGENTS.md`,
+  `CLAUDE.md`, and `README.md` remain as conventional discovery and public-entry files.
+- The README hero showcase now uses the supplied 2251×1584 first-viewport screenshot at
+  `docs/assets/screenshots/01-hero-landing.png`. Application source and runtime assets
+  were not changed.
 
 The prior six-tool WebMCP release state is retained in the change log below.
 
@@ -284,6 +289,18 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-08-28 — Repository organization and README hero showcase refresh
+**What changed:** Replaced the README's first hero screenshot in place with the supplied
+high-resolution first-viewport capture. Moved the internal project documentation and
+handoff archive into `docs/project/`, while preserving the root `AGENTS.md`,
+`CLAUDE.md`, `README.md`, runtime/config files, source folders, tests, and data paths.
+Updated the agent pointer, documentation indexes, and project-local assurance skill
+references to match the new layout.
+
+**Verification:** Documentation references were audited after the move. The supplied
+image is confirmed at 2251×1584. Application behavior was not changed; 338 tests,
+TypeScript, ESLint, static build, structural checks, and `git diff --check` all pass.
 
 ### 2026-08-28 — Overnight QA pipeline completion
 **What was found:** Stage A reproduced stale restored-draft validation state, an
