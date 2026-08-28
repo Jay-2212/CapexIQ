@@ -20,6 +20,11 @@ export function actionablePriceIncreaseInsight(
   inputs: ActionableInsightInputs
 ): ActionablePriceInsight | null {
   const baselinePaybackYears = runScenario(inputs.assumptions).paybackYears;
+  // Payback improvement is expressed in months, so an infinite baseline cannot
+  // produce a truthful finite comparison. Keep the Infinity sentinel in the
+  // underlying financial model, but suppress this optional insight instead of
+  // turning Infinity into user-facing copy.
+  if (!Number.isFinite(baselinePaybackYears)) return null;
   const deltas = [2, 5, 8, 10, 15];
   const maximumStartYear = Math.floor(inputs.usefulLifeYears / 2);
   const startYears = [1, 2, 3].filter(
@@ -34,6 +39,7 @@ export function actionablePriceIncreaseInsight(
         tariffIncreasePercentage: priceIncreasePercentage,
         tariffIncreaseStartYear: startYear,
       }).paybackYears;
+      if (!Number.isFinite(scenarioPaybackYears)) return;
       const paybackImprovementMonths =
         (baselinePaybackYears - scenarioPaybackYears) * 12;
 

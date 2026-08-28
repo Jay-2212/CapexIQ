@@ -42,4 +42,19 @@ describe("ActionableInsightCard", () => {
 
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("renders nothing when the simplified baseline payback is never reached", () => {
+    const nonFiniteBaselineInputs: AssessmentInputs = {
+      ...qualifyingInputs,
+      purchaseCost: 10_000_000,
+      fixedCostPerMonth: 2_400_000,
+    };
+    const result = computeAssessment(nonFiniteBaselineInputs);
+    const { container } = render(
+      <ActionableInsightCard inputs={nonFiniteBaselineInputs} result={result} />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByText(/Infinity|NaN/)).not.toBeInTheDocument();
+  });
 });

@@ -76,7 +76,7 @@ export function toAssessmentInputs(state: WizardState): AssessmentInputs {
   const hasFullRamp = RAMP_PERIODS.every(
     (period) => rampPct[period.suffix] !== null && rampPct[period.suffix] !== undefined
   );
-  const utilizationRamp: UtilizationRampUp | undefined = hasFullRamp
+  const utilizationRamp: UtilizationRampUp | undefined = state.advancedOpen && hasFullRamp
     ? {
         month1to3Pct: rampPct.month1to3 ?? 0,
         month4to6Pct: rampPct.month4to6 ?? 0,
@@ -105,7 +105,9 @@ export function toAssessmentInputs(state: WizardState): AssessmentInputs {
       cmcYears,
       cmcAnnualCost,
       amcAnnualCost,
-      costByYearPct: advanced.E.maintenanceCostByYearPct,
+      costByYearPct: state.advancedOpen
+        ? advanced.E.maintenanceCostByYearPct
+        : undefined,
     },
     usefulLifeYears,
     discountRate: advanced.F.discountRate ?? 12.5,

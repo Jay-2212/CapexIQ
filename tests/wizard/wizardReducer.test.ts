@@ -269,6 +269,37 @@ describe("RESTORE_DRAFT / ACKNOWLEDGE_RESTORED_DRAFT (wizard-state.md §6.5, §7
     expect(state.attemptedSteps).toEqual({});
   });
 
+  it("resets touched validation state while preserving draft values and settings", () => {
+    let draft = wizardReducer(emptyWizardState(), {
+      type: "SET_FIELD",
+      path: "basic.purchaseCost",
+      value: null,
+    });
+    draft = wizardReducer(draft, {
+      type: "SET_FIELD",
+      path: "preStep.hospitalName",
+      value: "Nirman Medical Centre",
+    });
+    draft = wizardReducer(draft, {
+      type: "SET_CURRENCY_UNIT",
+      field: "purchaseCost",
+      unit: "Lakh",
+    });
+    draft = wizardReducer(draft, { type: "ATTEMPT_STEP", step: "investment" });
+
+    const state = wizardReducer(emptyWizardState(), {
+      type: "RESTORE_DRAFT",
+      state: draft,
+      savedAt: "2026-07-13T00:00:00.000Z",
+    });
+
+    expect(state.basic.purchaseCost).toBeNull();
+    expect(state.preStep.hospitalName).toBe("Nirman Medical Centre");
+    expect(state.currencyUnits.purchaseCost).toBe("Lakh");
+    expect(state.touched).toEqual({});
+    expect(state.attemptedSteps).toEqual({});
+  });
+
   it("acknowledging clears the restored-draft flag without touching other state", () => {
     let state = wizardReducer(emptyWizardState(), {
       type: "RESTORE_DRAFT",

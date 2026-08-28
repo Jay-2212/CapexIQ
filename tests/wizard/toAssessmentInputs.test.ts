@@ -28,6 +28,55 @@ function baseMriState() {
   return state;
 }
 
+function populatedAdvancedMriState() {
+  let state = wizardReducer(baseMriState(), { type: "TOGGLE_ADVANCED" });
+  for (const [suffix, value] of [
+    ["privateCash", 55],
+    ["insuranceTpa", 25],
+    ["corporateCredit", 10],
+    ["pmJayGovt", 10],
+    ["other", 0],
+  ] as const) {
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: `advanced.A.payerMixSharePct.${suffix}`,
+      value,
+    });
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: `advanced.A.billedTariffByPayerType.${suffix}`,
+      value: 8500,
+    });
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: `advanced.A.realizationPctByPayerType.${suffix}`,
+      value: 70,
+    });
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: `advanced.A.collectionDelayDaysByPayerType.${suffix}`,
+      value: 90,
+    });
+  }
+  for (const [suffix, value] of [
+    ["month1to3", 50],
+    ["month4to6", 70],
+    ["month7to12", 85],
+    ["year2Plus", 100],
+  ] as const) {
+    state = wizardReducer(state, {
+      type: "SET_FIELD",
+      path: `advanced.B.utilizationRampPct.${suffix}`,
+      value,
+    });
+  }
+  return wizardReducer(state, {
+    type: "SET_MAINTENANCE_SCHEDULE_YEAR",
+    yearIndex: 0,
+    value: 12,
+  });
+}
+
 describe("toAssessmentInputs — financing mode mapping", () => {
   it("Cash: no financing cost applied to any year", () => {
     const inputs = toAssessmentInputs(baseMriState());
@@ -174,6 +223,53 @@ describe("toAssessmentInputs — utilization ramp-up wiring (ISS-19)", () => {
     });
     const inputs = toAssessmentInputs(state);
     expect(inputs.usagePerDay).toBe(6);
+  });
+
+  it("ignores populated Advanced payer, ramp, and maintenance values after Advanced Mode is closed", () => {
+    const cleanBasicState = baseMriState();
+    let state = populatedAdvancedMriState();
+    state = wizardReducer(state, { type: "TOGGLE_ADVANCED" });
+
+    expect(state.advancedOpen).toBe(false);
+    const basicInputs = toAssessmentInputs(state);
+    expect(basicInputs.payerMix).toEqual([
+      { payerName: "privateCash", shareOfVolume: 100, billedTariff: 2500, realizationPercentage: 100, collectionDelayDays: 0 },
+      { payerName: "insuranceTpa", shareOfVolume: 0, billedTariff: 2500, realizationPercentage: 100, collectionDelayDays: 0 },
+      { payerName: "corporateCredit", shareOfVolume: 0, billedTariff: 2500, realizationPercentage: 100, collectionDelayDays: 0 },
+      { payerName: "pmJayGovt", shareOfVolume: 0, billedTariff: 2500, realizationPercentage: 100, collectionDelayDays: 0 },
+      { payerName: "other", shareOfVolume: 0, billedTariff: 2500, realizationPercentage: 100, collectionDelayDays: 0 },
+    ]);
+    expect(basicInputs.utilizationRamp).toBeUndefined();
+    expect(basicInputs.maintenance.costByYearPct).toBeUndefined();
+    expect(basicInputs).toEqual(toAssessmentInputs(cleanBasicState));
+    expect(computeAssessment(basicInputs)).toEqual(
+      computeAssessment(toAssessmentInputs(cleanBasicState))
+    );
+  });
+
+  it("keeps Advanced payer, ramp, and maintenance values active while Advanced Mode is open", () => {
+    const state = populatedAdvancedMriState();
+
+    const inputs = toAssessmentInputs(state);
+    expect(inputs.payerMix.map(({ payerName, shareOfVolume, billedTariff, collectionDelayDays }) => ({
+      payerName,
+      shareOfVolume,
+      billedTariff,
+      collectionDelayDays,
+    }))).toEqual([
+      { payerName: "privateCash", shareOfVolume: 55, billedTariff: 8500, collectionDelayDays: 90 },
+      { payerName: "insuranceTpa", shareOfVolume: 25, billedTariff: 8500, collectionDelayDays: 90 },
+      { payerName: "corporateCredit", shareOfVolume: 10, billedTariff: 8500, collectionDelayDays: 90 },
+      { payerName: "pmJayGovt", shareOfVolume: 10, billedTariff: 8500, collectionDelayDays: 90 },
+      { payerName: "other", shareOfVolume: 0, billedTariff: 8500, collectionDelayDays: 90 },
+    ]);
+    expect(inputs.utilizationRamp).toEqual({
+      month1to3Pct: 50,
+      month4to6Pct: 70,
+      month7to12Pct: 85,
+      year2PlusPct: 100,
+    });
+    expect(inputs.maintenance.costByYearPct?.[0]).toBe(12);
   });
 });
 

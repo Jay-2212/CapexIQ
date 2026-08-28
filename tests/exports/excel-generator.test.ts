@@ -74,6 +74,36 @@ describe("generateExcelWorkbook", () => {
     expect(assumptions.getCell("B2").formula).toBeUndefined();
   });
 
+  it("applies readable financial formats, frozen headers, and bounded print setup", async () => {
+    const result = computeAssessment(inputs);
+    const buffer = await generateExcelWorkbook(inputs, result);
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(Buffer.from(buffer) as any); // eslint-disable-line @typescript-eslint/no-explicit-any -- exceljs's Buffer type vs. workspace @types/node Buffer generic skew, runtime-safe
+
+    const assumptions = workbook.getWorksheet("Assumptions")!;
+    expect(assumptions.getCell("B2").numFmt).toBe('₹#,##0;[Red]-₹#,##0');
+    expect(assumptions.getCell("B10").numFmt).toBe('0.0"%"');
+    expect(assumptions.views[0]).toMatchObject({ state: "frozen", ySplit: 1 });
+    expect(assumptions.pageSetup.printArea).toMatch(/^A1:E/);
+
+    const monthly = workbook.getWorksheet("Monthly")!;
+    expect(monthly.getCell("C2").numFmt).toBe('₹#,##0;[Red]-₹#,##0');
+    expect(monthly.getCell("D2").numFmt).toBe('0.0"%"');
+    expect(monthly.views[0]).toMatchObject({ state: "frozen", ySplit: 1 });
+    expect(monthly.pageSetup.orientation).toBe("landscape");
+    expect(monthly.pageSetup.fitToPage).toBe(true);
+    expect(monthly.pageSetup.fitToWidth).toBe(1);
+    expect(monthly.pageSetup.printArea).toMatch(/^A1:P/);
+    expect(monthly.pageSetup.printTitlesRow).toBe("1:1");
+
+    const annual = workbook.getWorksheet("Annual Summary")!;
+    expect(annual.getCell("B11").numFmt).toBe('₹#,##0;[Red]-₹#,##0');
+    expect(annual.getCell("B12").numFmt).toBe('0.0"%"');
+    expect(annual.getColumn(8).hidden).toBe(true);
+    expect(annual.pageSetup.printArea).toMatch(/^A1:G/);
+  });
+
   it("never throws for an unreachable break-even (undefined contribution margin)", async () => {
     const lossyInputs: AssessmentInputs = { ...inputs, variableCostPerUse: 10_000 };
     const result = computeAssessment(lossyInputs);
