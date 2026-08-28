@@ -19,14 +19,17 @@ truth, this file is a map onto it.
 ```text
 Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 ├── README.md                    <- public-facing repo landing page (GitHub renders this)
-├── INTRODUCTION.md              <- start here (project brief + rules), agent/dev-facing
-├── HANDOFF.md                   <- current state + change log — read this first, always
-├── handoff-archive/             <- old Change Log entries, moved out once HANDOFF.md's
-│                                  live log exceeds ~150 lines (its own archive rule)
-├── DIRECTORY.md                 <- this file
-├── ISSUES.md                    <- open/accepted/resolved tracker, check every session
-├── CONVENTIONS.md               <- how code gets written here — read before coding
-├── docs/                         <- long-form planning, research, and formula documentation
+├── AGENTS.md                    <- thin auto-discovered pointer to docs/project/
+├── CLAUDE.md                    <- Claude Code project instructions
+├── docs/                         <- internal project and long-form documentation
+│   ├── project/                  <- briefing, conventions, spec, handoff, and issues
+│   │   ├── INTRODUCTION.md       <- start here (project brief + rules)
+│   │   ├── HANDOFF.md            <- current state + change log
+│   │   ├── DIRECTORY.md          <- this file
+│   │   ├── ISSUES.md             <- open/accepted/resolved tracker
+│   │   ├── CONVENTIONS.md        <- how code gets written here
+│   │   ├── SPEC.md               <- full product spec
+│   │   └── handoff-archive/      <- older Change Log entries
 │   ├── agent-build-plan.md       <- phased build plan (10 phases), dependencies, DoD —
 │   │                              Phases 1-6 (data/formulas/content/design/wizard-state/
 │   │                              wizard UI) are complete; Phase 7 (results dashboard) is next
@@ -38,9 +41,6 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 │                               <- live-browser frontend critique and phased redesign
 │                                  plan (ISS-27): guided flow, units, help, assets,
 │                                  Advanced workspace, Methodology, and Results
-├── SPEC.md                      <- full product spec (has its own index, don't read
-│                                  front-to-back)
-├── AGENTS.md                    <- thin pointer to INTRODUCTION.md (auto-discovered filename)
 ├── .github/workflows/ci.yml     <- install/typecheck/lint/test/build/`git diff --check`
 │                                  on every push+PR to main (added 2026-08-06 — no CI
 │                                  existed before)
@@ -169,13 +169,13 @@ Roi_Calculator/                  (the "CapexIQ" GitHub repo)
 
 | You need... | Go to | Notes |
 |---|---|---|
-| To understand the product | `SPEC.md` | Use its index at the top, don't read front-to-back |
-| Where things stand right now | `HANDOFF.md` | Current State block at the top — the actual source of truth |
+| To understand the product | `docs/project/SPEC.md` | Use its index at the top, don't read front-to-back |
+| Where things stand right now | `docs/project/HANDOFF.md` | Current State block at the top — the actual source of truth |
 | Which phase to build next | `docs/agent-build-plan.md` | Phases 1-6, 8 done; Phase 7's multi-equipment/multi-band visual QA pass and Phase 9 (scenario comparison) remain |
 | The wizard's route map, field-to-step assignment, and state transitions | `app/forms/wizard-state.md` | Read before writing any wizard component |
 | The actual wizard reducer/schema/validation code | `app/forms/README.md` | Full per-file table — reducer, field schema, validation, persistence |
 | The canonical wizard-to-result calculation pipeline | `formulas/computeAssessment.ts` | Validated against `tests/scenarios/`'s golden numbers; the preview strip and `/results` both call this, never a second copy |
-| How code should be structured/tested | `CONVENTIONS.md` | Read before writing or editing any code |
+| How code should be structured/tested | `docs/project/CONVENTIONS.md` | Read before writing or editing any code |
 | Real Indian data on equipment cost/maintenance/financing/utilization | `docs/data-requirements.md` | §12-§20 have five research passes' findings; see its own table below |
 | The Investment Outlook score, EAC, discounted-payback, actionable-insight formulas | `docs/financial-model-spec.md` | Implemented in `formulas/investmentOutlookScore.ts` etc. |
 | Typography/spacing scale, tooltip mechanics, theme, landing-page/entry-flow decisions | `design/ux-product-spec.md` | Phase 4 deliverable, resolves SPEC.md §36.3 |
