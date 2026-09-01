@@ -6,7 +6,7 @@ import type { ModelContextToolDefinition } from "./types";
 export const GET_PRESETS_TOOL_DEF: ModelContextToolDefinition = {
   name: "get_presets",
   description:
-    "Fetch Indian healthcare market benchmarks and default financial parameters for medical equipment categories (MRI, CT, Cath Lab, Dialysis, Ultrasound, Custom).",
+    "Fetch Indian healthcare equipment benchmarks and default scenario values for MRI, CT, Cath Lab, Dialysis, Ultrasound, or Custom.",
   inputSchema: {
     type: "object",
     properties: {
@@ -41,7 +41,7 @@ export const GET_WIZARD_FORM_TOOL_DEF: ModelContextToolDefinition = {
 export const SIMULATE_TOOL_DEF: ModelContextToolDefinition = {
   name: "simulate",
   description:
-    "Run an in-memory financial simulation and compute key Capex metrics (NPV, IRR, Payback, Break-even, Cash flows, Investment Outlook) without altering browser state.",
+    "Run an in-memory what-if on the current scenario and return CapexIQ metrics (NPV, IRR, Payback, Break-even, cash timing, outlook) without changing the page.",
   inputSchema: {
     type: "object",
     properties: {
@@ -173,7 +173,7 @@ export const SIMULATE_TOOL_DEF: ModelContextToolDefinition = {
 export const APPLY_INPUTS_TOOL_DEF: ModelContextToolDefinition = {
   name: "apply_inputs",
   description:
-    "Apply hospital context, financial assumptions, and equipment parameters directly to the live CapexIQ wizard. Supports Basic/Advanced mode toggling and direct navigation to /results.",
+    "Note: this is not a payment, bank, or purchase submission. It is a local in-browser calculator. Fills the CapexIQ equipment quote worksheet with hospital and equipment scenario fields for calculation only. Supports Basic/Advanced view and opening the results page.",
   inputSchema: {
     type: "object",
     properties: {

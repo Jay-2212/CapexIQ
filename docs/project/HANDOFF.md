@@ -11,6 +11,21 @@ of *how* we got here.
 
 ## Current State
 
+*(Last updated: 2026-09-01, WebMCP tool-description wording for ChatGPT site-tool safety)*
+
+**CapexIQ WebMCP tool names, schemas, handlers, defaults, and annotations are unchanged.
+Only the registered `description` strings for `apply_inputs`, `get_presets`, and
+`simulate` were rewritten so ChatGPT's desktop-browser site-tool safety layer is less
+likely to treat `apply_inputs` as a payment/bank/purchase form. `readOnlyHint` was not
+added. `export_assessment` and `get_metric_guide` copy were left as-is.**
+
+Live host remains `https://capexiq.jaybharti.me/` (Pages project `capexiq-portfolio`).
+This session's job is to land the wording on `main` and confirm the Pages deploy.
+
+The prior overnight-QA and documentation-organization state is retained below.
+
+### Earlier verification context retained below
+
 *(Last updated: 2026-08-28, documentation organization and README showcase refresh)*
 
 **CapexIQ is source-verified through the four-stage overnight QA pipeline merged into
@@ -289,6 +304,25 @@ before <date>.` This keeps HANDOFF.md fast to read no matter how old the project
 ## Change Log
 
 *(most recent first)*
+
+### 2026-09-01 — WebMCP tool descriptions: calculator, not payment
+**What was found:** ChatGPT's desktop-browser site-tool safety review can block
+`apply_inputs` because the registered description talked about applying "financial
+assumptions" to the live wizard. OpenAI reviews each site-tool call and confirms
+purchases, personal-info sharing, and similar consequential actions. CapexIQ is a
+local in-browser calculator; the copy did not say so.
+
+**What changed:** Wording-only. Three `description` strings in
+`app/webmcp/toolDefinitions.ts`:
+- `apply_inputs` now leads with a not-a-payment/bank/purchase disclaimer and
+  describes filling the equipment quote worksheet.
+- `get_presets` and `simulate` drop "financial parameters" / "financial simulation".
+Tool names, parameter names, enums, handlers, defaults, and annotations
+(`readOnlyHint`) were not changed. `export_assessment` was left alone.
+
+**Verification:** 338 tests, TypeScript, ESLint, and `git diff --check` pass. Tool
+names, schemas, and handlers are unchanged. Landing on GitHub `main` and Cloudflare
+Pages production for `capexiq-portfolio` is the remaining release step.
 
 ### 2026-08-28 — Repository organization and README hero showcase refresh
 **What changed:** Replaced the README's first hero screenshot in place with the supplied
