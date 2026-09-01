@@ -19,8 +19,11 @@ Only the registered `description` strings for `apply_inputs`, `get_presets`, and
 likely to treat `apply_inputs` as a payment/bank/purchase form. `readOnlyHint` was not
 added. `export_assessment` and `get_metric_guide` copy were left as-is.**
 
-Live host remains `https://capexiq.jaybharti.me/` (Pages project `capexiq-portfolio`).
-This session's job is to land the wording on `main` and confirm the Pages deploy.
+Live host is `https://capexiq.jaybharti.me/` (Pages project `capexiq-portfolio`).
+Wording landed on GitHub `main` as `fc77862` (#26) and on production Pages deployment
+`727b1a6d-1561-4451-9c87-7957f21763bf`. Git auto-deploy did not fire; the `out/`
+artifact was uploaded with Wrangler. The live bundle contains the new
+`apply_inputs` disclaimer.
 
 The prior overnight-QA and documentation-organization state is retained below.
 
@@ -320,9 +323,12 @@ local in-browser calculator; the copy did not say so.
 Tool names, parameter names, enums, handlers, defaults, and annotations
 (`readOnlyHint`) were not changed. `export_assessment` was left alone.
 
-**Verification:** 338 tests, TypeScript, ESLint, and `git diff --check` pass. Tool
-names, schemas, and handlers are unchanged. Landing on GitHub `main` and Cloudflare
-Pages production for `capexiq-portfolio` is the remaining release step.
+**Verification:** 338 tests, TypeScript, ESLint, and `git diff --check` pass. GitHub
+CI on PR #26 passed. Squash-merged as `fc77862`. Git Pages auto-deploy did not
+create a new deployment; Wrangler uploaded `out/` as production deployment
+`727b1a6d-1561-4451-9c87-7957f21763bf` (source `fc77862`). Live
+`https://capexiq.jaybharti.me/` JS includes the new `apply_inputs` disclaimer and
+does not include the old "financial assumptions" string.
 
 ### 2026-08-28 — Repository organization and README hero showcase refresh
 **What changed:** Replaced the README's first hero screenshot in place with the supplied
